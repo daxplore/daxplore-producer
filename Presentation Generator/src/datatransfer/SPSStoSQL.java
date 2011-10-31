@@ -8,6 +8,8 @@ import java.io.IOException;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
+import java.sql.Statement;
+import java.sql.Time;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
@@ -61,12 +63,16 @@ public class SPSStoSQL {
 				columns.put(var.getShortName(), "text");
 			} else throw new Exception("Variable type unknown");
 		}
-		
+		System.out.print("Creating table...");
 		createRawDataTable(columns, sqliteDatabase);
+		System.out.println("done");
 		PreparedStatement addRowStatement = addRowStatement(columns, sqliteDatabase);
 		try {
 			BufferedReader br = new BufferedReader(new FileReader(temp));
 			String line;
+			System.out.print("Importing");
+			boolean autocommit = sqliteDatabase.getAutoCommit();
+			sqliteDatabase.setAutoCommit(false);
 			while((line = br.readLine()) != null){
 				String[] data = new String[sf.getVariableCount()];
 				StringTokenizer st = new StringTokenizer(line, ",");
@@ -76,7 +82,16 @@ public class SPSStoSQL {
 					c++;
 				}
 				addRow(columns, addRowStatement, data);
+				System.out.print(".");
 			}
+			System.out.println("\nWriting batch...");
+			long time = System.currentTimeMillis();
+			sqliteDatabase.commit();
+			sqliteDatabase.setAutoCommit(autocommit);
+			time = System.currentTimeMillis() - time;
+			System.out.println("Done, took " + (time/1000.0) + " seconds");
+			
+			
 		} catch (FileNotFoundException e) {
 			System.out.println("FileNotFoundException");
 			// TODO Auto-generated catch block
@@ -90,11 +105,29 @@ public class SPSStoSQL {
 	}
 	
 	protected static void createRawDataTable(Map<String,String> columns, Connection conn) throws SQLException{
-		LinkedList<String> qmarks = new LinkedList<String>();
+		StringBuilder sb = new StringBuilder();
+		Iterator<String> iter = columns.keySet().iterator();
+		sb.append("create table rawdata (");
+		while(iter.hasNext()){
+			String s = iter.next();
+			sb.append(s);
+			sb.append(" ");
+			sb.append(columns.get(s));
+			if(iter.hasNext()){
+				sb.append(", ");
+			}
+		}
+		sb.append(")");
+		Statement statement = conn.createStatement();
+		statement.execute(sb.toString());
+		statement.close();
+		/*LinkedList<String> qmarks = new LinkedList<String>();
 		for(int i = 0; i < columns.size(); i++){
 			qmarks.add("? ?");
 		}
-		PreparedStatement ps = conn.prepareStatement("create table rawdata ("+ MyTools.join(qmarks, ", ") + ")");
+		String query = "create table rawdata ("+ MyTools.join(qmarks, ", ") + ")";
+		System.out.println(query);
+		PreparedStatement ps = conn.prepareStatement(query);
 		
 		Iterator<String> iter = columns.keySet().iterator();
 		int i = 0;
@@ -105,7 +138,7 @@ public class SPSStoSQL {
 			ps.setString(i, columns.get(s));
 			i++;
 		}
-		ps.execute();
+		ps.execute();*/
 	}
 	
 	protected static PreparedStatement addRowStatement(Map<String,String> columns, Connection conn) throws SQLException {
@@ -126,7 +159,7 @@ public class SPSStoSQL {
 				double datadouble;
 				try {
 					datadouble = Double.parseDouble(datapoint);
-					statement.setDouble(colIndex, datadouble);
+					statement.setDouble(colIndex+1, datadouble);
 				} catch (NumberFormatException e) {
 					statement.setNull(colIndex, java.sql.Types.REAL);
 				} catch (NullPointerException e) {
@@ -137,8 +170,9 @@ public class SPSStoSQL {
 				if(datapoint == null){
 					datapoint = "";
 				}
-				statement.setString(colIndex, datapoint);
+				statement.setString(colIndex+1, datapoint);
 			} else throw new Error("Crash and burn");
+			colIndex++;
 		}
 		statement.execute();
 	}
