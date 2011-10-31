@@ -1,16 +1,17 @@
-package StatSafty;
+package statsafty;
 
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.io.PrintWriter;
 import java.net.MalformedURLException;
-import java.net.Socket;
 import java.net.URL;
 import java.net.URLConnection;
-import java.net.UnknownHostException;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
@@ -38,13 +39,23 @@ public class NaiveBayesClassifier {
 	 * @throws JDOObjectNotFoundException
 	 * @throws IOException
 	 * @throws SQLException
+	 * @throws ClassNotFoundException 
 	 */
-	public static void checkRow(ResultSet rs) throws IOException, SQLException {
+	public static void checkRow(ResultSet rs) throws IOException, SQLException, ClassNotFoundException {
+		Class.forName("org.sqlite.JDBC");
+		Connection connection;
+		connection = DriverManager.getConnection("jdbc:sqlite:");
+		Statement statement = connection.createStatement();
+		statement.setQueryTimeout(30); // set timeout to 30 sec.
+		// Restore the database from a backup file
+		Statement stat = connection.createStatement();
+		stat.executeUpdate("restore from statstore.db");
+		
 		Integer totalCorrect = 0, totalFailed = 0;
 		while (rs.next()) {
 			Map<String, Integer> selectors = new HashMap<String, Integer>();
 			selectors.put("A1", rs.getInt("A1"));
-			selectors.put("A3", rs.getInt("A3"));
+			selectors.put("A3AGG", rs.getInt("A3"));
 			selectors.put("A4", rs.getInt("A4"));
 			selectors.put("A5", rs.getInt("A5"));
 			selectors.put("A7AGG", rs.getInt("A7AGG"));
@@ -65,11 +76,22 @@ public class NaiveBayesClassifier {
 				LinkedList<Double> allArr = new LinkedList<Double>();
 				while (selIter.hasNext()) {
 					String s = selIter.next();
-					LinkedList<String> result = getStats(question, s, selectors.get(s));
+					//LinkedList<String> result = getStats(question, s, selectors.get(s));
+					LinkedList<String> result = getStats(question.toUpperCase(), s.toUpperCase(), selectors.get(s), connection);
+				
 					if (result == null) {
 						nulls++;
 						continue;
 					}
+					
+					/*
+					for(String res : result)
+						System.out.print(res+"\t");
+					System.out.print("\n");
+					for(String res : resultLocal)
+						System.out.print(res+"\t");
+					System.out.println("\n~~~");
+						*/	
 					JSONObject objAll = (JSONObject) JSONValue.parse(result.get(0));
 					JSONArray arrAll = (JSONArray) objAll.get("d");
 					JSONObject objThis = (JSONObject) JSONValue.parse(result.get(1));
@@ -153,6 +175,28 @@ public class NaiveBayesClassifier {
 			// e.printStackTrace();
 			return null;
 		}
+		return linkedlist;
+	}
+	
+	public static LinkedList<String> getStats(String question, String selector, int alternative, Connection connection) throws SQLException{
+		LinkedList<String> linkedlist = new LinkedList<String>();
+		alternative++;
+		PreparedStatement statement = connection.prepareStatement("SELECT value FROM statstore WHERE key=? OR key=?");
+		String key1 = "Q="+question;
+		statement.setString(1, key1);
+		String key2 = selector+"="+alternative+"+Q="+question;
+		statement.setString(2, key2);
+		ResultSet result = statement.executeQuery();
+		//System.out.println("SELECT value FROM statstore WHERE key='"+key1+"' OR key='"+key2+"'");
+		int i = 0;
+		while(result.next()){
+			String value = result.getString("value");
+			//System.out.println(i+": "+value);
+			i++;
+			linkedlist.add(value);
+		}
+		if(i!=2)return null;
+		//System.out.println("---");
 		return linkedlist;
 	}
 }

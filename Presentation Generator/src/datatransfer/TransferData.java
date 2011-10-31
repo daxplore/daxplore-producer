@@ -3,13 +3,11 @@ package datatransfer;
 import java.io.File;
 import java.sql.Connection;
 import java.sql.DriverManager;
-import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 
-import StatSafty.NaiveBayesClassifier;
-
+import statsafty.NaiveBayesClassifier;
 
 public class TransferData {
 	public static void main(String[] args) throws ClassNotFoundException {
@@ -17,14 +15,11 @@ public class TransferData {
 		Class.forName("org.sqlite.JDBC");
 		
 		String spssFileName;
-		//args
-
-		
 		
 		Connection connection = null;
 		try {
 			// create a database connection
-			connection = DriverManager.getConnection("jdbc:sqlite:sample.db");
+			connection = DriverManager.getConnection("jdbc:sqlite:rawdata.db");
 			Statement statement = connection.createStatement();
 			statement.setQueryTimeout(30); // set timeout to 30 sec.
 
@@ -38,15 +33,18 @@ public class TransferData {
 				System.out.println("Table dropped");
 				SPSStoSQL.loadRawData(spssFile, connection);
 				System.out.println("Data imported");
+			}else{
+				System.err.println("Not enough arguments given");
+				return;
 			}
 			
-			//ResultSet rs = statement.executeQuery("select * from rawdata");
+			ResultSet rs = statement.executeQuery("select * from rawdata");
 			/*while (rs.next()) {
 				// read the result set
-				System.out.println("A1 = " + rs.getInt("A1"));
-				System.out.println("id = " + rs.getInt("A7AGG"));
+				//System.out.println("A1 = " + rs.getInt("A1"));
+				//System.out.println("id = " + rs.getInt("A7AGG"));
 			}*/
-			//NaiveBayesClassifier.checkRow(rs);
+			NaiveBayesClassifier.checkRow(rs);
 			
 		} catch (SQLException e) {
 			// if the error message is "out of memory",
