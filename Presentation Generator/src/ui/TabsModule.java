@@ -1,12 +1,15 @@
-package generator;
+package ui;
 
 import java.awt.Label;
 
-public class VarChoiceModule extends ModulePanel {
+public class TabsModule extends ModulePanel {
 
-	public VarChoiceModule(){
-		add(new Label("VarChoiceFrame"));
+	private static final long serialVersionUID = -4607727757290653060L;
+
+	public TabsModule() {
+		add(new Label("TabsFrame"));
 	}
+	
 	@Override
 	public void save() {
 		// TODO Auto-generated method stub

@@ -1,4 +1,4 @@
-package generator;
+package ui;
 
 import java.awt.Label;
 import java.awt.event.ActionEvent;

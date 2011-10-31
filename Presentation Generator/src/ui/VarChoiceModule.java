@@ -1,13 +1,12 @@
-package generator;
+package ui;
 
 import java.awt.Label;
 
-public class VarEditorModule extends ModulePanel {
+public class VarChoiceModule extends ModulePanel {
 
-	public VarEditorModule(){
-		add(new Label("VarEditorFrame"));
+	public VarChoiceModule(){
+		add(new Label("VarChoiceFrame"));
 	}
-	
 	@Override
 	public void save() {
 		// TODO Auto-generated method stub

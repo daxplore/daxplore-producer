@@ -1,4 +1,4 @@
-package generator;
+package ui;
 
 import java.awt.Dimension;
 import java.awt.Label;

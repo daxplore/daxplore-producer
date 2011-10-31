@@ -1,4 +1,4 @@
-package generator;
+package ui;
 
 import java.awt.BorderLayout;
 import java.awt.CardLayout;

@@ -9,7 +9,6 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.sql.Time;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
@@ -53,8 +52,6 @@ public class SPSStoSQL {
 		
 		Map<String, String> columns = new LinkedHashMap<String,String>();
 		
-		//String[] columns = new String[sf.getVariableCount()];
-		//Object[][] data = new Object[sf.getRecordCount()][sf.getVariableCount()];
 		for(int i = 0; i < sf.getVariableCount(); i++){
 			SPSSVariable var = sf.getVariable(i);
 			if(var instanceof SPSSNumericVariable){
@@ -63,14 +60,11 @@ public class SPSStoSQL {
 				columns.put(var.getShortName(), "text");
 			} else throw new Exception("Variable type unknown");
 		}
-		System.out.print("Creating table...");
 		createRawDataTable(columns, sqliteDatabase);
-		System.out.println("done");
 		PreparedStatement addRowStatement = addRowStatement(columns, sqliteDatabase);
 		try {
 			BufferedReader br = new BufferedReader(new FileReader(temp));
 			String line;
-			System.out.print("Importing");
 			boolean autocommit = sqliteDatabase.getAutoCommit();
 			sqliteDatabase.setAutoCommit(false);
 			while((line = br.readLine()) != null){
@@ -82,14 +76,11 @@ public class SPSStoSQL {
 					c++;
 				}
 				addRow(columns, addRowStatement, data);
-				System.out.print(".");
 			}
-			System.out.println("\nWriting batch...");
 			long time = System.currentTimeMillis();
 			sqliteDatabase.commit();
 			sqliteDatabase.setAutoCommit(autocommit);
 			time = System.currentTimeMillis() - time;
-			System.out.println("Done, took " + (time/1000.0) + " seconds");
 			
 			
 		} catch (FileNotFoundException e) {

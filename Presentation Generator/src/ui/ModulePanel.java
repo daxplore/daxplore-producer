@@ -1,4 +1,4 @@
-package generator;
+package ui;
 
 import javax.swing.JPanel;
 
