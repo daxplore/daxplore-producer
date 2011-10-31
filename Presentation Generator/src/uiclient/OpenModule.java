@@ -1,4 +1,4 @@
-package ui;
+package uiclient;
 
 import java.awt.Label;
 import java.awt.event.ActionEvent;

@@ -1,4 +1,4 @@
-package ui;
+package uiclient;
 
 import javax.swing.JPanel;
 

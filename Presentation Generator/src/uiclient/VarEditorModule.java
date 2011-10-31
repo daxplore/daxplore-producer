@@ -1,13 +1,11 @@
-package ui;
+package uiclient;
 
 import java.awt.Label;
 
-public class TabsModule extends ModulePanel {
+public class VarEditorModule extends ModulePanel {
 
-	private static final long serialVersionUID = -4607727757290653060L;
-
-	public TabsModule() {
-		add(new Label("TabsFrame"));
+	public VarEditorModule(){
+		add(new Label("VarEditorFrame"));
 	}
 	
 	@Override

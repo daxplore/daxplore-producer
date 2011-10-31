@@ -1,4 +1,4 @@
-package ui;
+package uiclient;
 
 import java.awt.BorderLayout;
 import java.awt.CardLayout;
