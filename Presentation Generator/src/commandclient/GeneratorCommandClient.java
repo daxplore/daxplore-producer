@@ -13,6 +13,10 @@ public class GeneratorCommandClient {
 		CommandLineParser parser = new GnuParser();
 		try {
 			CommandLine commandLine = parser.parse(options, args);
+			if(commandLine.hasOption('h')){
+				printHelp(options);
+				return;
+			}
 			if(commandLine.hasOption('t')){
 				System.out.println("TRANSFER!");
 			}else{
