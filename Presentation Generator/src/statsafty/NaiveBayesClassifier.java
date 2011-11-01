@@ -4,7 +4,6 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
-import java.io.RandomAccessFile;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.HashMap;
@@ -30,7 +29,7 @@ public class NaiveBayesClassifier {
 	
 	final String[] questions = { "A16", "A9", "B17", "B18", "B21", "B22", "B24a", "B24b", "B24c", "B25b", "B25c", "B25d", "B26a", "B26b", "B28a", "B28c",
 			"B28e", "B28f", "B28g", "B29a", "B29b", "B29d", "B30", "B31", "B32", "B38", "C41a", "C41b", "C41c", "C41d", "C41e", "C44a", "C44b", "C44c",
-			"C44d", "C44e", "C44f", "C44g", /*"C45a", "C45b",*/ "C46b", "C46h", "C46i", "C50a", "C50b", "C50c", "C50d", "C50f", "C50g", "C50h", "C50j",
+			"C44d", "C44e", "C44f", "C44g", "C45a", "C45b", "C46b", "C46h", "C46i", "C50a", "C50b", "C50c", "C50d", "C50f", "C50g", "C50h", "C50j",
 			"C54a", "C55", "C56a", "C56b", "C56e", "C57a", "C57b", "C57c", "C58", "C62a", "C62b", "C62d", "D63", "D66a", "D66b", "D66c", "E72", "E73",
 			"E75" };
 	
@@ -38,60 +37,72 @@ public class NaiveBayesClassifier {
 		statStore = statStoreMap();
 	}
 	
-	public void checkRow(ResultSet rs) throws IOException, SQLException{
-		Map<String, Integer> selectors = new HashMap<String, Integer>();
-		selectors.put("A1", rs.getInt("A1"));
-		selectors.put("A3AGG", rs.getInt("A3"));
-		selectors.put("A4", rs.getInt("A4"));
-		selectors.put("A5", rs.getInt("A5"));
-		selectors.put("A7AGG", rs.getInt("A7AGG"));
-		// selectors.put("A8", 1);
-		selectors.put("A12cAGG", rs.getInt("A12cAGG"));
-		selectors.put("A12d", rs.getInt("A12d"));
-
+	public void checkRows(ResultSet rs) throws IOException, SQLException{
 		Map<String, Integer> predictions = new LinkedHashMap<String, Integer>();
-		
-		Integer totalCorrect = 0, totalFailed = 0;
-		
+		int totalCorrect = 0, totalFailed = 0, totalNulls = 0, totalRows = 0;
 		while (rs.next()) {
+			if(rs.getInt("STUDY")==1){
+				continue;
+			}
+			totalRows++;
+			Map<String, Integer> selectors = new HashMap<String, Integer>();
+			selectors.put("A1", rs.getInt("A1"));
+			selectors.put("A3AGG", rs.getInt("A3"));
+			selectors.put("A4", rs.getInt("A4"));
+			selectors.put("A5", rs.getInt("A5"));
+			selectors.put("A6", rs.getInt("A6"));
+			selectors.put("A7AGG", rs.getInt("A7AGG"));
+			// selectors.put("A8", 1);
+			selectors.put("A12cAGG", rs.getInt("A12cAGG"));
+			selectors.put("A12d", rs.getInt("A12d"));
 			
 			int nulls = 0;
 			for (String question : questions) {
-				Iterator<String> selIter = selectors.keySet().iterator();
+				
 				List<LinkedList<Double>> allres = new LinkedList<LinkedList<Double>>();
-				LinkedList<Double> allArr = new LinkedList<Double>();
+				
+				LinkedList<Double> questionTotalCount = new LinkedList<Double>();
+				String allStat = getStat(question);
+				JSONObject objAll = (JSONObject) JSONValue.parse(allStat);
+				JSONArray arrAll = (JSONArray) objAll.get("d");
+				for (int i = 0; i < arrAll.size(); i++) {
+					Number alln = (Number) arrAll.get(i);
+					questionTotalCount.add(alln.doubleValue());
+				}
+				
+				Iterator<String> selIter = selectors.keySet().iterator();
 				while (selIter.hasNext()) {
 					String selector = selIter.next();
 					
-					LinkedList<String> result = getStats(question.toUpperCase(), selector.toUpperCase(), selectors.get(selector), statStore);
-				
-					if (result == null) {
+					String thisStat = getStat(question, selector, (selectors.get(selector)+1));
+					if (thisStat == null) {
 						nulls++;
 						continue;
 					}
-					JSONObject objAll = (JSONObject) JSONValue.parse(result.get(0));
-					JSONArray arrAll = (JSONArray) objAll.get("d");
-					JSONObject objThis = (JSONObject) JSONValue.parse(result.get(1));
+					
+					JSONObject objThis = (JSONObject) JSONValue.parse(thisStat);
+					if(!objThis.containsKey("d")) {
+						nulls++;
+						continue;
+					}
 					JSONArray arrThis = (JSONArray) objThis.get("d");
+					
 					LinkedList<Double> res = new LinkedList<Double>();
-					allArr = new LinkedList<Double>();
 					for (int i = 0; i < arrAll.size(); i++) {
-						Number alln = (Number) arrAll.get(i);
-						allArr.add(alln.doubleValue());
 						Number thisn;
 						if (i >= arrThis.size()) {
 							thisn = 0;
 						} else {
 							thisn = (Number) arrThis.get(i);
 						}
-						res.add(thisn.doubleValue() / alln.doubleValue());
+						res.add(thisn.doubleValue() / questionTotalCount.get(i));
 					}
 					allres.add(res);
 
 				}
 				// allres.add(allArr);
 
-				Double[] NBCValue = allArr.toArray(new Double[0]);
+				Double[] NBCValue = questionTotalCount.toArray(new Double[0]);
 				for (LinkedList<Double> r : allres) {
 					for (int i = 0; i < r.size(); i++) {
 						NBCValue[i] *= r.get(i);
@@ -110,11 +121,12 @@ public class NaiveBayesClassifier {
 					}
 				}
 			}
-			System.out.println("Row " + rs.getRow() + ": " + (int)(0.5+100.0*correct/(correct + failed)) + "% = " + correct + "/" + (correct + failed) + " (" + failed + " failed, " + nulls + " null)");
+			System.out.println((int)(0.5+100.0*rs.getRow()/2346.0) + "%: EnkatID " + rs.getString("EnkatID") + ":\t" + (int)(0.5+100.0*correct/(correct + failed)) + "% = " + correct + "/" + (correct + failed) + " (" + failed + " failed, " + nulls + " null)");
 			totalCorrect += correct;
 			totalFailed += failed;
+			totalNulls += nulls;
 		}
-		System.out.println("Total: " + (int)(0.5+100.0*totalCorrect/(totalCorrect + totalFailed)) + "% = " + totalCorrect + "/" + (totalCorrect + totalFailed) + " (" + totalFailed + " failed)");
+		System.out.println("Total: " + (int)(0.5+100.0*totalCorrect/(totalCorrect + totalFailed)) + "% = " + totalCorrect + "/" + (totalCorrect + totalFailed) + " (" + totalFailed + " failed, " + totalNulls + " null)");
 	}
 
 	public static int maxIndex(Double[] arr) {
@@ -128,29 +140,13 @@ public class NaiveBayesClassifier {
 		}
 		return index;
 	}
-
-	public static LinkedList<String> getStats(String question, String selector, int alternative, Map<String, String> statStore) {
-		LinkedList<String> linkedList = new LinkedList<String>();
-		
-		String value = statStore.get(statStoreKey(question));
-		if(value==null)return null;
-		linkedList.add(value);
-		
-		value = statStore.get(statStoreKey(question, selector, alternative));
-		if(value==null)return null;
-		linkedList.add(value);
-		
-		if(linkedList.size()!=2)return null;
-		
-		return linkedList;
+	
+	public String getStat(String question){
+		return statStore.get("Q="+question.toUpperCase());
 	}
 	
-	public static String statStoreKey(String question){
-		return "Q="+question;
-	}
-	
-	public static String statStoreKey(String question, String selector, int alternative){
-		return selector+"="+alternative+"+Q="+question;
+	public String getStat(String question, String selector, int alternative){
+		return statStore.get(selector.toUpperCase()+"="+alternative+"+Q="+question.toUpperCase());
 	}
 	
 	public static Map<String, String> statStoreMap() throws IOException{

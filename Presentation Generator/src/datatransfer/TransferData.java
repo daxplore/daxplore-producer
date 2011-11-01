@@ -38,16 +38,11 @@ public class TransferData {
 				System.out.println("Data imported");
 			}else{
 				System.err.println("Not enough arguments given");
-				return;
 			}
 			
+			//Test with naive bayesian classifier:
 			ResultSet rs = statement.executeQuery("select * from rawdata");
-			/*while (rs.next()) {
-				// read the result set
-				//System.out.println("A1 = " + rs.getInt("A1"));
-				//System.out.println("id = " + rs.getInt("A7AGG"));
-			}*/
-			classifier.checkRow(rs);
+			classifier.checkRows(rs);
 			
 		} catch (SQLException e) {
 			// if the error message is "out of memory",
