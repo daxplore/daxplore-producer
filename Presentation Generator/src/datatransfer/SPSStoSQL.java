@@ -57,7 +57,9 @@ public class SPSStoSQL {
 			if(var instanceof SPSSNumericVariable){
 				columns.put(var.getShortName(), "real");
 			} else if (var instanceof SPSSStringVariable){
-				columns.put(var.getShortName(), "text");
+				//TODO ugly hack for EnkätID
+				columns.put("EnkatID", "text");
+				//columns.put(var.getShortName(), "text");
 			} else throw new Exception("Variable type unknown");
 		}
 		createRawDataTable(columns, sqliteDatabase);
@@ -152,9 +154,9 @@ public class SPSStoSQL {
 					datadouble = Double.parseDouble(datapoint);
 					statement.setDouble(colIndex+1, datadouble);
 				} catch (NumberFormatException e) {
-					statement.setNull(colIndex, java.sql.Types.REAL);
+					statement.setNull(colIndex+1, java.sql.Types.REAL);
 				} catch (NullPointerException e) {
-					statement.setNull(colIndex, java.sql.Types.REAL);
+					statement.setNull(colIndex+1, java.sql.Types.REAL);
 				}
 			}else if(type.equalsIgnoreCase("text")){
 				String datapoint = data[colIndex];

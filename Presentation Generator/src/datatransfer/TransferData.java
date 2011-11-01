@@ -1,6 +1,7 @@
 package datatransfer;
 
 import java.io.File;
+import java.io.IOException;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.ResultSet;
@@ -10,13 +11,15 @@ import java.sql.Statement;
 import statsafty.NaiveBayesClassifier;
 
 public class TransferData {
-	public static void main(String[] args) throws ClassNotFoundException {
+	public static void main(String[] args) throws ClassNotFoundException, IOException {
 		// load the sqlite-JDBC driver using the current class loader
 		Class.forName("org.sqlite.JDBC");
+		Connection connection = null;
 		
 		String spssFileName;
 		
-		Connection connection = null;
+		NaiveBayesClassifier classifier = new NaiveBayesClassifier();
+		
 		try {
 			// create a database connection
 			connection = DriverManager.getConnection("jdbc:sqlite:rawdata.db");
@@ -35,16 +38,11 @@ public class TransferData {
 				System.out.println("Data imported");
 			}else{
 				System.err.println("Not enough arguments given");
-				return;
 			}
 			
+			//Test with naive bayesian classifier:
 			ResultSet rs = statement.executeQuery("select * from rawdata");
-			/*while (rs.next()) {
-				// read the result set
-				//System.out.println("A1 = " + rs.getInt("A1"));
-				//System.out.println("id = " + rs.getInt("A7AGG"));
-			}*/
-			NaiveBayesClassifier.checkRow(rs);
+			classifier.checkRows(rs);
 			
 		} catch (SQLException e) {
 			// if the error message is "out of memory",
