@@ -4,8 +4,11 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
+import java.sql.Connection;
+import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Statement;
 import java.text.MessageFormat;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -25,7 +28,6 @@ import org.json.simple.JSONValue;
  */
 
 public class NaiveBayesClassifier {
-	
 	final Map<String, String> statStore;
 	
 	final String[] questions = { "A16", "A9", "B17", "B18", "B21", "B22", "B24a", "B24b", "B24c", "B25b", "B25c", "B25d", "B26a", "B26b", "B28a", "B28c",
@@ -135,8 +137,7 @@ public class NaiveBayesClassifier {
 			totalFailed += failed;
 			totalNulls += nulls;
 		}
-		
-		System.out.println(MessageFormat.format("Total:  {0,number,00.0%} correct\t({1} tested, {2} correct, {3} failed, {4} nulls)",
+		System.out.println(MessageFormat.format("\nTotal:  {0,number,00.0%} correct\t({1} tested, {2} correct, {3} failed, {4} nulls)",
 				(double)totalCorrect/(totalCorrect + totalFailed), (totalCorrect+totalFailed), totalCorrect, totalFailed, totalNulls));
 		System.out.println(MessageFormat.format("Avg:    {0,number,00.0%} correct\t({1,number,#} tested, {2,number,#} correct, {3,number,#} failed, {4,number,#} nulls)",
 				(double)totalCorrect/(totalCorrect + totalFailed), (double)(totalCorrect+totalFailed)/totalRows, (double)totalCorrect/totalRows, (double)totalFailed/totalRows, (double)totalNulls/totalRows));
@@ -206,4 +207,37 @@ public class NaiveBayesClassifier {
         }
         return statStoreMap;
     }
+	
+	
+	public static void main(String[] args) throws ClassNotFoundException, IOException {
+		Class.forName("org.sqlite.JDBC");
+		Connection connection = null;
+		try {
+			connection = DriverManager.getConnection("jdbc:sqlite:rawdata.db");
+			connection.setReadOnly(true);
+			Statement statement = connection.createStatement();
+			statement.setQueryTimeout(30);
+			
+			//Test with naive bayesian classifier:
+			NaiveBayesClassifier classifier = new NaiveBayesClassifier();
+			ResultSet rs = statement.executeQuery("select * from rawdata");
+			classifier.checkRows(rs);
+		} catch (SQLException e) {
+			// if the error message is "out of memory",
+			// it probably means no database file is found
+			e.printStackTrace();
+			System.err.println(e.getMessage());
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} finally {
+			try {
+				if (connection != null)
+					connection.close();
+			} catch (SQLException e) {
+				// connection close failed.
+				System.err.println(e);
+			}
+		}
+	}
 }
