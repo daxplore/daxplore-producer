@@ -33,6 +33,7 @@ public class TransferData {
 				File spssFile = new File(spssFileName);
 				System.out.println("Spss file opened");
 				statement.executeUpdate("drop table if exists rawdata");
+				statement.executeUpdate("drop table if exists rawmeta");
 				System.out.println("Table dropped");
 				SPSStoSQL.loadRawData(spssFile, connection);
 				System.out.println("Data imported");
@@ -41,8 +42,8 @@ public class TransferData {
 			}
 			
 			//Test with naive bayesian classifier:
-			ResultSet rs = statement.executeQuery("select * from rawdata");
-			classifier.checkRows(rs);
+			//ResultSet rs = statement.executeQuery("select * from rawdata");
+			//classifier.checkRows(rs);
 			
 		} catch (SQLException e) {
 			// if the error message is "out of memory",

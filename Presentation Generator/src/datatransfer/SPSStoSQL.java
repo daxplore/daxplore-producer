@@ -5,6 +5,7 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
+import java.nio.charset.Charset;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
@@ -14,8 +15,10 @@ import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.Map;
+import java.util.Set;
 import java.util.StringTokenizer;
 
+import org.json.simple.JSONValue;
 import org.opendatafoundation.data.FileFormatInfo;
 import org.opendatafoundation.data.FileFormatInfo.ASCIIFormat;
 import org.opendatafoundation.data.FileFormatInfo.Compatibility;
@@ -24,6 +27,7 @@ import org.opendatafoundation.data.spss.SPSSFileException;
 import org.opendatafoundation.data.spss.SPSSNumericVariable;
 import org.opendatafoundation.data.spss.SPSSStringVariable;
 import org.opendatafoundation.data.spss.SPSSVariable;
+import org.opendatafoundation.data.spss.SPSSVariableCategory;
 
 import tools.MyTools;
 
@@ -36,10 +40,14 @@ public class SPSStoSQL {
 		ffi.namesOnFirstLine = false;
 		ffi.asciiFormat = ASCIIFormat.CSV;
 		ffi.compatibility = Compatibility.GENERIC;
+		boolean autocommit = sqliteDatabase.getAutoCommit();
+		sqliteDatabase.setAutoCommit(false);
 		try {
-			sf = new SPSSFile(spssFile);
+			sf = new SPSSFile(spssFile,Charset.forName("ISO-8859-1"));
+			sf.logFlag = false;
 			sf.loadMetadata();
 			temp = File.createTempFile("spsscsv", ".csv.tmp");
+			temp.deleteOnExit();
 			sf.exportData(temp, ffi);
 		} catch (IOException e) {
 			e.printStackTrace();
@@ -51,24 +59,42 @@ public class SPSStoSQL {
 		}
 		
 		Map<String, String> columns = new LinkedHashMap<String,String>();
-		
+		createRawMetaTable(sqliteDatabase);
 		for(int i = 0; i < sf.getVariableCount(); i++){
 			SPSSVariable var = sf.getVariable(i);
+			String spsstype;
+			String valuelabels = null;
+			String qtype;
 			if(var instanceof SPSSNumericVariable){
+				spsstype = "Numeric";
+				qtype = VariableType.NUMERIC.toString();
 				columns.put(var.getShortName(), "real");
 			} else if (var instanceof SPSSStringVariable){
-				//TODO ugly hack for EnkätID
-				columns.put("EnkatID", "text");
-				//columns.put(var.getShortName(), "text");
+				spsstype = "String";
+				qtype = VariableType.TEXT.toString();
+				columns.put(var.getShortName(), "text");
 			} else throw new Exception("Variable type unknown");
+			if(var.hasValueLabels()){
+				qtype = VariableType.MAPPED.toString();
+				valuelabels = categoriesToJSON(var.categoryMap);
+			}
+			String measure = var.getMeasureLabel();
+			addColumnMeta(
+					var.getShortName(),
+					var.getName(),
+					var.getLabel(),
+					qtype,
+					spsstype,
+					valuelabels,
+					sqliteDatabase,
+					measure
+					);
 		}
 		createRawDataTable(columns, sqliteDatabase);
 		PreparedStatement addRowStatement = addRowStatement(columns, sqliteDatabase);
 		try {
 			BufferedReader br = new BufferedReader(new FileReader(temp));
 			String line;
-			boolean autocommit = sqliteDatabase.getAutoCommit();
-			sqliteDatabase.setAutoCommit(false);
 			while((line = br.readLine()) != null){
 				String[] data = new String[sf.getVariableCount()];
 				StringTokenizer st = new StringTokenizer(line, ",");
@@ -95,6 +121,39 @@ public class SPSStoSQL {
 			System.out.print(e.toString());
 			e.printStackTrace();
 		}
+	}
+	
+	protected static void createRawMetaTable(Connection conn) throws SQLException {
+		String query = "create table rawmeta (column text, longname text, qtext text, qtype text, spsstype text, valuelabels text, measure text)";
+		Statement statement = conn.createStatement();
+		statement.executeUpdate(query);
+	}
+	
+	protected static void addColumnMeta(String column, String longname, String qtext, String qtype, String spsstype, String valuelabels, Connection conn, String measure) throws SQLException {
+		PreparedStatement ps = conn.prepareStatement("insert into rawmeta values (?, ?, ?, ?, ?, ?, ?)");
+		
+		if(column != null)ps.setString(1, column);
+		else throw new NullPointerException();
+		
+		if(longname != null) ps.setString(2, longname);
+		else ps.setNull(2, java.sql.Types.VARCHAR);
+		
+		if(qtext != null) ps.setString(3, qtext);
+		else ps.setNull(3, java.sql.Types.VARCHAR);
+		
+		if(qtype != null) ps.setString(4, qtype);
+		else ps.setNull(4, java.sql.Types.VARCHAR);
+		
+		if(spsstype != null) ps.setString(5, spsstype);
+		else ps.setNull(5, java.sql.Types.VARCHAR);
+		
+		if(valuelabels != null) ps.setString(6, valuelabels);
+		else ps.setNull(6, java.sql.Types.VARCHAR);
+		
+		if(measure != null) ps.setString(7, measure);
+		else ps.setNull(7, java.sql.Types.VARCHAR);
+		
+		ps.executeUpdate();
 	}
 	
 	protected static void createRawDataTable(Map<String,String> columns, Connection conn) throws SQLException{
@@ -168,5 +227,18 @@ public class SPSStoSQL {
 			colIndex++;
 		}
 		statement.execute();
+	}
+	
+	protected static String categoriesToJSON(Map<String, SPSSVariableCategory> categories){
+		Set<String> keyset = categories.keySet();
+		Map<Object,String> catObj = new LinkedHashMap<Object, String>();
+		for(String key : keyset){
+			//if(categories.get(key).value != Double.NaN){
+			//	catObj.put(new Double(categories.get(key).value), categories.get(key).label);
+			//} else {
+				catObj.put(categories.get(key).strValue, categories.get(key).label);
+			//}
+		}
+		return JSONValue.toJSONString(catObj);
 	}
 }
