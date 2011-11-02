@@ -6,6 +6,7 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.text.MessageFormat;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
@@ -34,86 +35,92 @@ public class NaiveBayesClassifier {
 			"E75" };
 	
 	public NaiveBayesClassifier() throws IOException{
-		statStore = statStoreMap();
+		statStore = createStatStoreMap();
 	}
 	
-	public void checkRows(ResultSet rs) throws IOException, SQLException{
+	public void checkRows(ResultSet resultSet) throws IOException, SQLException{
 		Map<String, Integer> predictions = new LinkedHashMap<String, Integer>();
-		int totalCorrect = 0, totalFailed = 0, totalNulls = 0, totalRows = 0;
-		while (rs.next()) {
-			if(rs.getInt("STUDY")==1){
+		int totalRows = 0;
+		int totalCorrect = 0, totalFailed = 0, totalNulls = 0;
+		int studyNumber = 2;
+		String studyName = "d";
+		while (resultSet.next()) {
+			if(resultSet.getInt("STUDY")!=studyNumber){
 				continue;
 			}
-			totalRows++;
 			Map<String, Integer> selectors = new HashMap<String, Integer>();
-			selectors.put("A1", rs.getInt("A1"));
-			selectors.put("A3AGG", rs.getInt("A3"));
-			selectors.put("A4", rs.getInt("A4"));
-			selectors.put("A5", rs.getInt("A5"));
-			selectors.put("A6", rs.getInt("A6"));
-			selectors.put("A7AGG", rs.getInt("A7AGG"));
+			selectors.put("A1", resultSet.getInt("A1"));
+			selectors.put("A3AGG", resultSet.getInt("A3"));
+			selectors.put("A4", resultSet.getInt("A4"));
+			selectors.put("A5", resultSet.getInt("A5"));
+			selectors.put("A6", resultSet.getInt("A6"));
+			selectors.put("A7AGG", resultSet.getInt("A7AGG"));
 			// selectors.put("A8", 1);
-			selectors.put("A12cAGG", rs.getInt("A12cAGG"));
-			selectors.put("A12d", rs.getInt("A12d"));
+			selectors.put("A12cAGG", resultSet.getInt("A12cAGG"));
+			selectors.put("A12d", resultSet.getInt("A12d"));
 			
 			int nulls = 0;
+			
 			for (String question : questions) {
+				List<LinkedList<Double>> allResults = new LinkedList<LinkedList<Double>>();
 				
-				List<LinkedList<Double>> allres = new LinkedList<LinkedList<Double>>();
-				
+				/* Get the summed up content for the question (the total count)*/
 				LinkedList<Double> questionTotalCount = new LinkedList<Double>();
-				String allStat = getStat(question);
-				JSONObject objAll = (JSONObject) JSONValue.parse(allStat);
-				JSONArray arrAll = (JSONArray) objAll.get("d");
-				for (int i = 0; i < arrAll.size(); i++) {
-					Number alln = (Number) arrAll.get(i);
-					questionTotalCount.add(alln.doubleValue());
+				String questionTotalStat = getStat(question);
+				JSONObject questionTotalJSONObject = (JSONObject)JSONValue.parse(questionTotalStat);
+				if(!questionTotalJSONObject.containsKey(studyName)) {
+					nulls++;
+					continue;
+				}
+				JSONArray allJSONArray = (JSONArray)questionTotalJSONObject.get(studyName);
+				for (int i = 0; i < allJSONArray.size(); i++) {
+					Number number = (Number)allJSONArray.get(i);
+					questionTotalCount.add(number.doubleValue());
 				}
 				
-				Iterator<String> selIter = selectors.keySet().iterator();
-				while (selIter.hasNext()) {
-					String selector = selIter.next();
+				/* Get the values for each question with the given selector for this individual */
+				Iterator<String> selectorItererator = selectors.keySet().iterator();
+				while (selectorItererator.hasNext()) {
+					String selector = selectorItererator.next();
 					
-					String thisStat = getStat(question, selector, (selectors.get(selector)+1));
-					if (thisStat == null) {
+					String questionSelectorStat = getStat(question, selector, (selectors.get(selector)+1));
+					if (questionSelectorStat == null) {
 						nulls++;
 						continue;
 					}
 					
-					JSONObject objThis = (JSONObject) JSONValue.parse(thisStat);
-					if(!objThis.containsKey("d")) {
+					JSONObject questionSelectorJSONObject = (JSONObject)JSONValue.parse(questionSelectorStat);
+					if(!questionSelectorJSONObject.containsKey(studyName)) {
 						nulls++;
 						continue;
 					}
-					JSONArray arrThis = (JSONArray) objThis.get("d");
+					JSONArray questionSelectorJSONArray = (JSONArray)questionSelectorJSONObject.get(studyName);
 					
-					LinkedList<Double> res = new LinkedList<Double>();
-					for (int i = 0; i < arrAll.size(); i++) {
-						Number thisn;
-						if (i >= arrThis.size()) {
-							thisn = 0;
+					LinkedList<Double> questionSelectorResult = new LinkedList<Double>();
+					for (int i = 0; i < allJSONArray.size(); i++) {
+						Number number;
+						if (i >= questionSelectorJSONArray.size()) {
+							number = 0;
 						} else {
-							thisn = (Number) arrThis.get(i);
+							number = (Number)questionSelectorJSONArray.get(i);
 						}
-						res.add(thisn.doubleValue() / questionTotalCount.get(i));
+						questionSelectorResult.add(number.doubleValue() / questionTotalCount.get(i));
 					}
-					allres.add(res);
-
+					allResults.add(questionSelectorResult);
 				}
-				// allres.add(allArr);
 
-				Double[] NBCValue = questionTotalCount.toArray(new Double[0]);
-				for (LinkedList<Double> r : allres) {
-					for (int i = 0; i < r.size(); i++) {
-						NBCValue[i] *= r.get(i);
+				Double[] maximumAPosterioriValues = questionTotalCount.toArray(new Double[0]);
+				for (LinkedList<Double> result : allResults) {
+					for (int i = 0; i < result.size(); i++) {
+						maximumAPosterioriValues[i] *= result.get(i);
 					}
 				}
-				predictions.put(question, (maxIndex(NBCValue) + 1));
+				predictions.put(question, (maxIndex(maximumAPosterioriValues) + 1));
 			}
 			Integer correct = 0, failed = 0;
 			for (String question : questions) {
-				int real = rs.getInt(question);
-				if (!rs.wasNull()) {
+				int real = resultSet.getInt(question);
+				if (!resultSet.wasNull()) {
 					if (real == predictions.get(question)) {
 						correct++;
 					} else {
@@ -121,21 +128,45 @@ public class NaiveBayesClassifier {
 					}
 				}
 			}
-			System.out.println((int)(0.5+100.0*rs.getRow()/2346.0) + "%: EnkatID " + rs.getString("EnkatID") + ":\t" + (int)(0.5+100.0*correct/(correct + failed)) + "% = " + correct + "/" + (correct + failed) + " (" + failed + " failed, " + nulls + " null)");
+			System.out.println(MessageFormat.format("{0,number,00%}:\t{1,number,00.0%} correct\t({2} tested, {3} correct, {4} failed, {5} nulls)",
+					resultSet.getRow()/2346.0, (double)correct/(correct + failed), (correct+failed), correct, failed, nulls));
+			totalRows++;
 			totalCorrect += correct;
 			totalFailed += failed;
 			totalNulls += nulls;
 		}
-		System.out.println("Total: " + (int)(0.5+100.0*totalCorrect/(totalCorrect + totalFailed)) + "% = " + totalCorrect + "/" + (totalCorrect + totalFailed) + " (" + totalFailed + " failed, " + totalNulls + " null)");
+		
+		System.out.println(MessageFormat.format("Total:  {0,number,00.0%} correct\t({1} tested, {2} correct, {3} failed, {4} nulls)",
+				(double)totalCorrect/(totalCorrect + totalFailed), (totalCorrect+totalFailed), totalCorrect, totalFailed, totalNulls));
+		System.out.println(MessageFormat.format("Avg:    {0,number,00.0%} correct\t({1,number,#} tested, {2,number,#} correct, {3,number,#} failed, {4,number,#} nulls)",
+				(double)totalCorrect/(totalCorrect + totalFailed), (double)(totalCorrect+totalFailed)/totalRows, (double)totalCorrect/totalRows, (double)totalFailed/totalRows, (double)totalNulls/totalRows));
+		
+		/* The percentage of the questions we expect to get right by chance */
+		/* Counted as an average of the individual probabilities of getting a single question right */
+		/* Is this the right thing to calculate? */
+		double byChance = 0;
+		int questionsUsed = 0;
+		for(String question : questions){
+			String allStat = getStat(question);
+			JSONObject objAll = (JSONObject) JSONValue.parse(allStat);
+			if(!objAll.containsKey(studyName)) {
+				continue;
+			}
+			JSONArray arrAll = (JSONArray) objAll.get(studyName);
+			byChance += 1.0/arrAll.size();
+			questionsUsed++;
+		}
+		byChance /= questionsUsed;
+		System.out.println(MessageFormat.format("Chance: {0,number,00.0%}", byChance));
 	}
 
-	public static int maxIndex(Double[] arr) {
-		Double max = arr[0];
+	public static int maxIndex(Double[] array) {
+		Double max = array[0];
 		int index = 0;
-		for (int i = 1; i < arr.length; i++) {
-			if (arr[i] > max) {
+		for (int i = 1; i < array.length; i++) {
+			if (array[i] > max) {
 				index = i;
-				max = arr[i];
+				max = array[i];
 			}
 		}
 		return index;
@@ -149,7 +180,7 @@ public class NaiveBayesClassifier {
 		return statStore.get(selector.toUpperCase()+"="+alternative+"+Q="+question.toUpperCase());
 	}
 	
-	public static Map<String, String> statStoreMap() throws IOException{
+	public static Map<String, String> createStatStoreMap() throws IOException{
 		Map<String, String> statStoreMap = new HashMap<String, String>();
     	File file = new File("src/statsafty/statstoredata.js");
     	BufferedReader br = new BufferedReader(new FileReader(file));
