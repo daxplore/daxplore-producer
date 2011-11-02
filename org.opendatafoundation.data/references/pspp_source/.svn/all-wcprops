@@ -1,0 +1,29 @@
+K 25
+svn:wc:ra_dav:version-url
+V 70
+/ddidext/!svn/ver/2/org.opendatafoundation.data/references/pspp_source
+END
+sfm-read.c
+K 25
+svn:wc:ra_dav:version-url
+V 81
+/ddidext/!svn/ver/2/org.opendatafoundation.data/references/pspp_source/sfm-read.c
+END
+sfm-write.h
+K 25
+svn:wc:ra_dav:version-url
+V 82
+/ddidext/!svn/ver/2/org.opendatafoundation.data/references/pspp_source/sfm-write.h
+END
+sfm-read.h
+K 25
+svn:wc:ra_dav:version-url
+V 81
+/ddidext/!svn/ver/2/org.opendatafoundation.data/references/pspp_source/sfm-read.h
+END
+sfm-write.c
+K 25
+svn:wc:ra_dav:version-url
+V 82
+/ddidext/!svn/ver/2/org.opendatafoundation.data/references/pspp_source/sfm-write.c
+END
