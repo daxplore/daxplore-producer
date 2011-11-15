@@ -44,7 +44,7 @@ public class SPSStoSQL {
 		sqliteDatabase.setAutoCommit(false);
 		try {
 			sf = new SPSSFile(spssFile,Charset.forName("ISO-8859-1"));
-			sf.logFlag = false;
+			sf.logFlag = true;
 			sf.loadMetadata();
 			temp = File.createTempFile("spsscsv", ".csv.tmp");
 			temp.deleteOnExit();
@@ -92,7 +92,37 @@ public class SPSStoSQL {
 		}
 		createRawDataTable(columns, sqliteDatabase);
 		PreparedStatement addRowStatement = addRowStatement(columns, sqliteDatabase);
-		try {
+		
+		int n = 0;
+		Iterator<Object[]> iter = sf.getDataIterator();
+		while(iter.hasNext()){
+			if(n == 4){
+				sf.exportData(temp, ffi);
+			} else if (n == 8){
+				break;
+			}
+			Object[] data = iter.next();
+			String vars = "", vals = "";
+			for(int i = 0; i < data.length; i++){
+				String var = "", val = "";
+				if(data[i] instanceof String){
+					val = (String)data[i];
+				} else if(data[i] instanceof Double){
+					val = ((Double)data[i]).toString();
+				}
+				var = sf.getVariable(i).getShortName();
+				for (int j = var.length(); j < 10; j++) var += " ";
+				for (int j = val.length(); j < 10; j++) val += " ";
+				vars += var;
+				vals += val;
+			}
+			System.out.println(vals);
+			System.out.println(vars);
+			n++;
+		}
+		System.out.println("Cases: " + n);
+		
+		/*try {
 			BufferedReader br = new BufferedReader(new FileReader(temp));
 			String line;
 			while((line = br.readLine()) != null){
@@ -121,6 +151,7 @@ public class SPSStoSQL {
 			System.out.print(e.toString());
 			e.printStackTrace();
 		}
+		*/
 	}
 	
 	protected static void createRawMetaTable(Connection conn) throws SQLException {
