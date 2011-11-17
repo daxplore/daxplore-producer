@@ -1,0 +1,71 @@
+package tools;
+
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
+import java.util.Iterator;
+import java.util.Map;
+import java.util.Map.Entry;
+
+public class SQLTools {
+	
+	protected static boolean compareTables(String table1, String table2, String idcolumn, Map<String,String> columns, Connection conn) throws SQLException{
+		Statement statement = conn.createStatement();
+		statement.execute("select * from " + table1);
+		ResultSet rs1 = statement.getResultSet();
+		String idcoltype = columns.get(idcolumn);
+		PreparedStatement ps = conn.prepareStatement("select * from " + table2 + " where " + idcolumn + " = ?");
+		int row = 0;
+		while(rs1.next()){
+			String id;
+			if(idcoltype.equalsIgnoreCase("text")){
+				ps.setString(1, rs1.getString(idcolumn));
+				id = rs1.getString(idcolumn);
+			} else if(idcoltype.equalsIgnoreCase("real")){
+				ps.setDouble(1, rs1.getDouble(idcolumn));
+				id = new Double(rs1.getDouble(idcolumn)).toString();
+			} else {
+				return false;
+			}
+			ps.execute();
+			ResultSet rs2 = ps.getResultSet();
+			Iterator<Entry<String,String>> iter = columns.entrySet().iterator();
+			int duplicates = 0;
+			while(rs2.next()){
+				while(iter.hasNext()){
+					Entry<String,String> e = iter.next();
+					if(e.getValue().equalsIgnoreCase("real")){
+						double d1 = rs1.getDouble(e.getKey());
+						double d2 = rs2.getDouble(e.getKey());
+						if(rs1.wasNull() != rs2.wasNull()){
+							System.out.println("NULL row = " + row + " " + idcolumn + " = " + id + " column = " + e.getKey());
+							System.out.println("d: " + d1 + " != " + d2);
+							return false;
+						} else if(d1 != d2){
+							System.out.println("row = " + row + " " + idcolumn + " = " + id + " column = " + e.getKey());
+							System.out.println("d: " + d1 + " != " + d2);
+							return false;
+						}
+					} else if(e.getValue().equalsIgnoreCase("text")){
+						String s1 = rs1.getString(e.getKey());
+						String s2 = rs2.getString(e.getKey());
+						if(!s1.equals(s2)){
+							System.out.println("s: " + s1 + " != " + s2);
+							return false;
+						}
+					}
+				}
+				duplicates++;
+				if(duplicates > 1){
+					System.out.println("Duplicate row = " + row + " " + idcolumn + " = " + id);
+					return false;
+				}
+			}
+			row++;
+		}
+		
+		return true;
+	}
+}

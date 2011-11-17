@@ -1,9 +1,7 @@
 package datatransfer;
 
-import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileNotFoundException;
-import java.io.FileReader;
 import java.io.IOException;
 import java.nio.charset.Charset;
 import java.sql.Connection;
@@ -16,7 +14,6 @@ import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.Map;
 import java.util.Set;
-import java.util.StringTokenizer;
 
 import org.json.simple.JSONValue;
 import org.opendatafoundation.data.FileFormatInfo;
@@ -32,136 +29,83 @@ import org.opendatafoundation.data.spss.SPSSVariableCategory;
 import tools.MyTools;
 
 public class SPSStoSQL {
-
-	public static void loadRawData(File spssFile, Connection sqliteDatabase) throws Exception {
-		File temp;
-		SPSSFile sf;
-		FileFormatInfo ffi = new FileFormatInfo();
-		ffi.namesOnFirstLine = false;
-		ffi.asciiFormat = ASCIIFormat.CSV;
-		ffi.compatibility = Compatibility.GENERIC;
-		boolean autocommit = sqliteDatabase.getAutoCommit();
-		sqliteDatabase.setAutoCommit(false);
-		try {
+	
+	public static void loadRawData(File spssFile, Connection sqliteDatabase, String dataTable, String metaTable) throws ImportSPSSException, FileNotFoundException {
+		try{
+			SPSSFile sf = null;
+			FileFormatInfo ffi = new FileFormatInfo();
+			ffi.namesOnFirstLine = false;
+			ffi.asciiFormat = ASCIIFormat.CSV;
+			ffi.compatibility = Compatibility.GENERIC;
+			boolean autocommit = sqliteDatabase.getAutoCommit();
+			sqliteDatabase.setAutoCommit(false);
+			
 			sf = new SPSSFile(spssFile,Charset.forName("ISO-8859-1"));
-			sf.logFlag = true;
+			sf.logFlag = false;
 			sf.loadMetadata();
-			temp = File.createTempFile("spsscsv", ".csv.tmp");
-			temp.deleteOnExit();
-			sf.exportData(temp, ffi);
-		} catch (IOException e) {
-			e.printStackTrace();
-			return;
-		} catch (SPSSFileException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-			return;
-		}
-		
-		Map<String, String> columns = new LinkedHashMap<String,String>();
-		createRawMetaTable(sqliteDatabase);
-		for(int i = 0; i < sf.getVariableCount(); i++){
-			SPSSVariable var = sf.getVariable(i);
-			String spsstype;
-			String valuelabels = null;
-			String qtype;
-			if(var instanceof SPSSNumericVariable){
-				spsstype = "Numeric";
-				qtype = VariableType.NUMERIC.toString();
-				columns.put(var.getShortName(), "real");
-			} else if (var instanceof SPSSStringVariable){
-				spsstype = "String";
-				qtype = VariableType.TEXT.toString();
-				columns.put(var.getShortName(), "text");
-			} else throw new Exception("Variable type unknown");
-			if(var.hasValueLabels()){
-				qtype = VariableType.MAPPED.toString();
-				valuelabels = categoriesToJSON(var.categoryMap);
-			}
-			String measure = var.getMeasureLabel();
-			addColumnMeta(
-					var.getShortName(),
-					var.getName(),
-					var.getLabel(),
-					qtype,
-					spsstype,
-					valuelabels,
-					sqliteDatabase,
-					measure
-					);
-		}
-		createRawDataTable(columns, sqliteDatabase);
-		PreparedStatement addRowStatement = addRowStatement(columns, sqliteDatabase);
-		
-		int n = 0;
-		Iterator<Object[]> iter = sf.getDataIterator();
-		while(iter.hasNext()){
-			if(n == 4){
-				sf.exportData(temp, ffi);
-			} else if (n == 8){
-				break;
-			}
-			Object[] data = iter.next();
-			String vars = "", vals = "";
-			for(int i = 0; i < data.length; i++){
-				String var = "", val = "";
-				if(data[i] instanceof String){
-					val = (String)data[i];
-				} else if(data[i] instanceof Double){
-					val = ((Double)data[i]).toString();
+			
+			Map<String, String> columns = new LinkedHashMap<String,String>();
+			createRawMetaTable(sqliteDatabase, metaTable);
+			for(int i = 0; i < sf.getVariableCount(); i++){
+				SPSSVariable var = sf.getVariable(i);
+				String spsstype;
+				String valuelabels = null;
+				String qtype;
+				if(var instanceof SPSSNumericVariable){
+					spsstype = "Numeric";
+					qtype = VariableType.NUMERIC.toString();
+					columns.put(var.getShortName(), "real");
+				} else if (var instanceof SPSSStringVariable){
+					spsstype = "String";
+					qtype = VariableType.TEXT.toString();
+					columns.put(var.getShortName(), "text");
+				} else throw new ImportSPSSException("Variable type unknown");
+				if(var.hasValueLabels()){
+					qtype = VariableType.MAPPED.toString();
+					valuelabels = categoriesToJSON(var.categoryMap);
 				}
-				var = sf.getVariable(i).getShortName();
-				for (int j = var.length(); j < 10; j++) var += " ";
-				for (int j = val.length(); j < 10; j++) val += " ";
-				vars += var;
-				vals += val;
+				String measure = var.getMeasureLabel();
+				addColumnMeta(
+						metaTable,
+						var.getShortName(),
+						var.getName(),
+						var.getLabel(),
+						qtype,
+						spsstype,
+						valuelabels,
+						sqliteDatabase,
+						measure
+						);
 			}
-			System.out.println(vals);
-			System.out.println(vars);
-			n++;
-		}
-		System.out.println("Cases: " + n);
-		
-		/*try {
-			BufferedReader br = new BufferedReader(new FileReader(temp));
-			String line;
-			while((line = br.readLine()) != null){
-				String[] data = new String[sf.getVariableCount()];
-				StringTokenizer st = new StringTokenizer(line, ",");
-				int c = 0;
-				while(st.hasMoreTokens()){
-					data[c] = st.nextToken();
-					c++;
-				}
+			createRawDataTable(dataTable, columns, sqliteDatabase);
+			PreparedStatement addRowStatement = addRowStatement(dataTable, columns, sqliteDatabase);
+			
+			Iterator<Object[]> iter = sf.getDataIterator();
+			while(iter.hasNext()){
+				Object[] data = iter.next();
 				addRow(columns, addRowStatement, data);
 			}
-			long time = System.currentTimeMillis();
 			sqliteDatabase.commit();
+			
 			sqliteDatabase.setAutoCommit(autocommit);
-			time = System.currentTimeMillis() - time;
-			
-			
-		} catch (FileNotFoundException e) {
-			System.out.println("FileNotFoundException");
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+		} catch (SQLException e){
+			throw new ImportSPSSException("Sql error", e);
 		} catch (IOException e) {
-			System.out.println("IOException");
-			// TODO Auto-generated catch block
-			System.out.print(e.toString());
-			e.printStackTrace();
+			throw new ImportSPSSException("Error reading SPSSFile", e);
+		} catch (SPSSFileException e) {
+			throw new ImportSPSSException("Exception in SPSSFile", e);
 		}
-		*/
 	}
 	
-	protected static void createRawMetaTable(Connection conn) throws SQLException {
-		String query = "create table rawmeta (column text, longname text, qtext text, qtype text, spsstype text, valuelabels text, measure text)";
+	
+	protected static void createRawMetaTable(Connection conn, String tablename) throws SQLException {
+		String query = "create table " + tablename + " (column text, longname text, qtext text, qtype text, spsstype text, valuelabels text, measure text)";
 		Statement statement = conn.createStatement();
 		statement.executeUpdate(query);
 	}
 	
-	protected static void addColumnMeta(String column, String longname, String qtext, String qtype, String spsstype, String valuelabels, Connection conn, String measure) throws SQLException {
-		PreparedStatement ps = conn.prepareStatement("insert into rawmeta values (?, ?, ?, ?, ?, ?, ?)");
+	protected static void addColumnMeta(String metaTable, String column, String longname, String qtext, String qtype, String spsstype, String valuelabels, Connection conn, String measure) throws SQLException {
+		PreparedStatement ps = conn.prepareStatement("insert into " + metaTable + " values (?, ?, ?, ?, ?, ?, ?)");
 		
 		if(column != null)ps.setString(1, column);
 		else throw new NullPointerException();
@@ -180,17 +124,17 @@ public class SPSStoSQL {
 		
 		if(valuelabels != null) ps.setString(6, valuelabels);
 		else ps.setNull(6, java.sql.Types.VARCHAR);
-		
+
 		if(measure != null) ps.setString(7, measure);
 		else ps.setNull(7, java.sql.Types.VARCHAR);
 		
 		ps.executeUpdate();
 	}
 	
-	protected static void createRawDataTable(Map<String,String> columns, Connection conn) throws SQLException{
+	protected static void createRawDataTable(String dataTable, Map<String,String> columns, Connection conn) throws SQLException{
 		StringBuilder sb = new StringBuilder();
 		Iterator<String> iter = columns.keySet().iterator();
-		sb.append("create table rawdata (");
+		sb.append("create table " + dataTable + " (");
 		while(iter.hasNext()){
 			String s = iter.next();
 			sb.append(s);
@@ -224,15 +168,16 @@ public class SPSStoSQL {
 		ps.execute();*/
 	}
 	
-	protected static PreparedStatement addRowStatement(Map<String,String> columns, Connection conn) throws SQLException {
+	protected static PreparedStatement addRowStatement(String dataTable, Map<String,String> columns, Connection conn) throws SQLException {
 		LinkedList<String> qmarks = new LinkedList<String>();
 		for(int i = 0; i < columns.size(); i++){
 			qmarks.add("?");
 		}
-		PreparedStatement ps = conn.prepareStatement("insert into rawdata values("+ MyTools.join(qmarks, ", ") + ")");
+		PreparedStatement ps = conn.prepareStatement("insert into " + dataTable + " values("+ MyTools.join(qmarks, ", ") + ")");
 		return ps;
 	}
 	
+	/* Old, but kept just in case
 	protected static void addRow(Map<String,String> columns, PreparedStatement statement, String[] data) throws SQLException {
 		Collection<String> types= columns.values();
 		int colIndex = 0;
@@ -254,6 +199,33 @@ public class SPSStoSQL {
 					datapoint = "";
 				}
 				statement.setString(colIndex+1, datapoint);
+			} else throw new Error("Crash and burn");
+			colIndex++;
+		}
+		statement.execute();
+	}*/
+	
+	protected static void addRow(Map<String,String> columns, PreparedStatement statement, Object[] data) throws SQLException {
+		Collection<String> types= columns.values();
+		int colIndex = 0;
+		for(String type: types){
+			Object datapoint = data[colIndex];
+			if(type.equalsIgnoreCase("real") && datapoint instanceof Double){
+				Double ddatapoint = (Double)datapoint;
+				if(ddatapoint.isNaN() || ddatapoint.isInfinite()){
+					statement.setNull(colIndex+1, java.sql.Types.REAL);
+				} else {
+					statement.setDouble(colIndex+1 , ddatapoint);
+				}
+			}else if(type.equalsIgnoreCase("text") && datapoint instanceof String){
+				String sdatapoint = (String)datapoint;
+				statement.setString(colIndex+1, sdatapoint);
+			} else if (datapoint == null){
+				if(type.equalsIgnoreCase("real")){
+					statement.setNull(colIndex+1, java.sql.Types.REAL);
+				} else if (type.equalsIgnoreCase("text")){
+					statement.setString(colIndex+1, "");
+				}
 			} else throw new Error("Crash and burn");
 			colIndex++;
 		}

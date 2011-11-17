@@ -28,7 +28,7 @@ public class TransferData {
 				statement.executeUpdate("drop table if exists rawdata");
 				statement.executeUpdate("drop table if exists rawmeta");
 				System.out.println("Table dropped");
-				SPSStoSQL.loadRawData(spssFile, connection);
+				SPSStoSQL.loadRawData(spssFile, connection, "rawdata", "rawmeta");
 				System.out.println("Data imported");
 			}else{
 				System.err.println("Not enough arguments given");
@@ -38,9 +38,9 @@ public class TransferData {
 			// it probably means no database file is found
 			e.printStackTrace();
 			System.err.println(e.getMessage());
-		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+		} catch (ImportSPSSException e) {
+			System.out.println(e.getMessage());
+			e.getOriginalException().printStackTrace();
 		} finally {
 			try {
 				if (connection != null)
