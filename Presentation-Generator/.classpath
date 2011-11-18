@@ -9,6 +9,7 @@
 			<attribute name="javadoc_location" value="jar:platform:/resource/Presentation Generator/lib/commons-cli-1.2/commons-cli-1.2-javadoc.jar!/"/>
 		</attributes>
 	</classpathentry>
-	<classpathentry combineaccessrules="false" kind="src" path="/org.opendatafoundation.data"/>
+	<classpathentry kind="lib" path="lib/jcommander-1.20-SNAPSHOT.jar" sourcepath="lib/jcommander-1.20-SNAPSHOT-sources.jar"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/spssreader"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
