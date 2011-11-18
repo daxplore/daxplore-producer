@@ -20,7 +20,6 @@
 	<property name="build.dir" location="build" />
 	<property name="dist.dir" location="dist" />
 	<property name="lib.dir" location="lib" />
-	<property name="workspace" location="/home/axwi4586/devspace" />
 
 	<path id="classpath">
 		<pathelement path="${lib.dir}/" />
@@ -50,9 +49,9 @@
 
 		<target name="dist" depends="compile" description="description">
 			<mkdir dir="${dist.dir}" />
-			<jar destfile="${dist.dir}/Generator-${DSTAMP}.jar" basedir="${build.dir}">
+			<jar destfile="${dist.dir}/DaxploreProducer.jar" basedir="${build.dir}">
 				<manifest>
-					<attribute name="Main-Class" value="commandclient.GeneratorCommandClient" />
+					<attribute name="Main-Class" value="commandclient.DaxploreCommandClient" />
 				</manifest>
 			</jar>
 		</target>
