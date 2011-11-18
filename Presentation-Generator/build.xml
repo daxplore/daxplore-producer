@@ -9,9 +9,9 @@
      ====================================================================== 
      
      	<ant4eclipse:getProjectDirectory workspacedirectory="${workspace}" projectname="simple.linked.project" property="test" />
-     
+     		<pathelement path="${java.class.path}}" />
      -->
-<project name="project" default="dist" basedir=".">
+<project name="DaxploreProducer" default="jar" basedir=".">
 	<description>
             description
     </description>
@@ -20,7 +20,8 @@
 	<property name="build.dir" location="build" />
 	<property name="dist.dir" location="dist" />
 	<property name="lib.dir" location="lib" />
-
+	<property name="main-class" value="commandclient.DaxploreCommandClient" />
+	
 	<path id="classpath">
 		<pathelement path="${lib.dir}/" />
 		<fileset dir="${lib.dir}">
@@ -29,36 +30,46 @@
 		<fileset dir="${lib.dir}">
 			<include name="**/*.jar" />
 		</fileset>
-		<pathelement path="${java.class.path}}" />
 	</path>
 
 	<target name="libs">
-		
+		<manifestclasspath property="lib.list" jarfile="${dist.dir}/${ant.project.name}.jar">
+			<classpath refid="classpath" />
+		</manifestclasspath>
 	</target>
 
 	<target name="init">
 		<tstamp />
 		<mkdir dir="${build.dir}" />
+		<mkdir dir="${dist.dir}" />
 	</target>
 
 	<target name="compile" depends="init, libs" description="description">
-		
 		<javac srcdir="${src.dir}" destdir="${build.dir}" classpathref="classpath" includeantruntime="false">
 		</javac>
-		</target>
+	</target>
 
-		<target name="dist" depends="compile" description="description">
-			<mkdir dir="${dist.dir}" />
-			<jar destfile="${dist.dir}/DaxploreProducer.jar" basedir="${build.dir}">
-				<manifest>
-					<attribute name="Main-Class" value="commandclient.DaxploreCommandClient" />
-				</manifest>
-			</jar>
-		</target>
+	<target name="jar" depends="compile" description="description">
+		<jar destfile="${dist.dir}/${ant.project.name}.jar" basedir="${build.dir}">
+			<manifest>
+				<attribute name="Main-Class" value="${main-class}" />
+				<attribute name="Class-Path" value="${lib.list}" />
+			</manifest>
+		</jar>
+	</target>
 
-		<target name="clean" description="clean up">
-			<delete dir="${build.dir}" />
-			<delete dir="${dist.dir}" />
-		</target>
+	<target name="run" depends="jar">
+		<java fork="true" classname="${main-class}">
+			<classpath>
+				<path refid="classpath" />
+				<path location="${dist.dir}/${ant.project.name}.jar" />
+			</classpath>
+		</java>
+	</target>
 
-	</project>
+	<target name="clean" description="clean up">
+		<delete dir="${build.dir}" />
+		<delete dir="${dist.dir}" />
+	</target>
+
+</project>
