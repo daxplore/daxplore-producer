@@ -4,11 +4,6 @@
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
 	<classpathentry kind="lib" path="lib/json_simple-1.1.jar"/>
 	<classpathentry kind="lib" path="lib/sqlite-jdbc-3.7.2.jar"/>
-	<classpathentry kind="lib" path="lib/commons-cli-1.2/commons-cli-1.2.jar" sourcepath="lib/commons-cli-1.2/commons-cli-1.2-sources.jar">
-		<attributes>
-			<attribute name="javadoc_location" value="jar:platform:/resource/Presentation Generator/lib/commons-cli-1.2/commons-cli-1.2-javadoc.jar!/"/>
-		</attributes>
-	</classpathentry>
 	<classpathentry kind="lib" path="lib/jcommander-1.20-SNAPSHOT.jar" sourcepath="lib/jcommander-1.20-SNAPSHOT-sources.jar"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/spssreader"/>
 	<classpathentry kind="output" path="bin"/>
