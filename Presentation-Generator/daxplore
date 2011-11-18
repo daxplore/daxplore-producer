@@ -1,2 +1,2 @@
 #!/bin/bash
-java -jar dist/DaxploreProducer.jar $1 $2 $3
+java -jar dist/DaxploreProducer.jar $@
