@@ -1,30 +1,73 @@
 package commandclient;
 
 import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.nio.charset.Charset;
 import java.util.List;
 
 import com.beust.jcommander.Parameter;
 import com.beust.jcommander.Parameters;
+import com.beust.jcommander.converters.FileConverter;
+
+import daxplorelib.DaxploreException;
+import daxplorelib.DaxploreFile;
 
 @Parameters(commandDescription = "Import data into project")
 public class ImportCommand {
 
-	@Parameter(names = "--spss")
+	@Parameter(names = "--spss", description = "Import spss file")
 	public boolean spssImport = true;
 	
-	@Parameter(names = "--discard-old")
-	public boolean discardold = false;
-	
-	@Parameter(names = "--create")
+	@Parameter(names = "--create", description = "Create a new project")
 	public boolean create = false;
 	
-	@Parameter(description = "daxplore project file, data import file", converter = FileConverter.class)
-	public List<File> files;
+	@Parameter(names = "--charset", description = "Import with charachterset")
+	public String charsetName = "ISO-8859-1";
 	
-	public void run() {
-		System.out.println("RUUUUUN");
-		for(File f: files){
-			System.out.println(f.getName() + (f.exists()?" exists":" nonexistant"));
+	@Parameter(description = "daxplore project file, file to import", arity = 2, converter = FileConverter.class, required = true)
+	public List<File> files;
+
+	
+	public void run() throws ClassNotFoundException {
+		File projectFile = files.get(0);
+		File importFile = files.get(1);
+		if(!importFile.exists()){
+			System.out.println("SPSS file " + importFile.getName() + " does not exist");
+			return;
 		}
+		if(importFile.isDirectory()){
+			System.out.println("SPSS file is a directory, I can't import a directory");
+			return;
+		}
+		if(projectFile.isDirectory()){
+			System.out.println("Project file is a directory");
+			return;
+		}
+		Charset charset;
+		try{
+			charset = Charset.forName(charsetName);
+		} catch (Exception e){
+			System.out.println("Charset error");
+			return;
+		}
+		try {
+			DaxploreFile daxplorefile = new DaxploreFile(projectFile, create);
+			daxplorefile.importSPSS(importFile, charset);
+			System.out.println("Data imported");
+		} catch (FileNotFoundException e) {
+			System.out.println("Havn't we tested this already");
+			e.printStackTrace();
+			return;
+		} catch (IOException e) {
+			e.printStackTrace();
+			return;
+		} catch (DaxploreException e) {
+			// TODO Auto-generated catch block
+			System.out.println(e.getMessage());
+			e.printStackTrace();
+			return;
+		}
+		
 	}
 }
