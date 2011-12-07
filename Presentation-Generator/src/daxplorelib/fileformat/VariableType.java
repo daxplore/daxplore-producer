@@ -7,7 +7,7 @@ package daxplorelib.fileformat;
 public enum VariableType {
 	NUMERIC ("real", Double.class), 
 	TEXT ("text", String.class), 
-	MAPPED ("text", String.class);
+	MAPPED ("real", Double.class);
 	
 	private final String sqltype;
 	private final Class<?> javatype;
