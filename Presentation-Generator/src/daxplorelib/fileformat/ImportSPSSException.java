@@ -1,4 +1,4 @@
-package datatransfer;
+package daxplorelib.fileformat;
 
 public class ImportSPSSException extends Exception {
 	/**

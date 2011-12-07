@@ -1,4 +1,4 @@
-package tools;
+package daxplorelib;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -11,7 +11,21 @@ import java.util.Map.Entry;
 
 public class SQLTools {
 	
-	protected static boolean compareTables(String table1, String table2, String idcolumn, Map<String,String> columns, Connection conn) throws SQLException{
+	public static boolean tableExists(String tablename, Connection sqliteDatabase){
+		try{
+			PreparedStatement stmt = sqliteDatabase.prepareStatement("SELECT name FROM sqlite_master WHERE type='table' AND name=?");
+			stmt.setString(1, tablename);
+			ResultSet rs = stmt.executeQuery();
+			boolean first = rs.next();
+			return first && tablename.equals(rs.getString("name"));
+		} catch (SQLException e){
+			e.printStackTrace();
+			System.err.println(e.getMessage());
+			return false;
+		}
+	}
+	
+	public static boolean compareTables(String table1, String table2, String idcolumn, Map<String,String> columns, Connection conn) throws SQLException{
 		Statement statement = conn.createStatement();
 		statement.execute("select * from " + table1);
 		ResultSet rs1 = statement.getResultSet();
