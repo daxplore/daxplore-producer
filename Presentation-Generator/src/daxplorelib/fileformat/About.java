@@ -14,47 +14,48 @@ import daxplorelib.DaxploreFile;
  * It's a one row table with the columns: filetypeversion, creation, lastupdate, activerawdata
  */
 public class About {
-	int filetypeversionmajor = 1;
-	int filetypeversionminor = 0;
+	final int filetypeversionmajor;
+	final int filetypeversionminor;
 	Date creation;
 	Date lastupdate;
 	int activeRawData;
 	Connection database;
 	
 	public About(Connection sqliteDatabase) throws SQLException{
-		this.database = sqliteDatabase;
-		Statement stmt;
-		filetypeversionmajor = DaxploreFile.filetypeversionmajor;
-		filetypeversionminor = DaxploreFile.filetypeversionminor;
-		stmt = database.createStatement();
-		stmt.execute("SELECT * FROM about");
-		ResultSet rs = stmt.getResultSet();
-		rs.next();
-		filetypeversionmajor = rs.getInt("filetypeversionmajor");
-		filetypeversionminor = rs.getInt("filetypeversionminor");
-		creation = rs.getDate("creation");
-		lastupdate = rs.getDate("lastupdate");
-		activeRawData = rs.getInt("activerawdata");
-
+		this(sqliteDatabase, false);
 	}
 	
 	public About(Connection sqliteDatabase, boolean createnew) throws SQLException{
 		this.database = sqliteDatabase;
 		Statement stmt;
-		activeRawData = 0;
-		creation = new Date();
-		lastupdate = (Date) creation.clone();
-		stmt = database.createStatement();
-		stmt.executeUpdate("CREATE TABLE about (filetypeversionmajor INTEGER, filetypeversionminor INTEGER, creation INTEGER, lastupdate INTEGER, activerawdata INTEGER)");
-		PreparedStatement prepared = database.prepareStatement("INSERT INTO about VALUES (?, ?, ?, ?, ?)");
-		prepared.setInt(1, filetypeversionmajor);
-		prepared.setInt(2, filetypeversionminor);
-		prepared.setLong(3, creation.getTime());
-		prepared.setLong(4, lastupdate.getTime());
-		prepared.setInt(5, activeRawData);
-		prepared.execute();
-		stmt = database.createStatement();
-		stmt.executeUpdate("CREATE TABLE rawversions (version INTEGER PRIMARY KEY AUTOINCREMENT, rawmeta TEXT, rawdata TEXT, importdate INTEGER, filename TEXT)");
+		if(createnew){
+			filetypeversionmajor = DaxploreFile.filetypeversionmajor;
+			filetypeversionminor = DaxploreFile.filetypeversionminor;
+			activeRawData = 0;
+			creation = new Date();
+			lastupdate = (Date) creation.clone();
+			stmt = database.createStatement();
+			stmt.executeUpdate("CREATE TABLE about (filetypeversionmajor INTEGER, filetypeversionminor INTEGER, creation INTEGER, lastupdate INTEGER, activerawdata INTEGER)");
+			PreparedStatement prepared = database.prepareStatement("INSERT INTO about VALUES (?, ?, ?, ?, ?)");
+			prepared.setInt(1, filetypeversionmajor);
+			prepared.setInt(2, filetypeversionminor);
+			prepared.setLong(3, creation.getTime());
+			prepared.setLong(4, lastupdate.getTime());
+			prepared.setInt(5, activeRawData);
+			prepared.execute();
+			stmt = database.createStatement();
+			stmt.executeUpdate("CREATE TABLE rawversions (version INTEGER PRIMARY KEY AUTOINCREMENT, rawmeta TEXT, rawdata TEXT, importdate INTEGER, filename TEXT)");
+		}else{
+			stmt = database.createStatement();
+			stmt.execute("SELECT * FROM about");
+			ResultSet rs = stmt.getResultSet();
+			rs.next();
+			filetypeversionmajor = rs.getInt("filetypeversionmajor");
+			filetypeversionminor = rs.getInt("filetypeversionminor");
+			creation = rs.getDate("creation");
+			lastupdate = rs.getDate("lastupdate");
+			activeRawData = rs.getInt("activerawdata");
+		}
 	}
 	
 	public int getActiveRawData(){
@@ -81,6 +82,5 @@ public class About {
 	public int nextActiveRawData(){
 		return 0;
 	}
-	
 	
 }
