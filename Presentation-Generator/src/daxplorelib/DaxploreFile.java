@@ -23,45 +23,32 @@ public class DaxploreFile {
 	Connection sqliteDatabase;
 	About about;
 	
-	public DaxploreFile(File dbFile, boolean createnew){
+	public DaxploreFile(File dbFile, boolean createnew) throws DaxploreException{
 		try {
 			Class.forName("org.sqlite.JDBC");
-		} catch (ClassNotFoundException e1) {
-			// TODO Auto-generated catch block
-			e1.printStackTrace();
-			throw new Error("Sqlite could not be found");
+		} catch (ClassNotFoundException e) {
+			throw new DaxploreException("Sqlite could not be found", e);
 		}
 		if(dbFile.exists()){
 			try {
 				sqliteDatabase =  DriverManager.getConnection("jdbc:sqlite:" + dbFile.getAbsolutePath());
 				about = new About(sqliteDatabase);
 			} catch (SQLException e) {
-				System.err.println("Not a sqlite file?");
-				// TODO Auto-generated catch block
-				e.printStackTrace();
+				throw new DaxploreException("Not a sqlite file?", e);
 			}
 		} else if (createnew) { //create new project
 			try {
 				sqliteDatabase =  DriverManager.getConnection("jdbc:sqlite:" + dbFile.getAbsolutePath());
 				about = new About(sqliteDatabase, createnew);
 			} catch (SQLException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
+				throw new DaxploreException("Could not create new sqlite database (No write access?)", e);
 			}
 		} else {
-			throw new Error("Not new and doesn't exist");
+			throw new DaxploreException("Not new and doesn't exist");
 		}
-		/*try {
-			about = new About(sqliteDatabase);
-		} catch (SQLException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-			System.out.println("Not a Daxplore project file?");
-			throw new Error("Not a Daxplore project");
-		}*/
 	}
 	
-	public boolean importSPSS(File spssFile, Charset charset) throws FileNotFoundException, IOException, DaxploreException{
+	public void importSPSS(File spssFile, Charset charset) throws FileNotFoundException, IOException, DaxploreException{
 		SPSSFile sf = null;
 		FileFormatInfo ffi = new FileFormatInfo();
 		ffi.namesOnFirstLine = false;
@@ -72,15 +59,14 @@ public class DaxploreFile {
 			sf.logFlag = false;
 			sf.loadMetadata();
 		} catch (SPSSFileException e2) {
-			// TODO Auto-generated catch block
-			e2.printStackTrace();
-			throw new DaxploreException("SPSSFileException");
+			throw new DaxploreException("SPSSFileException", e2);
 		}
 		//Savepoint save = null;
 		
+		boolean autocommit = true;
 		try {
 			//save = sqliteDatabase.setSavepoint();
-			boolean autocommit = sqliteDatabase.getAutoCommit();
+			autocommit = sqliteDatabase.getAutoCommit();
 			sqliteDatabase.setAutoCommit(false);
 			sqliteDatabase.setTransactionIsolation(Connection.TRANSACTION_READ_UNCOMMITTED);
 			
@@ -89,27 +75,20 @@ public class DaxploreFile {
 			importedData.importSPSS(sf, charset);
 
 			sqliteDatabase.commit();
-			sqliteDatabase.setAutoCommit(autocommit);
-			return true;
-
 		} catch (SQLException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-			System.err.println(e.getMessage());
-			/*try {
-				if(save != null){
-					sqliteDatabase.rollback(save);
-				}
-				return false;
+			try {
+				sqliteDatabase.rollback();
 			} catch (SQLException e1) {
-				// TODO Auto-generated catch block
-				e1.printStackTrace();
-				return false;
-			}*/
-			return false;
+				throw new DaxploreException("Import error. Could not rollback.", e);
+			}
+			throw new DaxploreException("Import error.", e);
+		} finally {
+			try {
+				sqliteDatabase.setAutoCommit(autocommit);
+			} catch (SQLException e) {
+				throw new DaxploreException("Import error. Could not set autocommit. General wtf.", e);
+			}
 		}
-		
-		
 		
 	}
 	
