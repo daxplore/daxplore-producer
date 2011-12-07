@@ -26,6 +26,9 @@ import org.opendatafoundation.data.spss.SPSSStringVariable;
 import org.opendatafoundation.data.spss.SPSSVariable;
 import org.opendatafoundation.data.spss.SPSSVariableCategory;
 
+import daxplorelib.fileformat.ImportSPSSException;
+import daxplorelib.fileformat.VariableType;
+
 import tools.MyTools;
 
 public class SPSStoSQL {

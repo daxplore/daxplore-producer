@@ -7,6 +7,8 @@ import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.sql.Statement;
 
+import daxplorelib.fileformat.ImportSPSSException;
+
 public class TransferData {
 	public static void main(String[] args) throws ClassNotFoundException, IOException {
 		// load the sqlite-JDBC driver using the current class loader
