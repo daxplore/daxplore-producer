@@ -18,7 +18,7 @@ import daxplorelib.fileformat.About;
 import daxplorelib.fileformat.ImportedData;
 
 public class DaxploreFile {
-	public static final int filetypeversionmajor = 1;
+	public static final int filetypeversionmajor = 0;
 	public static final int filetypeversionminor = 1;
 	Connection sqliteDatabase;
 	About about;
@@ -49,7 +49,7 @@ public class DaxploreFile {
 				e.printStackTrace();
 			}
 		} else {
-			throw new Error("Not new and dosn't exist");
+			throw new Error("Not new and doesn't exist");
 		}
 		/*try {
 			about = new About(sqliteDatabase);
