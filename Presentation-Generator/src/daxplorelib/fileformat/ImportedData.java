@@ -19,10 +19,12 @@ public class ImportedData {
 	protected RawMeta rawmeta;
 	protected RawData rawdata;
 	protected int version;
+	protected String filename;
+	protected Date importdate = null;
 	
 	public ImportedData(Connection sqliteDatabase) throws SQLException{
 		this.database = sqliteDatabase;
-		Date today = new Date();
+		//importdate = new Date();
 		
 		if(SQLTools.tableExists("sqlite_sequence", sqliteDatabase)){
 			Statement verstmt = sqliteDatabase.createStatement();
@@ -33,8 +35,9 @@ public class ImportedData {
 		} else {
 			version = 1;
 		}
-		PreparedStatement stmt = database.prepareStatement("INSERT INTO rawversions (rawmeta, rawdata, importdate, filename) values (?,?,?,?)", Statement.RETURN_GENERATED_KEYS);
-		
+		//PreparedStatement stmt = database.prepareStatement("INSERT INTO rawversions (rawmeta, rawdata, importdate, filename) values (?,?,?,?)", Statement.RETURN_GENERATED_KEYS);
+		PreparedStatement stmt = database.prepareStatement("INSERT INTO rawversions (rawmeta, rawdata) values (?,?)", Statement.RETURN_GENERATED_KEYS);
+
 		/*ResultSet res = stmt.getGeneratedKeys();
 		int key = 0;
 		while (res.next()) {
@@ -44,7 +47,7 @@ public class ImportedData {
 		System.out.println("Creating version " + version);
 		stmt.setString(1, "rawmeta" + version);
 		stmt.setString(2, "rawdata" + version);
-		stmt.setLong(3, today.getTime());
+		//stmt.setLong(3, importdate.getTime());
 		stmt.execute();
 
 		this.rawmeta = new RawMeta("rawmeta" + version, database);
@@ -58,16 +61,19 @@ public class ImportedData {
 		stmt.setInt(1, version);
 		ResultSet res = stmt.executeQuery();
 		res.next();
+		this.filename = res.getString("filename");
+		this.importdate = res.getDate("importdate");
 		this.rawmeta = new RawMeta(res.getString("rawmeta"), database);
 		this.rawdata = new RawData(res.getString("rawdata"), rawmeta, database);
 	}
 	
 	public void importSPSS(SPSSFile spssFile, Charset charset) throws SQLException, DaxploreException{
 		String filename = spssFile.file.getName();
-		
-		PreparedStatement stmt = database.prepareStatement("UPDATE rawversions SET filename = ? WHERE version = ?");
-		stmt.setString(1, filename);
-		stmt.setInt(2, version);
+		importdate = new Date();
+		PreparedStatement stmt = database.prepareStatement("UPDATE rawversions SET importdate = ? , filename = ? WHERE version = ?");
+		stmt.setLong(1, importdate.getTime());
+		stmt.setString(2, filename);
+		stmt.setInt(3, version);
 		stmt.execute();
 		
 		rawmeta.importSPSS(spssFile, charset);
@@ -80,5 +86,17 @@ public class ImportedData {
 	
 	public RawData getRawData(){
 		return rawdata;
+	}
+	
+	public int getVersion(){
+		return version;
+	}
+	
+	public Date getImportDate() {
+		return importdate;
+	}
+	
+	public String getFilename() {
+		return filename;
 	}
 }

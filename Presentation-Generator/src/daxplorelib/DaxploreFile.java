@@ -14,7 +14,6 @@ import org.opendatafoundation.data.FileFormatInfo.Compatibility;
 import org.opendatafoundation.data.spss.SPSSFile;
 import org.opendatafoundation.data.spss.SPSSFileException;
 
-import daxplorelib.fileformat.About;
 import daxplorelib.fileformat.ImportedData;
 
 public class DaxploreFile {
@@ -73,7 +72,9 @@ public class DaxploreFile {
 			ImportedData importedData = new ImportedData(sqliteDatabase);
 			
 			importedData.importSPSS(sf, charset);
-
+			
+			about.setActiveRawData(importedData.getVersion());
+			
 			sqliteDatabase.commit();
 		} catch (SQLException e) {
 			try {
@@ -89,7 +90,9 @@ public class DaxploreFile {
 				throw new DaxploreException("Import error. Could not set autocommit. General wtf.", e);
 			}
 		}
-		
 	}
 	
+	public About getAbout(){
+		return about;
+	}
 }

@@ -1,4 +1,4 @@
-package daxplorelib.fileformat;
+package daxplorelib;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -6,8 +6,10 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.Date;
+import java.util.LinkedList;
+import java.util.List;
 
-import daxplorelib.DaxploreFile;
+import daxplorelib.fileformat.ImportedData;
 
 /**
  * This class mirrors the 'about' table in the project file
@@ -62,7 +64,7 @@ public class About {
 		return activeRawData;
 	}
 	
-	public void setActiveRawData(int newactive) throws SQLException{
+	void setActiveRawData(int newactive) throws SQLException{
 		PreparedStatement prepared = database.prepareStatement("UPDATE about SET activerawdata = ?");
 		prepared.setInt(1, newactive);
 		int rowsaffected = prepared.executeUpdate();
@@ -79,8 +81,35 @@ public class About {
 		}
 	}
 	
-	public int nextActiveRawData(){
-		return 0;
+	public List<ImportedData> getImportedDataVersions() {
+		List<ImportedData> importlist = new LinkedList<ImportedData>();
+		try {
+			boolean autocommit = database.getAutoCommit();
+			database.setAutoCommit(true);
+			Statement stmt = database.createStatement();
+			ResultSet rs = stmt.executeQuery("SELECT version FROM rawversions ORDER BY version ASC");
+			while(rs.next()){
+				int version = rs.getInt("version");
+				try {
+					ImportedData ip = new ImportedData(version, database);
+					importlist.add(ip);
+				} catch (SQLException e ) {
+					System.err.println("Error opening version " + version);
+				}
+			}
+			database.setAutoCommit(autocommit);
+			return importlist;
+		} catch (SQLException e){
+			System.err.println("Error getting imported versions");
+			return null;
+		}
 	}
 	
+	public Date getCreationDate() {
+		return creation;
+	}
+	
+	public Date getLastUpdate() {
+		return lastupdate;
+	}
 }
