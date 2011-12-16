@@ -29,7 +29,7 @@ public class ImportCommand {
 	public List<File> files;
 
 	
-	public void run() throws ClassNotFoundException {
+	public void run() {
 		File projectFile = files.get(0);
 		File importFile = files.get(1);
 		if(!importFile.exists()){

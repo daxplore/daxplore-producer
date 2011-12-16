@@ -8,8 +8,10 @@ public class DaxploreCommandClient {
 		//DaxploreCommandClient main = new DaxploreCommandClient();
 		JCommander jc = new JCommander();
 		jc.setProgramName("daxplore");
-		ImportCommand ic = new ImportCommand();
-		jc.addCommand("import", ic);
+		ImportCommand importcommand = new ImportCommand();
+		jc.addCommand("import", importcommand);
+		InfoCommand infocommand = new InfoCommand();
+		jc.addCommand("info", infocommand);
 		
 		jc.parse(args);
 		
@@ -17,12 +19,9 @@ public class DaxploreCommandClient {
 		if(command == null){
 			jc.usage();
 		} else if(jc.getParsedCommand().equals("import")){
-			try {
-				ic.run();
-			} catch (ClassNotFoundException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
+			importcommand.run();
+		} else if(jc.getParsedCommand().equals("info")){
+			infocommand.run();
 		}
 	}
 }
