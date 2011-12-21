@@ -81,6 +81,17 @@ public class About {
 		}
 	}
 	
+	public ImportedData getImportedData(int version){
+		try {
+			ImportedData id = new ImportedData(version, database);
+			return id;
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			return null;
+		}
+	}
+	
 	public List<ImportedData> getImportedDataVersions() {
 		List<ImportedData> importlist = new LinkedList<ImportedData>();
 		try {

@@ -3,6 +3,7 @@ package daxplorelib.fileformat;
 import java.nio.charset.Charset;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.Collection;
@@ -126,6 +127,13 @@ public class RawData {
 			colIndex++;
 		}
 		statement.execute();
+	}
+	
+	int getNumberOfRows() throws SQLException{
+		Statement stmt = sqliteDatabase.createStatement();
+		ResultSet rs = stmt.executeQuery("SELECT count(*) FROM " + tablename);
+		rs.next();
+		return rs.getInt(1);
 	}
 }
 

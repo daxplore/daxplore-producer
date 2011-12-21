@@ -14,19 +14,15 @@ import daxplorelib.fileformat.ImportedData;
 
 @Parameters(commandDescription = "Detials about the project")
 public class InfoCommand {
-
-	@Parameter(description = "daxplore project file", converter = FileConverter.class, required = true)
-	public List<File> projectfiles;
 	
-	@Parameter(description = "info about version")
-	public Integer version;
+	@Parameter(names={"-v","--version"}, description = "info about version")
+	public Integer version = null;
 	
-	public void run(){
+	public void run(File projectfile){
 		try {
-			File projectfile = projectfiles.get(0);
 			DaxploreFile daxplore = new DaxploreFile(projectfile, false);
 			About about = daxplore.getAbout();
-			if(version != null){
+			if(version == null){
 				System.out.println("File: " + projectfile.getName());
 				System.out.println("Creation date: " + about.getCreationDate().toString());
 				System.out.println("Last updated: " + about.getLastUpdate().toString());
@@ -42,7 +38,17 @@ public class InfoCommand {
 					System.out.println(data.getVersion() + ": " + data.getFilename() + " on " + data.getImportDate().toString());
 				}
 			} else {
-				
+				System.out.println("File: " + projectfile.getName());
+				System.out.println("Version: " + version);
+				ImportedData imported = about.getImportedData(version);
+				System.out.println("Imported from: " + imported.getFilename() + " on " + imported.getImportDate().toString());
+				List<String> columns = imported.getColumnList();
+				System.out.println("Has " + columns.size() + " columns and " + imported.getNumberOfRows() + " rows");
+				System.out.print("Columns: ");
+				for(String s: columns){
+					System.out.print(s + ", ");
+				}
+				System.out.print("\n");
 			}
 		} catch (DaxploreException e) {
 			// TODO Auto-generated catch block
