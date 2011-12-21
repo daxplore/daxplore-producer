@@ -25,23 +25,18 @@ public class ImportCommand {
 	@Parameter(names = "--charset", description = "Import with charachterset")
 	public String charsetName = "ISO-8859-1";
 	
-	@Parameter(description = "daxplore project file, file to import", arity = 2, converter = FileConverter.class, required = true)
+	@Parameter(description = "file to import", arity = 1, converter = FileConverter.class, required = true)
 	public List<File> files;
 
 	
-	public void run() {
-		File projectFile = files.get(0);
-		File importFile = files.get(1);
+	public void run(File projectFile) {
+		File importFile = files.get(0);
 		if(!importFile.exists()){
 			System.out.println("SPSS file " + importFile.getName() + " does not exist");
 			return;
 		}
 		if(importFile.isDirectory()){
 			System.out.println("SPSS file is a directory, I can't import a directory");
-			return;
-		}
-		if(projectFile.isDirectory()){
-			System.out.println("Project file is a directory");
 			return;
 		}
 		Charset charset;
