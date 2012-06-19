@@ -73,7 +73,7 @@ public class DaxploreFile {
 			
 			importedData.importSPSS(sf, charset);
 			
-			about.setActiveRawData(importedData.getVersion());
+			about.setImport(sf.file.getName());
 			
 			sqliteDatabase.commit();
 		} catch (SQLException e) {

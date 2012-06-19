@@ -19,14 +19,18 @@ import org.opendatafoundation.data.spss.SPSSStringVariable;
 import org.opendatafoundation.data.spss.SPSSVariable;
 import org.opendatafoundation.data.spss.SPSSVariableCategory;
 
+import daxplorelib.SQLTools;
+
 
 public class RawMeta {
-	String tablename;
+	static final String tablename = "rawmeta";
 	Connection sqliteDatabase;
 	
-	public RawMeta(String tablename, Connection sqliteDatabase){
-		this.tablename = tablename;
+	public RawMeta(Connection sqliteDatabase) throws SQLException{
 		this.sqliteDatabase = sqliteDatabase;
+		if(!SQLTools.tableExists(tablename, sqliteDatabase)){
+			createRawMetaTable(sqliteDatabase);
+		}
 	}
 	
 	public List<String> getColumns() throws SQLException{
@@ -53,7 +57,7 @@ public class RawMeta {
 	
 	public void importSPSS(SPSSFile spssFile, Charset charset) throws SQLException {
 		Map<String, String> columns = new LinkedHashMap<String,String>();
-		createRawMetaTable(sqliteDatabase, tablename);
+		clearRawMetaTable(sqliteDatabase);
 		for(int i = 0; i < spssFile.getVariableCount(); i++){
 			SPSSVariable var = spssFile.getVariable(i);
 			String spsstype;
@@ -87,10 +91,15 @@ public class RawMeta {
 		}
 	}
 	
-	protected static void createRawMetaTable(Connection conn, String tablename) throws SQLException {
+	protected static void createRawMetaTable(Connection conn) throws SQLException {
 		String query = "create table " + tablename + " (column text, longname text, qtext text, qtype text, spsstype text, valuelabels text, measure text)";
 		Statement statement = conn.createStatement();
 		statement.executeUpdate(query);
+	}
+	
+	protected static void clearRawMetaTable(Connection conn) throws SQLException {
+		Statement statement = conn.createStatement();
+		statement.executeUpdate("DELETE * FROM " + tablename);
 	}
 	
 	protected static void addColumnMeta(String metaTable, String column, String longname, String qtext, String qtype, String spsstype, String valuelabels, Connection conn, String measure) throws SQLException {

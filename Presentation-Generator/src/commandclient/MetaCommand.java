@@ -120,9 +120,9 @@ public class MetaCommand {
 				if(src.version != null){
 					version = src.version;
 				} else {
-					version = daxplorefile.getAbout().getActiveRawData();
+				//	version = daxplorefile.getAbout().getActiveRawData();
 				}
-				ImportedData imported = daxplorefile.getAbout().getImportedData(version);
+				//ImportedData imported = daxplorefile.getAbout().getImportedData(version);
 				//metadata = new MetaData(imported, daxplorefile);
 				break;
 			case JSON:

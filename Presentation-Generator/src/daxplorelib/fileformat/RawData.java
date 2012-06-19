@@ -19,21 +19,24 @@ import tools.MyTools;
 
 
 public class RawData {
-	String tablename;
+	static final String tablename = "rawdata";
 	Connection sqliteDatabase;
 	RawMeta metadata;
 	
-	public RawData(String tablename, RawMeta metadata, Connection sqliteDatabase){
-		this.tablename = tablename;
+	public RawData(RawMeta metadata, Connection sqliteDatabase){
 		this.sqliteDatabase = sqliteDatabase;
 		this.metadata = metadata;
 	}
 	
-	public void importSPSS(SPSSFile spssFile, Charset charset) throws SQLException, DaxploreException {
+	public void importSPSS(SPSSFile spssFile, Charset charset, RawMeta metadata) throws SQLException, DaxploreException {
+		this.metadata = metadata;
 		Map<String, VariableType> columns = metadata.getColumnMap();
 		
-		createRawDataTable(tablename, columns, sqliteDatabase);
-		PreparedStatement addRowStatement = addRowStatement(tablename, columns, sqliteDatabase);
+		Statement statement = sqliteDatabase.createStatement();
+		statement.executeUpdate("DROP TABLE " + tablename);
+		createRawDataTable(columns, sqliteDatabase);
+		
+		PreparedStatement addRowStatement = addRowStatement(columns, sqliteDatabase);
 		try{
 			Iterator<Object[]> iter = spssFile.getDataIterator();
 			while(iter.hasNext()){
@@ -46,10 +49,10 @@ public class RawData {
 		}
 	}
 
-	protected static void createRawDataTable(String dataTable, Map<String, VariableType> columns, Connection conn) throws SQLException{
+	protected static void createRawDataTable(Map<String, VariableType> columns, Connection conn) throws SQLException{
 		StringBuilder sb = new StringBuilder();
 		Iterator<String> iter = columns.keySet().iterator();
-		sb.append("create table " + dataTable + " (");
+		sb.append("create table " + tablename + " (");
 		while(iter.hasNext()){
 			String s = iter.next();
 			sb.append(s);
@@ -63,32 +66,14 @@ public class RawData {
 		Statement statement = conn.createStatement();
 		statement.execute(sb.toString());
 		statement.close();
-		/*LinkedList<String> qmarks = new LinkedList<String>();
-		for(int i = 0; i < columns.size(); i++){
-			qmarks.add("? ?");
-		}
-		String query = "create table rawdata ("+ MyTools.join(qmarks, ", ") + ")";
-		System.out.println(query);
-		PreparedStatement ps = conn.prepareStatement(query);
-		
-		Iterator<String> iter = columns.keySet().iterator();
-		int i = 0;
-		while(iter.hasNext()){
-			String s = iter.next();
-			ps.setString(i, s);
-			i++;
-			ps.setString(i, columns.get(s));
-			i++;
-		}
-		ps.execute();*/
 	}
 	
-	protected static PreparedStatement addRowStatement(String dataTable, Map<String, VariableType> columns, Connection conn) throws SQLException {
+	protected static PreparedStatement addRowStatement(Map<String, VariableType> columns, Connection conn) throws SQLException {
 		LinkedList<String> qmarks = new LinkedList<String>();
 		for(int i = 0; i < columns.size(); i++){
 			qmarks.add("?");
 		}
-		PreparedStatement ps = conn.prepareStatement("insert into " + dataTable + " values("+ MyTools.join(qmarks, ", ") + ")");
+		PreparedStatement ps = conn.prepareStatement("insert into " + tablename + " values("+ MyTools.join(qmarks, ", ") + ")");
 		return ps;
 	}
 	
