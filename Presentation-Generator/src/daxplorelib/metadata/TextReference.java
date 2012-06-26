@@ -19,8 +19,7 @@ public class TextReference implements JSONAware, Comparable<TextReference> {
 		return null;
 	}
 	
-	public String put(Locale locale){
-		return null;
+	public void put(String text, Locale locale){
 	}
 
 	@Override

@@ -104,7 +104,7 @@ public class MetaCommand {
 	
 	public void run(File file){
 		MetaData metadata;
-		try {
+		/*try {
 			DaxploreFile daxplorefile = new DaxploreFile(file, false);
 			
 			if(src.format == dest.format){
@@ -175,6 +175,6 @@ public class MetaCommand {
 		} catch (DaxploreException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
-		}
+		}*/
 	}
 }
