@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<classpath>
+	<classpathentry kind="src" path="Presentation-Generator/src"/>
+	<classpathentry kind="lib" path="Presentation-Generator/lib/jcommander-1.20-SNAPSHOT-sources.jar"/>
+	<classpathentry kind="lib" path="Presentation-Generator/lib/jcommander-1.20-SNAPSHOT.jar"/>
+	<classpathentry kind="lib" path="Presentation-Generator/lib/json_simple-1.1.jar"/>
+	<classpathentry kind="lib" path="Presentation-Generator/lib/org.opendatafoundation.data-20111116.jar"/>
+	<classpathentry kind="lib" path="Presentation-Generator/lib/sqlite-jdbc-3.7.2.jar"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
+	<classpathentry kind="output" path="bin"/>
+</classpath>
