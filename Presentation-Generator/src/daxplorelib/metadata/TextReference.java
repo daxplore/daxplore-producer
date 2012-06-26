@@ -4,10 +4,10 @@ import java.util.Locale;
 
 import org.json.simple.JSONAware;
 
-public class StringReference implements JSONAware {
+public class TextReference implements JSONAware, Comparable<TextReference> {
 	String reference;
 	
-	public StringReference(String reference){
+	public TextReference(String reference){
 		this.reference = reference;
 	}
 	
@@ -26,5 +26,10 @@ public class StringReference implements JSONAware {
 	@Override
 	public String toJSONString() {
 		return '"'+ reference + '"';
+	}
+
+	@Override
+	public int compareTo(TextReference o) {
+		return reference.compareTo(o.reference);
 	}
 }

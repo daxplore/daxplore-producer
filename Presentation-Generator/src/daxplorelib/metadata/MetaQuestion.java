@@ -22,9 +22,9 @@ public class MetaQuestion implements JSONAware, Comparable<MetaQuestion>{
 	String fullTextRef, shortTextRef;
 	MetaCalculation calculation;
 	
-	List<StringReference> options;
+	List<TextReference> options;
 	
-	public MetaQuestion(String id, String fullTextRef, String shortTextRef, MetaCalculation calculation, List<StringReference> options){
+	public MetaQuestion(String id, String fullTextRef, String shortTextRef, MetaCalculation calculation, List<TextReference> options){
 		this.id = id;
 		this.fullTextRef = fullTextRef;
 		this.shortTextRef = shortTextRef;
@@ -52,7 +52,7 @@ public class MetaQuestion implements JSONAware, Comparable<MetaQuestion>{
 		return shortTextRef;
 	}
 	
-	public List<StringReference> getOptionsRefs(){
+	public List<TextReference> getOptionsRefs(){
 		return options;
 	}
 
