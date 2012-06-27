@@ -18,6 +18,7 @@ import java.awt.CardLayout;
 import javax.swing.JEditorPane;
 import javax.swing.JList;
 import javax.swing.JTextArea;
+import javax.swing.JPanel;
 
 public class DaxploreGUI {
 
@@ -68,6 +69,10 @@ public class DaxploreGUI {
 		frame.getContentPane().add(btnImport);
 		
 		JButton btnQuestions = new JButton("Questions");
+		btnQuestions.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent arg0) {
+			}
+		});
 		btnQuestions.setBounds(16, 151, 117, 50);
 		frame.getContentPane().add(btnQuestions);
 		
@@ -86,5 +91,11 @@ public class DaxploreGUI {
 		JTabbedPane tabbedPane = new JTabbedPane(JTabbedPane.TOP);
 		tabbedPane.setBounds(135, 6, 587, 603);
 		frame.getContentPane().add(tabbedPane);
+		
+		JPanel panel = new JPanel();
+		tabbedPane.addTab("New tab", null, panel, null);
+		
+		JPanel panel_1 = new JPanel();
+		tabbedPane.addTab("New tab", null, panel_1, null);
 	}
 }
