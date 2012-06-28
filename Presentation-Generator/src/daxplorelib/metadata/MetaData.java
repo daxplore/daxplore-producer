@@ -28,14 +28,18 @@ public class MetaData {
 		if(SQLTools.tableExists("metadata", database)){
 			Statement stmt = database.createStatement();
 			stmt.executeUpdate("CREATE TABLE metadata ()");
-			stmt.executeUpdate("CRATE TABLE texts (ref TEXT, locale TEXT, text TEXT)");
+			stmt.executeUpdate(TextReference.sqlDefinition);
 		} else {
 			
 		}
 
 		
 	}
-	
+
+	/* 
+	 * Import/export methods that are used to change metadata in batch.
+	 * The preferred way too use the library.
+	 */
 	public void importStructure(Reader r, Formats format){
 		
 	}

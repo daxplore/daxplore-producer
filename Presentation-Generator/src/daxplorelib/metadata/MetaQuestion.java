@@ -1,6 +1,9 @@
 package daxplorelib.metadata;
 
-import java.util.List;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 
 import org.json.simple.JSONArray;
 import org.json.simple.JSONAware;
@@ -18,42 +21,83 @@ import org.json.simple.JSONObject;
  */
 
 public class MetaQuestion implements JSONAware, Comparable<MetaQuestion>{
+	protected static final String sqlDefinition = "CREATE TABLE metaquestion (id TEXT PRIMARY KEY, fulltextref TEXT, shorttextref TEXT, scale INTEGER )";
 	String id;
-	String fullTextRef, shortTextRef;
 	MetaCalculation calculation;
+	MetaScale scale;
 	
-	List<TextReference> options;
+	Connection connection;
 	
-	public MetaQuestion(String id, String fullTextRef, String shortTextRef, MetaCalculation calculation, List<TextReference> options){
+	public MetaQuestion(String id, String fullTextRef, String shortTextRef, MetaCalculation calculation, MetaScale scale, Connection connection) throws SQLException{
 		this.id = id;
-		this.fullTextRef = fullTextRef;
-		this.shortTextRef = shortTextRef;
+		this.connection = connection;
+		
+		PreparedStatement stmt = connection.prepareStatement("SELECT * FROM metaquestion WHERE id = ?");
+		stmt.setString(1, id);
+		stmt.execute();
+		if(stmt.getResultSet().next()) {
+			stmt = connection.prepareStatement("UPDATE metaquestion SET fulltextref = ?, shorttextref = ?, scale = ? WHERE id = ?");
+			stmt.setString(1, fullTextRef);
+			stmt.setString(2, shortTextRef);
+			stmt.setInt(3, scale.getID());
+			stmt.setString(4, id);
+			stmt.execute();
+		} else {
+			stmt = connection.prepareStatement("INSERT INTO metaquestion (id, fulltextref, shorttextref, scale) VALUES (?, ?, ?, ?)");
+			stmt.setString(1, id);
+			stmt.setString(2, fullTextRef);
+			stmt.setString(3, shortTextRef);
+			stmt.setInt(4, scale.getID());
+			stmt.execute();
+		}
+		
 		this.calculation = calculation;
-		this.options = options;
+		this.scale = scale;
 	}
 	
-	public MetaQuestion(JSONObject obj){
-		id = (String)obj.get("id");
-		fullTextRef = (String)obj.get("fulltext");
-		shortTextRef = (String)obj.get("shorttext");
-		calculation = new MetaCalculation((String)obj.get("data"));
-		
+	public MetaQuestion(String id, Connection connection) {
+		this.id = id;
+		this.connection = connection;
+	}
+	
+	public MetaQuestion(JSONObject obj, Connection connection) throws SQLException{
+		this((String)obj.get("id"), 
+				(String)obj.get("fulltext"), 
+				(String)obj.get("shorttext"), 
+				new MetaCalculation((String)obj.get("data")), 
+				new MetaScale((JSONArray)obj.get("scale"), connection),
+				connection
+				);
 	}
 	
 	public String getId(){
 		return id;
 	}
 	
-	public String getFullTextRef(){
-		return fullTextRef;
+	public String getFullTextRef() throws SQLException{
+		PreparedStatement stmt = connection.prepareStatement("SELECT fulltextref FROM metaquestion WHERE id = ?");
+		stmt.setString(1, id);
+		ResultSet rs = stmt.executeQuery();
+		if(rs.next()) {
+			return rs.getString("fulltextref");
+		} else {
+			return null;
+		}
 	}
 	
-	public String getShortTextRef(){
-		return shortTextRef;
+	public String getShortTextRef() throws SQLException{
+		PreparedStatement stmt = connection.prepareStatement("SELECT shorttextref FROM metaquestion WHERE id = ?");
+		stmt.setString(1, id);
+		ResultSet rs = stmt.executeQuery();
+		if(rs.next()) {
+			return rs.getString("shorttextref");
+		} else {
+			return null;
+		}
 	}
 	
-	public List<TextReference> getOptionsRefs(){
-		return options;
+	public MetaScale getScale(){
+		return scale;
 	}
 
 	@Override
@@ -66,13 +110,14 @@ public class MetaQuestion implements JSONAware, Comparable<MetaQuestion>{
 	public String toJSONString() {
 		JSONObject obj = new JSONObject();
 		obj.put("id", id);
-		obj.put("fulltext", fullTextRef);
-		obj.put("shorttext", shortTextRef);
-
-		JSONArray opts = new JSONArray();
-		opts.addAll(options);
+		try {
+			obj.put("fulltext", getFullTextRef());
+			obj.put("shorttext", getShortTextRef());
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
 		
-		obj.put("options", opts);
+		obj.put("options", scale);
 		
 		return obj.toJSONString();
 	}

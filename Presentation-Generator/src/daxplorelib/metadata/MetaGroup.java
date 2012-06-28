@@ -7,6 +7,8 @@ import org.json.simple.JSONAware;
 import org.json.simple.JSONObject;
 
 public class MetaGroup implements JSONAware{
+	protected static final String sqlDefinition = "CREATE TABLE metagroup (id INTEGER PRIMARY KEY, textref TEXT, type INTEGER)";
+	protected static final String sqlDefinition2 = "CREATE TABLE metagrouprel (groupid INTEGER, questionid TEXT)";		
 	
 	protected TextReference textRef;
 	protected List<MetaQuestion> questions;
