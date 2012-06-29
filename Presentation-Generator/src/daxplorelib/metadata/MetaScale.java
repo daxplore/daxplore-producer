@@ -104,7 +104,7 @@ public class MetaScale implements JSONAware{
 		return list;
 	}
 	
-	protected static List<TextReference> JSONtoList(JSONArray obj, Connection connection) {
+	protected static List<TextReference> JSONtoList(JSONArray obj, Connection connection) throws SQLException {
 		List<TextReference> list = new LinkedList<TextReference>();
 		for (int i = 0; i < obj.size(); i++) {
 			list.add(new TextReference((String)obj.get(i), connection));
