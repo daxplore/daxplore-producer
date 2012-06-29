@@ -48,13 +48,16 @@ public class RawData {
 			throw new DaxploreException("Something went wrong with spss-file");
 		}
 	}
-
+	
 	protected static void createRawDataTable(Map<String, VariableType> columns, Connection conn) throws SQLException{
 		StringBuilder sb = new StringBuilder();
 		Iterator<String> iter = columns.keySet().iterator();
 		sb.append("create table " + tablename + " (");
 		while(iter.hasNext()){
 			String s = iter.next();
+			if(s.contains("\"") || s.contains("'") || s.contains("$")){
+				continue;
+			}
 			sb.append(s);
 			sb.append(" ");
 			sb.append(columns.get(s).sqltype());

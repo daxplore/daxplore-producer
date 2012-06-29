@@ -43,16 +43,14 @@ public class MetaScale implements JSONAware{
 	     * See if the scale exists in the database. Search for list in list.
 	     */
 	    List<Integer> hits = new LinkedList<Integer>();
-	    while(rs.next()){
+	    while(rs.next()) {
 	    	for(int i = 0; i < options.size(); i++) {
 	    		if(!options.get(i).getRef().equals(rs.getString("textref"))) {
 	    			break;
 	    		} else if(i == options.size() -1) {
 	    			hits.add(rs.getInt("id"));
-	    		} else {
-	    			if(!rs.next()){
-	    				break;
-	    			}
+	    		} else if(!rs.next()){
+	    			break;
 	    		}
 	    	}
 	    }
@@ -80,7 +78,7 @@ public class MetaScale implements JSONAware{
 	    	stmt = connection.prepareStatement("SELECT max(id) FROM metascale");
 	    	rs = stmt.executeQuery();
 	    	rs.next();
-	    	id = rs.getInt(1) +1;
+	    	id = rs.getInt(1) +1; //TODO: Handle null
 	    	stmt = connection.prepareStatement("INSERT INTO metascalse (id, textref, order) VALUES (?, ?, ?)");
 	    	for(int i = 0; i < options.size(); i++) {
 	    		stmt.setInt(1, id);

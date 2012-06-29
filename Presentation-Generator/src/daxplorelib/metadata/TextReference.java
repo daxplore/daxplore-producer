@@ -31,7 +31,7 @@ public class TextReference implements JSONAware, Comparable<TextReference> {
 	public String get(Locale locale) throws SQLException, Exception {
 		PreparedStatement stmt = connection.prepareStatement("SELECT text FROM texts WHERE ref = ? AND locale = ?");
 		stmt.setString(1, reference);
-		stmt.setString(2, locale.toLanguageTag());
+		stmt.setString(2, locale.toLanguageTag()); //TODO: let Daniel choose locale representation
 		stmt.execute();
 		ResultSet rs = stmt.getResultSet();
 		if(rs.next()) {
