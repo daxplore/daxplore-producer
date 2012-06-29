@@ -69,13 +69,13 @@ public class DaxploreGUI {
 		frame.getContentPane().add(panel_1, BorderLayout.CENTER);
 		panel_1.setLayout(new CardLayout(0, 0));
 		
-		JPanel openPanel = new JPanel();
+		final JPanel openPanel = new JPanel();
 		panel_1.add(openPanel, "name_1340892548506154000");
 		
 		JLabel lblNewLabel = new JLabel("Open");
 		openPanel.add(lblNewLabel);
 		
-		JPanel importPanel = new JPanel();
+		final JPanel importPanel = new JPanel();
 		panel_1.add(importPanel, "name_1340892556990884000");
 		
 		JLabel lblNewLabel_1 = new JLabel("Import");
@@ -105,29 +105,16 @@ public class DaxploreGUI {
 		JLabel lblNewLabel_5 = new JLabel("Package");
 		packagePanel.add(lblNewLabel_5);
 		
+		// button control section
 		JButton btnOpen = new JButton("Open");
-		btnOpen.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent arg0) {
-				
-				System.out.println("Pressed open button.");
-			}
-		});
 		panel.add(btnOpen);
 		
 		JButton btnImport = new JButton("Import");
 		panel.add(btnImport);
-		btnImport.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-			}
-		});
-		
+
 		JButton btnQuestions = new JButton("Questions");
 		panel.add(btnQuestions);
-		btnQuestions.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent arg0) {
-			}
-		});
-		
+	
 		JButton btnEditor = new JButton("Edit file");
 		panel.add(btnEditor);
 		
@@ -135,6 +122,55 @@ public class DaxploreGUI {
 		panel.add(btnSort);
 		
 		JButton btnPackage = new JButton("Package");
-		panel.add(btnPackage);		
+		panel.add(btnPackage);
+		
+		// action behavior of buttons
+		
+		/* public void actionPerformed(ActionEvent e) {
+	        
+	        // We need to get the current layout of the CardLayout panel
+	        // before we can change it.
+	        CardLayout cl = (CardLayout)(cardPanel.getLayout());
+
+	        // This section of code finds out the button that has been pressed
+	        // and changes the card displayed on the cardLayout.
+	        if(e.getSource() == firstButton)
+	        {
+	            cl.first(cardPanel);
+	            cardCounter = 0;
+	        }
+	        else if(e.getSource() == lastButton)
+	        {
+	            cl.last(cardPanel);
+	            cardCounter = 2;
+	        }
+	        else if(e.getSource() == nextButton)
+	        {
+	            cl.next(cardPanel);
+	            if(cardCounter < 2)
+	            { 
+	                cardCounter++;
+	            }
+	            else 
+	            {
+	                cardCounter = 0;  
+	            } 
+	        }
+	        else if(e.getSource() == previousButton)
+	        {
+	            cl.previous(cardPanel);
+	            if(cardCounter > 0)
+	            {
+	                cardCounter--;
+	            }
+	            else
+	            {
+	                cardCounter = 2;
+	            }
+	        }
+
+	        titleLabel.setText(cardNames[cardCounter]);
+	        descLabel.setText(cardDescription[cardCounter]);
+	    } */
 	}
 }
