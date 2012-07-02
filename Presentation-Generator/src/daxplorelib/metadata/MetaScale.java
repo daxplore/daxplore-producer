@@ -4,7 +4,6 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.sql.Statement;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -12,7 +11,7 @@ import org.json.simple.JSONArray;
 import org.json.simple.JSONAware;
 
 public class MetaScale implements JSONAware{
-	public static final String sqlDefinition = "CREATE TABLE metascale (id INTEGER, textref STRING, order INTEGER)";
+	protected static final String sqlDefinition = "CREATE TABLE metascale (id INTEGER, textref STRING, order INTEGER)";
 	
 	Connection connection;
 	int id;

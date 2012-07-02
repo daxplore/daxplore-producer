@@ -5,7 +5,6 @@ import java.io.Writer;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.util.List;
 import java.util.Locale;
 
 import daxplorelib.SQLTools;
@@ -13,11 +12,6 @@ import daxplorelib.SQLTools;
 public class MetaData {
 	
 	Connection database;
-	
-	List<MetaQuestion> questions;
-	
-	List<MetaGroup> groups;
-	MetaGroup selectors;
 	
 	public enum Formats {
 		DATABASE,RESOURCE,JSON,RAW
