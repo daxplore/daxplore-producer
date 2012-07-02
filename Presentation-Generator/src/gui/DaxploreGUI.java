@@ -24,7 +24,12 @@ import java.awt.GridBagConstraints;
 import java.awt.Insets;
 import java.awt.GridLayout;
 import javax.swing.JLabel;
+import javax.swing.AbstractAction;
+import javax.swing.Action;
 
+/**
+ * Main window handler class. Initialization of application goes here.
+ */
 public class DaxploreGUI {
 
 	private JFrame frame;
@@ -65,112 +70,95 @@ public class DaxploreGUI {
 		frame.getContentPane().add(panel, BorderLayout.WEST);
 		panel.setLayout(new GridLayout(0, 1, 0, 0));
 		
-		JPanel panel_1 = new JPanel();
-		frame.getContentPane().add(panel_1, BorderLayout.CENTER);
-		panel_1.setLayout(new CardLayout(0, 0));
+		JPanel mainPanel = new JPanel();
+		frame.getContentPane().add(mainPanel, BorderLayout.CENTER);
+		mainPanel.setLayout(new CardLayout(0, 0));
 		
 		final JPanel openPanel = new JPanel();
-		panel_1.add(openPanel, "name_1340892548506154000");
+		mainPanel.add(openPanel, "name_1340892548506154000");
 		
 		JLabel lblNewLabel = new JLabel("Open");
 		openPanel.add(lblNewLabel);
 		
 		final JPanel importPanel = new JPanel();
-		panel_1.add(importPanel, "name_1340892556990884000");
+		mainPanel.add(importPanel, "name_1340892556990884000");
 		
 		JLabel lblNewLabel_1 = new JLabel("Import");
 		importPanel.add(lblNewLabel_1);
 		
 		JPanel questionsPanel = new JPanel();
-		panel_1.add(questionsPanel, "name_1340892588651402000");
+		mainPanel.add(questionsPanel, "name_1340892588651402000");
 		
 		JLabel lblNewLabel_2 = new JLabel("Questions");
 		questionsPanel.add(lblNewLabel_2);
 		
 		JPanel editPanel = new JPanel();
-		panel_1.add(editPanel, "name_1340892590961725000");
+		mainPanel.add(editPanel, "name_1340892590961725000");
 		
 		JLabel lblNewLabel_3 = new JLabel("Edit file");
 		editPanel.add(lblNewLabel_3);
 		
 		JPanel sortPanel = new JPanel();
-		panel_1.add(sortPanel, "name_1340892592836118000");
+		mainPanel.add(sortPanel, "name_1340892592836118000");
 		
 		JLabel lblNewLabel_4 = new JLabel("Sort data");
 		sortPanel.add(lblNewLabel_4);
 		
 		JPanel packagePanel = new JPanel();
-		panel_1.add(packagePanel, "name_1340892595957519000");
+		mainPanel.add(packagePanel, "name_1340892595957519000");
 		
 		JLabel lblNewLabel_5 = new JLabel("Package");
 		packagePanel.add(lblNewLabel_5);
 		
 		// button control section
 		JButton btnOpen = new JButton("Open");
+		btnOpen.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent arg0) {
+			}
+		});
 		panel.add(btnOpen);
 		
 		JButton btnImport = new JButton("Import");
+		btnImport.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+			}
+		});
 		panel.add(btnImport);
 
 		JButton btnQuestions = new JButton("Questions");
+		btnQuestions.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+			}
+		});
 		panel.add(btnQuestions);
 	
 		JButton btnEditor = new JButton("Edit file");
+		btnEditor.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+			}
+		});
 		panel.add(btnEditor);
 		
 		JButton btnSort = new JButton("Sort data");
+		btnSort.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+			}
+		});
 		panel.add(btnSort);
 		
 		JButton btnPackage = new JButton("Package");
+		btnPackage.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+			}
+		});
 		panel.add(btnPackage);
-		
-		// action behavior of buttons
-		
-		/* public void actionPerformed(ActionEvent e) {
-	        
-	        // We need to get the current layout of the CardLayout panel
-	        // before we can change it.
-	        CardLayout cl = (CardLayout)(cardPanel.getLayout());
-
-	        // This section of code finds out the button that has been pressed
-	        // and changes the card displayed on the cardLayout.
-	        if(e.getSource() == firstButton)
-	        {
-	            cl.first(cardPanel);
-	            cardCounter = 0;
-	        }
-	        else if(e.getSource() == lastButton)
-	        {
-	            cl.last(cardPanel);
-	            cardCounter = 2;
-	        }
-	        else if(e.getSource() == nextButton)
-	        {
-	            cl.next(cardPanel);
-	            if(cardCounter < 2)
-	            { 
-	                cardCounter++;
-	            }
-	            else 
-	            {
-	                cardCounter = 0;  
-	            } 
-	        }
-	        else if(e.getSource() == previousButton)
-	        {
-	            cl.previous(cardPanel);
-	            if(cardCounter > 0)
-	            {
-	                cardCounter--;
-	            }
-	            else
-	            {
-	                cardCounter = 2;
-	            }
-	        }
-
-	        titleLabel.setText(cardNames[cardCounter]);
-	        descLabel.setText(cardDescription[cardCounter]);
-	    } */
+	}
+	private class SwingAction extends AbstractAction {
+		public SwingAction() {
+			putValue(NAME, "SwingAction");
+			putValue(SHORT_DESCRIPTION, "Some short description");
+		}
+		public void actionPerformed(ActionEvent e) {
+		}
 	}
 }
