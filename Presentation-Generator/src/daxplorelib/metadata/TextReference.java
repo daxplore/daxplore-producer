@@ -38,7 +38,7 @@ public class TextReference implements JSONAware, Comparable<TextReference> {
 		return reference;
 	}
 	
-	public String get(Locale locale) throws SQLException, Exception {
+	public String get(Locale locale) throws SQLException {
 		PreparedStatement stmt = connection.prepareStatement("SELECT text FROM texts WHERE ref = ? AND locale = ?");
 		stmt.setString(1, reference);
 		stmt.setString(2, locale.toLanguageTag()); //TODO: let Daniel choose locale representation
@@ -46,15 +46,16 @@ public class TextReference implements JSONAware, Comparable<TextReference> {
 		ResultSet rs = stmt.getResultSet();
 		if(rs.next()) {
 			String text = rs.getString("text");
-			if(rs.next()) {
+			//TODO: is the following code needed?
+			/*if(rs.next()) {
 				throw new Exception("more than one result");
-			}
+			}*/
 			return text;
 		}
 		return null;
 	}
 	
-	public void put(String text, Locale locale) throws SQLException, Exception{
+	public void put(String text, Locale locale) throws SQLException {
 		if( get(locale) == null) {
 			PreparedStatement stmt = connection.prepareStatement("INSERT INTO texts (ref, locale, text) VALUES (?, ?, ?)");
 			stmt.setString(1, reference);

@@ -15,6 +15,7 @@ import org.opendatafoundation.data.spss.SPSSFile;
 import org.opendatafoundation.data.spss.SPSSFileException;
 
 import daxplorelib.fileformat.ImportedData;
+import daxplorelib.fileformat.RawMeta;
 
 public class DaxploreFile {
 	public static final int filetypeversionmajor = 0;
@@ -94,5 +95,13 @@ public class DaxploreFile {
 	
 	public About getAbout(){
 		return about;
+	}
+	
+	public RawMeta getRawMeta() throws DaxploreException {
+		try {
+			return new RawMeta(sqliteDatabase);
+		} catch (SQLException e) {
+			throw new DaxploreException("Could't get RawMeta", e);
+		}
 	}
 }

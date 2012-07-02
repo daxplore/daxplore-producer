@@ -27,7 +27,7 @@ public class MetaQuestion implements JSONAware, Comparable<MetaQuestion>{
 	
 	final Connection connection;
 	
-	public MetaQuestion(String id, String fullTextRef, String shortTextRef, MetaCalculation calculation, MetaScale scale, Connection connection) throws SQLException{
+	public MetaQuestion(String id, TextReference fullTextRef, TextReference shortTextRef, MetaCalculation calculation, MetaScale scale, Connection connection) throws SQLException{
 		this.id = id;
 		this.connection = connection;
 		
@@ -36,8 +36,8 @@ public class MetaQuestion implements JSONAware, Comparable<MetaQuestion>{
 		stmt.execute();
 		if(stmt.getResultSet().next()) {
 			stmt = connection.prepareStatement("UPDATE metaquestion SET fulltextref = ?, shorttextref = ?, scale = ?, calculation = ? WHERE id = ?");
-			stmt.setString(1, fullTextRef);
-			stmt.setString(2, shortTextRef);
+			stmt.setString(1, fullTextRef.getRef());
+			stmt.setString(2, shortTextRef.getRef());
 			stmt.setInt(3, scale.getID());
 			stmt.setInt(4, calculation.getID());
 			stmt.setString(5, id);
@@ -45,8 +45,8 @@ public class MetaQuestion implements JSONAware, Comparable<MetaQuestion>{
 		} else {
 			stmt = connection.prepareStatement("INSERT INTO metaquestion (id, fulltextref, shorttextref, scale, calculation) VALUES (?, ?, ?, ?)");
 			stmt.setString(1, id);
-			stmt.setString(2, fullTextRef);
-			stmt.setString(3, shortTextRef);
+			stmt.setString(2, fullTextRef.getRef());
+			stmt.setString(3, shortTextRef.getRef());
 			stmt.setInt(4, scale.getID());
 			stmt.setInt(5, calculation.getID());
 			stmt.execute();
@@ -62,8 +62,8 @@ public class MetaQuestion implements JSONAware, Comparable<MetaQuestion>{
 	
 	public MetaQuestion(JSONObject obj, Connection connection) throws SQLException{
 		this((String)obj.get("id"), 
-				(String)obj.get("fulltext"), 
-				(String)obj.get("shorttext"), 
+				new TextReference((String)obj.get("fulltext"), connection), 
+				new TextReference((String)obj.get("shorttext"), connection), 
 				new MetaCalculation((String)obj.get("data"), connection), 
 				new MetaScale((JSONArray)obj.get("scale"), connection),
 				connection
