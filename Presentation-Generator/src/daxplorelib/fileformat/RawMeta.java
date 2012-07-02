@@ -6,6 +6,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -13,29 +14,40 @@ import java.util.Map;
 import java.util.Set;
 
 import org.json.simple.JSONValue;
+import org.json.simple.parser.ContainerFactory;
+import org.json.simple.parser.JSONParser;
+import org.json.simple.parser.ParseException;
 import org.opendatafoundation.data.spss.SPSSFile;
 import org.opendatafoundation.data.spss.SPSSNumericVariable;
 import org.opendatafoundation.data.spss.SPSSStringVariable;
 import org.opendatafoundation.data.spss.SPSSVariable;
 import org.opendatafoundation.data.spss.SPSSVariableCategory;
 
+import tools.Pair;
 import daxplorelib.SQLTools;
 
 
 public class RawMeta {
-	static final String tablename = "rawmeta";
-	Connection sqliteDatabase;
+	protected static final String sqlDefinition = "CREATE TABLE rawmeta (column TEXT, longname TEXT, qtext TEXT, qtype TEXT, spsstype TEXT, valuelabels TEXT, measure TEXT)";
+	
+	public class RawMetaQuestion {
+		public String column, longname, qtext, qtype, spsstype, measure;
+		public List<Pair<String, Double>> valuelables;
+	}
+	
+	Connection connection;
 	
 	public RawMeta(Connection sqliteDatabase) throws SQLException{
-		this.sqliteDatabase = sqliteDatabase;
-		if(!SQLTools.tableExists(tablename, sqliteDatabase)){
-			createRawMetaTable(sqliteDatabase);
+		this.connection = sqliteDatabase;
+		if(!SQLTools.tableExists("rawmeta", sqliteDatabase)){
+			Statement statement = sqliteDatabase.createStatement();
+			statement.executeUpdate(sqlDefinition);
 		}
 	}
 	
 	public List<String> getColumns() throws SQLException{
-		Statement stmt = sqliteDatabase.createStatement();
-		ResultSet rs = stmt.executeQuery("SELECT column FROM " + tablename);
+		Statement stmt = connection.createStatement();
+		ResultSet rs = stmt.executeQuery("SELECT column FROM rawmeta");
 		List<String> list = new LinkedList<String>();
 		while(rs.next()){
 			list.add(rs.getString("column"));
@@ -44,8 +56,8 @@ public class RawMeta {
 	}
 	
 	public Map<String, VariableType> getColumnMap() throws SQLException{
-		Statement stmt = sqliteDatabase.createStatement();
-		ResultSet rs = stmt.executeQuery("SELECT column, qtype FROM " + tablename);
+		Statement stmt = connection.createStatement();
+		ResultSet rs = stmt.executeQuery("SELECT column, qtype FROM rawmeta");
 		Map<String, VariableType> columns = new LinkedHashMap<String,VariableType>();
 		while(rs.next()){
 			String col = rs.getString("column");
@@ -57,7 +69,7 @@ public class RawMeta {
 	
 	public void importSPSS(SPSSFile spssFile, Charset charset) throws SQLException {
 		Map<String, String> columns = new LinkedHashMap<String,String>();
-		clearRawMetaTable(sqliteDatabase);
+		clearRawMetaTable(connection);
 		for(int i = 0; i < spssFile.getVariableCount(); i++){
 			SPSSVariable var = spssFile.getVariable(i);
 			String spsstype;
@@ -78,28 +90,22 @@ public class RawMeta {
 			}
 			String measure = var.getMeasureLabel();
 			addColumnMeta(
-					tablename,
+					"rawmeta",
 					var.getShortName(),
 					var.getName(),
 					var.getLabel(),
 					qtype,
 					spsstype,
 					valuelabels,
-					sqliteDatabase,
+					connection,
 					measure
 					);
 		}
 	}
 	
-	protected static void createRawMetaTable(Connection conn) throws SQLException {
-		String query = "create table " + tablename + " (column text, longname text, qtext text, qtype text, spsstype text, valuelabels text, measure text)";
-		Statement statement = conn.createStatement();
-		statement.executeUpdate(query);
-	}
-	
 	protected static void clearRawMetaTable(Connection conn) throws SQLException {
 		Statement statement = conn.createStatement();
-		statement.executeUpdate("DELETE * FROM " + tablename);
+		statement.executeUpdate("DELETE * FROM rawmeta");
 	}
 	
 	protected static void addColumnMeta(String metaTable, String column, String longname, String qtext, String qtype, String spsstype, String valuelabels, Connection conn, String measure) throws SQLException {
@@ -140,5 +146,84 @@ public class RawMeta {
 			//}
 		}
 		return JSONValue.toJSONString(catObj);
+	}
+	
+	@SuppressWarnings("rawtypes")
+	protected static List<Pair<String, Double>> JSONtoCategories(String jsonstring) {
+		List<Pair<String, Double>> list = new LinkedList<Pair<String,Double>>();
+		
+		JSONParser parser = new JSONParser();
+		ContainerFactory containerFactory = new ContainerFactory(){
+			public List creatArrayContainer() {
+				return new LinkedList();
+			}
+			public Map createObjectContainer() {
+				return new LinkedHashMap();
+			}
+		};
+		Map json;
+		try {
+			json = (Map)parser.parse(jsonstring, containerFactory);
+		} catch (ParseException e) {
+			e.printStackTrace();
+			return null;
+		}
+	    Iterator iter = json.entrySet().iterator();
+	    
+	    while(iter.hasNext()) {
+	    	Map.Entry entry = (Map.Entry)iter.next();
+			list.add(new Pair<String, Double>(
+					(String)entry.getValue(),
+					Double.parseDouble((String) entry.getKey())
+					));
+	    }
+	    
+		return list;
+	}
+	
+	public Iterator<RawMetaQuestion> getQuestionIterator() throws SQLException{
+		PreparedStatement stmt = connection.prepareStatement("SELECT * FROM rawmeta ORDER BY column ASC");
+		final ResultSet rs = stmt.executeQuery();
+		
+		Iterator<RawMetaQuestion> iter = new Iterator<RawMetaQuestion>() {
+
+			@Override
+			public boolean hasNext() {
+				try {
+					return rs.isLast();
+				} catch (SQLException e) {
+					e.printStackTrace();
+					return false;
+				}
+			}
+
+			@Override
+			public RawMetaQuestion next() {
+				try {
+					rs.next();
+					RawMetaQuestion rmq = new RawMetaQuestion();
+					rmq.column = rs.getString("column");
+					rmq.longname = rs.getString("longname");
+					rmq.measure = rs.getString("measure");
+					rmq.qtext = rs.getString("qtext");
+					rmq.spsstype = rs.getString("spsstype");
+					rmq.valuelables = JSONtoCategories(rs.getString("valuelabels"));
+				} catch (SQLException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+				
+				return null;
+			}
+
+			@Override
+			public void remove() {
+				// TODO Auto-generated method stub
+				
+			}
+			
+		};
+		return iter;
+		
 	}
 }

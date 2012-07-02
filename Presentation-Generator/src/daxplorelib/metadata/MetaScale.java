@@ -9,9 +9,12 @@ import java.util.List;
 
 import org.json.simple.JSONArray;
 import org.json.simple.JSONAware;
+import org.json.simple.JSONObject;
+
+import tools.Pair;
 
 public class MetaScale implements JSONAware{
-	protected static final String sqlDefinition = "CREATE TABLE metascale (id INTEGER, textref STRING, order INTEGER)";
+	public static final String sqlDefinition = "CREATE TABLE metascale (id INTEGER, textref STRING, order INTEGER, value REAL)";
 	
 	Connection connection;
 	int id;
@@ -21,20 +24,20 @@ public class MetaScale implements JSONAware{
 		this.id = id;
 	}
 	
-	public MetaScale(List<TextReference> options, Connection connection) throws SQLException {
+	public MetaScale(List<Pair<TextReference, Double>> options, Connection connection) throws SQLException {
 		this.connection = connection;
 	    StringBuilder builder = new StringBuilder();
 	    builder.append("SELECT * FROM metascale WHERE textref IN (");
-	    for(TextReference tr : options) {
+	    for(Pair<TextReference, Double> tr : options) {
 	        builder.append("?");
 	        if(options.indexOf(tr) < options.size() -1 ) {
 	        	builder.append(",");
 	        }
 	    }
-	    builder.append(") OREDER BY id, order");
+	    builder.append(") ORDER BY id, order");
 	    PreparedStatement stmt = connection.prepareStatement(builder.toString());
 	    for(int i = 0; i < options.size(); i++) {
-	    	stmt.setString(i+1, options.get(i).getRef());
+	    	stmt.setString(i+1, options.get(i).getKey().getRef());
 	    }
 	    ResultSet rs = stmt.executeQuery();
 	    
@@ -44,7 +47,8 @@ public class MetaScale implements JSONAware{
 	    List<Integer> hits = new LinkedList<Integer>();
 	    while(rs.next()) {
 	    	for(int i = 0; i < options.size(); i++) {
-	    		if(!options.get(i).getRef().equals(rs.getString("textref"))) {
+	    		if(!options.get(i).getKey().getRef().equals(rs.getString("textref")) || 
+	    				!options.get(i).getValue().equals(rs.getDouble("value"))) {
 	    			break;
 	    		} else if(i == options.size() -1) {
 	    			hits.add(rs.getInt("id"));
@@ -55,13 +59,15 @@ public class MetaScale implements JSONAware{
 	    }
 	    
 	    boolean found = false;
-	    stmt = connection.prepareStatement("SELECT textref FROM metascale WHERE id = ? ORDER BY order ASC");
+	    stmt = connection.prepareStatement("SELECT textref, value FROM metascale WHERE id = ? ORDER BY order ASC");
 	    for(Integer i: hits) {
 	    	stmt.setInt(1, i);
 	    	rs = stmt.executeQuery();
-	    	for(TextReference tr : options) {
+	    	for(Pair<TextReference, Double> tr : options) {
 	    		rs.next();
-	    		if(!tr.getRef().equals(rs.getString("textref"))) {
+	    		if(!tr.getKey().getRef().equals(rs.getString("textref"))) {
+	    			break;
+	    		} else if (!tr.getValue().equals(rs.getDouble("value"))) {
 	    			break;
 	    		}
 	    	}
@@ -78,11 +84,12 @@ public class MetaScale implements JSONAware{
 	    	rs = stmt.executeQuery();
 	    	rs.next();
 	    	id = rs.getInt(1) +1; //TODO: Handle null
-	    	stmt = connection.prepareStatement("INSERT INTO metascalse (id, textref, order) VALUES (?, ?, ?)");
+	    	stmt = connection.prepareStatement("INSERT INTO metascalse (id, textref, order, value) VALUES (?, ?, ?, ?)");
 	    	for(int i = 0; i < options.size(); i++) {
 	    		stmt.setInt(1, id);
-		    	stmt.setString(2, options.get(0).getRef());
+		    	stmt.setString(2, options.get(i).getKey().getRef());
 		    	stmt.setInt(3, i);
+		    	stmt.setDouble(4, options.get(i).getValue());
 		    	stmt.execute();	    		
 	    	}
 	    }
@@ -92,21 +99,24 @@ public class MetaScale implements JSONAware{
 		this(JSONtoList(obj, connection), connection);
 	}
 	
-	public List<TextReference> getRefereceList() throws SQLException {
-		PreparedStatement stmt = connection.prepareStatement("SELECT textref FROM metascale WHERE id = ? ORDER BY order ASC");
+	public List<Pair<TextReference, Double>> getRefereceList() throws SQLException {
+		PreparedStatement stmt = connection.prepareStatement("SELECT textref, value FROM metascale WHERE id = ? ORDER BY order ASC");
 		stmt.setInt(1, id);
 		ResultSet rs = stmt.executeQuery();
-		List<TextReference> list = new LinkedList<TextReference>();
+		List<Pair<TextReference, Double>> list = new LinkedList<Pair<TextReference, Double>>();
 		while(rs.next()) {
-			list.add(new TextReference(rs.getString("textref"), connection));
+			list.add(new Pair<TextReference, Double>(new TextReference(rs.getString("textref"), connection), rs.getDouble("value")));
 		}
 		return list;
 	}
 	
-	protected static List<TextReference> JSONtoList(JSONArray obj, Connection connection) throws SQLException {
-		List<TextReference> list = new LinkedList<TextReference>();
+	protected static List<Pair<TextReference, Double>> JSONtoList(JSONArray obj, Connection connection) throws SQLException {
+		List<Pair<TextReference, Double>> list = new LinkedList<Pair<TextReference, Double>>();
 		for (int i = 0; i < obj.size(); i++) {
-			list.add(new TextReference((String)obj.get(i), connection));
+			JSONObject o = (JSONObject)obj.get(i);
+			list.add(new Pair<TextReference, Double>(
+					new TextReference((String)o.get("textref"), connection), 
+					Double.parseDouble((String)o.get("value"))));
 		}
 		return list;
 	}
@@ -119,11 +129,13 @@ public class MetaScale implements JSONAware{
 	@Override
 	public String toJSONString() {
 		JSONArray arr = new JSONArray();
-		List<TextReference> list;
 		try {
-			list = getRefereceList();
-			for(TextReference tr : list) {
-				arr.add(tr.getRef());
+			List<Pair<TextReference, Double>> list = getRefereceList();
+			for(Pair<TextReference, Double> tr : list) {
+				JSONObject o = new JSONObject();
+				o.put("textref", tr.getKey().getRef());
+				o.put("value", tr.getValue());
+				arr.add(o);
 			}
 		} catch (SQLException e) {
 			// TODO Auto-generated catch block
