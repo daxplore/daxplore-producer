@@ -85,8 +85,16 @@ public class MetaQuestion implements JSONAware, Comparable<MetaQuestion>{
 		}
 	}
 	
-	public void setFullTextRef(TextReference ref) {
-		//TODO: stub
+	/**
+	 * Updates fulltextref in the database.
+	 * @param ref
+	 * @throws SQLException
+	 */
+	public void setFullTextRef(TextReference ref) throws SQLException {
+		PreparedStatement stmt = connection.prepareStatement("UPDATE metaquestion SET fulltextref = ? WHERE id = ?");
+		stmt.setString(1, ref.getRef());
+		stmt.setString(2, id);
+		stmt.executeUpdate();
 	}
 	
 	public TextReference getShortTextRef() throws SQLException{
@@ -100,8 +108,16 @@ public class MetaQuestion implements JSONAware, Comparable<MetaQuestion>{
 		}
 	}
 	
-	public void setShortTextRef(TextReference ref) {
-		//TODO: stub
+	/**
+	 * Updates shorttextref in the database.
+	 * @param ref
+	 * @throws SQLException
+	 */
+	public void setShortTextRef(TextReference ref) throws SQLException {
+		PreparedStatement stmt = connection.prepareStatement("UPDATE metaquestion SET shorttextref = ? WHERE id = ?");
+		stmt.setString(1, ref.getRef());
+		stmt.setString(2, id);
+		stmt.executeUpdate();
 	}
 	
 	public MetaScale getScale() throws SQLException{
@@ -115,8 +131,16 @@ public class MetaQuestion implements JSONAware, Comparable<MetaQuestion>{
 		}
 	}
 	
-	public void setScale(MetaScale scale) {
-		//TODO: stub
+	/**
+	 * Updates metascale in the database.
+	 * @param scale
+	 * @throws SQLException
+	 */
+	public void setScale(MetaScale scale) throws SQLException {
+		PreparedStatement stmt = connection.prepareStatement("UPDATE metaquestion SET scale = ? WHERE id = ?");
+		stmt.setInt(1, scale.getID());
+		stmt.setString(2, id);
+		stmt.executeUpdate();
 	}
 	
 	public MetaCalculation getCalculation() throws SQLException {
