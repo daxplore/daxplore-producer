@@ -80,8 +80,16 @@ public class MetaGroup implements JSONAware{
 		}
 	}
 	
-	public void setTextRef(TextReference ref) {
-		//TODO: stub
+	/**
+	 * Updates textref in the database.
+	 * @param ref
+	 * @throws SQLException 
+	 */
+	public void setTextRef(TextReference ref) throws SQLException {
+		PreparedStatement stmt = connection.prepareStatement("UPDATE metagroup SET shorttextref = ? WHERE id = ?");
+		stmt.setString(1, ref.getRef());
+		stmt.setInt(2, id);
+		stmt.executeUpdate();
 	}
 
 	public List<MetaQuestion> getQuestions() throws SQLException {
