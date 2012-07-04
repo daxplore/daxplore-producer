@@ -44,29 +44,33 @@ public class MetaData {
 	 * Import/export methods that are used to change metadata in batch.
 	 * The preferred way too use the library.
 	 */
-	public void importFromRaw(DaxploreFile daxfile) throws DaxploreException, SQLException {
-		RawMeta rawmeta = daxfile.getRawMeta();
-		Iterator<RawMetaQuestion> iter = rawmeta.getQuestionIterator();
-		
-		Locale locale = new Locale("SV_se");
-		
-		while(iter.hasNext()) {
-			RawMetaQuestion rmq = iter.next();
-			TextReference fulltext = new TextReference(rmq.column + "_fulltext", connection);
-			fulltext.put(rmq.qtext, locale);
-			MetaCalculation calc = new MetaCalculation(rmq.column, connection);
-			List<Pair<TextReference, Double>> scalevalues = new LinkedList<Pair<TextReference,Double>>();
-			for(int i = 0; i < rmq.valuelables.size(); i++) {
-				Pair<String, Double> s = rmq.valuelables.get(i);
-				TextReference ref = new TextReference(rmq.column + "_option_" + i, connection);
-				ref.put(s.getKey(), locale);
-				scalevalues.add(new Pair<TextReference, Double>(fulltext, s.getValue()));
+	public void importFromRaw(DaxploreFile daxfile) throws DaxploreException {
+		try {
+			RawMeta rawmeta = daxfile.getRawMeta();
+			Iterator<RawMetaQuestion> iter = rawmeta.getQuestionIterator();
+			
+			Locale locale = new Locale("SV_se");
+			
+			while(iter.hasNext()) {
+				RawMetaQuestion rmq = iter.next();
+				TextReference fulltext = new TextReference(rmq.column + "_fulltext", connection);
+				fulltext.put(rmq.qtext, locale);
+				MetaCalculation calc = new MetaCalculation(rmq.column, connection);
+				List<Pair<TextReference, Double>> scalevalues = new LinkedList<Pair<TextReference,Double>>();
+				for(int i = 0; i < rmq.valuelables.size(); i++) {
+					Pair<String, Double> s = rmq.valuelables.get(i);
+					TextReference ref = new TextReference(rmq.column + "_option_" + i, connection);
+					ref.put(s.getKey(), locale);
+					scalevalues.add(new Pair<TextReference, Double>(fulltext, s.getValue()));
+				}
+				MetaScale scale = new MetaScale(scalevalues, connection);
+				
+				TextReference shorttext = new TextReference(rmq.column + "shorttext", connection);
+				
+				new MetaQuestion(rmq.column, fulltext, shorttext, calc, scale, connection);
 			}
-			MetaScale scale = new MetaScale(scalevalues, connection);
-			
-			TextReference shorttext = new TextReference(rmq.column + "shorttext", connection);
-			
-			new MetaQuestion(rmq.column, fulltext, shorttext, calc, scale, connection);
+		} catch (SQLException e) {
+			throw new DaxploreException("Failed to transfer metadata from raw", e);
 		}
 	}
 	
@@ -94,7 +98,7 @@ public class MetaData {
 		
 	}
 	
-	public void consolidateScales(Locale bylocale) {
+	public void consolidateScales(Locale bylocale) throws DaxploreException {
 		try {
 			List<MetaScale> scaleList = MetaScale.getAll(connection);
 			List<MetaScale> uniqueScales = new LinkedList<MetaScale>();
@@ -149,10 +153,41 @@ public class MetaData {
 			
 			
 		} catch (SQLException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			throw new DaxploreException("Failed to consolidate scales", e);
 		}
 		
+	}
+	
+	public List<MetaGroup> getAllGroups() throws DaxploreException {
+		try {
+			return MetaGroup.getAll(connection);
+		} catch (SQLException e) {
+			throw new DaxploreException("SQLExpection while trying to get groups", e);
+		}
+	}
+	
+	public List<MetaQuestion> getAllQuestions() throws DaxploreException {
+		try {
+			return MetaQuestion.getAll(connection);
+		} catch (SQLException e) {
+			throw new DaxploreException("SQLExpection while trying to get groups", e);
+		}
+	}
+	
+	public List<MetaScale> getAllScales() throws DaxploreException {
+		try {
+			return MetaScale.getAll(connection);
+		} catch (SQLException e) {
+			throw new DaxploreException("SQLExpection while trying to get groups", e);
+		}
+	}
+	
+	public List<TextReference> getAllTextReferences() throws DaxploreException {
+		try {
+			return TextReference.getAll(connection);
+		} catch (SQLException e) {
+			throw new DaxploreException("SQLExpection while trying to get groups", e);
+		}
 	}
 	
 	public void save(){

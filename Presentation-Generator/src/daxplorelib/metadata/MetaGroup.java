@@ -4,6 +4,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -112,6 +113,16 @@ public class MetaGroup implements JSONAware{
 		} else {
 			return 0;
 		}
+	}
+	
+	public static List<MetaGroup> getAll(Connection connection) throws SQLException {
+		Statement stmt = connection.createStatement();
+		ResultSet rs = stmt.executeQuery("SELECT id FROM metagroup ORDER BY id ASC");
+		List<MetaGroup> list = new LinkedList<MetaGroup>();
+		while(rs.next()) {
+			list.add(new MetaGroup(rs.getInt("id"), connection));
+		}
+		return list;
 	}
 
 	@SuppressWarnings("unchecked")
