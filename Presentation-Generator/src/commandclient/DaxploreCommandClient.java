@@ -40,14 +40,17 @@ public class DaxploreCommandClient {
 		}
 		String command = jc.getParsedCommand();
 		
+		if(file == null || command == null) {
+			jc.usage();
+			return;
+		}
+		
 		if(file.isDirectory()){
 			System.out.println("Project file is a directory");
 			return;
 		}
 		
-		if(command == null){
-			jc.usage();
-		} else if(command.equals("import")){
+		if(command.equals("import")){
 				importcommand.run(file);
 		} else if(command.equals("info")){
 			infocommand.run(file);
