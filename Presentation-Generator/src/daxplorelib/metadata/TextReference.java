@@ -74,6 +74,21 @@ public class TextReference implements JSONAware, Comparable<TextReference> {
 		}
 	}
 	
+	/**
+	 * Get a list of locales set for this TextReference
+	 * @return list of locales
+	 * @throws SQLException 
+	 */
+	public List<Locale> getLocales() throws SQLException {
+		PreparedStatement stmt = connection.prepareStatement("SELECT locale FROM texts WHERE ref = ?");
+		List<Locale> list = new LinkedList<Locale>();
+		ResultSet rs = stmt.executeQuery();
+		while(rs.next()) {
+			list.add(new Locale(rs.getString("locale")));
+		}
+		return list;
+	}
+	
 	public void remove() throws SQLException {
 		PreparedStatement stmt = connection.prepareStatement("DELETE FROM texts WHERE ref = ?");
 		stmt.setString(1, reference);
@@ -88,6 +103,10 @@ public class TextReference implements JSONAware, Comparable<TextReference> {
 			list.add(new TextReference(rs.getString("ref"), connection));
 		}
 		return list;
+	}
+	
+	public boolean equalsLocale(TextReference other, Locale locale) throws SQLException {
+		return get(locale).equals(other.get(locale));
 	}
 
 	@Override

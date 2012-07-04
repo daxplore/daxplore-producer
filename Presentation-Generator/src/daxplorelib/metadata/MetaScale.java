@@ -4,8 +4,10 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Locale;
 
 import org.json.simple.JSONArray;
 import org.json.simple.JSONAware;
@@ -13,7 +15,7 @@ import org.json.simple.JSONObject;
 
 import tools.Pair;
 
-public class MetaScale implements JSONAware{
+public class MetaScale implements JSONAware {
 	public static final String sqlDefinition = "CREATE TABLE metascale (id INTEGER, textref STRING, order INTEGER, value REAL)";
 	
 	Connection connection;
@@ -110,6 +112,16 @@ public class MetaScale implements JSONAware{
 		return list;
 	}
 	
+	public static List<MetaScale> getAll(Connection connection) throws SQLException {
+		Statement stmt = connection.createStatement();
+		ResultSet rs = stmt.executeQuery("SELECT UNIQUE(id) AS uid FROM metascale ORDER BY id");
+		List<MetaScale> list = new LinkedList<MetaScale>();
+		while(rs.next()) {
+			list.add(new MetaScale(rs.getInt("uid"), connection));
+		}
+		return list;
+	}
+	
 	protected static List<Pair<TextReference, Double>> JSONtoList(JSONArray obj, Connection connection) throws SQLException {
 		List<Pair<TextReference, Double>> list = new LinkedList<Pair<TextReference, Double>>();
 		for (int i = 0; i < obj.size(); i++) {
@@ -123,6 +135,35 @@ public class MetaScale implements JSONAware{
 	
 	public int getID(){
 		return id;
+	}
+	
+	public void remove() throws SQLException {
+		PreparedStatement stmt = connection.prepareStatement("DELETE FROM metascale WHERE id = ?");
+		stmt.setInt(1, id);
+		stmt.executeUpdate();
+	}
+	
+	public boolean equalsLocale(MetaScale other, Locale locale) throws SQLException {
+		List<Pair<TextReference, Double>> otherRefList = other.getRefereceList();
+		List<Pair<TextReference, Double>> thisRefList = getRefereceList();
+		
+		if(otherRefList.size() != thisRefList.size()) { return false; }
+		
+		for(int i = 0; i < thisRefList.size(); i++) {
+			if(!thisRefList.get(i).getValue().equals(otherRefList.get(i).getValue())) { return false; }
+			if(!thisRefList.get(i).getKey().equalsLocale(otherRefList.get(i).getKey(), locale)) { return false; }
+		}
+		
+		return true;
+	}
+	
+	public boolean equals(Object obj) {
+		if(obj instanceof MetaScale) {
+			MetaScale other = (MetaScale)obj;
+			return id == other.id;
+		} else {
+			return false;
+		}
 	}
 
 	@SuppressWarnings("unchecked")

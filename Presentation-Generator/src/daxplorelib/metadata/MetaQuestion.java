@@ -4,6 +4,9 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Statement;
+import java.util.LinkedList;
+import java.util.List;
 
 import org.json.simple.JSONArray;
 import org.json.simple.JSONAware;
@@ -128,6 +131,16 @@ public class MetaQuestion implements JSONAware, Comparable<MetaQuestion>{
 		} else {
 			return null;
 		}
+	}
+	
+	public static List<MetaQuestion> getAll(Connection connection) throws SQLException {
+		Statement stmt = connection.createStatement();
+		ResultSet rs = stmt.executeQuery("SELECT id FROM metaquestion ORDER BY id asc");
+		List<MetaQuestion> list = new LinkedList<MetaQuestion>();
+		while(rs.next()) {
+			list.add(new MetaQuestion(rs.getString("id"), connection));
+		}
+		return list;
 	}
 
 	@Override
