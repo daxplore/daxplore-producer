@@ -79,6 +79,10 @@ public class MetaGroup implements JSONAware{
 			return null;
 		}
 	}
+	
+	public void setTextRef(TextReference ref) {
+		//TODO: stub
+	}
 
 	public List<MetaQuestion> getQuestions() throws SQLException {
 		List<MetaQuestion> list = new LinkedList<MetaQuestion>();

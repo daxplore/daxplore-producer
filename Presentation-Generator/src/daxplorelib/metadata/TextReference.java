@@ -4,6 +4,9 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Statement;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Locale;
 
 import org.json.simple.JSONAware;
@@ -75,6 +78,16 @@ public class TextReference implements JSONAware, Comparable<TextReference> {
 		PreparedStatement stmt = connection.prepareStatement("DELETE FROM texts WHERE ref = ?");
 		stmt.setString(1, reference);
 		stmt.executeUpdate();
+	}
+	
+	public static List<TextReference> getAll(Connection connection) throws SQLException {
+		Statement stmt = connection.createStatement();
+		ResultSet rs = stmt.executeQuery("SELECT ref FROM texts");
+		List<TextReference> list = new LinkedList<TextReference>();
+		while(rs.next()) {
+			list.add(new TextReference(rs.getString("ref"), connection));
+		}
+		return list;
 	}
 
 	@Override

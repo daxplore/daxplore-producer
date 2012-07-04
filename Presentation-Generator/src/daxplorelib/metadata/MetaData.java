@@ -93,6 +93,10 @@ public class MetaData {
 		
 	}
 	
+	public void consolidateTexts(Locale bylocale) {
+		
+	}
+	
 	public void save(){
 		
 	}

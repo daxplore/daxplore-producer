@@ -74,26 +74,34 @@ public class MetaQuestion implements JSONAware, Comparable<MetaQuestion>{
 		return id;
 	}
 	
-	public String getFullTextRef() throws SQLException{
+	public TextReference getFullTextRef() throws SQLException{
 		PreparedStatement stmt = connection.prepareStatement("SELECT fulltextref FROM metaquestion WHERE id = ?");
 		stmt.setString(1, id);
 		ResultSet rs = stmt.executeQuery();
 		if(rs.next()) {
-			return rs.getString("fulltextref");
+			return new TextReference(rs.getString("fulltextref"), connection);
 		} else {
 			return null;
 		}
 	}
 	
-	public String getShortTextRef() throws SQLException{
+	public void setFullTextRef(TextReference ref) {
+		//TODO: stub
+	}
+	
+	public TextReference getShortTextRef() throws SQLException{
 		PreparedStatement stmt = connection.prepareStatement("SELECT shorttextref FROM metaquestion WHERE id = ?");
 		stmt.setString(1, id);
 		ResultSet rs = stmt.executeQuery();
 		if(rs.next()) {
-			return rs.getString("shorttextref");
+			return new TextReference(rs.getString("shorttextref"), connection);
 		} else {
 			return null;
 		}
+	}
+	
+	public void setShortTextRef(TextReference ref) {
+		//TODO: stub
 	}
 	
 	public MetaScale getScale() throws SQLException{
@@ -105,6 +113,10 @@ public class MetaQuestion implements JSONAware, Comparable<MetaQuestion>{
 		} else {
 			return null;
 		}
+	}
+	
+	public void setScale(MetaScale scale) {
+		//TODO: stub
 	}
 	
 	public MetaCalculation getCalculation() throws SQLException {
