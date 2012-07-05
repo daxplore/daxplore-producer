@@ -12,6 +12,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Properties;
 
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
@@ -167,12 +168,35 @@ public class MetaData {
 		w.close();
 	}
 	
-	public void importL10n(Reader r, Formats format, Locale locale) {
+	/**
+	 * 
+	 * @param reader A character based reader, compatible with {@link Properties#load(Reader)}
+	 * @param format
+	 * @param locale
+	 * @throws IOException
+	 */
+	public void importL10n(Reader reader, Formats format, Locale locale) throws IOException {
+		Properties properties = new Properties();
+		properties.load(reader);
 		
+		//Read the stuff:
+		String something = properties.getProperty("some-key");
 	}
 
-	public void exportL10n(Writer w, Formats format, Locale locale) {
+	/**
+	 * 
+	 * @param writer A character based writer, compatible with {@link Properties#store(Writer, String)}
+	 * @param format
+	 * @param locale
+	 * @throws IOException
+	 */
+	public void exportL10n(Writer writer, Formats format, Locale locale) throws IOException {
+		Properties properties = new Properties();
 		
+		//Store the stuff:
+		properties.put("some-key", "some-value");
+		
+		properties.store(writer, "Some documentation comment placed on the first row of the file"); //Comment can be null
 	}
 	
 	public void importConfig(Reader r, Formats format){
