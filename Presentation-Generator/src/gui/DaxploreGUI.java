@@ -14,6 +14,9 @@ import javax.swing.JInternalFrame;
 import javax.swing.JDesktopPane;
 import javax.swing.JTabbedPane;
 import javax.swing.JToggleButton;
+import javax.swing.UIManager;
+import javax.swing.UIManager.LookAndFeelInfo;
+
 import java.awt.CardLayout;
 import javax.swing.JEditorPane;
 import javax.swing.JList;
@@ -26,6 +29,9 @@ import java.awt.GridLayout;
 import javax.swing.JLabel;
 import javax.swing.AbstractAction;
 import javax.swing.Action;
+import javax.swing.JTree;
+import javax.swing.JTable;
+import javax.swing.ImageIcon;
 
 /**
  * Main window handler class. Initialization of application goes here.
@@ -38,6 +44,12 @@ public class DaxploreGUI {
 	 * Launch the application.
 	 */
 	public static void main(String[] args) {
+		try {
+			UIManager.setLookAndFeel("javax.swing.plaf.nimbus.NimbusLookAndFeel");
+		} catch (Throwable e) {
+			e.printStackTrace();
+		}
+		
 		EventQueue.invokeLater(new Runnable() {
 			public void run() {
 				try {
@@ -76,8 +88,10 @@ public class DaxploreGUI {
 		
 		final JPanel openPanel = new JPanel();
 		mainPanel.add(openPanel, "name_1340892548506154000");
+		openPanel.setLayout(null);
 		
 		JLabel lblNewLabel = new JLabel("Open");
+		lblNewLabel.setBounds(297, 5, 30, 16);
 		openPanel.add(lblNewLabel);
 		
 		final JPanel importPanel = new JPanel();
@@ -94,9 +108,7 @@ public class DaxploreGUI {
 		
 		JPanel editPanel = new JPanel();
 		mainPanel.add(editPanel, "name_1340892590961725000");
-		
-		JLabel lblNewLabel_3 = new JLabel("Edit file");
-		editPanel.add(lblNewLabel_3);
+		editPanel.setLayout(new BorderLayout(0, 0));
 		
 		JPanel sortPanel = new JPanel();
 		mainPanel.add(sortPanel, "name_1340892592836118000");
@@ -111,42 +123,48 @@ public class DaxploreGUI {
 		packagePanel.add(lblNewLabel_5);
 		
 		// button control section
-		JButton btnOpen = new JButton("Open");
+		JButton btnOpen = new JButton("");
+		btnOpen.setIcon(new ImageIcon(DaxploreGUI.class.getResource("/gui/resources/8.png")));
 		btnOpen.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
 			}
 		});
 		panel.add(btnOpen);
 		
-		JButton btnImport = new JButton("Import");
+		JButton btnImport = new JButton("");
+		btnImport.setIcon(new ImageIcon(DaxploreGUI.class.getResource("/gui/resources/4.png")));
 		btnImport.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 			}
 		});
 		panel.add(btnImport);
 
-		JButton btnQuestions = new JButton("Questions");
+		JButton btnQuestions = new JButton("");
+		btnQuestions.setIcon(new ImageIcon(DaxploreGUI.class.getResource("/gui/resources/6.png")));
 		btnQuestions.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 			}
 		});
 		panel.add(btnQuestions);
 	
-		JButton btnEditor = new JButton("Edit file");
+		JButton btnEditor = new JButton("");
+		btnEditor.setIcon(new ImageIcon(DaxploreGUI.class.getResource("/gui/resources/21.png")));
 		btnEditor.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 			}
 		});
 		panel.add(btnEditor);
 		
-		JButton btnSort = new JButton("Sort data");
+		JButton btnSort = new JButton("");
+		btnSort.setIcon(new ImageIcon(DaxploreGUI.class.getResource("/gui/resources/24.png")));
 		btnSort.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 			}
 		});
 		panel.add(btnSort);
 		
-		JButton btnPackage = new JButton("Package");
+		JButton btnPackage = new JButton("");
+		btnPackage.setIcon(new ImageIcon(DaxploreGUI.class.getResource("/gui/resources/28.png")));
 		btnPackage.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 			}
