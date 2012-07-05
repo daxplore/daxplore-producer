@@ -18,7 +18,7 @@ public class ImportController {
 	public List<File> files;
 
 	/**
-	 * Run the import command and read SPSS file.
+	 * Run the import command and read SPSS file. Taken from command client.
 	 * @param projectFile
 	 */
 	public void run(File projectFile) {
