@@ -1,5 +1,6 @@
 package tools;
 
+import java.sql.SQLException;
 import java.util.Arrays;
 import java.util.Iterator;
 
@@ -232,5 +233,20 @@ public class MyTools {
 			equals = equals || in.equals(compareToList[i]);
 		}
 		return equals;
+	}
+	
+	public static void printSQLExeption(SQLException e) {
+		System.err.println("------ SQLException --------");
+		System.err.println(e.getMessage());
+		System.err.println(e.getSQLState());
+		System.err.println(e.getStackTrace());
+		System.err.println("=================== Exception chain =====================");
+		Iterator<Throwable> ex = e.iterator();
+		while(ex.hasNext()) {
+			Throwable t = ex.next();
+			System.err.println(t.getMessage());
+			System.err.println(t.getStackTrace());
+		}
+		System.err.println("------ End of SQLException -------");
 	}
 }

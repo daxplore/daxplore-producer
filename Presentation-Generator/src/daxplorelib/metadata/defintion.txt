@@ -2,9 +2,9 @@
 mainobject
 {
 	questions: [<questionobject>],
-	selected: {
+	groups: {
 		questions: [<groupobject>],
-		selectors: <groupobject>
+		perspectives: <groupobject>
 	},
 	
 }

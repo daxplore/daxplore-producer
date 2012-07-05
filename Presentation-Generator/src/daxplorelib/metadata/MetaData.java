@@ -1,5 +1,6 @@
 package daxplorelib.metadata;
 
+import java.io.IOException;
 import java.io.Reader;
 import java.io.Writer;
 import java.sql.Connection;
@@ -10,7 +11,16 @@ import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 
+import org.json.simple.JSONArray;
+import org.json.simple.JSONObject;
+import org.json.simple.JSONValue;
+import org.json.simple.parser.ContainerFactory;
+import org.json.simple.parser.JSONParser;
+import org.json.simple.parser.ParseException;
+
+import tools.MyTools;
 import tools.Pair;
 
 import daxplorelib.DaxploreException;
@@ -18,6 +28,7 @@ import daxplorelib.DaxploreFile;
 import daxplorelib.SQLTools;
 import daxplorelib.fileformat.RawMeta;
 import daxplorelib.fileformat.RawMeta.RawMetaQuestion;
+import daxplorelib.metadata.MetaGroup.GroupType;
 
 public class MetaData {
 	
@@ -74,23 +85,97 @@ public class MetaData {
 		}
 	}
 	
-	public void importStructure(Reader r, Formats format){
+	@SuppressWarnings({ "rawtypes" })
+	public void importStructure(Reader r, Formats format) throws IOException {
+		JSONParser parser = new JSONParser();
+		ContainerFactory containerFactory = new ContainerFactory(){
+			public List creatArrayContainer() {
+				return new LinkedList();
+			}
+			public Map createObjectContainer() {
+				return null;
+			}                    
+		};
 		
+		try {
+			JSONObject json = (JSONObject) parser.parse(r, containerFactory);
+			Iterator iter = json.keySet().iterator();
+			while (iter.hasNext()) {
+				String key = (String) iter.next();
+				if("question".equals(key)) {
+					List questions = (List) json.get(key);
+					for(Object o: questions) {
+						JSONObject q = (JSONObject)o;
+						new MetaQuestion(q, connection);
+					}
+				} else if("groups".equals(key)) {
+					JSONObject groups = (JSONObject)json.get(key);
+					Iterator giter = json.keySet().iterator();
+					while(giter.hasNext()) {
+						String gkey = (String)giter.next();
+						if("quesions".equals(gkey)) {
+							List qgroups = (List) groups.get(gkey);
+							for(Object o: qgroups) {
+								JSONObject g = (JSONObject)o;
+								new MetaGroup(g, GroupType.QUESTIONS, connection);
+							}
+						} else if ("perspectives".equals(gkey)) {
+							JSONObject g = (JSONObject)groups.get(gkey);
+							new MetaGroup(g, GroupType.PERSPECTIVE, connection);
+						}
+					}
+				}
+			}
+		} catch (ParseException pe) {
+			System.out.println(pe);
+		} catch (SQLException e) {
+			MyTools.printSQLExeption(e);
+		}
+	}
+	
+	@SuppressWarnings("unchecked")
+	public void exportStructure(Writer w, Formats format) throws DaxploreException, IOException, SQLException{
+		JSONObject jsonroot = new JSONObject();
+		
+		//export questions
+		List<MetaQuestion> questions = getAllQuestions();
+		JSONArray questionArr = new JSONArray();
+		for(MetaQuestion q: questions) {
+			questionArr.add(q);
+		}
+		jsonroot.put("questions", questionArr);
+		
+		//export groups
+		List<MetaGroup> groups = getAllGroups();
+		JSONObject groupobj = new JSONObject();
+		JSONArray grouparr = new JSONArray();
+		MetaGroup perspectives = null;
+		for(MetaGroup g: groups) {
+			if(g.getType() == GroupType.QUESTIONS) {
+				grouparr.add(g);				
+			} else {
+				perspectives = g;
+			}
+		}
+		groupobj.put("questions", grouparr);
+		if(perspectives != null) {
+			groupobj.put("perspectives", perspectives);
+		}
+		jsonroot.put("groups", groupobj);
+		
+		w.write(jsonroot.toJSONString());
+		w.close();
 	}
 	
 	public void importL10n(Reader r, Formats format, Locale locale) {
 		
 	}
+
+	public void exportL10n(Writer w, Formats format, Locale locale) {
+		
+	}
 	
 	public void importConfig(Reader r, Formats format){
-		
-	}
-	
-	public void exportStructure(Writer w, Formats format){
-		
-	}
-	
-	public void exportL10n(Writer w, Formats format, Locale locale) {
 		
 	}
 	
@@ -104,7 +189,7 @@ public class MetaData {
 			List<MetaScale> uniqueScales = new LinkedList<MetaScale>();
 			List<MetaScale> genericScales = new LinkedList<MetaScale>();
 			LinkedHashMap<MetaScale, MetaScale> scaleMap = new LinkedHashMap<MetaScale, MetaScale>();
-			L: for(MetaScale s: scaleList) {
+			NextScale: for(MetaScale s: scaleList) {
 				for(MetaScale us: uniqueScales) {
 					if(us.equalsLocale(s, bylocale)) {
 						//If scale exists previously, create new generic scale 
@@ -123,13 +208,13 @@ public class MetaData {
 						genericScales.add(gs);
 						scaleMap.put(s, gs);
 						uniqueScales.remove(us);
-						continue L;
+						continue NextScale;
 					}
 				}
 				for(MetaScale gs: genericScales) {
 					if(gs.equalsLocale(s, bylocale)) {
 						scaleMap.put(s, gs);
-						continue L;
+						continue NextScale;
 					}
 				}
 			}

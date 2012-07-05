@@ -12,6 +12,8 @@ import org.json.simple.JSONArray;
 import org.json.simple.JSONAware;
 import org.json.simple.JSONObject;
 
+import tools.MyTools;
+
 public class MetaGroup implements JSONAware{
 	protected static final String sqlDefinition = "CREATE TABLE metagroup (id INTEGER PRIMARY KEY, textref TEXT, index INTEGER, type INTEGER)";
 	protected static final String sqlDefinition2 = "CREATE TABLE metagrouprel (groupid INTEGER, questionid TEXT)";		
@@ -29,6 +31,16 @@ public class MetaGroup implements JSONAware{
 		
 		public int asInt() {
 			return type;
+		}
+		
+		public static GroupType fromInt(int i) {
+			switch(i) {
+			case 0:
+				return QUESTIONS;
+			case 1:
+				return PERSPECTIVE;
+			}
+			return null;
 		}
 	}
 	
@@ -53,6 +65,10 @@ public class MetaGroup implements JSONAware{
 			removeQuestions();
 			addQuestions(questions);
 		}
+	}
+	
+	public MetaGroup(JSONObject obj, GroupType type, Connection connection) {
+		
 	}
 	
 	protected void addQuestions(List<MetaQuestion> questions) throws SQLException{
@@ -92,6 +108,18 @@ public class MetaGroup implements JSONAware{
 		stmt.setInt(2, id);
 		stmt.executeUpdate();
 	}
+	
+	public GroupType getType() throws SQLException {
+		PreparedStatement stmt = connection.prepareStatement("SELECT type FROM metagroup WHERE groupid = ?");
+		stmt.setInt(1, id);
+		ResultSet rs = stmt.executeQuery();
+		if(rs.next()) {
+			int type = rs.getInt("type");
+			return GroupType.fromInt(type);
+		} else {
+			return null;
+		}
+	}
 
 	public List<MetaQuestion> getQuestions() throws SQLException {
 		List<MetaQuestion> list = new LinkedList<MetaQuestion>();
@@ -128,8 +156,8 @@ public class MetaGroup implements JSONAware{
 	@SuppressWarnings("unchecked")
 	@Override
 	public String toJSONString() {
+		JSONObject obj = new JSONObject();
 		try {
-			JSONObject obj = new JSONObject();
 			obj.put("textref", getTextRef());
 			obj.put("index", getIndex());
 			JSONArray questions = new JSONArray();
@@ -137,9 +165,9 @@ public class MetaGroup implements JSONAware{
 				questions.add(q.getId());
 			}
 			obj.put("questions", questions);
-			return obj.toJSONString();
 		} catch (SQLException e) {
-			return "";
+			MyTools.printSQLExeption(e);
 		}
+		return obj.toJSONString();
 	}
 }
