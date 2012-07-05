@@ -59,6 +59,16 @@ public class MetaGroup implements JSONAware{
 		ResultSet rs = stmt.executeQuery();
 		if(rs.next()) {
 			id = rs.getInt("id");
+		} else {
+			//if not create new group
+			stmt = connection.prepareStatement("INSERT INTO metagroup (textref, index, type) VALUES (?, ?, ?)");
+			stmt.setString(1, textref.getRef());
+			stmt.setInt(2, index);
+			stmt.setInt(3, type.asInt());
+			stmt.execute();
+			rs = stmt.getGeneratedKeys();
+			rs.next();
+			id = rs.getInt(1);
 		}
 		
 		if(questions != null){
@@ -67,8 +77,14 @@ public class MetaGroup implements JSONAware{
 		}
 	}
 	
-	public MetaGroup(JSONObject obj, GroupType type, Connection connection) {
-		
+	public MetaGroup(JSONObject obj, GroupType type, Connection connection) throws SQLException {
+		this(new TextReference((String)obj.get("textref"), connection), (Integer)obj.get("index"), type, null, connection);
+		List<MetaQuestion> questions = new LinkedList<MetaQuestion>();
+		JSONArray questionArr = (JSONArray) obj.get("questions");
+		for(int i = 0; i < questionArr.size(); i++) {
+			questions.add(new MetaQuestion((String)questionArr.get(i), connection));
+		}
+		addQuestions(questions);
 	}
 	
 	protected void addQuestions(List<MetaQuestion> questions) throws SQLException{
