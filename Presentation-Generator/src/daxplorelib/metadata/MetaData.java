@@ -12,18 +12,17 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Properties;
 
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
-import org.json.simple.JSONValue;
 import org.json.simple.parser.ContainerFactory;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 
 import tools.MyTools;
 import tools.Pair;
-
 import daxplorelib.DaxploreException;
 import daxplorelib.DaxploreFile;
 import daxplorelib.SQLTools;
@@ -174,13 +173,23 @@ public class MetaData {
 	 * @param format
 	 * @param locale
 	 * @throws IOException
+	 * @throws DaxploreException 
 	 */
-	public void importL10n(Reader reader, Formats format, Locale locale) throws IOException {
+	public void importL10n(Reader reader, Formats format, Locale locale) throws IOException, DaxploreException {
 		Properties properties = new Properties();
 		properties.load(reader);
 		
-		//Read the stuff:
-		String something = properties.getProperty("some-key");
+		Iterator<Entry<Object, Object>> allTexts = properties.entrySet().iterator();
+		try {
+		while(allTexts.hasNext()) {
+			Entry<Object, Object> s = allTexts.next();
+			TextReference tr = new TextReference((String)s.getKey(), connection);
+			tr.put((String)s.getValue(), locale);
+		}
+		} catch (SQLException e) {
+			MyTools.printSQLExeption(e);
+			throw new DaxploreException("Error on Text import", e);
+		}
 	}
 
 	/**
@@ -189,14 +198,22 @@ public class MetaData {
 	 * @param format
 	 * @param locale
 	 * @throws IOException
+	 * @throws DaxploreException 
 	 */
-	public void exportL10n(Writer writer, Formats format, Locale locale) throws IOException {
+	public void exportL10n(Writer writer, Formats format, Locale locale) throws IOException, DaxploreException {
 		Properties properties = new Properties();
 		
-		//Store the stuff:
-		properties.put("some-key", "some-value");
+		try {
+			List<TextReference> allTexts = getAllTextReferences();
+			for(TextReference tr: allTexts) {
+				properties.put(tr.getRef(), tr.get(locale));
+			}
+		} catch (SQLException e) {
+			MyTools.printSQLExeption(e);
+			throw new DaxploreException("Error on Text export", e);
+		}
 		
-		properties.store(writer, "Some documentation comment placed on the first row of the file"); //Comment can be null
+		properties.store(writer, null); //Comment can be null Some documentation comment placed on the first row of the file
 	}
 	
 	public void importConfig(Reader r, Formats format){
