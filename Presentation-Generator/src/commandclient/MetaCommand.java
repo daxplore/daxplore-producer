@@ -104,7 +104,7 @@ public class MetaCommand {
 	
 	public void run(File file){
 		MetaData metadata;
-		try {
+		/*try {
 			DaxploreFile daxplorefile = new DaxploreFile(file, false);
 			
 			if(src.format == dest.format){
@@ -120,10 +120,10 @@ public class MetaCommand {
 				if(src.version != null){
 					version = src.version;
 				} else {
-					version = daxplorefile.getAbout().getActiveRawData();
+				//	version = daxplorefile.getAbout().getActiveRawData();
 				}
-				ImportedData imported = daxplorefile.getAbout().getImportedData(version);
-				metadata = new MetaData(imported, daxplorefile);
+				//ImportedData imported = daxplorefile.getAbout().getImportedData(version);
+				//metadata = new MetaData(imported, daxplorefile);
 				break;
 			case JSON:
 			case RESOURCE:
@@ -131,7 +131,7 @@ public class MetaCommand {
 				if(src.file.exists() && src.file.canRead()){
 					try {
 						br = new BufferedReader(new FileReader(src.file));
-						metadata = new MetaData(br, src.format, daxplorefile);
+						//metadata = new MetaData(br, src.format, daxplorefile);
 					} catch (FileNotFoundException e) {
 						System.out.println("File " + src.file.getName() + " does not exist");
 						return;
@@ -151,7 +151,7 @@ public class MetaCommand {
 			}
 			switch (dest.format){
 			case DATABASE:
-				metadata.save();
+				//metadata.save();
 				break;
 			case RAW:
 				System.out.println("Destination can't be RAW");
@@ -161,7 +161,7 @@ public class MetaCommand {
 				if(dest.file.canWrite()){
 					try {
 						BufferedWriter bw = new BufferedWriter(new FileWriter(dest.file));
-						metadata.export(bw, dest.format);
+						//metadata.export(bw, dest.format);
 						bw.flush();
 					} catch (IOException e) {
 						System.out.println("Can't write to " + dest.file.getName());
@@ -175,6 +175,6 @@ public class MetaCommand {
 		} catch (DaxploreException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
-		}
+		}*/
 	}
 }

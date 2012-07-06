@@ -20,10 +20,11 @@ public class About {
 	final int filetypeversionminor;
 	Date creation;
 	Date lastupdate;
-	int activeRawData;
+	Date importdate;
+	String filename;
 	Connection database;
 	
-	public About(Connection sqliteDatabase) throws SQLException{
+	public About(Connection sqliteDatabase) throws SQLException {
 		this(sqliteDatabase, false);
 	}
 	
@@ -33,20 +34,16 @@ public class About {
 		if(createnew){
 			filetypeversionmajor = DaxploreFile.filetypeversionmajor;
 			filetypeversionminor = DaxploreFile.filetypeversionminor;
-			activeRawData = 0;
 			creation = new Date();
 			lastupdate = (Date) creation.clone();
 			stmt = database.createStatement();
-			stmt.executeUpdate("CREATE TABLE about (filetypeversionmajor INTEGER, filetypeversionminor INTEGER, creation INTEGER, lastupdate INTEGER, activerawdata INTEGER)");
+			stmt.executeUpdate("CREATE TABLE about (filetypeversionmajor INTEGER, filetypeversionminor INTEGER, creation INTEGER, lastupdate INTEGER, importdate INTEGER, filename TEXT)");
 			PreparedStatement prepared = database.prepareStatement("INSERT INTO about VALUES (?, ?, ?, ?, ?)");
 			prepared.setInt(1, filetypeversionmajor);
 			prepared.setInt(2, filetypeversionminor);
 			prepared.setLong(3, creation.getTime());
 			prepared.setLong(4, lastupdate.getTime());
-			prepared.setInt(5, activeRawData);
 			prepared.execute();
-			stmt = database.createStatement();
-			stmt.executeUpdate("CREATE TABLE rawversions (version INTEGER PRIMARY KEY AUTOINCREMENT, rawmeta TEXT, rawdata TEXT, importdate INTEGER, filename TEXT)");
 		}else{
 			stmt = database.createStatement();
 			stmt.execute("SELECT * FROM about");
@@ -56,62 +53,18 @@ public class About {
 			filetypeversionminor = rs.getInt("filetypeversionminor");
 			creation = rs.getDate("creation");
 			lastupdate = rs.getDate("lastupdate");
-			activeRawData = rs.getInt("activerawdata");
+			importdate = rs.getDate("importdate");
+			filename = rs.getString("filename");
 		}
 	}
 	
-	public int getActiveRawData(){
-		return activeRawData;
-	}
-	
-	void setActiveRawData(int newactive) throws SQLException{
-		PreparedStatement prepared = database.prepareStatement("UPDATE about SET activerawdata = ?");
-		prepared.setInt(1, newactive);
-		int rowsaffected = prepared.executeUpdate();
-		if(rowsaffected == 1){
-			activeRawData = newactive;
-			return;
-		} else if(rowsaffected > 1){
-			activeRawData = newactive;
-			System.err.println("WTF! Do we have more than 1 row in about");
-			return;
-		} else if(rowsaffected == 0){
-			System.err.println("No rows in about?");
-			return;
-		}
-	}
-	
-	public ImportedData getImportedData(int version){
+	public ImportedData getImportedData(){
 		try {
-			ImportedData id = new ImportedData(version, database);
+			ImportedData id = new ImportedData(database);
 			return id;
 		} catch (SQLException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
-			return null;
-		}
-	}
-	
-	public List<ImportedData> getImportedDataVersions() {
-		List<ImportedData> importlist = new LinkedList<ImportedData>();
-		try {
-			boolean autocommit = database.getAutoCommit();
-			database.setAutoCommit(true);
-			Statement stmt = database.createStatement();
-			ResultSet rs = stmt.executeQuery("SELECT version FROM rawversions ORDER BY version ASC");
-			while(rs.next()){
-				int version = rs.getInt("version");
-				try {
-					ImportedData ip = new ImportedData(version, database);
-					importlist.add(ip);
-				} catch (SQLException e ) {
-					System.err.println("Error opening version " + version);
-				}
-			}
-			database.setAutoCommit(autocommit);
-			return importlist;
-		} catch (SQLException e){
-			System.err.println("Error getting imported versions");
 			return null;
 		}
 	}
@@ -122,5 +75,31 @@ public class About {
 	
 	public Date getLastUpdate() {
 		return lastupdate;
+	}
+	
+	public void setUpdate() throws SQLException {
+		Date now = new Date();
+		PreparedStatement prep = database.prepareStatement("UPDATE about SET lastupdate = ?");
+		prep.setLong(1, now.getTime());
+		lastupdate = now;
+		prep.executeUpdate();
+	}
+	
+	public Date getImportDate() {
+		return importdate;
+	}
+	
+	public void setImport(String filename) throws SQLException {
+		Date now = new Date();
+		PreparedStatement prep = database.prepareStatement("UPDATE about SET importdate = ?, filename = ?");
+		prep.setLong(1, now.getTime());
+		lastupdate = now;
+		prep.setString(2, filename);
+		this.filename = filename;
+		prep.executeUpdate();
+	}
+	
+	public String getImportFilename(){
+		return filename;
 	}
 }
