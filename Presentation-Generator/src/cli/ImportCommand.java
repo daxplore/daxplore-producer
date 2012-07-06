@@ -16,53 +16,105 @@ import daxplorelib.DaxploreFile;
 @Parameters(commandDescription = "Import data into project")
 public class ImportCommand {
 
-	@Parameter(names = "--spss", description = "Import spss file")
-	public boolean spssImport = true;
-	
-	@Parameter(names = "--create", description = "Create a new project")
-	public boolean create = false;
-	
-	@Parameter(names = "--charset", description = "Import with charachterset")
-	public String charsetName = "ISO-8859-1";
-	
-	@Parameter(description = "file to import", arity = 1, converter = FileConverter.class, required = true)
-	public List<File> files;
-
+	private ImportSpssCommand spssCommand;
+	private ImportMetaStructureCommand metaStructureCommand;
+	private ImportMetaTextsCommand metaTextsCommand;
 	
 	public void run(File projectFile) {
-		File importFile = files.get(0);
-		if(!importFile.exists()){
-			System.out.println("SPSS file " + importFile.getName() + " does not exist");
-			return;
+		
+	}
+	
+	public ImportSpssCommand getSpssCommand() {
+		if(spssCommand == null) {
+			spssCommand = new ImportSpssCommand();
 		}
-		if(importFile.isDirectory()){
-			System.out.println("SPSS file is a directory, I can't import a directory");
-			return;
+		return spssCommand;
+	}
+	
+	public ImportMetaStructureCommand getMetaStructureCommand() {
+		if(metaStructureCommand == null) {
+			metaStructureCommand = new ImportMetaStructureCommand();
 		}
-		Charset charset;
-		try{
-			charset = Charset.forName(charsetName);
-		} catch (Exception e){
-			System.out.println("Charset error");
-			return;
+		return metaStructureCommand;
+	}
+	
+	public ImportMetaTextsCommand getMetaTextsCommand() {
+		if(metaTextsCommand == null) {
+			metaTextsCommand = new ImportMetaTextsCommand();
 		}
-		try {
-			DaxploreFile daxplorefile = new DaxploreFile(projectFile, create);
-			daxplorefile.importSPSS(importFile, charset);
-			System.out.println("Data imported");
-		} catch (FileNotFoundException e) {
-			System.out.println("Havn't we tested this already");
-			e.printStackTrace();
-			return;
-		} catch (IOException e) {
-			e.printStackTrace();
-			return;
-		} catch (DaxploreException e) {
-			// TODO Auto-generated catch block
-			System.out.println(e.getMessage());
-			e.printStackTrace();
-			return;
+		return metaTextsCommand;
+	}
+	
+	@Parameters
+	public class ImportSpssCommand {
+		@Parameter(names = "--create", description = "Create a new project")
+		public boolean create = false;
+		
+		@Parameter(names = "--charset", description = "Import with charachterset")
+		public String charsetName = "ISO-8859-1";
+		
+		@Parameter(description = "file to import", arity = 1, converter = FileConverter.class, required = true)
+		public List<File> files;
+		
+		public void run(File projectFile) {
+			File importFile = files.get(0);
+			if(!importFile.exists()){
+				System.out.println("SPSS file " + importFile.getName() + " does not exist");
+				return;
+			}
+			if(importFile.isDirectory()){
+				System.out.println("SPSS file is a directory, I can't import a directory");
+				return;
+			}
+			Charset charset;
+			try{
+				charset = Charset.forName(charsetName);
+			} catch (Exception e){
+				System.out.println("Charset error");
+				return;
+			}
+			try {
+				DaxploreFile daxplorefile = new DaxploreFile(projectFile, create);
+				daxplorefile.importSPSS(importFile, charset);
+				System.out.println("Data imported");
+			} catch (FileNotFoundException e) {
+				System.out.println("Havn't we tested this already");
+				e.printStackTrace();
+				return;
+			} catch (IOException e) {
+				e.printStackTrace();
+				return;
+			} catch (DaxploreException e) {
+				// TODO Auto-generated catch block
+				System.out.println(e.getMessage());
+				e.printStackTrace();
+				return;
+			}
+		}
+	}
+	
+	@Parameters
+	public class ImportMetaStructureCommand {
+		
+		@Parameter(description = "file to import", arity = 1, converter = FileConverter.class, required = true)
+		public List<File> files;
+		
+		public void run(File projectFile) {
+			
 		}
 		
 	}
+	
+	@Parameters
+	public class ImportMetaTextsCommand {
+		
+		@Parameter(description = "file to import", arity = 1, converter = FileConverter.class, required = true)
+		public List<File> files;
+		
+		public void run(File projectFile) {
+			
+		}
+	}
 }
+
+

@@ -2,6 +2,12 @@ package cli;
 
 import java.io.File;
 
+import cli.ExportCommand.ExportStructureCommand;
+import cli.ExportCommand.ExportTextsCommand;
+import cli.ImportCommand.ImportMetaStructureCommand;
+import cli.ImportCommand.ImportMetaTextsCommand;
+import cli.ImportCommand.ImportSpssCommand;
+
 import com.beust.jcommander.JCommander;
 import com.beust.jcommander.Parameter;
 import com.beust.jcommander.ParameterException;
@@ -17,13 +23,27 @@ public class DaxploreCLI {
 
 		JCommander jc = new JCommander();
 		jc.setProgramName("daxplore");
-		ImportCommand importcommand = new ImportCommand();
-		jc.addCommand("import", importcommand);
+		
+		ImportCommand importCommand = new ImportCommand();
+		JCommander jc_import = addCommand(jc, "import", importCommand);
+		ImportSpssCommand importSpssCommand = importCommand.getSpssCommand();
+		addCommand(jc_import, "spss", importSpssCommand);
+		ImportMetaStructureCommand importMetaStructureCommand = importCommand.getMetaStructureCommand();
+		addCommand(jc_import, "structure", importMetaStructureCommand);
+		ImportMetaTextsCommand importMetaTextsCommand = importCommand.getMetaTextsCommand();
+		addCommand(jc_import, "texts", importMetaTextsCommand);
+		
+		ExportCommand exportCommand = new ExportCommand();
+		JCommander jc_export = addCommand(jc, "export", exportCommand);
+		ExportStructureCommand exportStructureCommand = exportCommand.getStructureCommand();
+		addCommand(jc_export, "structure", exportStructureCommand);
+		ExportTextsCommand exportTextsCommand = exportCommand.getTextsCommand();
+		addCommand(jc_export, "texts", exportTextsCommand);
+		
+		
 		InfoCommand infocommand = new InfoCommand();
 		jc.addCommand("info", infocommand);
-		MetaCommand metacommand = new MetaCommand();
-		jc.addCommand("meta", metacommand);
-	
+		
 		try{
 			jc.parse(args);
 		} catch (ParameterException e){
@@ -48,7 +68,7 @@ public class DaxploreCLI {
 		if(command == null){
 			jc.usage();
 		} else if(command.equals("import")){
-				importcommand.run(file);
+				importCommand.run(file);
 		} else if(command.equals("info")){
 			infocommand.run(file);
 		} else if(command.equals("meta")){
@@ -56,4 +76,11 @@ public class DaxploreCLI {
 		}
 
 	}
+	
+	private static JCommander addCommand(JCommander parentCommand,
+	        String commandName, Object commandObject) {
+	    parentCommand.addCommand(commandName, commandObject);
+	    return parentCommand.getCommands().get(commandName);
+	}
+	
 }
