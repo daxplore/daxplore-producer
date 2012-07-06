@@ -1,4 +1,4 @@
-package commandclient;
+package cli;
 
 import java.io.File;
 
@@ -7,7 +7,7 @@ import com.beust.jcommander.Parameter;
 import com.beust.jcommander.ParameterException;
 import com.beust.jcommander.converters.FileConverter;
 
-public class DaxploreCommandClient {
+public class DaxploreCLI {
 
 	@Parameter(names={"--file","-f"}, description = "Daxplore file", converter = FileConverter.class, required = true)
 	static File file;

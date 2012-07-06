@@ -1,4 +1,4 @@
-package commandclient;
+package cli;
 
 import java.io.File;
 import java.io.FileNotFoundException;
