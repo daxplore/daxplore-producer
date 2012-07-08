@@ -63,6 +63,7 @@ import java.io.File;
 import javax.swing.JTextPane;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.JScrollPane;
+import java.awt.Window.Type;
 
 /**
  * Main window handler class. Initialization of application goes here.
@@ -161,6 +162,10 @@ public class DaxploreGUI {
 		openPanel.add(openFileButton);
 		
 		JButton createNewFileButton = new JButton("Create new file...");
+		createNewFileButton.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+			}
+		});
 		createNewFileButton.setToolTipText("Creates a new SPSS file");
 		createNewFileButton.setBounds(168, 24, 150, 27);
 		openPanel.add(createNewFileButton);
@@ -183,31 +188,35 @@ public class DaxploreGUI {
 		lastImportedText.setBounds(112, 120, 343, 24);
 		openPanel.add(lastImportedText);
 		
-		// JTable test data.
-		String[] columnNames = {"First Name",
-                "Last Name",
-                "Sport",
-                "# of Years",
-                "Vegetarian"};
-		
-		Object[][] data = {
-			    {"Kathy", "Smith",
-			     "Snowboarding", new Integer(5), new Boolean(false)},
-			    {"John", "Doe",
-			     "Rowing", new Integer(3), new Boolean(true)},
-			    {"Sue", "Black",
-			     "Knitting", new Integer(2), new Boolean(false)},
-			    {"Jane", "White",
-			     "Speed reading", new Integer(20), new Boolean(true)},
-			    {"Joe", "Brown",
-			     "Pool", new Integer(10), new Boolean(false)}
-			};
-		
 		JScrollPane scrollPane = new JScrollPane();
 		scrollPane.setBounds(6, 173, 761, 520);
 		openPanel.add(scrollPane);
 		
-		tableSPSS = new JTable(data, columnNames);
+		tableSPSS = new JTable();
+		// test data, in reality we need to fill the model with SPSS file info.
+		tableSPSS.setModel(new DefaultTableModel(
+			new Object[][] {
+				{"Kathy", "Smith", "Snowboarding", new Integer(5), Boolean.FALSE},
+				{"John", "Doe", "Rowing", new Integer(3), Boolean.TRUE},
+				{"Sue", "Black", "Knitting", new Integer(2), Boolean.FALSE},
+				{"Jane", "White", "Speed reading", new Integer(20), Boolean.TRUE},
+				{"Joe", "Brown", "Pool", new Integer(10), Boolean.FALSE},
+			},
+			new String[] {
+				"First Name", "Last Name", "Sport", "Tries#", "Vegetarian"
+			}
+		) {
+			/**
+			 * 
+			 */
+			private static final long serialVersionUID = -6898131158931249619L;
+			boolean[] columnEditables = new boolean[] {
+				false, false, true, true, false
+			};
+			public boolean isCellEditable(int row, int column) {
+				return columnEditables[column];
+			}
+		});
 		scrollPane.setViewportView(tableSPSS);
 		
 		JSeparator openSeparator = new JSeparator();
@@ -257,6 +266,7 @@ public class DaxploreGUI {
 		
 		// radio button control section
 		JRadioButton btnOpen = new JRadioButton("");
+		btnOpen.setToolTipText("Open and create SPSS file(s)");
 		btnOpen.addItemListener(new ItemListener() {
 			public void itemStateChanged(ItemEvent e) {
 				CardLayout cl = (CardLayout)(mainPanel.getLayout());
@@ -271,6 +281,7 @@ public class DaxploreGUI {
 		buttonPanel.add(btnOpen);
 		
 		JRadioButton btnImport = new JRadioButton("");
+		btnImport.setToolTipText("Import SPSS file(s)");
 		btnImport.addItemListener(new ItemListener() {
 			public void itemStateChanged(ItemEvent e) {
 				CardLayout cl = (CardLayout)(mainPanel.getLayout());
@@ -285,6 +296,7 @@ public class DaxploreGUI {
 		buttonPanel.add(btnImport);
 
 		JRadioButton btnQuestions = new JRadioButton("");
+		btnQuestions.setToolTipText("Question edit");
 		btnQuestions.addItemListener(new ItemListener() {
 			public void itemStateChanged(ItemEvent e) {
 				CardLayout cl = (CardLayout)(mainPanel.getLayout());
@@ -299,6 +311,7 @@ public class DaxploreGUI {
 		buttonPanel.add(btnQuestions);
 	
 		JRadioButton btnEdit = new JRadioButton("");
+		btnEdit.setToolTipText("Edit SPSS data");
 		btnEdit.addItemListener(new ItemListener() {
 			public void itemStateChanged(ItemEvent e) {
 				CardLayout cl = (CardLayout)(mainPanel.getLayout());
@@ -313,6 +326,7 @@ public class DaxploreGUI {
 		buttonPanel.add(btnEdit);
 		
 		JRadioButton btnSort = new JRadioButton("");
+		btnSort.setToolTipText("Sort data");
 		btnSort.addItemListener(new ItemListener() {
 			public void itemStateChanged(ItemEvent e) {
 				CardLayout cl = (CardLayout)(mainPanel.getLayout());
@@ -327,6 +341,7 @@ public class DaxploreGUI {
 		buttonPanel.add(btnSort);
 		
 		JRadioButton btnPackage = new JRadioButton("");
+		btnPackage.setToolTipText("Package files");
 		btnPackage.addItemListener(new ItemListener() {
 			public void itemStateChanged(ItemEvent e) {
 				CardLayout cl = (CardLayout)(mainPanel.getLayout());
