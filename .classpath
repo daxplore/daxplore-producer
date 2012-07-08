@@ -7,5 +7,6 @@
 	<classpathentry kind="lib" path="Presentation-Generator/lib/org.opendatafoundation.data-20111116.jar"/>
 	<classpathentry kind="lib" path="Presentation-Generator/lib/sqlite-jdbc-3.7.2.jar"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
+	<classpathentry kind="lib" path="forms-1.3.0.jar" sourcepath="forms-1.3.0-src.zip"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
