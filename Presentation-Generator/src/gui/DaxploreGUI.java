@@ -64,6 +64,7 @@ import javax.swing.JTextPane;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.JScrollPane;
 import java.awt.Window.Type;
+import javax.swing.JSplitPane;
 
 /**
  * Main window handler class. Initialization of application goes here.
@@ -73,6 +74,7 @@ public class DaxploreGUI {
 	private JFrame frmDaxploreProducer;
 	private final ButtonGroup buttonGroup = new ButtonGroup();
 	private JTable tableSPSS;
+	private JTable table;
 
 	/**
 	 * Launch the application.
@@ -116,14 +118,15 @@ public class DaxploreGUI {
 	private void initialize() {
 		
 		frmDaxploreProducer = new JFrame();
+		frmDaxploreProducer.setResizable(false);
 		frmDaxploreProducer.setIconImage(Toolkit.getDefaultToolkit().getImage(DaxploreGUI.class.getResource("/gui/resources/Colorful_Chart_Icon_vol2.png")));
 		frmDaxploreProducer.setTitle("Daxplore Producer Developer Version");
-		frmDaxploreProducer.setResizable(false);
-		frmDaxploreProducer.setBounds(100, 100, 864, 732);
+		frmDaxploreProducer.setBounds(100, 100, 987, 800);
 		frmDaxploreProducer.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		frmDaxploreProducer.getContentPane().setLayout(new BorderLayout(0, 0));
 		
 		JPanel buttonPanel = new JPanel();
+		buttonPanel.setBorder(new MatteBorder(0, 0, 0, 1, (Color) Color.LIGHT_GRAY));
 		frmDaxploreProducer.getContentPane().add(buttonPanel, BorderLayout.WEST);
 		buttonPanel.setLayout(new GridLayout(0, 1, 0, 0));
 		
@@ -189,7 +192,7 @@ public class DaxploreGUI {
 		openPanel.add(lastImportedText);
 		
 		JScrollPane scrollPane = new JScrollPane();
-		scrollPane.setBounds(6, 173, 761, 520);
+		scrollPane.setBounds(6, 173, 883, 588);
 		openPanel.add(scrollPane);
 		
 		tableSPSS = new JTable();
@@ -221,16 +224,42 @@ public class DaxploreGUI {
 		
 		JSeparator openSeparator = new JSeparator();
 		openSeparator.setBorder(new EtchedBorder(EtchedBorder.LOWERED, null, null));
-		openSeparator.setBounds(6, 67, 761, 94);
+		openSeparator.setBounds(6, 67, 883, 100);
 		openPanel.add(openSeparator);
 		
 		final JPanel importPanel = new JPanel();
 		mainPanel.add(importPanel, "importPanel");
 		importPanel.setLayout(null);
 		
-		JLabel lblNewLabel_1 = new JLabel("Import");
-		lblNewLabel_1.setBounds(389, 5, 38, 16);
-		importPanel.add(lblNewLabel_1);
+		JButton importFileButton = new JButton("Import file...");
+		importFileButton.setBounds(6, 32, 120, 28);
+		importPanel.add(importFileButton);
+		
+		JButton exportFileButton = new JButton("Export file...");
+		exportFileButton.setBounds(138, 32, 120, 28);
+		importPanel.add(exportFileButton);
+		
+		JScrollPane scrollPaneTable = new JScrollPane();
+		scrollPaneTable.setBounds(6, 72, 883, 689);
+		importPanel.add(scrollPaneTable);
+		
+		table = new JTable();
+		table.setModel(new DefaultTableModel(
+			new Object[][] {
+				{null, null},
+			},
+			new String[] {
+				"Data", "SPSS File#"
+			}
+		) {
+			Class[] columnTypes = new Class[] {
+				Integer.class, Object.class
+			};
+			public Class getColumnClass(int columnIndex) {
+				return columnTypes[columnIndex];
+			}
+		});
+		scrollPaneTable.setViewportView(table);
 		
 		JPanel editPanel = new JPanel();
 		mainPanel.add(editPanel, "editPanel");
@@ -264,7 +293,7 @@ public class DaxploreGUI {
 		questionsLabel.setBounds(380, 5, 74, 16);
 		questionsPanel.add(questionsLabel);
 		
-		// radio button control section
+		// radio button control for the main menu selections.
 		JRadioButton btnOpen = new JRadioButton("");
 		btnOpen.setToolTipText("Open and create SPSS file(s)");
 		btnOpen.addItemListener(new ItemListener() {
