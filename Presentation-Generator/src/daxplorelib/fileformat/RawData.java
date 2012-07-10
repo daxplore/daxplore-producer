@@ -14,6 +14,7 @@ import java.util.Map;
 import org.opendatafoundation.data.spss.SPSSFile;
 
 import daxplorelib.DaxploreException;
+import daxplorelib.SQLTools;
 
 import tools.MyTools;
 
@@ -31,9 +32,10 @@ public class RawData {
 	public void importSPSS(SPSSFile spssFile, Charset charset, RawMeta metadata) throws SQLException, DaxploreException {
 		this.metadata = metadata;
 		Map<String, VariableType> columns = metadata.getColumnMap();
-		
-		Statement statement = sqliteDatabase.createStatement();
-		statement.executeUpdate("DROP TABLE " + tablename);
+		if(SQLTools.tableExists("rawdata", sqliteDatabase)) {
+			Statement statement = sqliteDatabase.createStatement();
+			statement.executeUpdate("DROP TABLE " + tablename);
+		}
 		createRawDataTable(columns, sqliteDatabase);
 		
 		PreparedStatement addRowStatement = addRowStatement(columns, sqliteDatabase);

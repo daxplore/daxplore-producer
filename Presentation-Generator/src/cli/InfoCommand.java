@@ -5,7 +5,6 @@ import java.util.List;
 
 import com.beust.jcommander.Parameter;
 import com.beust.jcommander.Parameters;
-import com.beust.jcommander.converters.FileConverter;
 
 import daxplorelib.About;
 import daxplorelib.DaxploreException;
@@ -19,6 +18,10 @@ public class InfoCommand {
 	public Integer version = null;
 	
 	public void run(File projectfile){
+		if(!projectfile.exists()) {
+			System.out.println("File does not exist");
+			return;
+		}
 		try {
 			DaxploreFile daxplore = new DaxploreFile(projectfile, false);
 			About about = daxplore.getAbout();

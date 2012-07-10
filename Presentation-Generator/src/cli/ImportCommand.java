@@ -31,14 +31,14 @@ public class ImportCommand {
 		return spssCommand;
 	}
 	
-	public ImportMetaStructureCommand getMetaStructureCommand() {
+	public ImportMetaStructureCommand getStructureCommand() {
 		if(metaStructureCommand == null) {
 			metaStructureCommand = new ImportMetaStructureCommand();
 		}
 		return metaStructureCommand;
 	}
 	
-	public ImportMetaTextsCommand getMetaTextsCommand() {
+	public ImportMetaTextsCommand getTextsCommand() {
 		if(metaTextsCommand == null) {
 			metaTextsCommand = new ImportMetaTextsCommand();
 		}
@@ -47,9 +47,6 @@ public class ImportCommand {
 	
 	@Parameters
 	public class ImportSpssCommand {
-		@Parameter(names = "--create", description = "Create a new project")
-		public boolean create = false;
-		
 		@Parameter(names = "--charset", description = "Import with charachterset")
 		public String charsetName = "ISO-8859-1";
 		
@@ -74,7 +71,7 @@ public class ImportCommand {
 				return;
 			}
 			try {
-				DaxploreFile daxplorefile = new DaxploreFile(projectFile, create);
+				DaxploreFile daxplorefile = new DaxploreFile(projectFile, false);
 				daxplorefile.importSPSS(importFile, charset);
 				System.out.println("Data imported");
 			} catch (FileNotFoundException e) {
@@ -87,6 +84,10 @@ public class ImportCommand {
 			} catch (DaxploreException e) {
 				// TODO Auto-generated catch block
 				System.out.println(e.getMessage());
+				Exception e2 = e.getOriginalException();
+				if(e2 != null) {
+					e2.printStackTrace();
+				}
 				e.printStackTrace();
 				return;
 			}

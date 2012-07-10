@@ -23,6 +23,7 @@ import org.opendatafoundation.data.spss.SPSSStringVariable;
 import org.opendatafoundation.data.spss.SPSSVariable;
 import org.opendatafoundation.data.spss.SPSSVariableCategory;
 
+import tools.MyTools;
 import tools.Pair;
 import daxplorelib.SQLTools;
 
@@ -69,7 +70,13 @@ public class RawMeta {
 	
 	public void importSPSS(SPSSFile spssFile, Charset charset) throws SQLException {
 		Map<String, String> columns = new LinkedHashMap<String,String>();
-		clearRawMetaTable(connection);
+		try {
+			clearRawMetaTable(connection);
+		} catch (SQLException e) {
+			System.out.println("error clearing table");
+			MyTools.printSQLExeption(e);
+			throw e;
+		}
 		for(int i = 0; i < spssFile.getVariableCount(); i++){
 			SPSSVariable var = spssFile.getVariable(i);
 			String spsstype;
@@ -89,23 +96,29 @@ public class RawMeta {
 				valuelabels = categoriesToJSON(var.categoryMap);
 			}
 			String measure = var.getMeasureLabel();
-			addColumnMeta(
-					"rawmeta",
-					var.getShortName(),
-					var.getName(),
-					var.getLabel(),
-					qtype,
-					spsstype,
-					valuelabels,
-					connection,
-					measure
-					);
+			try {
+				addColumnMeta(
+						"rawmeta",
+						var.getShortName(),
+						var.getName(),
+						var.getLabel(),
+						qtype,
+						spsstype,
+						valuelabels,
+						connection,
+						measure
+						);
+			} catch (SQLException e) {
+				System.out.println("Error adding row");
+				MyTools.printSQLExeption(e);
+				throw e;
+			}
 		}
 	}
 	
 	protected static void clearRawMetaTable(Connection conn) throws SQLException {
 		Statement statement = conn.createStatement();
-		statement.executeUpdate("DELETE * FROM rawmeta");
+		statement.executeUpdate("DELETE FROM rawmeta");
 	}
 	
 	protected static void addColumnMeta(String metaTable, String column, String longname, String qtext, String qtype, String spsstype, String valuelabels, Connection conn, String measure) throws SQLException {
@@ -182,32 +195,39 @@ public class RawMeta {
 	}
 	
 	public Iterator<RawMetaQuestion> getQuestionIterator() throws SQLException{
-		PreparedStatement stmt = connection.prepareStatement("SELECT * FROM rawmeta ORDER BY column ASC");
+		PreparedStatement stmt = connection.prepareStatement("SELECT count(*) AS c FROM rawmeta");
+		ResultSet r = stmt.executeQuery();
+		final int count = r.getInt("c");
+		
+		stmt = connection.prepareStatement("SELECT * FROM rawmeta ORDER BY column ASC");
 		final ResultSet rs = stmt.executeQuery();
 		
 		Iterator<RawMetaQuestion> iter = new Iterator<RawMetaQuestion>() {
-
+			int i = 0;
+			
 			@Override
 			public boolean hasNext() {
-				try {
-					return rs.isLast();
-				} catch (SQLException e) {
-					e.printStackTrace();
-					return false;
-				}
+				return i < count;
 			}
 
 			@Override
 			public RawMetaQuestion next() {
 				try {
 					rs.next();
+					i++;
 					RawMetaQuestion rmq = new RawMetaQuestion();
 					rmq.column = rs.getString("column");
 					rmq.longname = rs.getString("longname");
 					rmq.measure = rs.getString("measure");
 					rmq.qtext = rs.getString("qtext");
 					rmq.spsstype = rs.getString("spsstype");
-					rmq.valuelables = JSONtoCategories(rs.getString("valuelabels"));
+					String cats = rs.getString("valuelabels");
+					if(cats != null && !cats.equals("")) {
+						rmq.valuelables = JSONtoCategories(rs.getString("valuelabels"));
+					} else {
+						rmq.valuelables = new LinkedList<Pair<String,Double>>(); 
+					}
+					return rmq;
 				} catch (SQLException e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();

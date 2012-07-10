@@ -40,29 +40,49 @@ public class MetaData {
 	
 	public MetaData(Connection database) throws SQLException{
 		this.connection = database;
-		if(SQLTools.tableExists("metadata", database)){
-			Statement stmt = database.createStatement();
-			stmt.executeUpdate("CREATE TABLE metadata ()");
+		Statement stmt = database.createStatement();
+		if(!SQLTools.tableExists("texts", database)){
 			stmt.executeUpdate(TextReference.sqlDefinition);
-		} else {
-			
 		}
-
-		
+		if(!SQLTools.tableExists("metagroup", database)){
+			stmt.executeUpdate(MetaGroup.sqlDefinition);
+		}
+		if(!SQLTools.tableExists("metagrouprel", database)){
+			stmt.executeUpdate(MetaGroup.sqlDefinition2);
+		}
+		if(!SQLTools.tableExists("metaquestion", database)){
+			stmt.executeUpdate(MetaQuestion.sqlDefinition);
+		}
+		if(!SQLTools.tableExists("metascale", database)){
+			stmt.executeUpdate(MetaScale.sqlDefinition);
+		}
+		if(!SQLTools.tableExists("metacalc", database)){
+			stmt.executeUpdate(MetaCalculation.sqlDefinition);
+		}
 	}
 
 	/* 
 	 * Import/export methods that are used to change metadata in batch.
 	 * The preferred way too use the library.
 	 */
-	public void importFromRaw(DaxploreFile daxfile) throws DaxploreException {
+	public void importFromRaw(DaxploreFile daxfile, Locale locale) throws DaxploreException {
+		boolean autocommit = true;
+		try {
+			//save = sqliteDatabase.setSavepoint();
+			autocommit = connection.getAutoCommit();
+			connection.setAutoCommit(false);
+			connection.setTransactionIsolation(Connection.TRANSACTION_READ_UNCOMMITTED);
+		} catch (SQLException e) {
+			MyTools.printSQLExeption(e);
+			throw new DaxploreException("Failed to disable autocommit", e);
+		}
+		
 		try {
 			RawMeta rawmeta = daxfile.getRawMeta();
-			Iterator<RawMetaQuestion> iter = rawmeta.getQuestionIterator();
-			
-			Locale locale = new Locale("SV_se");
+			Iterator<RawMetaQuestion> iter = rawmeta.getQuestionIterator();	
 			
 			while(iter.hasNext()) {
+				System.out.print(".");
 				RawMetaQuestion rmq = iter.next();
 				TextReference fulltext = new TextReference(rmq.column + "_fulltext", connection);
 				fulltext.put(rmq.qtext, locale);
@@ -83,10 +103,17 @@ public class MetaData {
 		} catch (SQLException e) {
 			throw new DaxploreException("Failed to transfer metadata from raw", e);
 		}
+		
+		try {
+			connection.setAutoCommit(autocommit);
+		} catch (SQLException e) {
+			MyTools.printSQLExeption(e);
+			throw new DaxploreException("Failed to reenable autocommit", e);
+		}
 	}
 	
 	@SuppressWarnings({ "rawtypes" })
-	public void importStructure(Reader r, Formats format) throws IOException {
+	public void importStructure(Reader r) throws IOException {
 		JSONParser parser = new JSONParser();
 		ContainerFactory containerFactory = new ContainerFactory(){
 			public List creatArrayContainer() {
@@ -134,7 +161,7 @@ public class MetaData {
 	}
 	
 	@SuppressWarnings("unchecked")
-	public void exportStructure(Writer w, Formats format) throws DaxploreException, IOException, SQLException{
+	public void exportStructure(Writer w) throws DaxploreException, IOException, SQLException{
 		JSONObject jsonroot = new JSONObject();
 		
 		//export questions
@@ -175,7 +202,7 @@ public class MetaData {
 	 * @throws IOException
 	 * @throws DaxploreException 
 	 */
-	public void importL10n(Reader reader, Formats format, Locale locale) throws IOException, DaxploreException {
+	public void importL10n(Reader reader, Locale locale) throws IOException, DaxploreException {
 		Properties properties = new Properties();
 		properties.load(reader);
 		
@@ -200,13 +227,15 @@ public class MetaData {
 	 * @throws IOException
 	 * @throws DaxploreException 
 	 */
-	public void exportL10n(Writer writer, Formats format, Locale locale) throws IOException, DaxploreException {
+	public void exportL10n(Writer writer, Locale locale) throws IOException, DaxploreException {
 		Properties properties = new Properties();
 		
 		try {
 			List<TextReference> allTexts = getAllTextReferences();
 			for(TextReference tr: allTexts) {
-				properties.put(tr.getRef(), tr.get(locale));
+				if(tr.has(locale)) {
+					properties.put(tr.getRef(), tr.get(locale));
+				}
 			}
 		} catch (SQLException e) {
 			MyTools.printSQLExeption(e);
@@ -216,11 +245,11 @@ public class MetaData {
 		properties.store(writer, null); //Comment can be null Some documentation comment placed on the first row of the file
 	}
 	
-	public void importConfig(Reader r, Formats format){
+	public void importConfig(Reader r){
 		
 	}
 	
-	public void exportConfig(Writer w, Formats format){
+	public void exportConfig(Writer w){
 		
 	}
 	
