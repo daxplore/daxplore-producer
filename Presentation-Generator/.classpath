@@ -6,5 +6,7 @@
 	<classpathentry kind="lib" path="lib/sqlite-jdbc-3.7.2.jar"/>
 	<classpathentry kind="lib" path="lib/jcommander-1.20-SNAPSHOT.jar" sourcepath="lib/jcommander-1.20-SNAPSHOT-sources.jar"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/org.opendatafoundation.data"/>
+	<classpathentry kind="lib" path="lib/jdo2-api-2.3-eb.jar"/>
+	<classpathentry kind="lib" path="lib/appengine-remote-api.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
