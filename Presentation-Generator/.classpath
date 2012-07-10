@@ -4,9 +4,9 @@
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
 	<classpathentry kind="lib" path="lib/json_simple-1.1.jar"/>
 	<classpathentry kind="lib" path="lib/sqlite-jdbc-3.7.2.jar"/>
-	<classpathentry combineaccessrules="false" kind="src" path="/org.opendatafoundation.data"/>
 	<classpathentry kind="lib" path="lib/jdo2-api-2.3-eb.jar"/>
 	<classpathentry kind="lib" path="lib/appengine-remote-api.jar"/>
 	<classpathentry kind="lib" path="lib/jcommander-1.28-SNAPSHOT.jar"/>
+	<classpathentry kind="lib" path="lib/org.opendatafoundation.data-20111116.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

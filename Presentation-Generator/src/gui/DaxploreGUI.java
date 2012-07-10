@@ -1,80 +1,47 @@
 package gui;
 
-import gui.controller.OpenController;
 
-import java.awt.EventQueue;
 
-import javax.swing.JFrame;
-import javax.swing.JMenuBar;
-import java.awt.Button;
 import java.awt.BorderLayout;
-import java.awt.event.ActionListener;
-import java.awt.event.ActionEvent;
-import java.awt.FlowLayout;
+import java.awt.CardLayout;
+import java.awt.Color;
+import java.awt.EventQueue;
+import java.awt.GridLayout;
+import java.awt.Toolkit;
+import java.awt.event.ItemEvent;
+import java.awt.event.ItemListener;
 
-import javax.swing.BorderFactory;
+import javax.swing.ButtonGroup;
+import javax.swing.ImageIcon;
 import javax.swing.JButton;
-import javax.swing.JFileChooser;
-import javax.swing.JInternalFrame;
-import javax.swing.JDesktopPane;
-import javax.swing.JTabbedPane;
-import javax.swing.JToggleButton;
+import javax.swing.JFrame;
+import javax.swing.JLabel;
+import javax.swing.JPanel;
+import javax.swing.JRadioButton;
+import javax.swing.JScrollPane;
+import javax.swing.JSeparator;
+import javax.swing.JTable;
+import javax.swing.JTextPane;
 import javax.swing.UIManager;
 import javax.swing.UIManager.LookAndFeelInfo;
-
-import java.awt.CardLayout;
-import javax.swing.JEditorPane;
-import javax.swing.JList;
-import javax.swing.JTextArea;
-import javax.swing.JPanel;
+import javax.swing.border.EtchedBorder;
+import javax.swing.border.MatteBorder;
+import javax.swing.border.TitledBorder;
+import javax.swing.table.DefaultTableModel;
+import java.awt.FlowLayout;
+import javax.swing.BoxLayout;
+import javax.swing.GroupLayout;
+import javax.swing.GroupLayout.Alignment;
+import javax.swing.LayoutStyle.ComponentPlacement;
 import java.awt.GridBagLayout;
 import java.awt.GridBagConstraints;
 import java.awt.Insets;
-import java.awt.GridLayout;
-import javax.swing.JLabel;
-import javax.swing.AbstractAction;
-import javax.swing.Action;
-import javax.swing.JTree;
-import javax.swing.JTable;
-import javax.swing.ImageIcon;
-import javax.swing.border.Border;
-import javax.swing.border.EmptyBorder;
-import javax.swing.JScrollBar;
-import javax.swing.border.BevelBorder;
-import javax.swing.JRadioButton;
-import javax.swing.border.CompoundBorder;
-import javax.swing.ButtonGroup;
-import javax.swing.border.EtchedBorder;
-import javax.swing.border.TitledBorder;
 import javax.swing.JTextField;
-import javax.swing.JSeparator;
-import javax.swing.border.MatteBorder;
-import java.awt.Color;
-import java.awt.event.ItemListener;
-import java.awt.event.ItemEvent;
-import javax.swing.border.LineBorder;
-import javax.swing.filechooser.FileNameExtensionFilter;
-
-import com.jgoodies.forms.factories.DefaultComponentFactory;
-
-
-import java.awt.Toolkit;
-import java.io.File;
-import javax.swing.JTextPane;
-import javax.swing.table.DefaultTableModel;
-import javax.swing.JScrollPane;
-import java.awt.Window.Type;
-import javax.swing.JSplitPane;
 
 /**
  * Main window handler class. Initialization of application goes here.
  */
 public class DaxploreGUI {
-
-	private JFrame frmDaxploreProducer;
-	private final ButtonGroup buttonGroup = new ButtonGroup();
-	private JTable tableSPSS;
-	private JTable table;
 
 	/**
 	 * Launch the application.
@@ -104,6 +71,14 @@ public class DaxploreGUI {
 			}
 		});
 	}
+	JFrame frmDaxploreProducer;
+	private final ButtonGroup buttonGroup = new ButtonGroup();
+	private JTextField fileNameField;
+	private JTextField importDateField;
+	private JTextField creationDateField;
+	private JTextField lastImportFileNameField;
+
+	private JTable importTable;
 
 	/**
 	 * Create the application.
@@ -118,10 +93,9 @@ public class DaxploreGUI {
 	private void initialize() {
 		
 		frmDaxploreProducer = new JFrame();
-		frmDaxploreProducer.setResizable(false);
 		frmDaxploreProducer.setIconImage(Toolkit.getDefaultToolkit().getImage(DaxploreGUI.class.getResource("/gui/resources/Colorful_Chart_Icon_vol2.png")));
 		frmDaxploreProducer.setTitle("Daxplore Producer Developer Version");
-		frmDaxploreProducer.setBounds(100, 100, 987, 800);
+		frmDaxploreProducer.setBounds(100, 100, 900, 787);
 		frmDaxploreProducer.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		frmDaxploreProducer.getContentPane().setLayout(new BorderLayout(0, 0));
 		
@@ -137,129 +111,119 @@ public class DaxploreGUI {
 		
 		final JPanel openPanel = new JPanel();
 		mainPanel.add(openPanel, "openPanel");
-		openPanel.setLayout(null);
 		
-		final JButton openFileButton = new JButton("Open file...");
-		openFileButton.setToolTipText("Opens an SPSS file");
-		openFileButton.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				if (e.getSource() == openFileButton) {
-					JFileChooser fc = new JFileChooser();
-					FileNameExtensionFilter filter = new FileNameExtensionFilter(
-					        "SPSS Files", "spss");
-					    fc.setFileFilter(filter);
-			        int returnVal = fc.showOpenDialog(frmDaxploreProducer);
-
-			        if (returnVal == JFileChooser.APPROVE_OPTION) {
-			           File file = fc.getSelectedFile();
-			           //This is where a real application would open the file.
-			           System.out.println("Opening: " + file.getName() + ".");
-			           OpenController.ReadSPSSFile(fc);
-			        } else {
-			           System.out.println("Open command cancelled by user.");
-			        }
-				}
-			}
-		});
-		openFileButton.setBounds(6, 24, 150, 27);
-		openPanel.add(openFileButton);
-		
-		JButton createNewFileButton = new JButton("Create new file...");
-		createNewFileButton.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-			}
-		});
-		createNewFileButton.setToolTipText("Creates a new SPSS file");
-		createNewFileButton.setBounds(168, 24, 150, 27);
-		openPanel.add(createNewFileButton);
+		JPanel metaDataPanel = new JPanel();
+		metaDataPanel.setBorder(new TitledBorder(null, "Daxplore file information", TitledBorder.LEADING, TitledBorder.TOP, null, null));
 		
 		JLabel fileNameLabel = new JLabel("Filename:");
-		fileNameLabel.setBounds(16, 88, 71, 15);
-		openPanel.add(fileNameLabel);
+		fileNameLabel.setBounds(19, 81, 115, 15);
 		
-		JTextPane fileNameText = new JTextPane();
-		fileNameText.setEditable(false);
-		fileNameText.setBounds(112, 79, 343, 24);
-		openPanel.add(fileNameText);
+		JLabel importDateLabel = new JLabel("Import date:");
+		importDateLabel.setBounds(19, 114, 115, 15);
 		
-		JLabel lastImportedLabel = new JLabel("Last imported:");
-		lastImportedLabel.setBounds(15, 128, 85, 16);
-		openPanel.add(lastImportedLabel);
+		JPanel importSPSSPanel = new JPanel();
+		importSPSSPanel.setBorder(new TitledBorder(null, "Import SPSS File", TitledBorder.LEADING, TitledBorder.TOP, null, null));
+		GroupLayout gl_openPanel = new GroupLayout(openPanel);
+		gl_openPanel.setHorizontalGroup(
+			gl_openPanel.createParallelGroup(Alignment.TRAILING)
+				.addGroup(Alignment.LEADING, gl_openPanel.createSequentialGroup()
+					.addContainerGap()
+					.addGroup(gl_openPanel.createParallelGroup(Alignment.LEADING)
+						.addComponent(importSPSSPanel, Alignment.TRAILING, GroupLayout.DEFAULT_SIZE, 794, Short.MAX_VALUE)
+						.addComponent(metaDataPanel, Alignment.TRAILING, GroupLayout.DEFAULT_SIZE, 794, Short.MAX_VALUE))
+					.addContainerGap())
+		);
+		gl_openPanel.setVerticalGroup(
+			gl_openPanel.createParallelGroup(Alignment.LEADING)
+				.addGroup(gl_openPanel.createSequentialGroup()
+					.addContainerGap()
+					.addComponent(metaDataPanel, GroupLayout.PREFERRED_SIZE, 379, GroupLayout.PREFERRED_SIZE)
+					.addPreferredGap(ComponentPlacement.RELATED)
+					.addComponent(importSPSSPanel, GroupLayout.DEFAULT_SIZE, 368, Short.MAX_VALUE)
+					.addContainerGap())
+		);
 		
-		JTextPane lastImportedText = new JTextPane();
-		lastImportedText.setEditable(false);
-		lastImportedText.setBounds(112, 120, 343, 24);
-		openPanel.add(lastImportedText);
+		JButton importSPSSFileButton = new JButton("Import file...");
 		
-		JScrollPane scrollPane = new JScrollPane();
-		scrollPane.setBounds(6, 173, 883, 588);
-		openPanel.add(scrollPane);
+		JScrollPane importTableScrollPane = new JScrollPane();
 		
-		tableSPSS = new JTable();
-		// test data, in reality we need to fill the model with SPSS file info.
-		tableSPSS.setModel(new DefaultTableModel(
-			new Object[][] {
-				{"Kathy", "Smith", "Snowboarding", new Integer(5), Boolean.FALSE},
-				{"John", "Doe", "Rowing", new Integer(3), Boolean.TRUE},
-				{"Sue", "Black", "Knitting", new Integer(2), Boolean.FALSE},
-				{"Jane", "White", "Speed reading", new Integer(20), Boolean.TRUE},
-				{"Joe", "Brown", "Pool", new Integer(10), Boolean.FALSE},
-			},
-			new String[] {
-				"First Name", "Last Name", "Sport", "Tries#", "Vegetarian"
-			}
-		) {
-			/**
-			 * 
-			 */
-			private static final long serialVersionUID = -6898131158931249619L;
-			boolean[] columnEditables = new boolean[] {
-				false, false, true, true, false
-			};
-			public boolean isCellEditable(int row, int column) {
-				return columnEditables[column];
-			}
-		});
-		scrollPane.setViewportView(tableSPSS);
+		importTable = new JTable();
+		importTableScrollPane.setViewportView(importTable);
+		GroupLayout gl_importSPSSPanel = new GroupLayout(importSPSSPanel);
+		gl_importSPSSPanel.setHorizontalGroup(
+			gl_importSPSSPanel.createParallelGroup(Alignment.LEADING)
+				.addGroup(gl_importSPSSPanel.createSequentialGroup()
+					.addGap(8)
+					.addGroup(gl_importSPSSPanel.createParallelGroup(Alignment.LEADING)
+						.addComponent(importSPSSFileButton, GroupLayout.PREFERRED_SIZE, 105, GroupLayout.PREFERRED_SIZE)
+						.addComponent(importTableScrollPane, GroupLayout.PREFERRED_SIZE, 746, GroupLayout.PREFERRED_SIZE)))
+		);
+		gl_importSPSSPanel.setVerticalGroup(
+			gl_importSPSSPanel.createParallelGroup(Alignment.LEADING)
+				.addGroup(gl_importSPSSPanel.createSequentialGroup()
+					.addGap(7)
+					.addComponent(importSPSSFileButton)
+					.addGap(12)
+					.addComponent(importTableScrollPane, GroupLayout.PREFERRED_SIZE, 269, GroupLayout.PREFERRED_SIZE))
+		);
+		importSPSSPanel.setLayout(gl_importSPSSPanel);
 		
-		JSeparator openSeparator = new JSeparator();
-		openSeparator.setBorder(new EtchedBorder(EtchedBorder.LOWERED, null, null));
-		openSeparator.setBounds(6, 67, 883, 100);
-		openPanel.add(openSeparator);
+		JLabel creationDateLabel = new JLabel("Creation date:");
+		creationDateLabel.setBounds(19, 147, 115, 15);
+		
+		JLabel lastImportedFileLabel = new JLabel("Last import filename:");
+		lastImportedFileLabel.setBounds(19, 180, 135, 15);
+		
+		fileNameField = new JTextField();
+		fileNameField.setEditable(false);
+		fileNameField.setBounds(166, 75, 240, 27);
+		fileNameField.setColumns(10);
+		
+		importDateField = new JTextField();
+		importDateField.setEditable(false);
+		importDateField.setBounds(166, 108, 240, 27);
+		importDateField.setColumns(10);
+		
+		creationDateField = new JTextField();
+		creationDateField.setEditable(false);
+		creationDateField.setBounds(166, 141, 240, 27);
+		creationDateField.setColumns(10);
+		
+		lastImportFileNameField = new JTextField();
+		lastImportFileNameField.setEditable(false);
+		lastImportFileNameField.setBounds(166, 174, 240, 27);
+		lastImportFileNameField.setColumns(10);
+		metaDataPanel.setLayout(null);
+		metaDataPanel.add(fileNameLabel);
+		metaDataPanel.add(fileNameField);
+		metaDataPanel.add(importDateLabel);
+		metaDataPanel.add(importDateField);
+		metaDataPanel.add(creationDateLabel);
+		metaDataPanel.add(creationDateField);
+		metaDataPanel.add(lastImportedFileLabel);
+		metaDataPanel.add(lastImportFileNameField);
+		
+		final JButton openFileButton = new JButton("Open file...");
+		openFileButton.setBounds(19, 35, 92, 27);
+		metaDataPanel.add(openFileButton);
+		openFileButton.setToolTipText("Opens an daxplore file");
+		openFileButton.addActionListener(new OpenDaxploreFile(this, openFileButton));
+		
+		JButton createNewFileButton = new JButton("Create new file...");
+		createNewFileButton.setBounds(117, 35, 126, 27);
+		metaDataPanel.add(createNewFileButton);
+		createNewFileButton.addActionListener(new CreateDaxploreFile());
+		createNewFileButton.setToolTipText("Creates a new SPSS file");
+		
+		openPanel.setLayout(gl_openPanel);
 		
 		final JPanel importPanel = new JPanel();
 		mainPanel.add(importPanel, "importPanel");
 		importPanel.setLayout(null);
 		
-		JButton importFileButton = new JButton("Import file...");
-		importFileButton.setBounds(6, 32, 120, 28);
-		importPanel.add(importFileButton);
-		
-		JButton exportFileButton = new JButton("Export file...");
-		exportFileButton.setBounds(138, 32, 120, 28);
-		importPanel.add(exportFileButton);
-		
-		JScrollPane scrollPaneTable = new JScrollPane();
-		scrollPaneTable.setBounds(6, 72, 883, 689);
-		importPanel.add(scrollPaneTable);
-		
-		table = new JTable();
-		table.setModel(new DefaultTableModel(
-			new Object[][] {
-				{null, null},
-			},
-			new String[] {
-				"Data", "SPSS File#"
-			}
-		) {
-			Class[] columnTypes = new Class[] {
-				Integer.class, Object.class
-			};
-			public Class getColumnClass(int columnIndex) {
-				return columnTypes[columnIndex];
-			}
-		});
-		scrollPaneTable.setViewportView(table);
+		JLabel lblOldImportPanel = new JLabel("Old Import panel");
+		lblOldImportPanel.setBounds(288, 16, 124, 15);
+		importPanel.add(lblOldImportPanel);
 		
 		JPanel editPanel = new JPanel();
 		mainPanel.add(editPanel, "editPanel");
@@ -294,94 +258,94 @@ public class DaxploreGUI {
 		questionsPanel.add(questionsLabel);
 		
 		// radio button control for the main menu selections.
-		JRadioButton btnOpen = new JRadioButton("");
-		btnOpen.setToolTipText("Open and create SPSS file(s)");
-		btnOpen.addItemListener(new ItemListener() {
+		JRadioButton OpenButton = new JRadioButton("");
+		OpenButton.setToolTipText("Manage file(s)");
+		OpenButton.addItemListener(new ItemListener() {
 			public void itemStateChanged(ItemEvent e) {
 				CardLayout cl = (CardLayout)(mainPanel.getLayout());
 			    cl.show(mainPanel, "openPanel");
 			}
 		});
-		btnOpen.setRolloverEnabled(false);
-		btnOpen.setSelectedIcon(new ImageIcon(DaxploreGUI.class.getResource("/gui/resources/8_selected.png")));
-		btnOpen.setBorder(new TitledBorder(null, "", TitledBorder.LEADING, TitledBorder.TOP, null, null));
-		buttonGroup.add(btnOpen);
-		btnOpen.setIcon(new ImageIcon(DaxploreGUI.class.getResource("/gui/resources/8.png")));
-		buttonPanel.add(btnOpen);
+		OpenButton.setRolloverEnabled(false);
+		OpenButton.setSelectedIcon(new ImageIcon(DaxploreGUI.class.getResource("/gui/resources/8_selected.png")));
+		OpenButton.setBorder(new TitledBorder(null, "", TitledBorder.LEADING, TitledBorder.TOP, null, null));
+		buttonGroup.add(OpenButton);
+		OpenButton.setIcon(new ImageIcon(DaxploreGUI.class.getResource("/gui/resources/8.png")));
+		buttonPanel.add(OpenButton);
 		
-		JRadioButton btnImport = new JRadioButton("");
-		btnImport.setToolTipText("Import SPSS file(s)");
-		btnImport.addItemListener(new ItemListener() {
+		JRadioButton ImportButton = new JRadioButton("");
+		ImportButton.setToolTipText("Import SPSS file(s)");
+		ImportButton.addItemListener(new ItemListener() {
 			public void itemStateChanged(ItemEvent e) {
 				CardLayout cl = (CardLayout)(mainPanel.getLayout());
 			    cl.show(mainPanel, "importPanel");
 			}
 		});
-		btnImport.setSelectedIcon(new ImageIcon(DaxploreGUI.class.getResource("/gui/resources/4_selected.png")));
-		btnImport.setRolloverEnabled(false);
-		btnImport.setBorder(new TitledBorder(null, "", TitledBorder.LEADING, TitledBorder.TOP, null, null));
-		buttonGroup.add(btnImport);
-		btnImport.setIcon(new ImageIcon(DaxploreGUI.class.getResource("/gui/resources/4.png")));
-		buttonPanel.add(btnImport);
+		ImportButton.setSelectedIcon(new ImageIcon(DaxploreGUI.class.getResource("/gui/resources/4_selected.png")));
+		ImportButton.setRolloverEnabled(false);
+		ImportButton.setBorder(new TitledBorder(null, "", TitledBorder.LEADING, TitledBorder.TOP, null, null));
+		buttonGroup.add(ImportButton);
+		ImportButton.setIcon(new ImageIcon(DaxploreGUI.class.getResource("/gui/resources/4.png")));
+		buttonPanel.add(ImportButton);
 
-		JRadioButton btnQuestions = new JRadioButton("");
-		btnQuestions.setToolTipText("Question edit");
-		btnQuestions.addItemListener(new ItemListener() {
+		JRadioButton QuestionsButton = new JRadioButton("");
+		QuestionsButton.setToolTipText("Question edit");
+		QuestionsButton.addItemListener(new ItemListener() {
 			public void itemStateChanged(ItemEvent e) {
 				CardLayout cl = (CardLayout)(mainPanel.getLayout());
 			    cl.show(mainPanel, "questionsPanel");
 			}
 		});
-		btnQuestions.setSelectedIcon(new ImageIcon(DaxploreGUI.class.getResource("/gui/resources/6_selected.png")));
-		btnQuestions.setRolloverEnabled(false);
-		btnQuestions.setBorder(new TitledBorder(null, "", TitledBorder.LEADING, TitledBorder.TOP, null, null));
-		buttonGroup.add(btnQuestions);
-		btnQuestions.setIcon(new ImageIcon(DaxploreGUI.class.getResource("/gui/resources/6.png")));
-		buttonPanel.add(btnQuestions);
+		QuestionsButton.setSelectedIcon(new ImageIcon(DaxploreGUI.class.getResource("/gui/resources/6_selected.png")));
+		QuestionsButton.setRolloverEnabled(false);
+		QuestionsButton.setBorder(new TitledBorder(null, "", TitledBorder.LEADING, TitledBorder.TOP, null, null));
+		buttonGroup.add(QuestionsButton);
+		QuestionsButton.setIcon(new ImageIcon(DaxploreGUI.class.getResource("/gui/resources/6.png")));
+		buttonPanel.add(QuestionsButton);
 	
-		JRadioButton btnEdit = new JRadioButton("");
-		btnEdit.setToolTipText("Edit SPSS data");
-		btnEdit.addItemListener(new ItemListener() {
+		JRadioButton EditButton = new JRadioButton("");
+		EditButton.setToolTipText("Edit SPSS data");
+		EditButton.addItemListener(new ItemListener() {
 			public void itemStateChanged(ItemEvent e) {
 				CardLayout cl = (CardLayout)(mainPanel.getLayout());
 			    cl.show(mainPanel, "editPanel");
 			}
 		});
-		btnEdit.setSelectedIcon(new ImageIcon(DaxploreGUI.class.getResource("/gui/resources/21_selected.png")));
-		btnEdit.setRolloverEnabled(false);
-		btnEdit.setBorder(new TitledBorder(null, "", TitledBorder.LEADING, TitledBorder.TOP, null, null));
-		buttonGroup.add(btnEdit);
-		btnEdit.setIcon(new ImageIcon(DaxploreGUI.class.getResource("/gui/resources/21.png")));
-		buttonPanel.add(btnEdit);
+		EditButton.setSelectedIcon(new ImageIcon(DaxploreGUI.class.getResource("/gui/resources/21_selected.png")));
+		EditButton.setRolloverEnabled(false);
+		EditButton.setBorder(new TitledBorder(null, "", TitledBorder.LEADING, TitledBorder.TOP, null, null));
+		buttonGroup.add(EditButton);
+		EditButton.setIcon(new ImageIcon(DaxploreGUI.class.getResource("/gui/resources/21.png")));
+		buttonPanel.add(EditButton);
 		
-		JRadioButton btnSort = new JRadioButton("");
-		btnSort.setToolTipText("Sort data");
-		btnSort.addItemListener(new ItemListener() {
+		JRadioButton SortButton = new JRadioButton("");
+		SortButton.setToolTipText("Sort data");
+		SortButton.addItemListener(new ItemListener() {
 			public void itemStateChanged(ItemEvent e) {
 				CardLayout cl = (CardLayout)(mainPanel.getLayout());
 			    cl.show(mainPanel, "sortPanel");
 			}
 		});
-		btnSort.setSelectedIcon(new ImageIcon(DaxploreGUI.class.getResource("/gui/resources/24_selected.png")));
-		btnSort.setRolloverEnabled(false);
-		btnSort.setBorder(new TitledBorder(null, "", TitledBorder.LEADING, TitledBorder.TOP, null, null));
-		buttonGroup.add(btnSort);
-		btnSort.setIcon(new ImageIcon(DaxploreGUI.class.getResource("/gui/resources/24.png")));
-		buttonPanel.add(btnSort);
+		SortButton.setSelectedIcon(new ImageIcon(DaxploreGUI.class.getResource("/gui/resources/24_selected.png")));
+		SortButton.setRolloverEnabled(false);
+		SortButton.setBorder(new TitledBorder(null, "", TitledBorder.LEADING, TitledBorder.TOP, null, null));
+		buttonGroup.add(SortButton);
+		SortButton.setIcon(new ImageIcon(DaxploreGUI.class.getResource("/gui/resources/24.png")));
+		buttonPanel.add(SortButton);
 		
-		JRadioButton btnPackage = new JRadioButton("");
-		btnPackage.setToolTipText("Package files");
-		btnPackage.addItemListener(new ItemListener() {
+		JRadioButton PackageButton = new JRadioButton("");
+		PackageButton.setToolTipText("Package files");
+		PackageButton.addItemListener(new ItemListener() {
 			public void itemStateChanged(ItemEvent e) {
 				CardLayout cl = (CardLayout)(mainPanel.getLayout());
 			    cl.show(mainPanel, "packagePanel");
 			}
 		});
-		btnPackage.setSelectedIcon(new ImageIcon(DaxploreGUI.class.getResource("/gui/resources/28_selected.png")));
-		btnPackage.setRolloverEnabled(false);
-		btnPackage.setBorder(new TitledBorder(null, "", TitledBorder.LEADING, TitledBorder.TOP, null, null));
-		buttonGroup.add(btnPackage);
-		btnPackage.setIcon(new ImageIcon(DaxploreGUI.class.getResource("/gui/resources/28.png")));
-		buttonPanel.add(btnPackage);
+		PackageButton.setSelectedIcon(new ImageIcon(DaxploreGUI.class.getResource("/gui/resources/28_selected.png")));
+		PackageButton.setRolloverEnabled(false);
+		PackageButton.setBorder(new TitledBorder(null, "", TitledBorder.LEADING, TitledBorder.TOP, null, null));
+		buttonGroup.add(PackageButton);
+		PackageButton.setIcon(new ImageIcon(DaxploreGUI.class.getResource("/gui/resources/28.png")));
+		buttonPanel.add(PackageButton);
 	}
 }
