@@ -1,6 +1,8 @@
 package gui;
 
-
+import gui.openpanel.CreateDaxploreFile;
+import gui.openpanel.ImportSPSSFile;
+import gui.openpanel.OpenDaxploreFile;
 
 import java.awt.BorderLayout;
 import java.awt.CardLayout;
@@ -24,6 +26,7 @@ import javax.swing.JTable;
 import javax.swing.JTextPane;
 import javax.swing.UIManager;
 import javax.swing.UIManager.LookAndFeelInfo;
+import javax.swing.UnsupportedLookAndFeelException;
 import javax.swing.border.EtchedBorder;
 import javax.swing.border.MatteBorder;
 import javax.swing.border.TitledBorder;
@@ -38,17 +41,22 @@ import java.awt.GridBagConstraints;
 import java.awt.Insets;
 import javax.swing.JTextField;
 
+import daxplorelib.DaxploreFile;
+
 /**
  * Main window handler class. Initialization of application goes here.
  */
 public class DaxploreGUI {
 
 	/**
-	 * Launch the application.
+	 * Main execution loop, includes the thread handler, required for swing
+	 * applications. Do not move the main() method from this file as it will
+	 * break windowbuilder parsing.
 	 */
 	public static void main(String[] args) {
 		
-		// use an appropriate look and feel here.
+		// set the look and feel here, currently we use nimbus, looks nice :)
+		// only available from java 6 and up though.
 		try {
 		    for (LookAndFeelInfo info : UIManager.getInstalledLookAndFeels()) {
 		        if ("Nimbus".equals(info.getName())) {
@@ -57,7 +65,21 @@ public class DaxploreGUI {
 		        }
 		    }
 		} catch (Exception e) {
-		    // If Nimbus is not available, you can set the GUI to another look and feel.
+			try {
+				UIManager.setLookAndFeel("javax.swing.plaf.nimbus.NimbusLookAndFeel");
+			} catch (ClassNotFoundException e1) {
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
+			} catch (InstantiationException e1) {
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
+			} catch (IllegalAccessException e1) {
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
+			} catch (UnsupportedLookAndFeelException e1) {
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
+			}
 		}
 		
 		EventQueue.invokeLater(new Runnable() {
@@ -71,14 +93,25 @@ public class DaxploreGUI {
 			}
 		});
 	}
-	JFrame frmDaxploreProducer;
+	public JFrame frmDaxploreProducer;
 	private final ButtonGroup buttonGroup = new ButtonGroup();
-	private JTextField fileNameField;
-	private JTextField importDateField;
-	private JTextField creationDateField;
-	private JTextField lastImportFileNameField;
-
+	public JTextField fileNameField;
+	public JTextField importDateField;
+	public JTextField creationDateField;
+	public JTextField lastImportFileNameField;
+	
 	private JTable importTable;
+	
+	private DaxploreFile daxploreFile;
+
+	
+	public DaxploreFile getDaxploreFile() {
+		return daxploreFile;
+	}
+
+	public void setDaxploreFile(DaxploreFile daxploreFile) {
+		this.daxploreFile = daxploreFile;
+	}
 
 	/**
 	 * Create the application.
@@ -109,7 +142,7 @@ public class DaxploreGUI {
 		frmDaxploreProducer.getContentPane().add(mainPanel, BorderLayout.CENTER);
 		mainPanel.setLayout(new CardLayout(0, 0));
 		
-		final JPanel openPanel = new JPanel();
+		JPanel openPanel = new JPanel();
 		mainPanel.add(openPanel, "openPanel");
 		
 		JPanel metaDataPanel = new JPanel();
@@ -144,6 +177,7 @@ public class DaxploreGUI {
 		);
 		
 		JButton importSPSSFileButton = new JButton("Import file...");
+		importSPSSFileButton.addActionListener(new ImportSPSSFile(this, importSPSSFileButton));
 		
 		JScrollPane importTableScrollPane = new JScrollPane();
 		
@@ -175,6 +209,7 @@ public class DaxploreGUI {
 		lastImportedFileLabel.setBounds(19, 180, 135, 15);
 		
 		fileNameField = new JTextField();
+
 		fileNameField.setEditable(false);
 		fileNameField.setBounds(166, 75, 240, 27);
 		fileNameField.setColumns(10);
@@ -203,21 +238,21 @@ public class DaxploreGUI {
 		metaDataPanel.add(lastImportedFileLabel);
 		metaDataPanel.add(lastImportFileNameField);
 		
-		final JButton openFileButton = new JButton("Open file...");
-		openFileButton.setBounds(19, 35, 92, 27);
+		JButton openFileButton = new JButton("Open file...");
+		openFileButton.setBounds(19, 35, 135, 27);
 		metaDataPanel.add(openFileButton);
-		openFileButton.setToolTipText("Opens an daxplore file");
+		openFileButton.setToolTipText("Opens a daxplore file");
 		openFileButton.addActionListener(new OpenDaxploreFile(this, openFileButton));
 		
 		JButton createNewFileButton = new JButton("Create new file...");
-		createNewFileButton.setBounds(117, 35, 126, 27);
+		createNewFileButton.setBounds(168, 35, 135, 27);
 		metaDataPanel.add(createNewFileButton);
 		createNewFileButton.addActionListener(new CreateDaxploreFile());
-		createNewFileButton.setToolTipText("Creates a new SPSS file");
+		createNewFileButton.setToolTipText("Creates a new daxplore project file");
 		
 		openPanel.setLayout(gl_openPanel);
 		
-		final JPanel importPanel = new JPanel();
+		JPanel importPanel = new JPanel();
 		mainPanel.add(importPanel, "importPanel");
 		importPanel.setLayout(null);
 		
@@ -257,7 +292,15 @@ public class DaxploreGUI {
 		questionsLabel.setBounds(380, 5, 74, 16);
 		questionsPanel.add(questionsLabel);
 		
-		// radio button control for the main menu selections.
+		radioButtonCreator(buttonPanel, mainPanel);
+	}
+
+	/**
+	 * Handles the display and functionality of the left panel buttons.
+	 * @param buttonPanel
+	 * @param mainPanel
+	 */
+	private void radioButtonCreator(JPanel buttonPanel, final JPanel mainPanel) {
 		JRadioButton OpenButton = new JRadioButton("");
 		OpenButton.setToolTipText("Manage file(s)");
 		OpenButton.addItemListener(new ItemListener() {
@@ -266,6 +309,7 @@ public class DaxploreGUI {
 			    cl.show(mainPanel, "openPanel");
 			}
 		});
+		
 		OpenButton.setRolloverEnabled(false);
 		OpenButton.setSelectedIcon(new ImageIcon(DaxploreGUI.class.getResource("/gui/resources/8_selected.png")));
 		OpenButton.setBorder(new TitledBorder(null, "", TitledBorder.LEADING, TitledBorder.TOP, null, null));
@@ -281,6 +325,7 @@ public class DaxploreGUI {
 			    cl.show(mainPanel, "importPanel");
 			}
 		});
+		
 		ImportButton.setSelectedIcon(new ImageIcon(DaxploreGUI.class.getResource("/gui/resources/4_selected.png")));
 		ImportButton.setRolloverEnabled(false);
 		ImportButton.setBorder(new TitledBorder(null, "", TitledBorder.LEADING, TitledBorder.TOP, null, null));
@@ -296,6 +341,7 @@ public class DaxploreGUI {
 			    cl.show(mainPanel, "questionsPanel");
 			}
 		});
+		
 		QuestionsButton.setSelectedIcon(new ImageIcon(DaxploreGUI.class.getResource("/gui/resources/6_selected.png")));
 		QuestionsButton.setRolloverEnabled(false);
 		QuestionsButton.setBorder(new TitledBorder(null, "", TitledBorder.LEADING, TitledBorder.TOP, null, null));
@@ -311,6 +357,7 @@ public class DaxploreGUI {
 			    cl.show(mainPanel, "editPanel");
 			}
 		});
+		
 		EditButton.setSelectedIcon(new ImageIcon(DaxploreGUI.class.getResource("/gui/resources/21_selected.png")));
 		EditButton.setRolloverEnabled(false);
 		EditButton.setBorder(new TitledBorder(null, "", TitledBorder.LEADING, TitledBorder.TOP, null, null));
@@ -326,6 +373,8 @@ public class DaxploreGUI {
 			    cl.show(mainPanel, "sortPanel");
 			}
 		});
+		
+		
 		SortButton.setSelectedIcon(new ImageIcon(DaxploreGUI.class.getResource("/gui/resources/24_selected.png")));
 		SortButton.setRolloverEnabled(false);
 		SortButton.setBorder(new TitledBorder(null, "", TitledBorder.LEADING, TitledBorder.TOP, null, null));
@@ -341,6 +390,7 @@ public class DaxploreGUI {
 			    cl.show(mainPanel, "packagePanel");
 			}
 		});
+		
 		PackageButton.setSelectedIcon(new ImageIcon(DaxploreGUI.class.getResource("/gui/resources/28_selected.png")));
 		PackageButton.setRolloverEnabled(false);
 		PackageButton.setBorder(new TitledBorder(null, "", TitledBorder.LEADING, TitledBorder.TOP, null, null));
