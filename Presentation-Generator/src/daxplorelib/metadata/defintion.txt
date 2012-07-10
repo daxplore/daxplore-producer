@@ -1,0 +1,32 @@
+
+mainobject
+{
+	questions: [<questionobject>],
+	groups: {
+		questions: [<groupobject>],
+		perspectives: <groupobject>
+	},
+	
+}
+
+questionobject
+{
+	id: string
+	data: <dataobject>,
+	longtext: <stringreference>,
+	shorttext: <stringreference>,
+	options: [<stringreference>],
+}
+
+groupobject
+{
+	text: <stringreference>,
+	questions: [<questionobject.id>],
+	index: int
+}
+
+dataobject //kanske behövs. koppla frågan till en column eller till en mer komplex fråga, kanske till och med eget språk
+{
+	column: string
+}
+

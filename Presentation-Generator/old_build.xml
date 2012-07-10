@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- ====================================================================== 
+     Nov 16, 2011 1:03:52 PM                                                        
+
+     project    
+     description
+                   
+     axwi4586                                                                
+     ====================================================================== -->
+<project name="Generator" default="dist" basedir="."  xmlns:ant4eclipse="antlib:org.ant4eclipse" xmlns:antcontrib="antlib:net.sf.antcontrib">
+
+	<taskdef uri="antlib:net.sf.antcontrib" resource="net/sf/antcontrib/antlib.xml" />
+
+	<taskdef uri="antlib:org.ant4eclipse" resource="org/ant4eclipse/antlib.xml" />
+    <description>
+            description
+    </description>
+	
+	<property name="src" location="src"/>
+	<property name="build" location="build"/>
+	<property name="dist"  location="dist"/>
+	
+	
+	<target name="libs">
+
+	</target>
+	
+	<target name="init">
+		<tstamp />
+		<mkdir dir="${build}" />
+	</target>
+	
+    <target name="compile" depends="init,libs" description="description">
+		<javac srcdir="${src}" destdir="${build}" />
+    </target>
+	
+    <target name="dist" depends="compile" description="description">
+    	<mkdir dir="${dist}"/>
+        <jar destfile="${dist}/Generator-${DSTAMP}.jar" basedir="${build}">
+        	<manifest>
+        		<attribute name="Main-Class" value="commandclient.GeneratorCommandClient"/>
+        	</manifest>
+        </jar>
+    </target>
+
+	<target name="clean" description="clean up">
+		<delete dir="${build}" />
+		<delete dit="${dist}" />
+	</target>
+
+</project>
