@@ -2,6 +2,7 @@ package gui.openpanel;
 
 import gui.DaxploreGUI;
 
+import java.awt.Dialog;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
@@ -26,34 +27,68 @@ public final class CreateDaxploreFile implements ActionListener {
 	}
 
 	public void actionPerformed(ActionEvent e) {
-		if (e.getSource() == createFileButton) {
-			JFileChooser fc = new JFileChooser();
-			FileNameExtensionFilter filter = new FileNameExtensionFilter(
-			        "Daxplore Files", "daxplore");
-			    fc.setFileFilter(filter);
-			    
-	        int returnVal = fc.showSaveDialog(this.daxploreGUI.frmDaxploreProducer);
+		
+		final JFileChooser fc = new JFileChooser() {
 
-	        if (returnVal == JFileChooser.APPROVE_OPTION) {
-	        	try {
-	        		if(daxploreGUI.getDaxploreFile() != null) {
-						daxploreGUI.getDaxploreFile().close();	        			
-	        		}
+	        private static final long serialVersionUID = 7919427933588163126L;
+	        
+	        // override default operation of approveSelection() so it can handle overwriting files.
+	        @Override
+	        public void approveSelection() {
+	            File f = getSelectedFile();
+	            if (f.exists() && getDialogType() == SAVE_DIALOG) {
+	                int result = JOptionPane.showConfirmDialog(this,
+	                        "The file exists, overwrite?", "Existing file",
+	                        JOptionPane.YES_NO_CANCEL_OPTION);
+	                switch (result) {
+	                case JOptionPane.YES_OPTION:
+	                    super.approveSelection();
+	                    return;
+	                case JOptionPane.CANCEL_OPTION:
+	                    cancelSelection();
+	                    return;
+	                default:
+	                    return;
+	                }
+	            }
+	            super.approveSelection();
+	        }
+	    };
+		if (e.getSource() == createFileButton) {
+			
+			FileNameExtensionFilter filter = new FileNameExtensionFilter("Daxplore Files", "daxplore");
+			fc.setFileFilter(filter);
+
+			int returnVal = fc.showSaveDialog(this.daxploreGUI.frmDaxploreProducer);
+
+			if (returnVal == JFileChooser.APPROVE_OPTION) {
+				try {
+					if (daxploreGUI.getDaxploreFile() != null) {
+						daxploreGUI.getDaxploreFile().close();
+					}
 				} catch (DaxploreException e2) {
 					System.out.println("Couldn't close file");
 					e2.printStackTrace();
 					return;
 				}
-	           File file = fc.getSelectedFile();
-	           try {
-				daxploreGUI.setDaxploreFile(new DaxploreFile(file, true));
-				daxploreGUI.updateTextFields();
-			} catch (DaxploreException e1) {
-				System.out.println("Saving daxplore file failure.");
-				e1.printStackTrace();
+
+				// set the appropriate file ending.
+				File file = fc.getSelectedFile();
+				String name = file.getName();
+				if (name.indexOf('.') == -1) {
+					name += ".daxplore";
+					file = new File(file.getParentFile(), name);
+				}
+
+				try {
+					daxploreGUI.setDaxploreFile(new DaxploreFile(file, true));
+					daxploreGUI.updateTextFields();
+				} catch (DaxploreException e1) {
+					System.out.println("Saving daxplore file failure.");
+					e1.printStackTrace();
+				}
+				System.out.println("Saving: " + file.getName());
 			}
-	           System.out.println("Saving: " + file.getName());
-	        }
 		}
 	}
 }

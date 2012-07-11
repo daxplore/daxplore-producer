@@ -18,6 +18,7 @@ import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JRadioButton;
 import javax.swing.JScrollPane;
@@ -56,6 +57,26 @@ public class DaxploreGUI {
 	 * break windowbuilder parsing.
 	 */
 	public static void main(String[] args) {
+		
+		// do a java version check, if target system doesn't have java 7, exit.
+		
+		
+		String javaVersion = System.getProperty("java.version");
+		System.out.println(javaVersion);
+		String[] javaVersionSplit = javaVersion.split("\\.");
+		int indexZero = Integer.parseInt(javaVersionSplit[0]);
+		int indexOne = Integer.parseInt(javaVersionSplit[1]);
+		System.out.println(indexZero + " " + indexOne);
+
+		if (!(indexZero >= 1) || (indexOne < 7))
+		{
+			JOptionPane.showMessageDialog(null,
+					"This program only supports Java 7 or higher.",
+					"Daxplore warning",
+					JOptionPane.ERROR_MESSAGE);
+			return;
+		}
+			
 		
 		// set the look and feel here, currently we use nimbus.
 		// only available from java 6 and up though.
@@ -292,26 +313,28 @@ public class DaxploreGUI {
 	}
 
 	public void updateTextFields() {
+		
+		SimpleDateFormat formatter = new SimpleDateFormat("dd/MM/yyyy");
+		
 		// set the text fields if we have a daxplore file loaded.
 		if (daxploreFile != null) {
 			// update text fields with appropriate data.
-			fileNameField.setText(daxploreFile.toString());
+			fileNameField.setText(daxploreFile.getFile().getName());
 			
 			// check if it's a newly created file, if so, it doesn't contain certain fields.
-			if (daxploreFile.getAbout().getImportFilename() != null) {
-			
-				lastImportFileNameField.setText(
-					daxploreFile.getAbout().getImportFilename());
-			
-			// date must first be converted to the appropriate format before returned as string.
-			SimpleDateFormat formatter = new SimpleDateFormat("dd/MM/yyyy");
-			importDateField.setText(
-					formatter.format(daxploreFile.getAbout().getImportDate()));
+			String importFilename = daxploreFile.getAbout().getImportFilename();
+			if (importFilename != null && !"".equals(importFilename)) {
+				lastImportFileNameField.setText(daxploreFile.getAbout().getImportFilename());
+				// date must first be converted to the appropriate format before returned as string.
+				importDateField.setText(formatter.format(daxploreFile.getAbout().getImportDate()));
+			} else {
+				lastImportFileNameField.setText("");
+				importDateField.setText("");
 			}
 			
 			// creation/modify dates isn't platform independent!
 			creationDateField.setText(
-					formatter.format(daxploreFile.getAbout().getCreationDate()));
+			formatter.format(daxploreFile.getAbout().getCreationDate()));
 		}
 	}
 
