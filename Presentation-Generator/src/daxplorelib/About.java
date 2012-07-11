@@ -38,11 +38,13 @@ public class About {
 			lastupdate = (Date) creation.clone();
 			stmt = database.createStatement();
 			stmt.executeUpdate("CREATE TABLE about (filetypeversionmajor INTEGER, filetypeversionminor INTEGER, creation INTEGER, lastupdate INTEGER, importdate INTEGER, filename TEXT)");
-			PreparedStatement prepared = database.prepareStatement("INSERT INTO about VALUES (?, ?, ?, ?, ?)");
+			PreparedStatement prepared = database.prepareStatement("INSERT INTO about VALUES (?, ?, ?, ?, ?, ?)");
 			prepared.setInt(1, filetypeversionmajor);
 			prepared.setInt(2, filetypeversionminor);
 			prepared.setLong(3, creation.getTime());
 			prepared.setLong(4, lastupdate.getTime());
+			prepared.setLong(5, 0);
+			prepared.setString(6, "");
 			prepared.execute();
 		}else{
 			stmt = database.createStatement();

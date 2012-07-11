@@ -1,3 +1,4 @@
+package cli;
 /*package commandclient;
 
 import com.beust.jcommander.IStringConverter;

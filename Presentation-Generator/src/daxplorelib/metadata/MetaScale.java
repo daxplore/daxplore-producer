@@ -17,7 +17,7 @@ import tools.MyTools;
 import tools.Pair;
 
 public class MetaScale implements JSONAware {
-	public static final String sqlDefinition = "CREATE TABLE metascale (id INTEGER, textref STRING, order INTEGER, value REAL)";
+	public static final String sqlDefinition = "CREATE TABLE metascale (id INTEGER, textref STRING, ord INTEGER, value REAL)";
 	
 	Connection connection;
 	int id;
@@ -37,7 +37,7 @@ public class MetaScale implements JSONAware {
 	        	builder.append(",");
 	        }
 	    }
-	    builder.append(") ORDER BY id, order");
+	    builder.append(") ORDER BY id, ord");
 	    PreparedStatement stmt = connection.prepareStatement(builder.toString());
 	    for(int i = 0; i < options.size(); i++) {
 	    	stmt.setString(i+1, options.get(i).getKey().getRef());
@@ -62,7 +62,7 @@ public class MetaScale implements JSONAware {
 	    }
 	    
 	    boolean found = false;
-	    stmt = connection.prepareStatement("SELECT textref, value FROM metascale WHERE id = ? ORDER BY order ASC");
+	    stmt = connection.prepareStatement("SELECT textref, value FROM metascale WHERE id = ? ORDER BY ord ASC");
 	    for(Integer i: hits) {
 	    	stmt.setInt(1, i);
 	    	rs = stmt.executeQuery();
@@ -87,7 +87,7 @@ public class MetaScale implements JSONAware {
 	    	rs = stmt.executeQuery();
 	    	rs.next();
 	    	id = rs.getInt(1) +1; //TODO: Handle null
-	    	stmt = connection.prepareStatement("INSERT INTO metascalse (id, textref, order, value) VALUES (?, ?, ?, ?)");
+	    	stmt = connection.prepareStatement("INSERT INTO metascale (id, textref, ord, value) VALUES (?, ?, ?, ?)");
 	    	for(int i = 0; i < options.size(); i++) {
 	    		stmt.setInt(1, id);
 		    	stmt.setString(2, options.get(i).getKey().getRef());
@@ -98,12 +98,12 @@ public class MetaScale implements JSONAware {
 	    }
 	}
 	
-	public MetaScale(JSONArray obj, Connection connection) throws SQLException {
+	public MetaScale(JSONArray obj, Connection connection, boolean extra) throws SQLException {
 		this(JSONtoList(obj, connection), connection);
 	}
 	
 	public List<Pair<TextReference, Double>> getRefereceList() throws SQLException {
-		PreparedStatement stmt = connection.prepareStatement("SELECT textref, value FROM metascale WHERE id = ? ORDER BY order ASC");
+		PreparedStatement stmt = connection.prepareStatement("SELECT textref, value FROM metascale WHERE id = ? ORDER BY ord ASC");
 		stmt.setInt(1, id);
 		ResultSet rs = stmt.executeQuery();
 		List<Pair<TextReference, Double>> list = new LinkedList<Pair<TextReference, Double>>();

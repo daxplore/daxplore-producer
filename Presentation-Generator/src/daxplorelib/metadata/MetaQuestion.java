@@ -48,7 +48,7 @@ public class MetaQuestion implements JSONAware, Comparable<MetaQuestion>{
 			stmt.setString(5, id);
 			stmt.execute();
 		} else {
-			stmt = connection.prepareStatement("INSERT INTO metaquestion (id, fulltextref, shorttextref, scale, calculation) VALUES (?, ?, ?, ?)");
+			stmt = connection.prepareStatement("INSERT INTO metaquestion (id, fulltextref, shorttextref, scale, calculation) VALUES (?, ?, ?, ?, ?)");
 			stmt.setString(1, id);
 			stmt.setString(2, fullTextRef.getRef());
 			stmt.setString(3, shortTextRef.getRef());
@@ -70,7 +70,7 @@ public class MetaQuestion implements JSONAware, Comparable<MetaQuestion>{
 				new TextReference((String)obj.get("fulltext"), connection), 
 				new TextReference((String)obj.get("shorttext"), connection), 
 				new MetaCalculation((String)obj.get("data"), connection), 
-				new MetaScale((JSONArray)obj.get("scale"), connection),
+				new MetaScale((JSONArray)obj.get("scale"), connection, true),
 				connection
 				);
 	}

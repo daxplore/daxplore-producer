@@ -6,7 +6,11 @@
 	<classpathentry kind="lib" path="lib/sqlite-jdbc-3.7.2.jar"/>
 	<classpathentry kind="lib" path="lib/jdo2-api-2.3-eb.jar"/>
 	<classpathentry kind="lib" path="lib/appengine-remote-api.jar"/>
-	<classpathentry kind="lib" path="lib/jcommander-1.28-SNAPSHOT.jar"/>
 	<classpathentry kind="lib" path="lib/org.opendatafoundation.data-20111116.jar"/>
+	<classpathentry kind="lib" path="lib/jcommander-1.28-SNAPSHOT.jar" sourcepath="lib/jcommander-1.28-SNAPSHOT-sources.jar">
+		<attributes>
+			<attribute name="javadoc_location" value="jar:file:/home/axwi4586/devspace/Daxel-Producer/Presentation-Generator/lib/jcommander-1.28-SNAPSHOT-javadoc.jar!/"/>
+		</attributes>
+	</classpathentry>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
