@@ -39,6 +39,8 @@ import javax.swing.LayoutStyle.ComponentPlacement;
 import java.awt.GridBagLayout;
 import java.awt.GridBagConstraints;
 import java.awt.Insets;
+import java.text.SimpleDateFormat;
+
 import javax.swing.JTextField;
 
 import daxplorelib.DaxploreFile;
@@ -55,7 +57,7 @@ public class DaxploreGUI {
 	 */
 	public static void main(String[] args) {
 		
-		// set the look and feel here, currently we use nimbus, looks nice :)
+		// set the look and feel here, currently we use nimbus.
 		// only available from java 6 and up though.
 		try {
 		    for (LookAndFeelInfo info : UIManager.getInstalledLookAndFeels()) {
@@ -99,8 +101,6 @@ public class DaxploreGUI {
 	public JTextField importDateField;
 	public JTextField creationDateField;
 	public JTextField lastImportFileNameField;
-	
-	private JTable importTable;
 	
 	private DaxploreFile daxploreFile;
 
@@ -152,18 +152,18 @@ public class DaxploreGUI {
 		fileNameLabel.setBounds(19, 81, 115, 15);
 		
 		JLabel importDateLabel = new JLabel("Import date:");
-		importDateLabel.setBounds(19, 114, 115, 15);
+		importDateLabel.setBounds(19, 209, 115, 15);
 		
 		JPanel importSPSSPanel = new JPanel();
 		importSPSSPanel.setBorder(new TitledBorder(null, "Import SPSS File", TitledBorder.LEADING, TitledBorder.TOP, null, null));
 		GroupLayout gl_openPanel = new GroupLayout(openPanel);
 		gl_openPanel.setHorizontalGroup(
-			gl_openPanel.createParallelGroup(Alignment.TRAILING)
-				.addGroup(Alignment.LEADING, gl_openPanel.createSequentialGroup()
+			gl_openPanel.createParallelGroup(Alignment.LEADING)
+				.addGroup(Alignment.TRAILING, gl_openPanel.createSequentialGroup()
 					.addContainerGap()
-					.addGroup(gl_openPanel.createParallelGroup(Alignment.LEADING)
-						.addComponent(importSPSSPanel, Alignment.TRAILING, GroupLayout.DEFAULT_SIZE, 794, Short.MAX_VALUE)
-						.addComponent(metaDataPanel, Alignment.TRAILING, GroupLayout.DEFAULT_SIZE, 794, Short.MAX_VALUE))
+					.addGroup(gl_openPanel.createParallelGroup(Alignment.TRAILING)
+						.addComponent(importSPSSPanel, Alignment.LEADING, GroupLayout.DEFAULT_SIZE, 802, Short.MAX_VALUE)
+						.addComponent(metaDataPanel, Alignment.LEADING, GroupLayout.DEFAULT_SIZE, 802, Short.MAX_VALUE))
 					.addContainerGap())
 		);
 		gl_openPanel.setVerticalGroup(
@@ -172,62 +172,58 @@ public class DaxploreGUI {
 					.addContainerGap()
 					.addComponent(metaDataPanel, GroupLayout.PREFERRED_SIZE, 379, GroupLayout.PREFERRED_SIZE)
 					.addPreferredGap(ComponentPlacement.RELATED)
-					.addComponent(importSPSSPanel, GroupLayout.DEFAULT_SIZE, 368, Short.MAX_VALUE)
+					.addComponent(importSPSSPanel, GroupLayout.PREFERRED_SIZE, 368, Short.MAX_VALUE)
 					.addContainerGap())
 		);
 		
-		JButton importSPSSFileButton = new JButton("Import file...");
-		importSPSSFileButton.addActionListener(new ImportSPSSFile(this, importSPSSFileButton));
+		JButton openSPSSFileButton = new JButton("Open SPSS file...");
+		openSPSSFileButton.setBounds(20, 50, 153, 27);
+		openSPSSFileButton.addActionListener(new ImportSPSSFile(this, openSPSSFileButton));
 		
 		JScrollPane importTableScrollPane = new JScrollPane();
+		importTableScrollPane.setBounds(20, 89, 759, 254);
 		
-		importTable = new JTable();
-		importTableScrollPane.setViewportView(importTable);
-		GroupLayout gl_importSPSSPanel = new GroupLayout(importSPSSPanel);
-		gl_importSPSSPanel.setHorizontalGroup(
-			gl_importSPSSPanel.createParallelGroup(Alignment.LEADING)
-				.addGroup(gl_importSPSSPanel.createSequentialGroup()
-					.addGap(8)
-					.addGroup(gl_importSPSSPanel.createParallelGroup(Alignment.LEADING)
-						.addComponent(importSPSSFileButton, GroupLayout.PREFERRED_SIZE, 105, GroupLayout.PREFERRED_SIZE)
-						.addComponent(importTableScrollPane, GroupLayout.PREFERRED_SIZE, 746, GroupLayout.PREFERRED_SIZE)))
-		);
-		gl_importSPSSPanel.setVerticalGroup(
-			gl_importSPSSPanel.createParallelGroup(Alignment.LEADING)
-				.addGroup(gl_importSPSSPanel.createSequentialGroup()
-					.addGap(7)
-					.addComponent(importSPSSFileButton)
-					.addGap(12)
-					.addComponent(importTableScrollPane, GroupLayout.PREFERRED_SIZE, 269, GroupLayout.PREFERRED_SIZE))
-		);
-		importSPSSPanel.setLayout(gl_importSPSSPanel);
+		JButton importSPSSFileButton = new JButton("");
+		importSPSSFileButton.setToolTipText("Import SPSS file");
+		importSPSSFileButton.setIcon(new ImageIcon(DaxploreGUI.class.getResource("/gui/resources/Arrow-Up-48.png")));
+		importSPSSFileButton.setBounds(332, 19, 90, 58);
+		
+		JTextPane textPane = new JTextPane();
+		importTableScrollPane.setViewportView(textPane);
+		importSPSSPanel.setLayout(null);
+		importSPSSPanel.add(importSPSSFileButton);
+		importSPSSPanel.add(openSPSSFileButton);
+		importSPSSPanel.add(importTableScrollPane);
 		
 		JLabel creationDateLabel = new JLabel("Creation date:");
-		creationDateLabel.setBounds(19, 147, 115, 15);
+		creationDateLabel.setBounds(19, 114, 115, 15);
 		
 		JLabel lastImportedFileLabel = new JLabel("Last import filename:");
-		lastImportedFileLabel.setBounds(19, 180, 135, 15);
+		lastImportedFileLabel.setBounds(19, 174, 135, 15);
 		
+		// text fields in open panel.
 		fileNameField = new JTextField();
-
 		fileNameField.setEditable(false);
 		fileNameField.setBounds(166, 75, 240, 27);
 		fileNameField.setColumns(10);
 		
 		importDateField = new JTextField();
 		importDateField.setEditable(false);
-		importDateField.setBounds(166, 108, 240, 27);
+		importDateField.setBounds(166, 203, 240, 27);
 		importDateField.setColumns(10);
 		
 		creationDateField = new JTextField();
 		creationDateField.setEditable(false);
-		creationDateField.setBounds(166, 141, 240, 27);
+		creationDateField.setBounds(166, 108, 240, 27);
 		creationDateField.setColumns(10);
 		
 		lastImportFileNameField = new JTextField();
 		lastImportFileNameField.setEditable(false);
-		lastImportFileNameField.setBounds(166, 174, 240, 27);
+		lastImportFileNameField.setBounds(166, 168, 240, 27);
 		lastImportFileNameField.setColumns(10);
+		
+		updateTextFields();
+		
 		metaDataPanel.setLayout(null);
 		metaDataPanel.add(fileNameLabel);
 		metaDataPanel.add(fileNameField);
@@ -247,7 +243,7 @@ public class DaxploreGUI {
 		JButton createNewFileButton = new JButton("Create new file...");
 		createNewFileButton.setBounds(168, 35, 135, 27);
 		metaDataPanel.add(createNewFileButton);
-		createNewFileButton.addActionListener(new CreateDaxploreFile());
+		createNewFileButton.addActionListener(new CreateDaxploreFile(this, createNewFileButton));
 		createNewFileButton.setToolTipText("Creates a new daxplore project file");
 		
 		openPanel.setLayout(gl_openPanel);
@@ -293,6 +289,30 @@ public class DaxploreGUI {
 		questionsPanel.add(questionsLabel);
 		
 		radioButtonCreator(buttonPanel, mainPanel);
+	}
+
+	public void updateTextFields() {
+		// set the text fields if we have a daxplore file loaded.
+		if (daxploreFile != null) {
+			// update text fields with appropriate data.
+			fileNameField.setText(daxploreFile.toString());
+			
+			// check if it's a newly created file, if so, it doesn't contain certain fields.
+			if (daxploreFile.getAbout().getImportFilename() != null) {
+			
+				lastImportFileNameField.setText(
+					daxploreFile.getAbout().getImportFilename());
+			
+			// date must first be converted to the appropriate format before returned as string.
+			SimpleDateFormat formatter = new SimpleDateFormat("dd/MM/yyyy");
+			importDateField.setText(
+					formatter.format(daxploreFile.getAbout().getImportDate()));
+			}
+			
+			// creation/modify dates isn't platform independent!
+			creationDateField.setText(
+					formatter.format(daxploreFile.getAbout().getCreationDate()));
+		}
 	}
 
 	/**

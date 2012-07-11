@@ -42,26 +42,25 @@ public final class OpenDaxploreFile implements ActionListener {
 	        int returnVal = fc.showOpenDialog(this.daxploreGUI.frmDaxploreProducer);
 
 	        if (returnVal == JFileChooser.APPROVE_OPTION) {
+	        	try {
+	        		if(daxploreGUI.getDaxploreFile() != null) {
+						daxploreGUI.getDaxploreFile().close();	        			
+	        		}
+				} catch (DaxploreException e2) {
+					System.out.println("Couldn't close file");
+					e2.printStackTrace();
+					return;
+				}
 	           File file = fc.getSelectedFile();
 	           System.out.println("Opening: " + file.getName() + ".");
 	           try {
 				daxploreGUI.setDaxploreFile(new DaxploreFile(file, false));
 				
 				// print the contents of daxplore file about section, just for testing.
-				System.out.println(daxploreGUI.getDaxploreFile().getAbout());
+				System.out.println("Daxplore file content: " + daxploreGUI.getDaxploreFile().getAbout());
 				
-				// update text fields with appropriate data.
-				daxploreGUI.fileNameField.setText(file.getName());
-				daxploreGUI.lastImportFileNameField.setText(
-						daxploreGUI.getDaxploreFile().getAbout().getImportFilename());
-				
-				// date must first be converted to the appropriate format before returned as string.
-				SimpleDateFormat formatter = new SimpleDateFormat("dd/MM/yyyy");
-				daxploreGUI.importDateField.setText(
-						formatter.format(daxploreGUI.getDaxploreFile().getAbout().getImportDate()));
-				
-				// creation/modify dates isn't platform independent!
-				daxploreGUI.creationDateField.setText("NOT SUPPORTED");
+				// update text fields so that file information is properly shown.
+				daxploreGUI.updateTextFields();
 				
 			} catch (DaxploreException e1) {
 				JOptionPane.showMessageDialog(this.daxploreGUI.frmDaxploreProducer,

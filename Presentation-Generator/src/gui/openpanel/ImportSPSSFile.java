@@ -26,7 +26,7 @@ public final class ImportSPSSFile implements ActionListener {
 		if (e.getSource() == importSPSSFileButton) {
 			JFileChooser fc = new JFileChooser();
 			FileNameExtensionFilter filter = new FileNameExtensionFilter(
-					"SPSS Files", "SPSS");
+					"SPSS Files", "sav");
 			fc.setFileFilter(filter);
 
 			int returnVal = fc.showOpenDialog(this.daxploreGUI.frmDaxploreProducer);
