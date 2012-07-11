@@ -125,6 +125,22 @@ public class RawData {
 		rs.next();
 		return rs.getInt(1);
 	}
+	
+	public boolean hasData() {
+		if(SQLTools.tableExists("rawdata", sqliteDatabase)) {
+			try {
+				if(getNumberOfRows() > 0) {
+					return true;
+				} else {
+					return false;
+				}
+			} catch (SQLException e) {
+				return false;
+			}
+		} else {
+			return false;
+		}
+	}
 }
 
 

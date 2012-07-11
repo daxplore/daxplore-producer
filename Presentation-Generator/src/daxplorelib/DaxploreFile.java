@@ -23,7 +23,7 @@ import daxplorelib.metadata.MetaData;
 public class DaxploreFile {
 	public static final int filetypeversionmajor = 0;
 	public static final int filetypeversionminor = 1;
-	Connection sqliteDatabase;
+	Connection connection;
 	About about;
 	
 	public DaxploreFile(File dbFile, boolean createnew) throws DaxploreException{
@@ -34,15 +34,15 @@ public class DaxploreFile {
 		}
 		if(dbFile.exists()){
 			try {
-				sqliteDatabase =  DriverManager.getConnection("jdbc:sqlite:" + dbFile.getAbsolutePath());
-				about = new About(sqliteDatabase);
+				connection =  DriverManager.getConnection("jdbc:sqlite:" + dbFile.getAbsolutePath());
+				about = new About(connection);
 			} catch (SQLException e) {
 				throw new DaxploreException("Not a sqlite file?", e);
 			}
 		} else if (createnew) { //create new project
 			try {
-				sqliteDatabase =  DriverManager.getConnection("jdbc:sqlite:" + dbFile.getAbsolutePath());
-				about = new About(sqliteDatabase, createnew);
+				connection =  DriverManager.getConnection("jdbc:sqlite:" + dbFile.getAbsolutePath());
+				about = new About(connection, createnew);
 			} catch (SQLException e) {
 				throw new DaxploreException("Could not create new sqlite database (No write access?)", e);
 			}
@@ -69,11 +69,11 @@ public class DaxploreFile {
 		boolean autocommit = true;
 		try {
 			//save = sqliteDatabase.setSavepoint();
-			autocommit = sqliteDatabase.getAutoCommit();
-			sqliteDatabase.setAutoCommit(false);
-			sqliteDatabase.setTransactionIsolation(Connection.TRANSACTION_READ_UNCOMMITTED);
+			autocommit = connection.getAutoCommit();
+			connection.setAutoCommit(false);
+			connection.setTransactionIsolation(Connection.TRANSACTION_READ_UNCOMMITTED);
 			
-			ImportedData importedData = new ImportedData(sqliteDatabase);
+			ImportedData importedData = new ImportedData(connection);
 			try {
 				importedData.importSPSS(sf, charset);
 			} catch (SQLException e) {
@@ -83,18 +83,18 @@ public class DaxploreFile {
 				
 			about.setImport(sf.file.getName());
 			
-			sqliteDatabase.commit();
+			connection.commit();
 		} catch (SQLException e) {
 			MyTools.printSQLExeption(e);
 			try {
-				sqliteDatabase.rollback();
+				connection.rollback();
 			} catch (SQLException e1) {
 				throw new DaxploreException("Import error. Could not rollback.", e);
 			}
 			throw new DaxploreException("Import error.", e);
 		} finally {
 			try {
-				sqliteDatabase.setAutoCommit(autocommit);
+				connection.setAutoCommit(autocommit);
 			} catch (SQLException e) {
 				throw new DaxploreException("Import error. Could not set autocommit. General wtf.", e);
 			}
@@ -105,9 +105,20 @@ public class DaxploreFile {
 		return about;
 	}
 	
+	public ImportedData getImportedData(){
+		try {
+			ImportedData id = new ImportedData(connection);
+			return id;
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			return null;
+		}
+	}
+	
 	public MetaData getMetaData() throws DaxploreException {
 		try {
-			return new MetaData(sqliteDatabase);
+			return new MetaData(connection);
 		} catch (SQLException e) {
 			throw new DaxploreException("Couldn't get metadata", e);
 		}
@@ -115,7 +126,7 @@ public class DaxploreFile {
 	
 	public RawMeta getRawMeta() throws DaxploreException {
 		try {
-			return new RawMeta(sqliteDatabase);
+			return new RawMeta(connection);
 		} catch (SQLException e) {
 			throw new DaxploreException("Could't get RawMeta", e);
 		}
@@ -123,7 +134,7 @@ public class DaxploreFile {
 	
 	public void close() throws DaxploreException {
 		try {
-			sqliteDatabase.close();
+			connection.close();
 		} catch (SQLException e) {
 			throw new DaxploreException("Could not close", e);
 		}

@@ -92,11 +92,7 @@ public class ImportedData {
 		}
 	}
 	
-	public Date getImportDate() {
-		return importdate;
-	}
-	
-	public String getFilename() {
-		return filename;
+	public boolean hasData() {
+		return rawmeta.hasData() && rawdata.hasData();
 	}
 }

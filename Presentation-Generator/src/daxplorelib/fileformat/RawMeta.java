@@ -246,4 +246,16 @@ public class RawMeta {
 		return iter;
 		
 	}
+	
+	public boolean hasData() {
+		if(SQLTools.tableExists("rawmeta", connection)) {
+			try {
+				if(getColumns().size() > 0) {
+					return true;
+				} else { return false; }
+			} catch (SQLException e) {
+				return false;
+			}
+		} else { return false; }
+	}
 }
