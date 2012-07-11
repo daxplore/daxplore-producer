@@ -25,8 +25,10 @@ public class DaxploreFile {
 	public static final int filetypeversionminor = 1;
 	Connection connection;
 	About about;
+	File file;
 	
 	public DaxploreFile(File dbFile, boolean createnew) throws DaxploreException{
+		this.file = dbFile;
 		try {
 			Class.forName("org.sqlite.JDBC");
 		} catch (ClassNotFoundException e) {
@@ -138,5 +140,9 @@ public class DaxploreFile {
 		} catch (SQLException e) {
 			throw new DaxploreException("Could not close", e);
 		}
+	}
+	
+	public File getFile() {
+		return file;
 	}
 }

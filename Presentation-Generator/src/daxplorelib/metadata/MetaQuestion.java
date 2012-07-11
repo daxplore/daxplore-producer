@@ -43,7 +43,11 @@ public class MetaQuestion implements JSONAware, Comparable<MetaQuestion>{
 			stmt = connection.prepareStatement("UPDATE metaquestion SET fulltextref = ?, shorttextref = ?, scale = ?, calculation = ? WHERE id = ?");
 			stmt.setString(1, fullTextRef.getRef());
 			stmt.setString(2, shortTextRef.getRef());
-			stmt.setInt(3, scale.getID());
+			if(scale != null) {
+				stmt.setInt(3, scale.getID());
+			} else {
+				stmt.setNull(3, java.sql.Types.INTEGER);
+			}
 			stmt.setInt(4, calculation.getID());
 			stmt.setString(5, id);
 			stmt.execute();
@@ -70,7 +74,7 @@ public class MetaQuestion implements JSONAware, Comparable<MetaQuestion>{
 				new TextReference((String)obj.get("fulltext"), connection), 
 				new TextReference((String)obj.get("shorttext"), connection), 
 				new MetaCalculation((String)obj.get("data"), connection), 
-				new MetaScale((JSONArray)obj.get("scale"), connection, true),
+				obj.containsKey("scale") ? new MetaScale((JSONArray)obj.get("scale"), connection, true) : null, //MetaScale should be null if there is no scale
 				connection
 				);
 	}
@@ -130,7 +134,12 @@ public class MetaQuestion implements JSONAware, Comparable<MetaQuestion>{
 		stmt.setString(1, id);
 		ResultSet rs = stmt.executeQuery();
 		if(rs.next()) {
-			return new MetaScale(rs.getInt("scale"), connection);
+			int scaleid = rs.getInt("scale");
+			if(rs.wasNull()) {
+				return null;
+			} else {
+				return new MetaScale(scaleid, connection);
+			}
 		} else {
 			return null;
 		}
@@ -182,7 +191,10 @@ public class MetaQuestion implements JSONAware, Comparable<MetaQuestion>{
 		try {
 			obj.put("fulltext", getFullTextRef());
 			obj.put("shorttext", getShortTextRef());
-			obj.put("options", getScale());
+			MetaScale scale = getScale();
+			if(scale != null) {
+				obj.put("options", getScale());
+			}
 		} catch (SQLException e) {
 			MyTools.printSQLExeption(e);
 		}
