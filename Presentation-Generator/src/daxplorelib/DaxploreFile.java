@@ -14,8 +14,11 @@ import org.opendatafoundation.data.FileFormatInfo.Compatibility;
 import org.opendatafoundation.data.spss.SPSSFile;
 import org.opendatafoundation.data.spss.SPSSFileException;
 
+import tools.MyTools;
+
 import daxplorelib.fileformat.ImportedData;
 import daxplorelib.fileformat.RawMeta;
+import daxplorelib.metadata.MetaData;
 
 public class DaxploreFile {
 	public static final int filetypeversionmajor = 0;
@@ -71,13 +74,18 @@ public class DaxploreFile {
 			sqliteDatabase.setTransactionIsolation(Connection.TRANSACTION_READ_UNCOMMITTED);
 			
 			ImportedData importedData = new ImportedData(sqliteDatabase);
-			
-			importedData.importSPSS(sf, charset);
-			
+			try {
+				importedData.importSPSS(sf, charset);
+			} catch (SQLException e) {
+				MyTools.printSQLExeption(e);
+				throw new DaxploreException("Imprt error", e);
+			}
+				
 			about.setImport(sf.file.getName());
 			
 			sqliteDatabase.commit();
 		} catch (SQLException e) {
+			MyTools.printSQLExeption(e);
 			try {
 				sqliteDatabase.rollback();
 			} catch (SQLException e1) {
@@ -97,11 +105,27 @@ public class DaxploreFile {
 		return about;
 	}
 	
+	public MetaData getMetaData() throws DaxploreException {
+		try {
+			return new MetaData(sqliteDatabase);
+		} catch (SQLException e) {
+			throw new DaxploreException("Couldn't get metadata", e);
+		}
+	}
+	
 	public RawMeta getRawMeta() throws DaxploreException {
 		try {
 			return new RawMeta(sqliteDatabase);
 		} catch (SQLException e) {
 			throw new DaxploreException("Could't get RawMeta", e);
+		}
+	}
+	
+	public void close() throws DaxploreException {
+		try {
+			sqliteDatabase.close();
+		} catch (SQLException e) {
+			throw new DaxploreException("Could not close", e);
 		}
 	}
 }

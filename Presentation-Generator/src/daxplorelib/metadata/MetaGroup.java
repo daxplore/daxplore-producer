@@ -15,7 +15,7 @@ import org.json.simple.JSONObject;
 import tools.MyTools;
 
 public class MetaGroup implements JSONAware{
-	protected static final String sqlDefinition = "CREATE TABLE metagroup (id INTEGER PRIMARY KEY, textref TEXT, index INTEGER, type INTEGER)";
+	protected static final String sqlDefinition = "CREATE TABLE metagroup (id INTEGER PRIMARY KEY, textref TEXT, ind INTEGER, type INTEGER)";
 	protected static final String sqlDefinition2 = "CREATE TABLE metagrouprel (groupid INTEGER, questionid TEXT)";		
 	
 	protected int id;
@@ -61,7 +61,7 @@ public class MetaGroup implements JSONAware{
 			id = rs.getInt("id");
 		} else {
 			//if not create new group
-			stmt = connection.prepareStatement("INSERT INTO metagroup (textref, index, type) VALUES (?, ?, ?)");
+			stmt = connection.prepareStatement("INSERT INTO metagroup (textref, ind, type) VALUES (?, ?, ?)");
 			stmt.setString(1, textref.getRef());
 			stmt.setInt(2, index);
 			stmt.setInt(3, type.asInt());
@@ -149,11 +149,11 @@ public class MetaGroup implements JSONAware{
 	}
 	
 	public int getIndex() throws SQLException {
-		PreparedStatement stmt = connection.prepareStatement("SELECT index FROM metagroup WHERE id = ?");
+		PreparedStatement stmt = connection.prepareStatement("SELECT ind FROM metagroup WHERE id = ?");
 		stmt.setInt(1, id);
 		ResultSet rs = stmt.executeQuery();
 		if(rs.next()) {
-			return rs.getInt("index");
+			return rs.getInt("ind");
 		} else {
 			return 0;
 		}
