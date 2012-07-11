@@ -1,4 +1,6 @@
 *.class
 *.db
+*.daxplore
 /dist
 /build
+/bin
