@@ -28,18 +28,23 @@ public class InfoCommand {
 			System.out.println("File: " + projectfile.getName());
 			System.out.println("Creation date: " + about.getCreationDate().toString());
 			System.out.println("Last updated: " + about.getLastUpdate().toString());
-			ImportedData imported = about.getImportedData();
-			System.out.println("Imported from: " + imported.getFilename() + " on " + imported.getImportDate().toString());
-			List<String> columns = imported.getColumnList();
-			System.out.println("Has " + columns.size() + " columns and " + imported.getNumberOfRows() + " rows");
-			System.out.print("Columns: ");
-			for(String s: columns){
-				System.out.print(s + ", ");
+			ImportedData imported = daxplore.getImportedData();
+			if(imported != null && imported.hasData()) {
+				System.out.print("Imported from: " + about.getImportFilename());
+				System.out.println(" on " + about.getImportDate().toString());
+				List<String> columns = imported.getColumnList();
+				System.out.println("Has " + columns.size() + " columns and " + imported.getNumberOfRows() + " rows");
+				System.out.print("Columns: ");
+				for(String s: columns){
+					System.out.print(s + ", ");
+				}
+				System.out.print("\n");
+			} else {
+				System.out.println("Has never imported data");
 			}
-			System.out.print("\n");
 		} catch (DaxploreException e) {
 			// TODO Auto-generated catch block
-			e.printStackTrace();
+			e.getOriginalException().printStackTrace();
 		}
 	}
 }

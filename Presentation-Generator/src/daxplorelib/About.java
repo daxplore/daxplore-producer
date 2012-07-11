@@ -60,17 +60,6 @@ public class About {
 		}
 	}
 	
-	public ImportedData getImportedData(){
-		try {
-			ImportedData id = new ImportedData(database);
-			return id;
-		} catch (SQLException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-			return null;
-		}
-	}
-	
 	public Date getCreationDate() {
 		return creation;
 	}
@@ -95,10 +84,10 @@ public class About {
 		Date now = new Date();
 		PreparedStatement prep = database.prepareStatement("UPDATE about SET importdate = ?, filename = ?");
 		prep.setLong(1, now.getTime());
-		lastupdate = now;
 		prep.setString(2, filename);
 		this.filename = filename;
 		prep.executeUpdate();
+		setUpdate();
 	}
 	
 	public String getImportFilename(){

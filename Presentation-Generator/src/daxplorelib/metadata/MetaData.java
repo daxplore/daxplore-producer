@@ -87,14 +87,22 @@ public class MetaData {
 				TextReference fulltext = new TextReference(rmq.column + "_fulltext", connection);
 				fulltext.put(rmq.qtext, locale);
 				MetaCalculation calc = new MetaCalculation(rmq.column, connection);
-				List<Pair<TextReference, Double>> scalevalues = new LinkedList<Pair<TextReference,Double>>();
-				for(int i = 0; i < rmq.valuelables.size(); i++) {
-					Pair<String, Double> s = rmq.valuelables.get(i);
-					TextReference ref = new TextReference(rmq.column + "_option_" + i, connection);
-					ref.put(s.getKey(), locale);
-					scalevalues.add(new Pair<TextReference, Double>(fulltext, s.getValue()));
+				MetaScale scale = null;
+				switch(rmq.measure) {
+				case MAPPED:
+					List<Pair<TextReference, Double>> scalevalues = new LinkedList<Pair<TextReference,Double>>();
+					for(int i = 0; i < rmq.valuelables.size(); i++) {
+						Pair<String, Double> s = rmq.valuelables.get(i);
+						TextReference ref = new TextReference(rmq.column + "_option_" + i, connection);
+						ref.put(s.getKey(), locale);
+						scalevalues.add(new Pair<TextReference, Double>(ref, s.getValue()));
+					}
+					scale = new MetaScale(scalevalues, connection);
+					break;
+				default:
+					scale = null;
+					break;
 				}
-				MetaScale scale = new MetaScale(scalevalues, connection);
 				
 				TextReference shorttext = new TextReference(rmq.column + "shorttext", connection);
 				
