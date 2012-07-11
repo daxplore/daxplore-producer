@@ -3,6 +3,7 @@ package gui;
 import gui.openpanel.CreateDaxploreFile;
 import gui.openpanel.ImportSPSSFile;
 import gui.openpanel.OpenDaxploreFile;
+import gui.openpanel.OpenSPSSFile;
 
 import java.awt.BorderLayout;
 import java.awt.CardLayout;
@@ -44,7 +45,11 @@ import java.text.SimpleDateFormat;
 
 import javax.swing.JTextField;
 
+import org.opendatafoundation.data.spss.SPSSFile;
+
 import daxplorelib.DaxploreFile;
+import java.awt.event.ActionListener;
+import java.awt.event.ActionEvent;
 
 /**
  * Main window handler class. Initialization of application goes here.
@@ -59,14 +64,11 @@ public class DaxploreGUI {
 	public static void main(String[] args) {
 		
 		// do a java version check, if target system doesn't have java 7, exit.
-		
-		
 		String javaVersion = System.getProperty("java.version");
-		System.out.println(javaVersion);
+		System.out.println("Java version " + javaVersion + " was found.");
 		String[] javaVersionSplit = javaVersion.split("\\.");
 		int indexZero = Integer.parseInt(javaVersionSplit[0]);
 		int indexOne = Integer.parseInt(javaVersionSplit[1]);
-		System.out.println(indexZero + " " + indexOne);
 
 		if (!(indexZero >= 1) || (indexOne < 7))
 		{
@@ -116,14 +118,25 @@ public class DaxploreGUI {
 			}
 		});
 	}
+	
+	// data fields for main class.
 	public JFrame frmDaxploreProducer;
 	private final ButtonGroup buttonGroup = new ButtonGroup();
 	public JTextField fileNameField;
 	public JTextField importDateField;
 	public JTextField creationDateField;
 	public JTextField lastImportFileNameField;
-	
 	private DaxploreFile daxploreFile;
+	private SPSSFile spssFile;
+	JTextPane spssFileInfoText;
+	
+	public SPSSFile getSpssFile() {
+		return spssFile;
+	}
+
+	public void setSpssFile(SPSSFile spssFile) {
+		this.spssFile = spssFile;
+	}
 
 	
 	public DaxploreFile getDaxploreFile() {
@@ -179,12 +192,12 @@ public class DaxploreGUI {
 		importSPSSPanel.setBorder(new TitledBorder(null, "Import SPSS File", TitledBorder.LEADING, TitledBorder.TOP, null, null));
 		GroupLayout gl_openPanel = new GroupLayout(openPanel);
 		gl_openPanel.setHorizontalGroup(
-			gl_openPanel.createParallelGroup(Alignment.LEADING)
-				.addGroup(Alignment.TRAILING, gl_openPanel.createSequentialGroup()
+			gl_openPanel.createParallelGroup(Alignment.TRAILING)
+				.addGroup(gl_openPanel.createSequentialGroup()
 					.addContainerGap()
 					.addGroup(gl_openPanel.createParallelGroup(Alignment.TRAILING)
-						.addComponent(importSPSSPanel, Alignment.LEADING, GroupLayout.DEFAULT_SIZE, 802, Short.MAX_VALUE)
-						.addComponent(metaDataPanel, Alignment.LEADING, GroupLayout.DEFAULT_SIZE, 802, Short.MAX_VALUE))
+						.addComponent(importSPSSPanel, Alignment.LEADING, GroupLayout.DEFAULT_SIZE, 784, Short.MAX_VALUE)
+						.addComponent(metaDataPanel, Alignment.LEADING, GroupLayout.DEFAULT_SIZE, 784, Short.MAX_VALUE))
 					.addContainerGap())
 		);
 		gl_openPanel.setVerticalGroup(
@@ -193,24 +206,25 @@ public class DaxploreGUI {
 					.addContainerGap()
 					.addComponent(metaDataPanel, GroupLayout.PREFERRED_SIZE, 379, GroupLayout.PREFERRED_SIZE)
 					.addPreferredGap(ComponentPlacement.RELATED)
-					.addComponent(importSPSSPanel, GroupLayout.PREFERRED_SIZE, 368, Short.MAX_VALUE)
-					.addContainerGap())
+					.addComponent(importSPSSPanel, GroupLayout.PREFERRED_SIZE, 343, GroupLayout.PREFERRED_SIZE)
+					.addContainerGap(25, Short.MAX_VALUE))
 		);
 		
 		JButton openSPSSFileButton = new JButton("Open SPSS file...");
 		openSPSSFileButton.setBounds(20, 50, 153, 27);
-		openSPSSFileButton.addActionListener(new ImportSPSSFile(this, openSPSSFileButton));
+		openSPSSFileButton.addActionListener(new OpenSPSSFile(this, openSPSSFileButton));
 		
 		JScrollPane importTableScrollPane = new JScrollPane();
-		importTableScrollPane.setBounds(20, 89, 759, 254);
+		importTableScrollPane.setBounds(20, 89, 746, 235);
 		
 		JButton importSPSSFileButton = new JButton("");
+		importSPSSFileButton.addActionListener(new ImportSPSSFile(this, importSPSSFileButton));
 		importSPSSFileButton.setToolTipText("Import SPSS file");
 		importSPSSFileButton.setIcon(new ImageIcon(DaxploreGUI.class.getResource("/gui/resources/Arrow-Up-48.png")));
 		importSPSSFileButton.setBounds(332, 19, 90, 58);
 		
-		JTextPane textPane = new JTextPane();
-		importTableScrollPane.setViewportView(textPane);
+		spssFileInfoText = new JTextPane();
+		importTableScrollPane.setViewportView(spssFileInfoText);
 		importSPSSPanel.setLayout(null);
 		importSPSSPanel.add(importSPSSFileButton);
 		importSPSSPanel.add(openSPSSFileButton);
@@ -312,6 +326,15 @@ public class DaxploreGUI {
 		radioButtonCreator(buttonPanel, mainPanel);
 	}
 
+	public void updateSpssFileInfoText() {
+		if (spssFile != null) {
+			spssFileInfoText.setText(
+					"SPSS file ready for import: " +
+					spssFile.file.getName() + "\n" +
+					spssFile.file.getAbsolutePath());
+		}
+	}
+
 	public void updateTextFields() {
 		
 		SimpleDateFormat formatter = new SimpleDateFormat("dd/MM/yyyy");
@@ -326,13 +349,16 @@ public class DaxploreGUI {
 			if (importFilename != null && !"".equals(importFilename)) {
 				lastImportFileNameField.setText(daxploreFile.getAbout().getImportFilename());
 				// date must first be converted to the appropriate format before returned as string.
+				if (daxploreFile.getAbout().getImportDate() != null) {
 				importDateField.setText(formatter.format(daxploreFile.getAbout().getImportDate()));
+				} else {
+					importDateField.setText("");
+				}
 			} else {
 				lastImportFileNameField.setText("");
 				importDateField.setText("");
 			}
 			
-			// creation/modify dates isn't platform independent!
 			creationDateField.setText(
 			formatter.format(daxploreFile.getAbout().getCreationDate()));
 		}
