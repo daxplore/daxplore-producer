@@ -56,7 +56,11 @@ public class MetaQuestion implements JSONAware, Comparable<MetaQuestion>{
 			stmt.setString(1, id);
 			stmt.setString(2, fullTextRef.getRef());
 			stmt.setString(3, shortTextRef.getRef());
-			stmt.setInt(4, scale.getID());
+			if(scale != null) {
+				stmt.setInt(4, scale.getID());
+			} else {
+				stmt.setNull(3, java.sql.Types.INTEGER);
+			}
 			stmt.setInt(5, calculation.getID());
 			stmt.execute();
 		}

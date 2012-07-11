@@ -88,7 +88,7 @@ public class MetaData {
 				fulltext.put(rmq.qtext, locale);
 				MetaCalculation calc = new MetaCalculation(rmq.column, connection);
 				MetaScale scale = null;
-				switch(rmq.measure) {
+				switch(rmq.qtype) {
 				case MAPPED:
 					List<Pair<TextReference, Double>> scalevalues = new LinkedList<Pair<TextReference,Double>>();
 					for(int i = 0; i < rmq.valuelables.size(); i++) {
@@ -262,19 +262,34 @@ public class MetaData {
 	}
 	
 	public void consolidateScales(Locale bylocale) throws DaxploreException {
+		boolean autocommit = true;
 		try {
+			//save = sqliteDatabase.setSavepoint();
+			autocommit = connection.getAutoCommit();
+			connection.setAutoCommit(false);
+			connection.setTransactionIsolation(Connection.TRANSACTION_READ_UNCOMMITTED);
+		} catch (SQLException e) {
+			MyTools.printSQLExeption(e);
+			throw new DaxploreException("Failed to disable autocommit", e);
+		}
+		
+		try {
+			//System.out.println("Consolidating...");
 			List<MetaScale> scaleList = MetaScale.getAll(connection);
 			List<MetaScale> uniqueScales = new LinkedList<MetaScale>();
 			List<MetaScale> genericScales = new LinkedList<MetaScale>();
 			LinkedHashMap<MetaScale, MetaScale> scaleMap = new LinkedHashMap<MetaScale, MetaScale>();
 			NextScale: for(MetaScale s: scaleList) {
+				//System.out.print("\n.");
 				for(MetaScale us: uniqueScales) {
+					//System.out.print(",");
 					if(us.equalsLocale(s, bylocale)) {
+						//System.out.print("+");
 						//If scale exists previously, create new generic scale 
 						List<Pair<TextReference, Double>> oldrefs = us.getRefereceList();
 						List<Pair<TextReference, Double>> newrefs = new LinkedList<Pair<TextReference, Double>>();
 						for(int i = 0; i < oldrefs.size(); i++) {
-							TextReference tr = new TextReference("generic" + (uniqueScales.size() +1) + "_option_" + i, connection);
+							TextReference tr = new TextReference("generic" + (genericScales.size() +1) + "_option_" + i, connection);
 							TextReference oldtr = oldrefs.get(i).getKey();
 							List<Locale> locs = oldtr.getLocales();
 							for(Locale loc: locs) {
@@ -283,6 +298,7 @@ public class MetaData {
 							newrefs.add(new Pair<TextReference, Double>(tr, oldrefs.get(i).getValue()));
 						}
 						MetaScale gs = new MetaScale(newrefs, connection);
+						//System.out.println("\n" + us.toJSONString() +" -> " + gs.toJSONString());
 						genericScales.add(gs);
 						scaleMap.put(s, gs);
 						uniqueScales.remove(us);
@@ -295,8 +311,11 @@ public class MetaData {
 						continue NextScale;
 					}
 				}
+				uniqueScales.add(s);
 			}
+			//System.out.println(" " + genericScales.size() + " scales.");
 			
+			//System.out.println("Altering questions to use generic scales...");
 			//Change all questions to use new generic scales
 			List<MetaQuestion> allquestions = MetaQuestion.getAll(connection);
 			for(MetaQuestion q: allquestions) {
@@ -305,6 +324,7 @@ public class MetaData {
 				}
 			}
 			
+			//System.out.println("Removing old scales");
 			//remove old unused scales
 			for(MetaScale s: scaleMap.keySet()) {
 				List<Pair<TextReference, Double>> refs = s.getRefereceList();
@@ -313,12 +333,29 @@ public class MetaData {
 					p.getKey().remove();
 				}
 			}
-			
+			//System.out.println("Done");
 			
 		} catch (SQLException e) {
 			throw new DaxploreException("Failed to consolidate scales", e);
 		}
 		
+		try {
+			connection.setAutoCommit(autocommit);
+		} catch (SQLException e) {
+			MyTools.printSQLExeption(e);
+			throw new DaxploreException("Failed to reenable autocommit", e);
+		}
+	}
+	
+	public void clearNullStrings() throws DaxploreException {
+		List<TextReference> reflist = getAllTextReferences();
+		try {
+			for(TextReference tr: reflist) {
+				tr.clearNulls();
+			}
+		} catch (SQLException e) {
+			throw new DaxploreException("Faild while clearing nulls from strings", e);
+		}
 	}
 	
 	public List<MetaGroup> getAllGroups() throws DaxploreException {

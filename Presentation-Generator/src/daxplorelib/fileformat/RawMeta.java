@@ -32,8 +32,8 @@ public class RawMeta {
 	protected static final String sqlDefinition = "CREATE TABLE rawmeta (column TEXT, longname TEXT, qtext TEXT, qtype TEXT, spsstype TEXT, valuelabels TEXT, measure TEXT)";
 	
 	public class RawMetaQuestion {
-		public String column, longname, qtext, qtype, spsstype;
-		public VariableType measure = null;
+		public String column, longname, qtext, spsstype, measure;
+		public VariableType qtype = null;
 		public List<Pair<String, Double>> valuelables;
 	}
 	
@@ -219,11 +219,10 @@ public class RawMeta {
 					RawMetaQuestion rmq = new RawMetaQuestion();
 					rmq.column = rs.getString("column");
 					rmq.longname = rs.getString("longname");
-					String measure = rs.getString("measure");
-					if(measure != null && !"".equals(measure)) {
-						rmq.measure = VariableType.valueOf(measure);
-					}
+					rmq.measure = rs.getString("measure");;
 					rmq.qtext = rs.getString("qtext");
+					String qtype = rs.getString("qtype");
+					rmq.qtype = VariableType.valueOf(qtype);
 					rmq.spsstype = rs.getString("spsstype");
 					String cats = rs.getString("valuelabels");
 					if(cats != null && !cats.equals("")) {

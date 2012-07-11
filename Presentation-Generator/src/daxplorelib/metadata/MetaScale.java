@@ -115,10 +115,10 @@ public class MetaScale implements JSONAware {
 	
 	public static List<MetaScale> getAll(Connection connection) throws SQLException {
 		Statement stmt = connection.createStatement();
-		ResultSet rs = stmt.executeQuery("SELECT UNIQUE(id) AS uid FROM metascale ORDER BY id");
+		ResultSet rs = stmt.executeQuery("SELECT DISTINCT id FROM metascale ORDER BY id");
 		List<MetaScale> list = new LinkedList<MetaScale>();
 		while(rs.next()) {
-			list.add(new MetaScale(rs.getInt("uid"), connection));
+			list.add(new MetaScale(rs.getInt("id"), connection));
 		}
 		return list;
 	}
@@ -153,6 +153,7 @@ public class MetaScale implements JSONAware {
 		for(int i = 0; i < thisRefList.size(); i++) {
 			if(!thisRefList.get(i).getValue().equals(otherRefList.get(i).getValue())) { return false; }
 			if(!thisRefList.get(i).getKey().equalsLocale(otherRefList.get(i).getKey(), locale)) { return false; }
+			if(thisRefList.get(i).getKey().get(locale).equals("")) { return false; }
 		}
 		
 		return true;

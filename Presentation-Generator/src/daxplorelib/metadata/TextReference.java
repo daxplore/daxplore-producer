@@ -44,7 +44,7 @@ public class TextReference implements JSONAware, Comparable<TextReference> {
 	public String get(Locale locale) throws SQLException {
 		PreparedStatement stmt = connection.prepareStatement("SELECT text FROM texts WHERE ref = ? AND locale = ?");
 		stmt.setString(1, reference);
-		stmt.setString(2, locale.getLanguage()); //TODO: let Daniel choose locale representation
+		stmt.setString(2, locale.toLanguageTag()); //TODO: let Daniel choose locale representation
 		stmt.execute();
 		ResultSet rs = stmt.getResultSet();
 		if(rs.next()) {
@@ -62,14 +62,14 @@ public class TextReference implements JSONAware, Comparable<TextReference> {
 		if( get(locale) == null) {
 			PreparedStatement stmt = connection.prepareStatement("INSERT INTO texts (ref, locale, text) VALUES (?, ?, ?)");
 			stmt.setString(1, reference);
-			stmt.setString(2, locale.getLanguage());
+			stmt.setString(2, locale.toLanguageTag());
 			stmt.setString(3, text);
 			stmt.execute();
 		} else {
 			PreparedStatement stmt = connection.prepareStatement("UPDATE texts SET text = ? WHERE ref = ? AND locale = ?");
 			stmt.setString(1, text);
 			stmt.setString(2, reference);
-			stmt.setString(3, locale.getLanguage());
+			stmt.setString(3, locale.toLanguageTag());
 			stmt.execute();
 		}
 	}
@@ -77,7 +77,7 @@ public class TextReference implements JSONAware, Comparable<TextReference> {
 	public boolean has(Locale locale) throws SQLException {
 		PreparedStatement stmt = connection.prepareStatement("SELECT text FROM texts WHERE ref = ? AND locale = ?");
 		stmt.setString(1, reference);
-		stmt.setString(2, locale.getLanguage()); //TODO: let Daniel choose locale representation
+		stmt.setString(2, locale.toLanguageTag()); //TODO: let Daniel choose locale representation
 		stmt.execute();
 		ResultSet rs = stmt.getResultSet();
 		return rs.next();
@@ -90,10 +90,14 @@ public class TextReference implements JSONAware, Comparable<TextReference> {
 	 */
 	public List<Locale> getLocales() throws SQLException {
 		PreparedStatement stmt = connection.prepareStatement("SELECT locale FROM texts WHERE ref = ?");
+		stmt.setString(1, reference);
 		List<Locale> list = new LinkedList<Locale>();
 		ResultSet rs = stmt.executeQuery();
 		while(rs.next()) {
-			list.add(new Locale(rs.getString("locale")));
+			String l = rs.getString("locale");
+			if(!rs.wasNull() && !l.equals("")) {
+				list.add(new Locale(l));
+			}
 		}
 		return list;
 	}
@@ -115,7 +119,18 @@ public class TextReference implements JSONAware, Comparable<TextReference> {
 	}
 	
 	public boolean equalsLocale(TextReference other, Locale locale) throws SQLException {
-		return get(locale).equals(other.get(locale));
+		if(has(locale) && other.has(locale)) {
+			return get(locale).equals(other.get(locale));
+		} else return false;
+	}
+	
+	public void clearNulls() throws SQLException {
+		if(getLocales().size() > 0) {
+			PreparedStatement stmt = connection.prepareStatement("DELETE FROM texts WHERE ref = ? AND locale = ?");
+			stmt.setString(1, reference);
+			stmt.setString(2, "");
+			stmt.executeUpdate();
+		}
 	}
 
 	@Override
