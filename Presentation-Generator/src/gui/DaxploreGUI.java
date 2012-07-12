@@ -65,14 +65,7 @@ public class DaxploreGUI {
 	public static void main(String[] args) {
 		
 		// do a java version check, if target system doesn't have java 7, exit.
-		String javaVersion = System.getProperty("java.version");
-		System.out.println("Java version " + javaVersion + " was found.");
-		String[] javaVersionSplit = javaVersion.split("\\.");
-		int indexZero = Integer.parseInt(javaVersionSplit[0]);
-		int indexOne = Integer.parseInt(javaVersionSplit[1]);
-
-		if (!(indexZero >= 1) || (indexOne < 7))
-		{
+		if (GUITools.javaVersionCheck() != true) {
 			JOptionPane.showMessageDialog(null,
 					"This program only supports Java 7 or higher.",
 					"Daxplore warning",

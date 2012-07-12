@@ -133,12 +133,10 @@ public class ImportSPSSFile implements ActionListener, PropertyChangeListener {
 			File importFile = daxploreGUI.getSpssFile().file;
 			
 			try {
-				
-				daxploreGUI.getDaxploreFile().importSPSS(importFile, charset);
-				// adding progress bar of import here.
 				importSpssFileButton.setEnabled(false);
 		        daxploreGUI.frmDaxploreProducer.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
-		        //Instances of javax.swing.SwingWorker are not reusuable, so
+				daxploreGUI.getDaxploreFile().importSPSS(importFile, charset);
+				//Instances of javax.swing.SwingWorker are not reusuable, so
 		        //we create new instances as needed.
 		        task = new Task();
 		        task.addPropertyChangeListener(importSpssFileInstance);
