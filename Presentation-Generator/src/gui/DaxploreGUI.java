@@ -175,11 +175,6 @@ public class DaxploreGUI {
 		
 		openPanelView.setSpssFileInfoText(new JTextPane());
 		
-		JPanel buttonPanel = new JPanel();
-		buttonPanel.setBorder(new MatteBorder(0, 0, 0, 1, (Color) Color.LIGHT_GRAY));
-		frmDaxploreProducer.getContentPane().add(buttonPanel, BorderLayout.WEST);
-		buttonPanel.setLayout(new GridLayout(0, 1, 0, 0));
-		
 		final JPanel mainPanel = new JPanel();
 		mainPanel.setBorder(new MatteBorder(0, 1, 0, 0, (Color) Color.GRAY));
 		frmDaxploreProducer.getContentPane().add(mainPanel, BorderLayout.CENTER);
@@ -289,6 +284,9 @@ public class DaxploreGUI {
 		editPanel.add(lblEdit);
 		
 		openPanelView.setSpssFileInfoText(new JTextPane());
-		mainPanelView.radioButtonCreator(buttonPanel, mainPanel);
+		JPanel buttonPanel = mainPanelView.radioButtonCreator( mainPanel);
+		
+		frmDaxploreProducer.getContentPane().add(buttonPanel, BorderLayout.WEST);
+		
 	}
 }

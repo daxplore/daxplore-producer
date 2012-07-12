@@ -1,6 +1,8 @@
 package gui;
 
 import java.awt.CardLayout;
+import java.awt.Color;
+import java.awt.GridLayout;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
 
@@ -8,14 +10,12 @@ import javax.swing.ButtonGroup;
 import javax.swing.ImageIcon;
 import javax.swing.JPanel;
 import javax.swing.JRadioButton;
+import javax.swing.border.MatteBorder;
 import javax.swing.border.TitledBorder;
 
 public class MainPanelView {
 	private ButtonGroup buttonGroup;
 
-	/**
-	 * @wbp.parser.entryPoint
-	 */
 	public MainPanelView(ButtonGroup buttonGroup) {
 		this.buttonGroup = buttonGroup;
 	}
@@ -30,10 +30,15 @@ public class MainPanelView {
 
 	/**
 	 * Handles the display and functionality of the left panel buttons.
+	 * @wbp.parser.entryPoint
 	 * @param buttonPanel
 	 * @param mainPanel
 	 */
-	void radioButtonCreator(JPanel buttonPanel, final JPanel mainPanel) {
+	JPanel radioButtonCreator(final JPanel mainPanel) {
+		JPanel buttonPanel = new JPanel();	
+		buttonPanel.setBorder(new MatteBorder(0, 0, 0, 1, (Color) Color.LIGHT_GRAY));
+		buttonPanel.setLayout(new GridLayout(0, 1, 0, 0));
+		
 		JRadioButton OpenButton = new JRadioButton("");
 		OpenButton.setToolTipText("Manage file(s)");
 		OpenButton.addItemListener(new ItemListener() {
@@ -130,5 +135,7 @@ public class MainPanelView {
 		getButtonGroup().add(PackageButton);
 		PackageButton.setIcon(new ImageIcon(DaxploreGUI.class.getResource("/gui/resources/28.png")));
 		buttonPanel.add(PackageButton);
+		
+		return buttonPanel;
 	}
 }
