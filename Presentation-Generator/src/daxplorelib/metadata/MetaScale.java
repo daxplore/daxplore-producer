@@ -13,11 +13,13 @@ import org.json.simple.JSONArray;
 import org.json.simple.JSONAware;
 import org.json.simple.JSONObject;
 
+import daxplorelib.DaxploreTable;
+
 import tools.MyTools;
 import tools.Pair;
 
 public class MetaScale implements JSONAware {
-	public static final String sqlDefinition = "CREATE TABLE metascale (id INTEGER, textref STRING, ord INTEGER, value REAL)";
+	protected static final DaxploreTable table = new DaxploreTable("CREATE TABLE metascale (id INTEGER, textref STRING, ord INTEGER, value REAL)", "metascale");
 	
 	Connection connection;
 	int id;

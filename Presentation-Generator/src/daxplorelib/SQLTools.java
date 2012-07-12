@@ -30,6 +30,14 @@ public class SQLTools {
 		}
 	}
 	
+	public static void createIfNotExists(DaxploreTable table, Connection connection) throws SQLException {
+		if(!tableExists(table.name, connection)) {
+			Statement stmt = connection.createStatement();
+			stmt.executeUpdate(table.sql);
+			stmt.close();
+		}
+	}
+	
 	public static boolean compareTables(String table1, String table2, String idcolumn, Map<String,String> columns, Connection connection) throws SQLException{
 		Statement stmt = connection.createStatement();
 		stmt.execute("select * from " + table1);

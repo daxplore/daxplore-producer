@@ -7,6 +7,8 @@ import java.nio.charset.Charset;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
+import java.util.LinkedList;
+import java.util.List;
 
 import org.opendatafoundation.data.FileFormatInfo;
 import org.opendatafoundation.data.FileFormatInfo.ASCIIFormat;
@@ -16,41 +18,74 @@ import org.opendatafoundation.data.spss.SPSSFileException;
 
 import tools.MyTools;
 
-import daxplorelib.fileformat.ImportedData;
-import daxplorelib.fileformat.RawMeta;
 import daxplorelib.metadata.MetaData;
+import daxplorelib.raw.RawImport;
+import daxplorelib.raw.RawMeta;
 
 public class DaxploreFile {
 	public static final int filetypeversionmajor = 0;
 	public static final int filetypeversionminor = 1;
 	Connection connection;
 	About about;
-	File file;
+	File file = null;
 	
-	public DaxploreFile(File dbFile, boolean createnew) throws DaxploreException{
-		this.file = dbFile;
+	public static DaxploreFile createFromExistingFile(File file) throws DaxploreException {
 		try {
 			Class.forName("org.sqlite.JDBC");
 		} catch (ClassNotFoundException e) {
 			throw new DaxploreException("Sqlite could not be found", e);
 		}
-		if(dbFile.exists()){
-			try {
-				connection =  DriverManager.getConnection("jdbc:sqlite:" + dbFile.getAbsolutePath());
-				about = new About(connection);
-			} catch (SQLException e) {
-				throw new DaxploreException("Not a sqlite file?", e);
-			}
-		} else if (createnew) { //create new project
-			try {
-				connection =  DriverManager.getConnection("jdbc:sqlite:" + dbFile.getAbsolutePath());
-				about = new About(connection, createnew);
-			} catch (SQLException e) {
-				throw new DaxploreException("Could not create new sqlite database (No write access?)", e);
-			}
-		} else {
-			throw new DaxploreException("Not new and doesn't exist");
+		
+		try {
+			Connection connection =  DriverManager.getConnection("jdbc:sqlite:" + file.getAbsolutePath());
+			return new DaxploreFile(connection, false, file);
+		} catch (SQLException e) {
+			throw new DaxploreException("Not a sqlite file?", e);
 		}
+	}
+	
+	public static DaxploreFile createWithNewFile(File file) throws DaxploreException {
+		try {
+			Class.forName("org.sqlite.JDBC");
+		} catch (ClassNotFoundException e) {
+			throw new DaxploreException("Sqlite could not be found", e);
+		}
+		
+		try {
+			Connection connection =  DriverManager.getConnection("jdbc:sqlite:" + file.getAbsolutePath());
+			return new DaxploreFile(connection, true, file);
+		} catch (SQLException e) {
+			throw new DaxploreException("Could not create new sqlite database (No write access?)", e);
+		}
+	}
+	
+	/*public static DaxploreFile createInMemory() throws DaxploreException {
+		try {
+			Class.forName("org.sqlite.JDBC");
+		} catch (ClassNotFoundException e) {
+			throw new DaxploreException("Sqlite could not be found", e);
+		}
+		
+		try {
+			Connection connection = DriverManager.getConnection("jdbc:sqlite::memory:");
+			return new DaxploreFile(connection, true);
+		} catch (SQLException e) {
+			throw new DaxploreException("Could not create in mamory database");
+		}
+	}*/
+	
+	protected DaxploreFile(Connection connection, boolean createNew, File file) throws DaxploreException {
+		this.connection = connection;
+		this.file = file;
+		try {
+			about = new About(connection, createNew);
+		} catch (SQLException e) {
+			throw new DaxploreException("Error creating about", e);
+		}
+	}
+	
+	public DaxploreMemoryFile getInMemoryFile() {
+		return null;
 	}
 	
 	public void importSPSS(File spssFile, Charset charset) throws FileNotFoundException, IOException, DaxploreException{
@@ -74,9 +109,9 @@ public class DaxploreFile {
 			int isolation = connection.getTransactionIsolation();
 			connection.setTransactionIsolation(Connection.TRANSACTION_READ_UNCOMMITTED);
 			
-			ImportedData importedData = new ImportedData(connection);
+			RawImport rawImport = new RawImport(connection);
 
-			importedData.importSPSS(sf, charset);
+			rawImport.importSPSS(sf, charset);
 
 				
 			about.setImport(sf.file.getName());
@@ -100,9 +135,9 @@ public class DaxploreFile {
 		return about;
 	}
 	
-	public ImportedData getImportedData(){
+	public RawImport getImportedData(){
 		try {
-			ImportedData id = new ImportedData(connection);
+			RawImport id = new RawImport(connection);
 			return id;
 		} catch (SQLException e) {
 			// TODO Auto-generated catch block
@@ -137,5 +172,13 @@ public class DaxploreFile {
 	
 	public File getFile() {
 		return file;
+	}
+	
+	protected List<DaxploreTable> getTables() throws DaxploreException {
+		List<DaxploreTable> list = new LinkedList<DaxploreTable>();
+		list.add(About.table);
+		list.addAll(getMetaData().getTables());
+		list.addAll(getImportedData().getTables());
+		return list;
 	}
 }

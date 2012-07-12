@@ -7,8 +7,10 @@ import java.sql.SQLException;
 
 import org.json.simple.JSONAware;
 
+import daxplorelib.DaxploreTable;
+
 public class MetaCalculation implements JSONAware{
-	protected static final String sqlDefinition = "CREATE TABLE metacalc (id INTEGER, column TEXT)";
+	protected static final DaxploreTable table = new DaxploreTable("CREATE TABLE metacalc (id INTEGER, column TEXT)", "metacalc");
 	int id;
 	Connection connection;
 	

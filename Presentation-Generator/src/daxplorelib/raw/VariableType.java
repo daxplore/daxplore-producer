@@ -1,4 +1,4 @@
-package daxplorelib.fileformat;
+package daxplorelib.raw;
 
 /**
  * Different variable types and how they map between SPSS, sqlite and java

@@ -12,6 +12,8 @@ import org.json.simple.JSONArray;
 import org.json.simple.JSONAware;
 import org.json.simple.JSONObject;
 
+import daxplorelib.DaxploreTable;
+
 import tools.MyTools;
 
 /*
@@ -25,8 +27,8 @@ import tools.MyTools;
 }
  */
 
-public class MetaQuestion implements JSONAware, Comparable<MetaQuestion>{
-	protected static final String sqlDefinition = "CREATE TABLE metaquestion (id TEXT PRIMARY KEY, fulltextref TEXT, shorttextref TEXT, scale INTEGER, calculation INTEGER )";
+public class MetaQuestion implements JSONAware, Comparable<MetaQuestion> {
+	protected static final DaxploreTable table = new DaxploreTable("CREATE TABLE metaquestion (id TEXT PRIMARY KEY, fulltextref TEXT, shorttextref TEXT, scale INTEGER, calculation INTEGER)", "metaquestion");
 	String id;
 	MetaCalculation calculation;
 	

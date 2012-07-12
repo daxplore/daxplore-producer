@@ -19,9 +19,9 @@ import com.beust.jcommander.Parameters;
 
 import daxplorelib.DaxploreException;
 import daxplorelib.DaxploreFile;
-import daxplorelib.fileformat.ImportedData;
 import daxplorelib.metadata.MetaData;
 import daxplorelib.metadata.MetaData.Formats;
+import daxplorelib.raw.RawImport;
 
 @Parameters(commandDescription = "Manage metadata")
 public class MetaCommand {

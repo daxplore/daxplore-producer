@@ -1,4 +1,4 @@
-package daxplorelib.fileformat;
+package daxplorelib.raw;
 
 import java.nio.charset.Charset;
 import java.sql.Connection;
@@ -14,32 +14,44 @@ import java.util.Map;
 import org.opendatafoundation.data.spss.SPSSFile;
 
 import daxplorelib.DaxploreException;
+import daxplorelib.DaxploreTable;
 import daxplorelib.SQLTools;
 
 import tools.MyTools;
 
 
 public class RawData {
+	protected final DaxploreTable table = new DaxploreTable(null, "rawdata");
 	static final String tablename = "rawdata";
-	Connection sqliteDatabase;
+	Connection connection;
 	RawMeta metadata;
 	
-	public RawData(RawMeta metadata, Connection sqliteDatabase){
-		this.sqliteDatabase = sqliteDatabase;
+	public RawData(RawMeta metadata, Connection connection) throws SQLException{
+		this.connection = connection;
 		this.metadata = metadata;
+		if(SQLTools.tableExists(table.name, connection)){
+			PreparedStatement stmt = connection.prepareStatement("SELECT sql FROM sqlite_master WHERE name=?");
+			stmt.setString(1, table.name);
+			ResultSet rs = stmt.executeQuery();
+			rs.next();
+			table.sql = rs.getString("sql");
+		}
 	}
 	
 	public void importSPSS(SPSSFile spssFile, Charset charset, RawMeta metadata) throws SQLException, DaxploreException {
 		this.metadata = metadata;
+		Statement stmt = connection.createStatement();
 		Map<String, VariableType> columns = metadata.getColumnMap();
-		if(SQLTools.tableExists("rawdata", sqliteDatabase)) {
-			Statement stmt = sqliteDatabase.createStatement();
-			stmt.executeUpdate("DROP TABLE " + tablename);
-			stmt.close();
+		if(SQLTools.tableExists("rawdata", connection)) {
+			stmt.executeUpdate("DROP TABLE " + table.name);
 		}
-		createRawDataTable(columns, sqliteDatabase);
+		String createString = createRawDataTableString(columns, connection);
 		
-		PreparedStatement addRowStatement = addRowStatement(columns, sqliteDatabase);
+		table.sql = createString;
+		stmt.execute(createString);
+		stmt.close();
+		
+		PreparedStatement addRowStatement = addRowStatement(columns, connection);
 		try{
 			Iterator<Object[]> iter = spssFile.getDataIterator();
 			while(iter.hasNext()){
@@ -53,7 +65,7 @@ public class RawData {
 		}
 	}
 	
-	protected static void createRawDataTable(Map<String, VariableType> columns, Connection conn) throws SQLException{
+	protected static String createRawDataTableString(Map<String, VariableType> columns, Connection conn) throws SQLException{
 		StringBuilder sb = new StringBuilder();
 		Iterator<String> iter = columns.keySet().iterator();
 		sb.append("create table " + tablename + " (");
@@ -70,9 +82,7 @@ public class RawData {
 			}
 		}
 		sb.append(")");
-		Statement stmt = conn.createStatement();
-		stmt.execute(sb.toString());
-		stmt.close();
+		return sb.toString();
 	}
 	
 	protected static PreparedStatement addRowStatement(Map<String, VariableType> columns, Connection connection) throws SQLException {
@@ -123,7 +133,7 @@ public class RawData {
 	}
 	
 	int getNumberOfRows() throws SQLException{
-		Statement stmt = sqliteDatabase.createStatement();
+		Statement stmt = connection.createStatement();
 		ResultSet rs = stmt.executeQuery("SELECT count(*) FROM " + tablename);
 		rs.next();
 		int ret = rs.getInt(1);
@@ -132,7 +142,7 @@ public class RawData {
 	}
 	
 	public boolean hasData() {
-		if(SQLTools.tableExists("rawdata", sqliteDatabase)) {
+		if(SQLTools.tableExists("rawdata", connection)) {
 			try {
 				if(getNumberOfRows() > 0) {
 					return true;

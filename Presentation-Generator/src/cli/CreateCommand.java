@@ -15,7 +15,7 @@ public class CreateCommand {
 			return;
 		} else {
 			try {
-				new DaxploreFile(file, true);
+				DaxploreFile.createWithNewFile(file);
 			} catch (DaxploreException e) {
 				System.out.println("Couldn't create file");
 				Exception e2 = e.getOriginalException();

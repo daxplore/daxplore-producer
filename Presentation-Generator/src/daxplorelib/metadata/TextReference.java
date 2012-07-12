@@ -11,8 +11,10 @@ import java.util.Locale;
 
 import org.json.simple.JSONAware;
 
+import daxplorelib.DaxploreTable;
+
 public class TextReference implements JSONAware, Comparable<TextReference> {
-	protected static final String sqlDefinition = "CREATE TABLE texts (ref TEXT, locale TEXT, text TEXT, UNIQUE ( ref, locale) )";
+	protected static final DaxploreTable table = new DaxploreTable("CREATE TABLE texts (ref TEXT, locale TEXT, text TEXT, UNIQUE ( ref, locale) )", "texts");
 	
 	protected String reference;
 	protected Connection connection;

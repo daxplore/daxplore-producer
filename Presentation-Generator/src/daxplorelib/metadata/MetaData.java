@@ -26,10 +26,11 @@ import tools.Pair;
 import tools.SortedProperties;
 import daxplorelib.DaxploreException;
 import daxplorelib.DaxploreFile;
+import daxplorelib.DaxploreTable;
 import daxplorelib.SQLTools;
-import daxplorelib.fileformat.RawMeta;
-import daxplorelib.fileformat.RawMeta.RawMetaQuestion;
 import daxplorelib.metadata.MetaGroup.GroupType;
+import daxplorelib.raw.RawMeta;
+import daxplorelib.raw.RawMeta.RawMetaQuestion;
 
 public class MetaData {
 	
@@ -39,27 +40,15 @@ public class MetaData {
 		DATABASE,RESOURCE,JSON,RAW
 	}
 	
-	public MetaData(Connection database) throws SQLException{
-		this.connection = database;
-		Statement stmt = database.createStatement();
-		if(!SQLTools.tableExists("texts", database)){
-			stmt.executeUpdate(TextReference.sqlDefinition);
-		}
-		if(!SQLTools.tableExists("metagroup", database)){
-			stmt.executeUpdate(MetaGroup.sqlDefinition);
-		}
-		if(!SQLTools.tableExists("metagrouprel", database)){
-			stmt.executeUpdate(MetaGroup.sqlDefinition2);
-		}
-		if(!SQLTools.tableExists("metaquestion", database)){
-			stmt.executeUpdate(MetaQuestion.sqlDefinition);
-		}
-		if(!SQLTools.tableExists("metascale", database)){
-			stmt.executeUpdate(MetaScale.sqlDefinition);
-		}
-		if(!SQLTools.tableExists("metacalc", database)){
-			stmt.executeUpdate(MetaCalculation.sqlDefinition);
-		}
+	public MetaData(Connection connection) throws SQLException{
+		this.connection = connection;
+		Statement stmt = connection.createStatement();
+		SQLTools.createIfNotExists(TextReference.table, connection);
+		SQLTools.createIfNotExists(MetaGroup.table, connection);
+		SQLTools.createIfNotExists(MetaGroup.table2, connection);
+		SQLTools.createIfNotExists(MetaQuestion.table, connection);
+		SQLTools.createIfNotExists(MetaScale.table, connection);
+		SQLTools.createIfNotExists(MetaCalculation.table, connection);
 		stmt.close();
 	}
 
@@ -213,6 +202,17 @@ public class MetaData {
 	 * @throws DaxploreException 
 	 */
 	public void importL10n(Reader reader, Locale locale) throws IOException, DaxploreException {
+		boolean autocommit = true;
+		try {
+			//save = sqliteDatabase.setSavepoint();
+			autocommit = connection.getAutoCommit();
+			connection.setAutoCommit(false);
+			connection.setTransactionIsolation(Connection.TRANSACTION_READ_UNCOMMITTED);
+		} catch (SQLException e) {
+			MyTools.printSQLExeption(e);
+			throw new DaxploreException("Failed to disable autocommit", e);
+		}
+		
 		Properties properties = new Properties();
 		properties.load(reader);
 		
@@ -226,6 +226,13 @@ public class MetaData {
 		} catch (SQLException e) {
 			MyTools.printSQLExeption(e);
 			throw new DaxploreException("Error on Text import", e);
+		}
+		
+		try {
+			connection.setAutoCommit(autocommit);
+		} catch (SQLException e) {
+			MyTools.printSQLExeption(e);
+			throw new DaxploreException("Failed to reenable autocommit", e);
 		}
 	}
 
@@ -422,6 +429,17 @@ public class MetaData {
 		} catch (SQLException e) {
 			throw new DaxploreException("SQLExpection while trying to get groups", e);
 		}
+	}
+	
+	public List<DaxploreTable> getTables() {
+		List<DaxploreTable> list = new LinkedList<DaxploreTable>();
+		list.add(MetaQuestion.table);
+		list.add(MetaGroup.table);
+		list.add(MetaGroup.table2);
+		list.add(MetaScale.table);
+		list.add(MetaCalculation.table);
+		list.add(TextReference.table);
+		return list;
 	}
 	
 	public void save(){

@@ -1,34 +1,33 @@
-package daxplorelib.fileformat;
+package daxplorelib.raw;
 
 import java.nio.charset.Charset;
 import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.sql.Statement;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
 import org.opendatafoundation.data.spss.SPSSFile;
 
 import daxplorelib.DaxploreException;
+import daxplorelib.DaxploreTable;
 import daxplorelib.SQLTools;
 
-public class ImportedData {
+public class RawImport {
 
-	private Connection database;
+	private Connection connection;
 	protected RawMeta rawmeta;
 	protected RawData rawdata;
 	protected String filename;
 	protected Date importdate = null;
 	
-	public ImportedData(Connection sqliteDatabase) throws SQLException{
-		this.database = sqliteDatabase;
+	public RawImport(Connection sqliteDatabase) throws SQLException{
+		this.connection = sqliteDatabase;
 
-		this.rawmeta = new RawMeta(database);
-		this.rawdata = new RawData(this.rawmeta, database);
+		this.rawmeta = new RawMeta(connection);
+		this.rawdata = new RawData(this.rawmeta, connection);
 	}
 	
 	public void importSPSS(SPSSFile spssFile, Charset charset) throws SQLException, DaxploreException{	
@@ -42,7 +41,7 @@ public class ImportedData {
 	 * @param other ImportedData to compare to.
 	 * @return Map of all columns with the values 0 if they exist in both, -1 if it only exists in other and 1 if it only exists in this
 	 */
-	public Map<String, Integer> compareColumns(ImportedData other){
+	public Map<String, Integer> compareColumns(RawImport other){
 		try {
 			Map<String, Integer> columnMap = new HashMap<String,Integer>();
 			List<String> columnsthis = rawmeta.getColumns();
@@ -94,5 +93,14 @@ public class ImportedData {
 	
 	public boolean hasData() {
 		return rawmeta.hasData() && rawdata.hasData();
+	}
+	
+	public List<DaxploreTable> getTables() {
+		List<DaxploreTable> list = new LinkedList<DaxploreTable>();
+		if(SQLTools.tableExists("rawdata", connection)){
+			list.add(RawMeta.table);
+			list.add(rawdata.table);
+		}
+		return list;
 	}
 }

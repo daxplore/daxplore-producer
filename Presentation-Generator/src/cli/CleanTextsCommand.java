@@ -21,7 +21,7 @@ public class CleanTextsCommand {
 		}
 		DaxploreFile dax;
 		try {
-			dax = new DaxploreFile(file, false);
+			dax = DaxploreFile.createFromExistingFile(file);
 		} catch (DaxploreException e) {
 			System.out.println("Could not open daxplorefile (not a daxplorefile?)");
 			System.out.println(e.getMessage());
