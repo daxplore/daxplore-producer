@@ -24,6 +24,7 @@ public class MetaCalculation implements JSONAware{
 		if(rs.next()) {
 			this.id = rs.getInt("id");
 		}
+		stmt.close();
 	}
 	
 	public String getColumn() throws SQLException{
@@ -31,8 +32,11 @@ public class MetaCalculation implements JSONAware{
 		stmt.setInt(1, id);
 		ResultSet rs = stmt.executeQuery();
 		if(rs.next()) {
-			return rs.getString("column");
+			String column = rs.getString("column");
+			stmt.close();
+			return column;
 		} else {
+			stmt.close();
 			return null;
 		}
 	}

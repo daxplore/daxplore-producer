@@ -23,6 +23,7 @@ import org.json.simple.parser.ParseException;
 
 import tools.MyTools;
 import tools.Pair;
+import tools.SortedProperties;
 import daxplorelib.DaxploreException;
 import daxplorelib.DaxploreFile;
 import daxplorelib.SQLTools;
@@ -59,6 +60,7 @@ public class MetaData {
 		if(!SQLTools.tableExists("metacalc", database)){
 			stmt.executeUpdate(MetaCalculation.sqlDefinition);
 		}
+		stmt.close();
 	}
 
 	/* 
@@ -236,13 +238,15 @@ public class MetaData {
 	 * @throws DaxploreException 
 	 */
 	public void exportL10n(Writer writer, Locale locale) throws IOException, DaxploreException {
-		Properties properties = new Properties();
+		Properties properties = new SortedProperties();
 		
 		try {
 			List<TextReference> allTexts = getAllTextReferences();
 			for(TextReference tr: allTexts) {
 				if(tr.has(locale)) {
 					properties.put(tr.getRef(), tr.get(locale));
+				} else {
+					properties.put(tr.getRef(), "");
 				}
 			}
 		} catch (SQLException e) {
@@ -262,6 +266,8 @@ public class MetaData {
 	}
 	
 	public void consolidateScales(Locale bylocale) throws DaxploreException {
+		//TODO: very slow. optimize
+		
 		boolean autocommit = true;
 		try {
 			//save = sqliteDatabase.setSavepoint();
@@ -313,6 +319,7 @@ public class MetaData {
 				}
 				uniqueScales.add(s);
 			}
+			connection.commit();
 			//System.out.println(" " + genericScales.size() + " scales.");
 			
 			//System.out.println("Altering questions to use generic scales...");
@@ -323,17 +330,25 @@ public class MetaData {
 					q.setScale(scaleMap.get(q.getScale()));
 				}
 			}
+			connection.commit();
 			
-			//System.out.println("Removing old scales");
+			System.out.print("Removing old scales");
 			//remove old unused scales
+			List<TextReference> toBeRemoved = new LinkedList<TextReference>();
 			for(MetaScale s: scaleMap.keySet()) {
 				List<Pair<TextReference, Double>> refs = s.getRefereceList();
 				s.remove();
 				for(Pair<TextReference, Double> p: refs) {
-					p.getKey().remove();
+					toBeRemoved.add(p.getKey());
+					//p.getKey().remove();
 				}
 			}
-			//System.out.println("Done");
+			System.out.println(".");
+			for(TextReference tr: toBeRemoved) {
+				tr.remove();
+			}
+			connection.commit();
+			System.out.println("Done");
 			
 		} catch (SQLException e) {
 			throw new DaxploreException("Failed to consolidate scales", e);
@@ -348,13 +363,32 @@ public class MetaData {
 	}
 	
 	public void clearNullStrings() throws DaxploreException {
+		boolean autocommit = true;
+		try {
+			//save = sqliteDatabase.setSavepoint();
+			autocommit = connection.getAutoCommit();
+			connection.setAutoCommit(false);
+			connection.setTransactionIsolation(Connection.TRANSACTION_READ_UNCOMMITTED);
+		} catch (SQLException e) {
+			MyTools.printSQLExeption(e);
+			throw new DaxploreException("Failed to disable autocommit", e);
+		}
+		
 		List<TextReference> reflist = getAllTextReferences();
 		try {
 			for(TextReference tr: reflist) {
 				tr.clearNulls();
 			}
+			connection.commit();
 		} catch (SQLException e) {
 			throw new DaxploreException("Faild while clearing nulls from strings", e);
+		}
+		
+		try {
+			connection.setAutoCommit(autocommit);
+		} catch (SQLException e) {
+			MyTools.printSQLExeption(e);
+			throw new DaxploreException("Failed to reenable autocommit", e);
 		}
 	}
 	

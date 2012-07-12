@@ -39,11 +39,12 @@ public class RawMeta {
 	
 	Connection connection;
 	
-	public RawMeta(Connection sqliteDatabase) throws SQLException{
-		this.connection = sqliteDatabase;
-		if(!SQLTools.tableExists("rawmeta", sqliteDatabase)){
-			Statement statement = sqliteDatabase.createStatement();
-			statement.executeUpdate(sqlDefinition);
+	public RawMeta(Connection connection) throws SQLException{
+		this.connection = connection;
+		if(!SQLTools.tableExists("rawmeta", connection)){
+			Statement stmt = connection.createStatement();
+			stmt.executeUpdate(sqlDefinition);
+			stmt.close();
 		}
 	}
 	
@@ -54,6 +55,7 @@ public class RawMeta {
 		while(rs.next()){
 			list.add(rs.getString("column"));
 		}
+		stmt.close();
 		return list;
 	}
 	
@@ -66,6 +68,7 @@ public class RawMeta {
 			VariableType type = VariableType.valueOf(rs.getString("qtype"));
 			columns.put(col, type);
 		}
+		stmt.close();
 		return columns;
 	}
 	
@@ -98,8 +101,9 @@ public class RawMeta {
 			}
 			String measure = var.getMeasureLabel();
 			try {
+				PreparedStatement stmt = connection.prepareStatement("INSERT INTO rawmeta values (?, ?, ?, ?, ?, ?, ?)");
 				addColumnMeta(
-						"rawmeta",
+						stmt,
 						var.getShortName(),
 						var.getName(),
 						var.getLabel(),
@@ -109,6 +113,7 @@ public class RawMeta {
 						connection,
 						measure
 						);
+				stmt.close();
 			} catch (SQLException e) {
 				System.out.println("Error adding row");
 				MyTools.printSQLExeption(e);
@@ -118,35 +123,36 @@ public class RawMeta {
 	}
 	
 	protected static void clearRawMetaTable(Connection conn) throws SQLException {
-		Statement statement = conn.createStatement();
-		statement.executeUpdate("DELETE FROM rawmeta");
+		Statement stmt = conn.createStatement();
+		stmt.executeUpdate("DELETE FROM rawmeta");
+		stmt.close();
+		
 	}
 	
-	protected static void addColumnMeta(String metaTable, String column, String longname, String qtext, String qtype, String spsstype, String valuelabels, Connection conn, String measure) throws SQLException {
-		PreparedStatement ps = conn.prepareStatement("insert into " + metaTable + " values (?, ?, ?, ?, ?, ?, ?)");
+	protected static void addColumnMeta(PreparedStatement stmt, String column, String longname, String qtext, String qtype, String spsstype, String valuelabels, Connection conn, String measure) throws SQLException {
 		
-		if(column != null)ps.setString(1, column);
+		if(column != null)stmt.setString(1, column);
 		else throw new NullPointerException();
 		
-		if(longname != null) ps.setString(2, longname);
-		else ps.setNull(2, java.sql.Types.VARCHAR);
+		if(longname != null) stmt.setString(2, longname);
+		else stmt.setNull(2, java.sql.Types.VARCHAR);
 		
-		if(qtext != null) ps.setString(3, qtext);
-		else ps.setNull(3, java.sql.Types.VARCHAR);
+		if(qtext != null) stmt.setString(3, qtext);
+		else stmt.setNull(3, java.sql.Types.VARCHAR);
 		
-		if(qtype != null) ps.setString(4, qtype);
-		else ps.setNull(4, java.sql.Types.VARCHAR);
+		if(qtype != null) stmt.setString(4, qtype);
+		else stmt.setNull(4, java.sql.Types.VARCHAR);
 		
-		if(spsstype != null) ps.setString(5, spsstype);
-		else ps.setNull(5, java.sql.Types.VARCHAR);
+		if(spsstype != null) stmt.setString(5, spsstype);
+		else stmt.setNull(5, java.sql.Types.VARCHAR);
 		
-		if(valuelabels != null) ps.setString(6, valuelabels);
-		else ps.setNull(6, java.sql.Types.VARCHAR);
+		if(valuelabels != null) stmt.setString(6, valuelabels);
+		else stmt.setNull(6, java.sql.Types.VARCHAR);
 
-		if(measure != null) ps.setString(7, measure);
-		else ps.setNull(7, java.sql.Types.VARCHAR);
+		if(measure != null) stmt.setString(7, measure);
+		else stmt.setNull(7, java.sql.Types.VARCHAR);
 		
-		ps.executeUpdate();
+		stmt.executeUpdate();
 	}
 	
 	protected static String categoriesToJSON(Map<String, SPSSVariableCategory> categories){
@@ -208,6 +214,13 @@ public class RawMeta {
 			
 			@Override
 			public boolean hasNext() {
+				if(!(i < count)) {
+					try {
+						rs.close();
+					} catch (SQLException e) {
+						MyTools.printSQLExeption(e);
+					}
+				}
 				return i < count;
 			}
 
@@ -246,6 +259,7 @@ public class RawMeta {
 			}
 			
 		};
+		//stmt.closeOnCompletion();
 		return iter;
 		
 	}

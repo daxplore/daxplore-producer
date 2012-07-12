@@ -46,6 +46,7 @@ public class About {
 			prepared.setLong(5, 0);
 			prepared.setString(6, "");
 			prepared.execute();
+			stmt.close();
 		}else{
 			stmt = database.createStatement();
 			stmt.execute("SELECT * FROM about");
@@ -57,6 +58,7 @@ public class About {
 			lastupdate = rs.getDate("lastupdate");
 			importdate = rs.getDate("importdate");
 			filename = rs.getString("filename");
+			stmt.close();
 		}
 	}
 	
@@ -70,10 +72,11 @@ public class About {
 	
 	public void setUpdate() throws SQLException {
 		Date now = new Date();
-		PreparedStatement prep = database.prepareStatement("UPDATE about SET lastupdate = ?");
-		prep.setLong(1, now.getTime());
+		PreparedStatement stmt = database.prepareStatement("UPDATE about SET lastupdate = ?");
+		stmt.setLong(1, now.getTime());
 		lastupdate = now;
-		prep.executeUpdate();
+		stmt.executeUpdate();
+		stmt.close();
 	}
 	
 	public Date getImportDate() {
@@ -82,11 +85,13 @@ public class About {
 	
 	public void setImport(String filename) throws SQLException {
 		Date now = new Date();
-		PreparedStatement prep = database.prepareStatement("UPDATE about SET importdate = ?, filename = ?");
-		prep.setLong(1, now.getTime());
-		prep.setString(2, filename);
+		PreparedStatement stmt = database.prepareStatement("UPDATE about SET importdate = ?, filename = ?");
+		stmt.setLong(1, now.getTime());
+		stmt.setString(2, filename);
 		this.filename = filename;
-		prep.executeUpdate();
+		this.importdate = now;
+		stmt.executeUpdate();
+		stmt.close();
 		setUpdate();
 	}
 	

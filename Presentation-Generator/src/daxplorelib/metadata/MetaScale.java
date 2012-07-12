@@ -60,6 +60,7 @@ public class MetaScale implements JSONAware {
 	    		}
 	    	}
 	    }
+	    stmt.close();
 	    
 	    boolean found = false;
 	    stmt = connection.prepareStatement("SELECT textref, value FROM metascale WHERE id = ? ORDER BY ord ASC");
@@ -81,6 +82,7 @@ public class MetaScale implements JSONAware {
 	    	found = true;
 	    	break;
 	    }
+	    stmt.close();
 	    
 	    if(!found) {
 	    	stmt = connection.prepareStatement("SELECT max(id) FROM metascale");
@@ -95,6 +97,7 @@ public class MetaScale implements JSONAware {
 		    	stmt.setDouble(4, options.get(i).getValue());
 		    	stmt.execute();	    		
 	    	}
+	    	stmt.close();
 	    }
 	}
 	
@@ -110,6 +113,7 @@ public class MetaScale implements JSONAware {
 		while(rs.next()) {
 			list.add(new Pair<TextReference, Double>(new TextReference(rs.getString("textref"), connection), rs.getDouble("value")));
 		}
+		stmt.close();
 		return list;
 	}
 	
@@ -120,6 +124,7 @@ public class MetaScale implements JSONAware {
 		while(rs.next()) {
 			list.add(new MetaScale(rs.getInt("id"), connection));
 		}
+		stmt.close();
 		return list;
 	}
 	
@@ -142,6 +147,7 @@ public class MetaScale implements JSONAware {
 		PreparedStatement stmt = connection.prepareStatement("DELETE FROM metascale WHERE id = ?");
 		stmt.setInt(1, id);
 		stmt.executeUpdate();
+		stmt.close();
 	}
 	
 	public boolean equalsLocale(MetaScale other, Locale locale) throws SQLException {

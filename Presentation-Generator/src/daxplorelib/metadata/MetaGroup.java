@@ -61,6 +61,7 @@ public class MetaGroup implements JSONAware{
 			id = rs.getInt("id");
 		} else {
 			//if not create new group
+			stmt.close();
 			stmt = connection.prepareStatement("INSERT INTO metagroup (textref, ind, type) VALUES (?, ?, ?)");
 			stmt.setString(1, textref.getRef());
 			stmt.setInt(2, index);
@@ -70,7 +71,7 @@ public class MetaGroup implements JSONAware{
 			rs.next();
 			id = rs.getInt(1);
 		}
-		
+		stmt.close();
 		if(questions != null){
 			removeQuestions();
 			addQuestions(questions);
@@ -94,12 +95,14 @@ public class MetaGroup implements JSONAware{
 			stmt.setString(2, q.getId());
 			stmt.executeUpdate();
 		}
+		stmt.close();
 	}
 	
 	protected void removeQuestions() throws SQLException {
 		PreparedStatement stmt = connection.prepareStatement("DELETE FROM metagrouprel WHERE groupid = ?");
 		stmt.setInt(1, id);
 		stmt.executeUpdate();
+		stmt.close();
 	}
 	
 	public TextReference getTextRef() throws SQLException {
@@ -107,8 +110,11 @@ public class MetaGroup implements JSONAware{
 		stmt.setInt(1, id);
 		ResultSet rs = stmt.executeQuery();
 		if(rs.next()) {
-			return new TextReference(rs.getString("textref"), connection);
+			TextReference tr = new TextReference(rs.getString("textref"), connection);
+			stmt.close();
+			return tr;
 		} else {
+			stmt.close();
 			return null;
 		}
 	}
@@ -123,6 +129,7 @@ public class MetaGroup implements JSONAware{
 		stmt.setString(1, ref.getRef());
 		stmt.setInt(2, id);
 		stmt.executeUpdate();
+		stmt.close();
 	}
 	
 	public GroupType getType() throws SQLException {
@@ -131,8 +138,11 @@ public class MetaGroup implements JSONAware{
 		ResultSet rs = stmt.executeQuery();
 		if(rs.next()) {
 			int type = rs.getInt("type");
-			return GroupType.fromInt(type);
+			GroupType gt = GroupType.fromInt(type);
+			stmt.close();
+			return gt;
 		} else {
+			stmt.close();
 			return null;
 		}
 	}
@@ -145,6 +155,7 @@ public class MetaGroup implements JSONAware{
 		while(rs.next()) {
 			list.add(new MetaQuestion(rs.getString("questionid"), connection));
 		}
+		stmt.close();
 		return list;
 	}
 	
@@ -153,8 +164,11 @@ public class MetaGroup implements JSONAware{
 		stmt.setInt(1, id);
 		ResultSet rs = stmt.executeQuery();
 		if(rs.next()) {
-			return rs.getInt("ind");
+			int ind = rs.getInt("ind");
+			stmt.close();
+			return ind;
 		} else {
+			stmt.close();
 			return 0;
 		}
 	}
@@ -166,6 +180,7 @@ public class MetaGroup implements JSONAware{
 		while(rs.next()) {
 			list.add(new MetaGroup(rs.getInt("id"), connection));
 		}
+		stmt.close();
 		return list;
 	}
 

@@ -72,8 +72,11 @@ public class ImportCommand {
 			}
 			try {
 				DaxploreFile daxplorefile = new DaxploreFile(projectFile, false);
+				System.out.println("Importing...");
 				daxplorefile.importSPSS(importFile, charset);
 				System.out.println("Data imported");
+				daxplorefile.importSPSS(importFile, charset);
+				System.out.println("Data imported 2nd time");
 			} catch (FileNotFoundException e) {
 				System.out.println("Havn't we tested this already");
 				e.printStackTrace();

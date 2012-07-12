@@ -33,8 +33,9 @@ public class RawData {
 		this.metadata = metadata;
 		Map<String, VariableType> columns = metadata.getColumnMap();
 		if(SQLTools.tableExists("rawdata", sqliteDatabase)) {
-			Statement statement = sqliteDatabase.createStatement();
-			statement.executeUpdate("DROP TABLE " + tablename);
+			Statement stmt = sqliteDatabase.createStatement();
+			stmt.executeUpdate("DROP TABLE " + tablename);
+			stmt.close();
 		}
 		createRawDataTable(columns, sqliteDatabase);
 		
@@ -45,6 +46,7 @@ public class RawData {
 				Object[] data = iter.next();
 				addRow(columns, addRowStatement, data);
 			}
+			addRowStatement.close();
 		} catch (Exception e){
 			e.printStackTrace();
 			throw new DaxploreException("Something went wrong with spss-file");
@@ -68,17 +70,17 @@ public class RawData {
 			}
 		}
 		sb.append(")");
-		Statement statement = conn.createStatement();
-		statement.execute(sb.toString());
-		statement.close();
+		Statement stmt = conn.createStatement();
+		stmt.execute(sb.toString());
+		stmt.close();
 	}
 	
-	protected static PreparedStatement addRowStatement(Map<String, VariableType> columns, Connection conn) throws SQLException {
+	protected static PreparedStatement addRowStatement(Map<String, VariableType> columns, Connection connection) throws SQLException {
 		LinkedList<String> qmarks = new LinkedList<String>();
 		for(int i = 0; i < columns.size(); i++){
 			qmarks.add("?");
 		}
-		PreparedStatement ps = conn.prepareStatement("insert into " + tablename + " values("+ MyTools.join(qmarks, ", ") + ")");
+		PreparedStatement ps = connection.prepareStatement("insert into " + tablename + " values("+ MyTools.join(qmarks, ", ") + ")");
 		return ps;
 	}
 	
@@ -117,13 +119,16 @@ public class RawData {
 			colIndex++;
 		}
 		statement.execute();
+		//don't close statement
 	}
 	
 	int getNumberOfRows() throws SQLException{
 		Statement stmt = sqliteDatabase.createStatement();
 		ResultSet rs = stmt.executeQuery("SELECT count(*) FROM " + tablename);
 		rs.next();
-		return rs.getInt(1);
+		int ret = rs.getInt(1);
+		stmt.close();
+		return ret;
 	}
 	
 	public boolean hasData() {
