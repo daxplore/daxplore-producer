@@ -11,13 +11,18 @@ import java.util.Map.Entry;
 
 public class SQLTools {
 	
-	public static boolean tableExists(String tablename, Connection sqliteDatabase){
+	public static boolean tableExists(String tablename, Connection connection){
 		try{
-			PreparedStatement stmt = sqliteDatabase.prepareStatement("SELECT name FROM sqlite_master WHERE type='table' AND name=?");
+			PreparedStatement stmt = connection.prepareStatement("SELECT name FROM sqlite_master WHERE type='table' AND name=?");
 			stmt.setString(1, tablename);
 			ResultSet rs = stmt.executeQuery();
 			boolean first = rs.next();
-			return first && tablename.equals(rs.getString("name"));
+			if(first) {
+				String name = rs.getString("name");
+				stmt.close();
+				return tablename.equals(name);
+			}
+			return false;
 		} catch (SQLException e){
 			e.printStackTrace();
 			System.err.println(e.getMessage());
@@ -25,12 +30,12 @@ public class SQLTools {
 		}
 	}
 	
-	public static boolean compareTables(String table1, String table2, String idcolumn, Map<String,String> columns, Connection conn) throws SQLException{
-		Statement statement = conn.createStatement();
-		statement.execute("select * from " + table1);
-		ResultSet rs1 = statement.getResultSet();
+	public static boolean compareTables(String table1, String table2, String idcolumn, Map<String,String> columns, Connection connection) throws SQLException{
+		Statement stmt = connection.createStatement();
+		stmt.execute("select * from " + table1);
+		ResultSet rs1 = stmt.getResultSet();
 		String idcoltype = columns.get(idcolumn);
-		PreparedStatement ps = conn.prepareStatement("select * from " + table2 + " where " + idcolumn + " = ?");
+		PreparedStatement ps = connection.prepareStatement("select * from " + table2 + " where " + idcolumn + " = ?");
 		int row = 0;
 		while(rs1.next()){
 			String id;
@@ -79,7 +84,8 @@ public class SQLTools {
 			}
 			row++;
 		}
-		
+		ps.close();
+		stmt.close();
 		return true;
 	}
 }

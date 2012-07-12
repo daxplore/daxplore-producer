@@ -237,8 +237,9 @@ public class MyTools {
 	
 	public static void printSQLExeption(SQLException e) {
 		System.err.println("------ SQLException --------");
-		System.err.println(e.getMessage());
-		System.err.println(e.getSQLState());
+		System.err.println("Message: " + e.getMessage());
+		System.err.println("State: " + e.getSQLState());
+		System.err.println("Code: " + e.getErrorCode());
 		System.err.println(e.getStackTrace());
 		System.err.println("=================== Exception chain =====================");
 		Iterator<Throwable> ex = e.iterator();

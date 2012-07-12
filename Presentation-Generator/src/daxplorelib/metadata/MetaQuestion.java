@@ -40,6 +40,7 @@ public class MetaQuestion implements JSONAware, Comparable<MetaQuestion>{
 		stmt.setString(1, id);
 		stmt.execute();
 		if(stmt.getResultSet().next()) {
+			stmt.close();
 			stmt = connection.prepareStatement("UPDATE metaquestion SET fulltextref = ?, shorttextref = ?, scale = ?, calculation = ? WHERE id = ?");
 			stmt.setString(1, fullTextRef.getRef());
 			stmt.setString(2, shortTextRef.getRef());
@@ -50,15 +51,22 @@ public class MetaQuestion implements JSONAware, Comparable<MetaQuestion>{
 			}
 			stmt.setInt(4, calculation.getID());
 			stmt.setString(5, id);
-			stmt.execute();
+			stmt.executeUpdate();
+			stmt.close();
 		} else {
+			stmt.close();
 			stmt = connection.prepareStatement("INSERT INTO metaquestion (id, fulltextref, shorttextref, scale, calculation) VALUES (?, ?, ?, ?, ?)");
 			stmt.setString(1, id);
 			stmt.setString(2, fullTextRef.getRef());
 			stmt.setString(3, shortTextRef.getRef());
-			stmt.setInt(4, scale.getID());
+			if(scale != null) {
+				stmt.setInt(4, scale.getID());
+			} else {
+				stmt.setNull(3, java.sql.Types.INTEGER);
+			}
 			stmt.setInt(5, calculation.getID());
-			stmt.execute();
+			stmt.executeUpdate();
+			stmt.close();
 		}
 		
 		this.calculation = calculation;
@@ -88,8 +96,11 @@ public class MetaQuestion implements JSONAware, Comparable<MetaQuestion>{
 		stmt.setString(1, id);
 		ResultSet rs = stmt.executeQuery();
 		if(rs.next()) {
-			return new TextReference(rs.getString("fulltextref"), connection);
+			TextReference tr = new TextReference(rs.getString("fulltextref"), connection);
+			stmt.close();
+			return tr;
 		} else {
+			stmt.close();
 			return null;
 		}
 	}
@@ -104,6 +115,7 @@ public class MetaQuestion implements JSONAware, Comparable<MetaQuestion>{
 		stmt.setString(1, ref.getRef());
 		stmt.setString(2, id);
 		stmt.executeUpdate();
+		stmt.close();
 	}
 	
 	public TextReference getShortTextRef() throws SQLException{
@@ -111,8 +123,11 @@ public class MetaQuestion implements JSONAware, Comparable<MetaQuestion>{
 		stmt.setString(1, id);
 		ResultSet rs = stmt.executeQuery();
 		if(rs.next()) {
-			return new TextReference(rs.getString("shorttextref"), connection);
+			TextReference tr = new TextReference(rs.getString("shorttextref"), connection);
+			stmt.close();
+			return tr;
 		} else {
+			stmt.close();
 			return null;
 		}
 	}
@@ -127,6 +142,7 @@ public class MetaQuestion implements JSONAware, Comparable<MetaQuestion>{
 		stmt.setString(1, ref.getRef());
 		stmt.setString(2, id);
 		stmt.executeUpdate();
+		stmt.close();
 	}
 	
 	public MetaScale getScale() throws SQLException{
@@ -136,11 +152,15 @@ public class MetaQuestion implements JSONAware, Comparable<MetaQuestion>{
 		if(rs.next()) {
 			int scaleid = rs.getInt("scale");
 			if(rs.wasNull()) {
+				stmt.close();
 				return null;
 			} else {
-				return new MetaScale(scaleid, connection);
+				MetaScale ms = new MetaScale(scaleid, connection);
+				stmt.close();
+				return ms;
 			}
 		} else {
+			stmt.close();
 			return null;
 		}
 	}
@@ -155,6 +175,7 @@ public class MetaQuestion implements JSONAware, Comparable<MetaQuestion>{
 		stmt.setInt(1, scale.getID());
 		stmt.setString(2, id);
 		stmt.executeUpdate();
+		stmt.close();
 	}
 	
 	public MetaCalculation getCalculation() throws SQLException {
@@ -162,8 +183,11 @@ public class MetaQuestion implements JSONAware, Comparable<MetaQuestion>{
 		stmt.setString(1, id);
 		ResultSet rs = stmt.executeQuery();
 		if(rs.next()) {
-			return new MetaCalculation(rs.getInt("calculation"), connection);
+			MetaCalculation mc = new MetaCalculation(rs.getInt("calculation"), connection);
+			stmt.close();
+			return mc;
 		} else {
+			stmt.close();
 			return null;
 		}
 	}
@@ -175,6 +199,7 @@ public class MetaQuestion implements JSONAware, Comparable<MetaQuestion>{
 		while(rs.next()) {
 			list.add(new MetaQuestion(rs.getString("id"), connection));
 		}
+		stmt.close();
 		return list;
 	}
 

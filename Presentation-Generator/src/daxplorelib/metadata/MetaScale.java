@@ -60,6 +60,7 @@ public class MetaScale implements JSONAware {
 	    		}
 	    	}
 	    }
+	    stmt.close();
 	    
 	    boolean found = false;
 	    stmt = connection.prepareStatement("SELECT textref, value FROM metascale WHERE id = ? ORDER BY ord ASC");
@@ -81,6 +82,7 @@ public class MetaScale implements JSONAware {
 	    	found = true;
 	    	break;
 	    }
+	    stmt.close();
 	    
 	    if(!found) {
 	    	stmt = connection.prepareStatement("SELECT max(id) FROM metascale");
@@ -95,6 +97,7 @@ public class MetaScale implements JSONAware {
 		    	stmt.setDouble(4, options.get(i).getValue());
 		    	stmt.execute();	    		
 	    	}
+	    	stmt.close();
 	    }
 	}
 	
@@ -110,16 +113,18 @@ public class MetaScale implements JSONAware {
 		while(rs.next()) {
 			list.add(new Pair<TextReference, Double>(new TextReference(rs.getString("textref"), connection), rs.getDouble("value")));
 		}
+		stmt.close();
 		return list;
 	}
 	
 	public static List<MetaScale> getAll(Connection connection) throws SQLException {
 		Statement stmt = connection.createStatement();
-		ResultSet rs = stmt.executeQuery("SELECT UNIQUE(id) AS uid FROM metascale ORDER BY id");
+		ResultSet rs = stmt.executeQuery("SELECT DISTINCT id FROM metascale ORDER BY id");
 		List<MetaScale> list = new LinkedList<MetaScale>();
 		while(rs.next()) {
-			list.add(new MetaScale(rs.getInt("uid"), connection));
+			list.add(new MetaScale(rs.getInt("id"), connection));
 		}
+		stmt.close();
 		return list;
 	}
 	
@@ -142,6 +147,7 @@ public class MetaScale implements JSONAware {
 		PreparedStatement stmt = connection.prepareStatement("DELETE FROM metascale WHERE id = ?");
 		stmt.setInt(1, id);
 		stmt.executeUpdate();
+		stmt.close();
 	}
 	
 	public boolean equalsLocale(MetaScale other, Locale locale) throws SQLException {
@@ -153,6 +159,7 @@ public class MetaScale implements JSONAware {
 		for(int i = 0; i < thisRefList.size(); i++) {
 			if(!thisRefList.get(i).getValue().equals(otherRefList.get(i).getValue())) { return false; }
 			if(!thisRefList.get(i).getKey().equalsLocale(otherRefList.get(i).getKey(), locale)) { return false; }
+			if(thisRefList.get(i).getKey().get(locale).equals("")) { return false; }
 		}
 		
 		return true;

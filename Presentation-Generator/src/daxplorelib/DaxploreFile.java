@@ -66,26 +66,24 @@ public class DaxploreFile {
 		} catch (SPSSFileException e2) {
 			throw new DaxploreException("SPSSFileException", e2);
 		}
-		//Savepoint save = null;
 		
 		boolean autocommit = true;
 		try {
-			//save = sqliteDatabase.setSavepoint();
 			autocommit = connection.getAutoCommit();
 			connection.setAutoCommit(false);
+			int isolation = connection.getTransactionIsolation();
 			connection.setTransactionIsolation(Connection.TRANSACTION_READ_UNCOMMITTED);
 			
 			ImportedData importedData = new ImportedData(connection);
-			try {
-				importedData.importSPSS(sf, charset);
-			} catch (SQLException e) {
-				MyTools.printSQLExeption(e);
-				throw new DaxploreException("Imprt error", e);
-			}
+
+			importedData.importSPSS(sf, charset);
+
 				
 			about.setImport(sf.file.getName());
 			
 			connection.commit();
+			connection.setTransactionIsolation(isolation);
+			connection.setAutoCommit(autocommit);
 		} catch (SQLException e) {
 			MyTools.printSQLExeption(e);
 			try {
@@ -94,13 +92,8 @@ public class DaxploreFile {
 				throw new DaxploreException("Import error. Could not rollback.", e);
 			}
 			throw new DaxploreException("Import error.", e);
-		} finally {
-			try {
-				connection.setAutoCommit(autocommit);
-			} catch (SQLException e) {
-				throw new DaxploreException("Import error. Could not set autocommit. General wtf.", e);
-			}
 		}
+		sf.close();
 	}
 	
 	public About getAbout(){

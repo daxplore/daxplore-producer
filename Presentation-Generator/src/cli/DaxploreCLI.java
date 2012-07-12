@@ -50,6 +50,12 @@ public class DaxploreCLI {
 		TransferCommand transferCommand = new TransferCommand();
 		addCommand(jc, "transfer", transferCommand);
 		
+		ConsolidateCommand consolidateCommand = new ConsolidateCommand();
+		addCommand(jc, "scalemerge", consolidateCommand);
+		
+		CleanTextsCommand cleanTextsCommand = new CleanTextsCommand();
+		addCommand(jc, "cleantexts", cleanTextsCommand);
+		
 		if(args.length > 1	) {
 			file = new File(args[0]);
 			if(file.isDirectory()) {
@@ -114,6 +120,10 @@ public class DaxploreCLI {
 			createCommand.run(file);
 		} else if(command.equals("transfer")) {
 			transferCommand.run(file);
+		} else if(command.equals("scalemerge")) {
+			consolidateCommand.run(file);
+		} else if(command.equals("cleantexts")) {
+			cleanTextsCommand.run(file);
 		}
 
 	}
