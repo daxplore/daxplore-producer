@@ -60,7 +60,7 @@ public final class OpenDaxploreFile implements ActionListener {
 				System.out.println("Daxplore file content: " + daxploreGUI.getDaxploreFile().getAbout());
 				
 				// update text fields so that file information is properly shown.
-				daxploreGUI.updateTextFields();
+				daxploreGUI.openPanelView.updateTextFields(daxploreGUI);
 				
 			} catch (DaxploreException e1) {
 				JOptionPane.showMessageDialog(this.daxploreGUI.frmDaxploreProducer,

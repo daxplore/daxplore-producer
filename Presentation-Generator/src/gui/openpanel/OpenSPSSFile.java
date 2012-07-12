@@ -57,7 +57,7 @@ public class OpenSPSSFile implements ActionListener {
 					
 					OpenSPSSDialog spssApprove = new OpenSPSSDialog(this.daxploreGUI, this.daxploreGUI.getSpssFile());
 					spssApprove.setVisible(true);
-					daxploreGUI.updateSpssFileInfoText();
+					daxploreGUI.openPanelView.updateSpssFileInfoText(daxploreGUI);
 					
 				} catch (FileNotFoundException e1) {
 					System.out.println("SPSS file open failed.");

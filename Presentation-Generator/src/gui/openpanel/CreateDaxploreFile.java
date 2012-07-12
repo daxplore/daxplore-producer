@@ -83,7 +83,7 @@ public final class CreateDaxploreFile implements ActionListener {
 
 				try {
 					daxploreGUI.setDaxploreFile(new DaxploreFile(file, true));
-					daxploreGUI.updateTextFields();
+					daxploreGUI.openPanelView.updateTextFields(daxploreGUI);
 				} catch (DaxploreException e1) {
 					System.out.println("Saving daxplore file failure.");
 					e1.printStackTrace();

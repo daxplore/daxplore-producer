@@ -144,7 +144,7 @@ public class ImportSPSSFile implements ActionListener, PropertyChangeListener {
 				
 				// update open panel text fields to ensure the latest file updates are displayed
 				// after a successful spss import.
-				daxploreGUI.updateTextFields();
+				daxploreGUI.openPanelView.updateTextFields(daxploreGUI);
 				getDaxploreGUI().setSpssFileInfoText(getDaxploreGUI().getSpssFileInfoText() + "\nSPSS file successfully imported!");
 				
 			} catch (FileNotFoundException e2) {
