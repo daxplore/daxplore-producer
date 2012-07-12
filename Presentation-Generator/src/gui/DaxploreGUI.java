@@ -50,6 +50,7 @@ import org.opendatafoundation.data.spss.SPSSFile;
 import daxplorelib.DaxploreFile;
 import java.awt.event.ActionListener;
 import java.awt.event.ActionEvent;
+import javax.swing.JProgressBar;
 
 /**
  * Main window handler class. Initialization of application goes here.
@@ -107,6 +108,7 @@ public class DaxploreGUI {
 			}
 		}
 		
+		// thread handler for main window.
 		EventQueue.invokeLater(new Runnable() {
 			public void run() {
 				try {
@@ -121,15 +123,32 @@ public class DaxploreGUI {
 	
 	// data fields for main class.
 	public JFrame frmDaxploreProducer;
+	
+	// button group for left button panel.
 	private final ButtonGroup buttonGroup = new ButtonGroup();
-	public JTextField fileNameField;
-	public JTextField importDateField;
-	public JTextField creationDateField;
-	public JTextField lastImportFileNameField;
+	
+	// open panel dialog fields.
+	// TODO: Move this to a seperate class.
+	private JTextField fileNameField;
+	private JTextField importDateField;
+	private JTextField creationDateField;
+	private JTextField lastImportFileNameField;
 	private DaxploreFile daxploreFile;
-	private SPSSFile spssFile;
 	JTextPane spssFileInfoText;
 	
+	// getters and setters galore.
+	// TODO: Organize the methods to seperate files.
+	public String getSpssFileInfoText() {
+		return spssFileInfoText.getText();
+	}
+
+	public void setSpssFileInfoText(String spssFileInfoText) {
+		this.spssFileInfoText.setText(spssFileInfoText);
+	}
+
+	// file handling classes.
+	private SPSSFile spssFile;
+
 	public SPSSFile getSpssFile() {
 		return spssFile;
 	}
@@ -215,18 +234,23 @@ public class DaxploreGUI {
 		openSPSSFileButton.addActionListener(new OpenSPSSFile(this, openSPSSFileButton));
 		
 		JScrollPane importTableScrollPane = new JScrollPane();
-		importTableScrollPane.setBounds(20, 89, 746, 235);
+		importTableScrollPane.setBounds(20, 89, 763, 217);
 		
-		JButton importSPSSFileButton = new JButton("");
-		importSPSSFileButton.addActionListener(new ImportSPSSFile(this, importSPSSFileButton));
-		importSPSSFileButton.setToolTipText("Import SPSS file");
-		importSPSSFileButton.setIcon(new ImageIcon(DaxploreGUI.class.getResource("/gui/resources/Arrow-Up-48.png")));
-		importSPSSFileButton.setBounds(332, 19, 90, 58);
+		// progress bar for import spss panel goes here.
+		JProgressBar importSpssFileProgressBar = new JProgressBar();
+		importSpssFileProgressBar.setBounds(600, 307, 183, 19);
+		importSPSSPanel.add(importSpssFileProgressBar);
+		
+		JButton importSpssFileButton = new JButton("");
+		importSpssFileButton.addActionListener(new ImportSPSSFile(this, importSpssFileButton, importSpssFileProgressBar));
+		importSpssFileButton.setToolTipText("Import SPSS file");
+		importSpssFileButton.setIcon(new ImageIcon(DaxploreGUI.class.getResource("/gui/resources/Arrow-Up-48.png")));
+		importSpssFileButton.setBounds(332, 19, 90, 58);
 		
 		spssFileInfoText = new JTextPane();
 		importTableScrollPane.setViewportView(spssFileInfoText);
 		importSPSSPanel.setLayout(null);
-		importSPSSPanel.add(importSPSSFileButton);
+		importSPSSPanel.add(importSpssFileButton);
 		importSPSSPanel.add(openSPSSFileButton);
 		importSPSSPanel.add(importTableScrollPane);
 		
@@ -326,6 +350,9 @@ public class DaxploreGUI {
 		radioButtonCreator(buttonPanel, mainPanel);
 	}
 
+	/**
+	 * Updates text field for the SPSS file information in the open panel dialog.
+	 */
 	public void updateSpssFileInfoText() {
 		if (spssFile != null) {
 			spssFileInfoText.setText(
@@ -334,7 +361,10 @@ public class DaxploreGUI {
 					spssFile.file.getAbsolutePath());
 		}
 	}
-
+	
+	/**
+	 * Updates text fields in the open panel dialog to display daxplore file information.
+	 */
 	public void updateTextFields() {
 		
 		SimpleDateFormat formatter = new SimpleDateFormat("dd/MM/yyyy");

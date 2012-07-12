@@ -2,36 +2,105 @@ package gui.openpanel;
 
 import gui.DaxploreGUI;
 
+import java.awt.Cursor;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.nio.charset.Charset;
+import java.util.Random;
 
 import javax.swing.JButton;
 import javax.swing.JFileChooser;
 import javax.swing.JOptionPane;
+import javax.swing.JProgressBar;
+import javax.swing.SwingWorker;
 import javax.swing.filechooser.FileNameExtensionFilter;
+
+import com.sun.media.sound.Toolkit;
 
 import daxplorelib.DaxploreException;
 import daxplorelib.DaxploreFile;
 
-public class ImportSPSSFile implements ActionListener {
+/**
+ * SPSS file import class to GUI.
+ * @author jorgenrosen
+ *
+ */
+public class ImportSPSSFile implements ActionListener, PropertyChangeListener {
 	
 	private final DaxploreGUI daxploreGUI;
-	private final JButton importSPSSFileButton;
+	public DaxploreGUI getDaxploreGUI() {
+		return daxploreGUI;
+	}
+	
+	private final ImportSPSSFile importSpssFileInstance;
+
+	public ImportSPSSFile getImportSpssFileInstance() {
+		return importSpssFileInstance;
+	}
+
+	private final JButton importSpssFileButton;
+	private final JProgressBar importSpssFileProgressBar;
+	private Task task;
+	
+	// TODO: Allow for configuration of charsets in future?
 	public String charsetName = "ISO-8859-1";
 
-	public ImportSPSSFile(DaxploreGUI daxploreGUI, JButton importSPSSFileButton) {
+	public ImportSPSSFile(DaxploreGUI daxploreGUI, JButton importSPSSFileButton, JProgressBar importSPSSFileProgressBar) {
 		this.daxploreGUI = daxploreGUI;
-		this.importSPSSFileButton = importSPSSFileButton;
+		this.importSpssFileButton = importSPSSFileButton;
+		this.importSpssFileProgressBar = importSPSSFileProgressBar;
+		importSpssFileInstance = this;
 	}
+	
+	class Task extends SwingWorker<Void, Void> {
+        /*
+         * Main task. Executed in background thread.
+         */
+        @Override
+        public Void doInBackground() {
+            Random random = new Random();
+            int progress = 0;
+            //Initialize progress property.
+            setProgress(0);
+            while (progress < 100) {
+                //Sleep for up to one second.
+                try {
+                    Thread.sleep(random.nextInt(100));
+                } catch (InterruptedException ignore) {}
+                //Make random progress.
+                progress += random.nextInt(10);
+                setProgress(Math.min(progress, 100));
+            }
+            return null;
+        }
+
+        /*
+         * Executed in event dispatching thread. Triggers once the progress task is complete.
+         */
+        @Override
+        public void done() {
+            importSpssFileButton.setEnabled(true);	// make sure button can be used again.
+            daxploreGUI.frmDaxploreProducer.setCursor(null); //turn off the wait cursor
+        }
+    }
+	
+	// called when task changes.
+	public void propertyChange(PropertyChangeEvent evt) {
+        if ("progress" == evt.getPropertyName()) {
+            int progress = (Integer) evt.getNewValue();
+            importSpssFileProgressBar.setValue(progress);
+        } 
+    }
 
 	@Override
 	public void actionPerformed(ActionEvent e) {
 		
-		if (e.getSource() == importSPSSFileButton) {
+		if (e.getSource() == importSpssFileButton) {
 			
 			if (daxploreGUI.getSpssFile() == null) {
 				JOptionPane.showMessageDialog(this.daxploreGUI.frmDaxploreProducer,
@@ -54,34 +123,54 @@ public class ImportSPSSFile implements ActionListener {
 			try{
 				charset = Charset.forName(charsetName);
 			} catch (Exception e1) {
-				System.out.println("Charset error");
+				JOptionPane.showMessageDialog(this.daxploreGUI.frmDaxploreProducer,
+						"Unable to create charset, aborting import.",
+						"Daxplore file warning",
+						JOptionPane.ERROR_MESSAGE);
 				return;
 			}
+			
 			File importFile = daxploreGUI.getSpssFile().file;
 			
 			try {
-				daxploreGUI.getDaxploreFile().importSPSS(importFile, charset);
-				JOptionPane.showMessageDialog(this.daxploreGUI.frmDaxploreProducer,
-						"File imported successfully.",
-						"Daxplore import",
-						JOptionPane.INFORMATION_MESSAGE);
 				
+				daxploreGUI.getDaxploreFile().importSPSS(importFile, charset);
+				// adding progress bar of import here.
+				importSpssFileButton.setEnabled(false);
+		        daxploreGUI.frmDaxploreProducer.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
+		        //Instances of javax.swing.SwingWorker are not reusuable, so
+		        //we create new instances as needed.
+		        task = new Task();
+		        task.addPropertyChangeListener(importSpssFileInstance);
+		        task.execute();
+				
+				// update open panel text fields to ensure the latest file updates are displayed
+				// after a successful spss import.
 				daxploreGUI.updateTextFields();
+				getDaxploreGUI().setSpssFileInfoText(getDaxploreGUI().getSpssFileInfoText() + "\nSPSS file successfully imported!");
 				
 			} catch (FileNotFoundException e2) {
-				System.out.println("SPSS file not found.");
+				JOptionPane.showMessageDialog(this.daxploreGUI.frmDaxploreProducer,
+						"Unable to find the SPSS file.",
+						"Daxplore file warning",
+						JOptionPane.ERROR_MESSAGE);
 				e2.printStackTrace();
 				return;
 			} catch (IOException e2) {
-				// TODO Auto-generated catch block
+				JOptionPane.showMessageDialog(this.daxploreGUI.frmDaxploreProducer,
+						"File import error.",
+						"Daxplore file warning",
+						JOptionPane.ERROR_MESSAGE);
 				e2.printStackTrace();
 				return;
 			} catch (DaxploreException e2) {
-				System.out.println(e2);
+				JOptionPane.showMessageDialog(this.daxploreGUI.frmDaxploreProducer,
+						"Unable to import file, aborting operation.",
+						"Daxplore file warning",
+						JOptionPane.ERROR_MESSAGE);
 				e2.printStackTrace();
 				return;
 			}
 		}
-	}
-		
+	}		
 }
