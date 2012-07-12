@@ -84,8 +84,8 @@ public class DaxploreFile {
 		}
 	}
 	
-	public DaxploreMemoryFile getInMemoryFile() {
-		return null;
+	public DaxploreMemoryFile getInMemoryFile() throws DaxploreException {
+		return DaxploreMemoryFile.createCopy(this);
 	}
 	
 	public void importSPSS(File spssFile, Charset charset) throws FileNotFoundException, IOException, DaxploreException{
