@@ -26,6 +26,7 @@ public final class CreateDaxploreFile implements ActionListener {
 		this.createFileButton = createFileButton;
 	}
 
+	@Override
 	public void actionPerformed(ActionEvent e) {
 		
 		final JFileChooser fc = new JFileChooser() {
@@ -33,7 +34,6 @@ public final class CreateDaxploreFile implements ActionListener {
 	        private static final long serialVersionUID = 7919427933588163126L;
 	        
 	        // override default operation of approveSelection() so it can handle overwriting files.
-	        @Override
 	        public void approveSelection() {
 	            File f = getSelectedFile();
 	            if (f.exists() && getDialogType() == SAVE_DIALOG) {
@@ -54,6 +54,7 @@ public final class CreateDaxploreFile implements ActionListener {
 	            super.approveSelection();
 	        }
 	    };
+	    
 		if (e.getSource() == createFileButton) {
 			
 			FileNameExtensionFilter filter = new FileNameExtensionFilter("Daxplore Files", "daxplore");
