@@ -12,11 +12,13 @@ import org.json.simple.JSONArray;
 import org.json.simple.JSONAware;
 import org.json.simple.JSONObject;
 
+import daxplorelib.DaxploreTable;
+
 import tools.MyTools;
 
 public class MetaGroup implements JSONAware{
-	protected static final String sqlDefinition = "CREATE TABLE metagroup (id INTEGER PRIMARY KEY, textref TEXT, ind INTEGER, type INTEGER)";
-	protected static final String sqlDefinition2 = "CREATE TABLE metagrouprel (groupid INTEGER, questionid TEXT)";		
+	protected static final DaxploreTable table = new DaxploreTable("CREATE TABLE metagroup (id INTEGER PRIMARY KEY, textref TEXT, ind INTEGER, type INTEGER)", "metagroup");
+	protected static final DaxploreTable table2 = new DaxploreTable("CREATE TABLE metagrouprel (groupid INTEGER, questionid TEXT)", "metagrouprel");
 	
 	protected int id;
 	private Connection connection;

@@ -9,7 +9,7 @@ import com.beust.jcommander.Parameters;
 import daxplorelib.About;
 import daxplorelib.DaxploreException;
 import daxplorelib.DaxploreFile;
-import daxplorelib.fileformat.ImportedData;
+import daxplorelib.raw.RawImport;
 
 @Parameters(commandDescription = "Detials about the project")
 public class InfoCommand {
@@ -17,18 +17,18 @@ public class InfoCommand {
 	@Parameter(names={"-v","--version"}, description = "info about version")
 	public Integer version = null;
 	
-	public void run(File projectfile){
-		if(!projectfile.exists()) {
+	public void run(File file){
+		if(!file.exists()) {
 			System.out.println("File does not exist");
 			return;
 		}
 		try {
-			DaxploreFile daxplore = new DaxploreFile(projectfile, false);
+			DaxploreFile daxplore = DaxploreFile.createFromExistingFile(file);
 			About about = daxplore.getAbout();
-			System.out.println("File: " + projectfile.getName());
+			System.out.println("File: " + file.getName());
 			System.out.println("Creation date: " + about.getCreationDate().toString());
 			System.out.println("Last updated: " + about.getLastUpdate().toString());
-			ImportedData imported = daxplore.getImportedData();
+			RawImport imported = daxplore.getImportedData();
 			if(imported != null && imported.hasData()) {
 				System.out.print("Imported from: " + about.getImportFilename());
 				System.out.println(" on " + about.getImportDate().toString());

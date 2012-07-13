@@ -60,7 +60,7 @@ public final class OpenDaxploreFile implements ActionListener {
 	           File file = fc.getSelectedFile();
 	           System.out.println("Opening: " + file.getName() + ".");
 	           try {
-				guiFile.setDaxploreFile(new DaxploreFile(file, false));
+				guiFile.setDaxploreFile(DaxploreFile.createFromExistingFile(file));
 				
 				// print the contents of daxplore file about section, just for testing.
 				System.out.println("Daxplore file content: " + guiFile.getDaxploreFile().getAbout());

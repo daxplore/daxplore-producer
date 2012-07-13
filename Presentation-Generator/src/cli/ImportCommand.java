@@ -1,21 +1,15 @@
 package cli;
 
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.FileReader;
 import java.io.IOException;
-import java.nio.ByteBuffer;
-import java.nio.CharBuffer;
+import java.io.Reader;
 import java.nio.charset.Charset;
-import java.nio.charset.CharsetDecoder;
-import java.nio.charset.CharsetEncoder;
 import java.util.List;
+import java.util.Locale;
 import java.util.Set;
-
-import org.opendatafoundation.data.FileFormatInfo;
-import org.opendatafoundation.data.FileFormatInfo.ASCIIFormat;
-import org.opendatafoundation.data.FileFormatInfo.Compatibility;
-import org.opendatafoundation.data.spss.SPSSFile;
-import org.opendatafoundation.data.spss.SPSSFileException;
 
 import tools.SPSSTools;
 
@@ -25,6 +19,7 @@ import com.beust.jcommander.converters.FileConverter;
 
 import daxplorelib.DaxploreException;
 import daxplorelib.DaxploreFile;
+import daxplorelib.metadata.MetaData;
 
 @Parameters(commandDescription = "Import data into project")
 public class ImportCommand {
@@ -69,7 +64,7 @@ public class ImportCommand {
 		@Parameter(description = "file to import", arity = 1, converter = FileConverter.class, required = true)
 		public List<File> files;
 		
-		public void run(File projectFile) {
+		public void run(File file) {
 			File importFile = files.get(0);
 			if(!importFile.exists()){
 				System.out.println("SPSS file " + importFile.getName() + " does not exist");
@@ -102,8 +97,8 @@ public class ImportCommand {
 				}
 				
 			} else {
-			try {
-					DaxploreFile daxplorefile = new DaxploreFile(projectFile, false);
+				try {
+					DaxploreFile daxplorefile = DaxploreFile.createFromExistingFile(file);
 					System.out.println("Importing...");
 					daxplorefile.importSPSS(importFile, charset);
 					System.out.println("Data imported");
@@ -123,8 +118,6 @@ public class ImportCommand {
 					if(e2 != null) {
 						e2.printStackTrace();
 					}
-					e.printStackTrace();
-					return;
 				}
 			}
 		}
@@ -142,14 +135,67 @@ public class ImportCommand {
 		
 	}
 	
-	@Parameters
+	@Parameters(separators = "=")
 	public class ImportMetaTextsCommand {
+		
+		@Parameter(names = "--locale", description = "Locale to export", converter = LocaleConverter.class)
+		public Locale locale = new Locale("sv");
 		
 		@Parameter(description = "file to import", arity = 1, converter = FileConverter.class, required = true)
 		public List<File> files;
 		
-		public void run(File projectFile) {
+		public void run(File file) {
+			DaxploreFile dax;
+			Reader r;
 			
+			System.out.println("Importing texts for locale: " + locale.toLanguageTag());
+			try {
+				dax = DaxploreFile.createFromExistingFile(file);
+			} catch (DaxploreException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+				return;
+			}
+			
+			File infile = files.get(0);
+			if(!infile.exists()) {
+				System.out.println("File " + infile.getName() + " doesn't exist");
+				return;
+			} else {
+				if(!infile.canRead()) {
+					System.out.println("Can't read from file: " + infile.getName());
+					return;
+				} 
+				FileReader fr = null;
+				try {
+					fr = new FileReader(infile);
+				} catch (IOException e) {
+					System.out.println("Could not open file for writing");
+					e.printStackTrace();
+					return;
+				}
+				r = new BufferedReader(fr);
+			}
+			MetaData metadata;
+			try {
+				metadata = dax.getMetaData();
+			} catch (DaxploreException e) {
+				System.out.println("Could not get metadata");
+				e.printStackTrace();
+				return;
+			}
+			
+			try {
+				metadata.importL10n(r, locale);
+			} catch (DaxploreException e) {
+				System.out.println("Error exporting texts");
+				e.printStackTrace();
+				return;
+			} catch (IOException e) {
+				System.out.println("Error exporting texts");
+				e.printStackTrace();
+				return;
+			}			
 		}
 	}
 }

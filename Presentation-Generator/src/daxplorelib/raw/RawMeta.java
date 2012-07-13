@@ -1,4 +1,4 @@
-package daxplorelib.fileformat;
+package daxplorelib.raw;
 
 import java.nio.charset.Charset;
 import java.sql.Connection;
@@ -25,11 +25,12 @@ import org.opendatafoundation.data.spss.SPSSVariableCategory;
 
 import tools.MyTools;
 import tools.Pair;
+import daxplorelib.DaxploreTable;
 import daxplorelib.SQLTools;
 
 
 public class RawMeta {
-	protected static final String sqlDefinition = "CREATE TABLE rawmeta (column TEXT, longname TEXT, qtext TEXT, qtype TEXT, spsstype TEXT, valuelabels TEXT, measure TEXT)";
+	protected static final DaxploreTable table = new DaxploreTable("CREATE TABLE rawmeta (column TEXT, longname TEXT, qtext TEXT, qtype TEXT, spsstype TEXT, valuelabels TEXT, measure TEXT)", "rawmeta");
 	
 	public class RawMetaQuestion {
 		public String column, longname, qtext, spsstype, measure;
@@ -41,11 +42,7 @@ public class RawMeta {
 	
 	public RawMeta(Connection connection) throws SQLException{
 		this.connection = connection;
-		if(!SQLTools.tableExists("rawmeta", connection)){
-			Statement stmt = connection.createStatement();
-			stmt.executeUpdate(sqlDefinition);
-			stmt.close();
-		}
+		SQLTools.createIfNotExists(table, connection);
 	}
 	
 	public List<String> getColumns() throws SQLException{

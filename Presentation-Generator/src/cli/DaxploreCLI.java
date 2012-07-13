@@ -56,6 +56,9 @@ public class DaxploreCLI {
 		CleanTextsCommand cleanTextsCommand = new CleanTextsCommand();
 		addCommand(jc, "cleantexts", cleanTextsCommand);
 		
+		TestCommand testCommand = new TestCommand();
+		addCommand(jc, "test", testCommand);
+		
 		if(args.length > 1	) {
 			file = new File(args[0]);
 			if(file.isDirectory()) {
@@ -124,6 +127,8 @@ public class DaxploreCLI {
 			consolidateCommand.run(file);
 		} else if(command.equals("cleantexts")) {
 			cleanTextsCommand.run(file);
+		} else if(command.equals("test")) {
+			testCommand.run(file);
 		}
 
 	}

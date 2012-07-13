@@ -46,7 +46,7 @@ public class ExportCommand {
 			DaxploreFile dax;
 			Writer w;
 			try {
-				dax = new DaxploreFile(file, false);
+				dax = DaxploreFile.createFromExistingFile(file);
 			} catch (DaxploreException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
@@ -120,7 +120,7 @@ public class ExportCommand {
 			DaxploreFile dax;
 			Writer w;
 			try {
-				dax = new DaxploreFile(file, false);
+				dax = DaxploreFile.createFromExistingFile(file);
 			} catch (DaxploreException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();

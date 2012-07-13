@@ -9,13 +9,14 @@ import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
 
-import daxplorelib.fileformat.ImportedData;
+import daxplorelib.raw.RawImport;
 
 /**
  * This class mirrors the 'about' table in the project file
  * It's a one row table with the columns: filetypeversion, creation, lastupdate, activerawdata
  */
 public class About {
+	protected static final DaxploreTable table = new DaxploreTable("CREATE TABLE about (filetypeversionmajor INTEGER, filetypeversionminor INTEGER, creation INTEGER, lastupdate INTEGER, importdate INTEGER, filename TEXT)", "about");
 	final int filetypeversionmajor;
 	final int filetypeversionminor;
 	Date creation;
@@ -37,7 +38,8 @@ public class About {
 			creation = new Date();
 			lastupdate = (Date) creation.clone();
 			stmt = database.createStatement();
-			stmt.executeUpdate("CREATE TABLE about (filetypeversionmajor INTEGER, filetypeversionminor INTEGER, creation INTEGER, lastupdate INTEGER, importdate INTEGER, filename TEXT)");
+			stmt.executeUpdate(table.sql);
+			stmt.close();
 			PreparedStatement prepared = database.prepareStatement("INSERT INTO about VALUES (?, ?, ?, ?, ?, ?)");
 			prepared.setInt(1, filetypeversionmajor);
 			prepared.setInt(2, filetypeversionminor);
@@ -46,7 +48,8 @@ public class About {
 			prepared.setLong(5, 0);
 			prepared.setString(6, "");
 			prepared.execute();
-			stmt.close();
+			prepared.close();
+			
 		}else{
 			stmt = database.createStatement();
 			stmt.execute("SELECT * FROM about");
