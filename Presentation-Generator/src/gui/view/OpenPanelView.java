@@ -30,7 +30,7 @@ public class OpenPanelView extends JPanel {
 	private JTextField importDateField = new JTextField();;
 	private JTextField creationDateField = new JTextField();
 	private JTextField lastImportFileNameField = new JTextField();
-	private JTextPane spssFileInfoText = new JTextPane();
+	public JTextPane spssFileInfoText = new JTextPane();
 	
 	public OpenPanelView(GUIMain guiMain, GUIFile guiFile) {
 		fileNameField.setEditable(false);
@@ -114,13 +114,13 @@ public class OpenPanelView extends JPanel {
 		
 		metaDataPanel.setLayout(null);
 		metaDataPanel.add(fileNameLabel);
-		metaDataPanel.add(getFileNameField());
+		metaDataPanel.add(fileNameField);
 		metaDataPanel.add(importDateLabel);
-		metaDataPanel.add(getImportDateField());
+		metaDataPanel.add(importDateField);
 		metaDataPanel.add(creationDateLabel);
-		metaDataPanel.add(getCreationDateField());
+		metaDataPanel.add(creationDateField);
 		metaDataPanel.add(lastImportedFileLabel);
-		metaDataPanel.add(getLastImportFileNameField());
+		metaDataPanel.add(lastImportFileNameField);
 		
 		JButton openFileButton = new JButton("Open file...");
 		openFileButton.setBounds(19, 35, 135, 27);
@@ -135,47 +135,6 @@ public class OpenPanelView extends JPanel {
 		createNewFileButton.setToolTipText("Creates a new daxplore project file");
 		
 		setLayout(gl_openPanel);
-	}
-
-	// getters and setters.
-	public JTextField getFileNameField() {
-		return fileNameField;
-	}
-
-	public void setFileNameField(JTextField fileNameField) {
-		this.fileNameField = fileNameField;
-	}
-
-	public JTextField getImportDateField() {
-		return importDateField;
-	}
-
-	public void setImportDateField(JTextField importDateField) {
-		this.importDateField = importDateField;
-	}
-
-	public JTextField getCreationDateField() {
-		return creationDateField;
-	}
-
-	public void setCreationDateField(JTextField creationDateField) {
-		this.creationDateField = creationDateField;
-	}
-
-	public JTextField getLastImportFileNameField() {
-		return lastImportFileNameField;
-	}
-
-	public void setLastImportFileNameField(JTextField lastImportFileNameField) {
-		this.lastImportFileNameField = lastImportFileNameField;
-	}
-
-	public String getSpssFileInfoText() {
-		return spssFileInfoText.getText();
-	}
-
-	public void setSpssFileInfoText(String spssFileInfoText) {
-		this.spssFileInfoText.setText(spssFileInfoText);
 	}
 	
 	/**
@@ -202,24 +161,24 @@ public class OpenPanelView extends JPanel {
 		// set the text fields if we have a daxplore file loaded.
 		if (guiFile.getDaxploreFile() != null) {
 			// update text fields with appropriate data.
-			getFileNameField().setText(guiFile.getDaxploreFile().getFile().getName());
+			fileNameField.setText(guiFile.getDaxploreFile().getFile().getName());
 			
 			// check if it's a newly created file, if so, it doesn't contain certain fields.
 			String importFilename = guiFile.getDaxploreFile().getAbout().getImportFilename();
 			if (importFilename != null && !"".equals(importFilename)) {
-				getLastImportFileNameField().setText(guiFile.getDaxploreFile().getAbout().getImportFilename());
+				lastImportFileNameField.setText(guiFile.getDaxploreFile().getAbout().getImportFilename());
 				// date must first be converted to the appropriate format before returned as string.
 				if (guiFile.getDaxploreFile().getAbout().getImportDate() != null) {
-				getImportDateField().setText(formatter.format(guiFile.getDaxploreFile().getAbout().getImportDate()));
+				importDateField.setText(formatter.format(guiFile.getDaxploreFile().getAbout().getImportDate()));
 				} else {
-					getImportDateField().setText("");
+					importDateField.setText("");
 				}
 			} else {
-				getLastImportFileNameField().setText("");
-				getImportDateField().setText("");
+				lastImportFileNameField.setText("");
+				importDateField.setText("");
 			}
 			
-			getCreationDateField().setText(
+			creationDateField.setText(
 			formatter.format(guiFile.getDaxploreFile().getAbout().getCreationDate()));
 		}
 	}

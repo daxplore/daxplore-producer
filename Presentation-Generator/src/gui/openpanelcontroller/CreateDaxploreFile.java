@@ -18,6 +18,11 @@ import javax.swing.filechooser.FileNameExtensionFilter;
 import daxplorelib.DaxploreException;
 import daxplorelib.DaxploreFile;
 
+/**
+ * Daxplore file creation controller. Used in open panel view.
+ * @author hkfs89
+ *
+ */
 public final class CreateDaxploreFile implements ActionListener {
 
 	private final GUIMain guiMain;

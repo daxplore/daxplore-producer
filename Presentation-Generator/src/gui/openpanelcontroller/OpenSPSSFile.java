@@ -20,6 +20,11 @@ import org.opendatafoundation.data.spss.SPSSFile;
 
 import daxplorelib.DaxploreException;
 
+/**
+ * Handles operations of the open spss file button in open panel.
+ * @author hkfs89
+ *
+ */
 public class OpenSPSSFile implements ActionListener {
 
 	private final GUIMain guiMain;

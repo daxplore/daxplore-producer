@@ -33,6 +33,11 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.util.StringTokenizer;
 
+/**
+ * Import SPSS dialog wizard.
+ * @author hkfs89
+ *
+ */
 public class OpenSPSSDialog extends JDialog {
 
 	private static final long serialVersionUID = 1L;

@@ -21,8 +21,8 @@ import daxplorelib.DaxploreFile;
 
 
 /**
- * Handles the open operations of the daxplore project file.
- * Nested classes are DaxploreGUI and JButton.
+ * Handles the operations of the daxplore project file button.
+ * 
  */
 public final class OpenDaxploreFile implements ActionListener {
 
@@ -53,7 +53,10 @@ public final class OpenDaxploreFile implements ActionListener {
 						guiFile.getDaxploreFile().close();	        			
 	        		}
 				} catch (DaxploreException e2) {
-					System.out.println("Couldn't close file");
+					JOptionPane.showMessageDialog(this.guiMain.guiMainFrame,
+							"Something went wrong when trying to close old daxplore file.",
+							"Daxplore file warning",
+							JOptionPane.ERROR_MESSAGE);
 					e2.printStackTrace();
 					return;
 				}

@@ -35,12 +35,7 @@ import daxplorelib.DaxploreFile;
 public class ImportSPSSFile implements ActionListener, PropertyChangeListener {
 	
 	private final GUIMain guiMain;
-	private final ImportSPSSFile importSpssFileInstance; // for instance save.
 	private GUIFile guiFile;
-	
-	public ImportSPSSFile getImportSpssFileInstance() {
-		return importSpssFileInstance;
-	}
 
 	private final JButton importSpssFileButton;
 	private final JProgressBar importSpssFileProgressBar;
@@ -56,9 +51,13 @@ public class ImportSPSSFile implements ActionListener, PropertyChangeListener {
 		this.openPanelView = openPanelView;
 		this.importSpssFileButton = importSPSSFileButton;
 		this.importSpssFileProgressBar = importSPSSFileProgressBar;
-		importSpssFileInstance = this;  // saving instance.
 	}
 	
+	/**
+	 * Used for the progress bar, injected override class.
+	 * @author hkfs89
+	 *
+	 */
 	class Task extends SwingWorker<Void, Void> {
         /*
          * Main task. Executed in background thread.
@@ -141,13 +140,13 @@ public class ImportSPSSFile implements ActionListener, PropertyChangeListener {
 				//Instances of javax.swing.SwingWorker are not reusuable, so
 		        //we create new instances as needed.
 		        task = new Task();
-		        task.addPropertyChangeListener(importSpssFileInstance);
+		        task.addPropertyChangeListener(this);
 		        task.execute();
 				
 				// update open panel text fields to ensure the latest file updates are displayed
 				// after a successful spss import.
 				openPanelView.updateTextFields(guiMain, guiFile);
-				openPanelView.setSpssFileInfoText(openPanelView.getSpssFileInfoText() + "\nSPSS file successfully imported!");
+				openPanelView.spssFileInfoText.setText(openPanelView.spssFileInfoText.getText() + "\nSPSS file successfully imported!");
 				
 			} catch (FileNotFoundException e2) {
 				JOptionPane.showMessageDialog(this.guiMain.guiMainFrame,
