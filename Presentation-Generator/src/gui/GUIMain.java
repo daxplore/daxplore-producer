@@ -1,57 +1,33 @@
 package gui;
 
-import gui.openpanel.CreateDaxploreFile;
-import gui.openpanel.ImportSPSSFile;
-import gui.openpanel.OpenDaxploreFile;
-import gui.openpanel.OpenSPSSFile;
+import gui.view.ButtonPanelView;
+import gui.view.OpenPanelView;
 
 import java.awt.BorderLayout;
 import java.awt.CardLayout;
 import java.awt.Color;
 import java.awt.EventQueue;
-import java.awt.GridLayout;
+import java.awt.FlowLayout;
 import java.awt.Toolkit;
 
-import javax.swing.ButtonGroup;
-import javax.swing.ImageIcon;
-import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
-import javax.swing.JScrollPane;
-import javax.swing.JSeparator;
-import javax.swing.JTable;
 import javax.swing.JTextPane;
 import javax.swing.UIManager;
 import javax.swing.UIManager.LookAndFeelInfo;
 import javax.swing.UnsupportedLookAndFeelException;
-import javax.swing.border.EtchedBorder;
 import javax.swing.border.MatteBorder;
-import javax.swing.border.TitledBorder;
-import javax.swing.table.DefaultTableModel;
-import java.awt.FlowLayout;
-import javax.swing.BoxLayout;
-import javax.swing.GroupLayout;
-import javax.swing.GroupLayout.Alignment;
-import javax.swing.LayoutStyle.ComponentPlacement;
-import java.awt.GridBagLayout;
-import java.awt.GridBagConstraints;
-import java.awt.Insets;
-
-import javax.swing.JTextField;
 
 import org.opendatafoundation.data.spss.SPSSFile;
 
 import daxplorelib.DaxploreFile;
-import java.awt.event.ActionListener;
-import java.awt.event.ActionEvent;
-import javax.swing.JProgressBar;
 
 /**
  * Main window handler class. Initialization of application goes here.
  */
-public class DaxploreGUI {
+public class GUIMain {
 
 	/**
 	 * Main execution loop, includes the thread handler, required for swing
@@ -101,7 +77,7 @@ public class DaxploreGUI {
 		EventQueue.invokeLater(new Runnable() {
 			public void run() {
 				try {
-					DaxploreGUI window = new DaxploreGUI();
+					GUIMain window = new GUIMain();
 					window.frmDaxploreProducer.setVisible(true);
 				} catch (Exception e) {
 					e.printStackTrace();
@@ -121,21 +97,12 @@ public class DaxploreGUI {
 		this.frmDaxploreProducer = frmDaxploreProducer;
 	}
 
-	private MainPanelView mainPanelView = new MainPanelView(new ButtonGroup());
-	public OpenPanelView openPanelView = new OpenPanelView();
+	final JPanel mainPanel = new JPanel();
+	private ButtonPanelView buttonPanelView = new ButtonPanelView();
 
-	// getters and setters galore.
-	// TODO: Organize the methods to seperate files.
-	public String getSpssFileInfoText() {
-		return openPanelView.getSpssFileInfoText().getText();
-	}
-
-	public void setSpssFileInfoText(String spssFileInfoText) {
-		this.openPanelView.getSpssFileInfoText().setText(spssFileInfoText);
-	}
 
 	// file handler.
-	DaxploreDataModel daxploreDataModel = new DaxploreDataModel();
+	public GUIFile daxploreDataModel = new GUIFile();
 
 	public SPSSFile getSpssFile() {
 		return daxploreDataModel.getSpssFile();
@@ -153,11 +120,16 @@ public class DaxploreGUI {
 	public void setDaxploreFile(DaxploreFile daxploreFile) {
 		this.daxploreDataModel.setDaxploreFile(daxploreFile);
 	}
+	
+	public void switchTo(String label) {
+		CardLayout cl = (CardLayout)(mainPanel.getLayout());
+	    cl.show(mainPanel, label);
+	}
 
 	/**
 	 * Create the application.
 	 */
-	public DaxploreGUI() {
+	public GUIMain() {
 		initGUI();
 	}
 
@@ -167,27 +139,28 @@ public class DaxploreGUI {
 	private void initGUI() {
 		
 		frmDaxploreProducer = new JFrame();
-		frmDaxploreProducer.setIconImage(Toolkit.getDefaultToolkit().getImage(DaxploreGUI.class.getResource("/gui/resources/Colorful_Chart_Icon_vol2.png")));
+		frmDaxploreProducer.setIconImage(Toolkit.getDefaultToolkit().getImage(GUIMain.class.getResource("/gui/resources/Colorful_Chart_Icon_vol2.png")));
 		frmDaxploreProducer.setTitle("Daxplore Producer Developer Version");
 		frmDaxploreProducer.setBounds(100, 100, 900, 787);
 		frmDaxploreProducer.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		frmDaxploreProducer.getContentPane().setLayout(new BorderLayout(0, 0));
 		
-		openPanelView.setSpssFileInfoText(new JTextPane());
-		openPanelView.updateSpssFileInfoText(this);
-		final JPanel mainPanel = new JPanel();
 		mainPanel.setBorder(new MatteBorder(0, 1, 0, 0, (Color) Color.GRAY));
-		frmDaxploreProducer.getContentPane().add(mainPanel, BorderLayout.CENTER);
 		mainPanel.setLayout(new CardLayout(0, 0));
 		
-		JPanel openPanel = openPanelView.createOpenPanel(this);
-		mainPanel.add(openPanel, "openPanel");
+		frmDaxploreProducer.getContentPane().add(mainPanel, BorderLayout.CENTER);
+		
+		JPanel buttonPanel = buttonPanelView.radioButtonCreator(this);
+		frmDaxploreProducer.getContentPane().add(buttonPanel, BorderLayout.WEST);
+		
+		OpenPanelView openPanelView = new OpenPanelView(this);
+		mainPanel.add(openPanelView, "openPanel");
 		
 		JPanel groupsPanel = new JPanel();
 		mainPanel.add(groupsPanel, "importPanel");
 		groupsPanel.setLayout(new FlowLayout(FlowLayout.CENTER, 5, 5));
 		
-		JLabel lblOldImportPanel = new JLabel("Old Import panel");
+		JLabel lblOldImportPanel = new JLabel("GroupsPanel");
 		groupsPanel.add(lblOldImportPanel);
 		
 		JPanel editPanel = new JPanel();
@@ -197,11 +170,6 @@ public class DaxploreGUI {
 		JLabel lblEdit = new JLabel("Edit");
 		lblEdit.setBounds(397, 5, 42, 16);
 		editPanel.add(lblEdit);
-		
-		openPanelView.setSpssFileInfoText(new JTextPane());
-		JPanel buttonPanel = mainPanelView.radioButtonCreator( mainPanel);
-		
-		frmDaxploreProducer.getContentPane().add(buttonPanel, BorderLayout.WEST);
 		
 	}
 }

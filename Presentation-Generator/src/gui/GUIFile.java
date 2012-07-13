@@ -4,11 +4,11 @@ import org.opendatafoundation.data.spss.SPSSFile;
 
 import daxplorelib.DaxploreFile;
 
-public class DaxploreDataModel {
+public class GUIFile {
 	private DaxploreFile daxploreFile;
 	private SPSSFile spssFile;
 
-	public DaxploreDataModel() {
+	public GUIFile() {
 	}
 
 	public DaxploreFile getDaxploreFile() {

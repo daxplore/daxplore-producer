@@ -1,6 +1,6 @@
-package gui.openpanel;
+package gui.view;
 
-import gui.DaxploreGUI;
+import gui.GUIMain;
 
 import java.awt.BorderLayout;
 import java.awt.Dimension;
@@ -57,7 +57,7 @@ public class OpenSPSSDialog extends JDialog {
 	 * @param spssFile
 	 * @param daxploreGUI
 	 */
-	public OpenSPSSDialog(final DaxploreGUI daxploreGUI, SPSSFile spssFile) {
+	public OpenSPSSDialog(final GUIMain daxploreGUI, SPSSFile spssFile) {
 		setDialog(this);
 		setTitle("Inspect SPSS file");
 		setBounds(100, 100, 762, 622);
@@ -102,6 +102,10 @@ public class OpenSPSSDialog extends JDialog {
 		}
 	}
 	
+	/**
+	 * Creates a temporary file on disc and imports SPSS file information as well as outputs it to a table display.
+	 * @param sf
+	 */
 	public void SPSSTable(SPSSFile sf) {
 		File temp;
 		FileFormatInfo ffi = new FileFormatInfo();

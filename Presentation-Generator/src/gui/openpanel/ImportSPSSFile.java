@@ -1,6 +1,7 @@
 package gui.openpanel;
 
-import gui.DaxploreGUI;
+import gui.GUIMain;
+import gui.view.OpenPanelView;
 
 import java.awt.Cursor;
 import java.awt.event.ActionEvent;
@@ -32,10 +33,7 @@ import daxplorelib.DaxploreFile;
  */
 public class ImportSPSSFile implements ActionListener, PropertyChangeListener {
 	
-	private final DaxploreGUI daxploreGUI;
-	public DaxploreGUI getDaxploreGUI() {
-		return daxploreGUI;
-	}
+	private final GUIMain guiMain;
 	
 	private final ImportSPSSFile importSpssFileInstance;
 
@@ -45,13 +43,15 @@ public class ImportSPSSFile implements ActionListener, PropertyChangeListener {
 
 	private final JButton importSpssFileButton;
 	private final JProgressBar importSpssFileProgressBar;
+	private final OpenPanelView openPanelView;
 	private Task task;
 	
 	// TODO: Allow for configuration of charsets in future?
 	public String charsetName = "ISO-8859-1";
 
-	public ImportSPSSFile(DaxploreGUI daxploreGUI, JButton importSPSSFileButton, JProgressBar importSPSSFileProgressBar) {
-		this.daxploreGUI = daxploreGUI;
+	public ImportSPSSFile(GUIMain daxploreGUI, OpenPanelView openPanelView, JButton importSPSSFileButton, JProgressBar importSPSSFileProgressBar) {
+		this.guiMain = daxploreGUI;
+		this.openPanelView = openPanelView;
 		this.importSpssFileButton = importSPSSFileButton;
 		this.importSpssFileProgressBar = importSPSSFileProgressBar;
 		importSpssFileInstance = this;
@@ -85,7 +85,7 @@ public class ImportSPSSFile implements ActionListener, PropertyChangeListener {
         @Override
         public void done() {
             importSpssFileButton.setEnabled(true);	// make sure button can be used again.
-            daxploreGUI.frmDaxploreProducer.setCursor(null); //turn off the wait cursor
+            guiMain.frmDaxploreProducer.setCursor(null); //turn off the wait cursor
         }
     }
 	
@@ -102,8 +102,8 @@ public class ImportSPSSFile implements ActionListener, PropertyChangeListener {
 		
 		if (e.getSource() == importSpssFileButton) {
 			
-			if (daxploreGUI.getSpssFile() == null) {
-				JOptionPane.showMessageDialog(this.daxploreGUI.frmDaxploreProducer,
+			if (guiMain.getSpssFile() == null) {
+				JOptionPane.showMessageDialog(this.guiMain.frmDaxploreProducer,
 						"You must open an SPSS file before you can import it.",
 						"Daxplore file warning",
 						JOptionPane.ERROR_MESSAGE);
@@ -111,8 +111,8 @@ public class ImportSPSSFile implements ActionListener, PropertyChangeListener {
 				
 			}
 			
-			if (daxploreGUI.getDaxploreFile() == null) {
-				JOptionPane.showMessageDialog(this.daxploreGUI.frmDaxploreProducer,
+			if (guiMain.getDaxploreFile() == null) {
+				JOptionPane.showMessageDialog(this.guiMain.frmDaxploreProducer,
 						"Create or open a daxplore project file before you import an SPSS file.",
 						"Daxplore file warning",
 						JOptionPane.ERROR_MESSAGE);
@@ -123,19 +123,19 @@ public class ImportSPSSFile implements ActionListener, PropertyChangeListener {
 			try{
 				charset = Charset.forName(charsetName);
 			} catch (Exception e1) {
-				JOptionPane.showMessageDialog(this.daxploreGUI.frmDaxploreProducer,
+				JOptionPane.showMessageDialog(this.guiMain.frmDaxploreProducer,
 						"Unable to create charset, aborting import.",
 						"Daxplore file warning",
 						JOptionPane.ERROR_MESSAGE);
 				return;
 			}
 			
-			File importFile = daxploreGUI.getSpssFile().file;
+			File importFile = guiMain.getSpssFile().file;
 			
 			try {
 				importSpssFileButton.setEnabled(false);
-		        daxploreGUI.frmDaxploreProducer.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
-				daxploreGUI.getDaxploreFile().importSPSS(importFile, charset);
+		        guiMain.frmDaxploreProducer.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
+				guiMain.getDaxploreFile().importSPSS(importFile, charset);
 				//Instances of javax.swing.SwingWorker are not reusuable, so
 		        //we create new instances as needed.
 		        task = new Task();
@@ -144,25 +144,25 @@ public class ImportSPSSFile implements ActionListener, PropertyChangeListener {
 				
 				// update open panel text fields to ensure the latest file updates are displayed
 				// after a successful spss import.
-				daxploreGUI.openPanelView.updateTextFields(daxploreGUI);
-				getDaxploreGUI().setSpssFileInfoText(getDaxploreGUI().getSpssFileInfoText() + "\nSPSS file successfully imported!");
+				openPanelView.updateTextFields(guiMain);
+				openPanelView.setSpssFileInfoText(openPanelView.getSpssFileInfoText() + "\nSPSS file successfully imported!");
 				
 			} catch (FileNotFoundException e2) {
-				JOptionPane.showMessageDialog(this.daxploreGUI.frmDaxploreProducer,
+				JOptionPane.showMessageDialog(this.guiMain.frmDaxploreProducer,
 						"Unable to find the SPSS file.",
 						"Daxplore file warning",
 						JOptionPane.ERROR_MESSAGE);
 				e2.printStackTrace();
 				return;
 			} catch (IOException e2) {
-				JOptionPane.showMessageDialog(this.daxploreGUI.frmDaxploreProducer,
+				JOptionPane.showMessageDialog(this.guiMain.frmDaxploreProducer,
 						"File import error.",
 						"Daxplore file warning",
 						JOptionPane.ERROR_MESSAGE);
 				e2.printStackTrace();
 				return;
 			} catch (DaxploreException e2) {
-				JOptionPane.showMessageDialog(this.daxploreGUI.frmDaxploreProducer,
+				JOptionPane.showMessageDialog(this.guiMain.frmDaxploreProducer,
 						"Unable to import file, aborting operation.",
 						"Daxplore file warning",
 						JOptionPane.ERROR_MESSAGE);

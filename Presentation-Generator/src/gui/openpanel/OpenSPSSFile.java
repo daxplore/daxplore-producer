@@ -1,6 +1,8 @@
 package gui.openpanel;
 
-import gui.DaxploreGUI;
+import gui.GUIMain;
+import gui.view.OpenPanelView;
+import gui.view.OpenSPSSDialog;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -19,11 +21,13 @@ import daxplorelib.DaxploreException;
 
 public class OpenSPSSFile implements ActionListener {
 
-	private final DaxploreGUI daxploreGUI;
+	private final GUIMain daxploreGUI;
 	private final JButton openSPSSFileButton;
+	private final OpenPanelView openPanelView;
 
-	public OpenSPSSFile(DaxploreGUI daxploreGUI, JButton openSPSSFileButton) {
+	public OpenSPSSFile(GUIMain daxploreGUI, OpenPanelView openPanelView, JButton openSPSSFileButton) {
 		this.daxploreGUI = daxploreGUI;
+		this.openPanelView = openPanelView;
 		this.openSPSSFileButton = openSPSSFileButton;
 	}
 	
@@ -57,7 +61,7 @@ public class OpenSPSSFile implements ActionListener {
 					
 					OpenSPSSDialog spssApprove = new OpenSPSSDialog(this.daxploreGUI, this.daxploreGUI.getSpssFile());
 					spssApprove.setVisible(true);
-					daxploreGUI.openPanelView.updateSpssFileInfoText(daxploreGUI);
+					openPanelView.updateSpssFileInfoText(daxploreGUI);
 					
 				} catch (FileNotFoundException e1) {
 					System.out.println("SPSS file open failed.");
