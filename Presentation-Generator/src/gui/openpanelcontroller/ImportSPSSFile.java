@@ -137,8 +137,8 @@ public class ImportSPSSFile implements ActionListener, PropertyChangeListener {
 				importSpssFileButton.setEnabled(false);
 		        guiMain.guiMainFrame.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
 				guiFile.getDaxploreFile().importSPSS(importFile, charset);
-				//Instances of javax.swing.SwingWorker are not reusuable, so
-		        //we create new instances as needed.
+				// Instances of javax.swing.SwingWorker are not reusuable, so
+		        // we create new instances as needed.
 		        task = new Task();
 		        task.addPropertyChangeListener(this);
 		        task.execute();

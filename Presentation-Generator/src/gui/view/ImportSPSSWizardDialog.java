@@ -38,7 +38,7 @@ import java.util.StringTokenizer;
  * @author hkfs89
  *
  */
-public class OpenSPSSDialog extends JDialog {
+public class ImportSPSSWizardDialog extends JDialog {
 
 	private static final long serialVersionUID = 1L;
 	private JDialog dialog;
@@ -62,7 +62,7 @@ public class OpenSPSSDialog extends JDialog {
 	 * @param spssFile
 	 * @param daxploreGUI
 	 */
-	public OpenSPSSDialog(final GUIMain daxploreGUI, SPSSFile spssFile) {
+	public ImportSPSSWizardDialog(final GUIMain daxploreGUI, SPSSFile spssFile) {
 		setDialog(this);
 		setTitle("Inspect SPSS file");
 		setBounds(100, 100, 762, 622);

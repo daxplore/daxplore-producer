@@ -48,23 +48,23 @@ public class ButtonPanelView extends JPanel {
 
 		// groups button.
 		JRadioButton GroupsButton = new JRadioButton("");
-		GroupsButton.setToolTipText("Import SPSS file(s)");
+		GroupsButton.setToolTipText("Edit groups and questions");
 		GroupsButton.addItemListener(new ItemListener() {
 			public void itemStateChanged(ItemEvent e) {
 				guiMain.switchTo("groupsPanel");
 			}
 		});
 		
-		GroupsButton.setSelectedIcon(new ImageIcon(GUIMain.class.getResource("/gui/resources/4_selected.png")));
+		GroupsButton.setSelectedIcon(new ImageIcon(ButtonPanelView.class.getResource("/gui/resources/29_selected.png")));
 		GroupsButton.setRolloverEnabled(false);
 		GroupsButton.setBorder(new TitledBorder(null, "", TitledBorder.LEADING, TitledBorder.TOP, null, null));
 		buttonGroup.add(GroupsButton);
-		GroupsButton.setIcon(new ImageIcon(GUIMain.class.getResource("/gui/resources/4.png")));
+		GroupsButton.setIcon(new ImageIcon(ButtonPanelView.class.getResource("/gui/resources/29.png")));
 		add(GroupsButton);
 	
 		// edit button.
 		JRadioButton EditButton = new JRadioButton("");
-		EditButton.setToolTipText("Edit SPSS data");
+		EditButton.setToolTipText("*SET TOOL TIP*");
 		EditButton.addItemListener(new ItemListener() {
 			public void itemStateChanged(ItemEvent e) {
 				guiMain.switchTo("editPanel");

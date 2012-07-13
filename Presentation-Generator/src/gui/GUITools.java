@@ -1,7 +1,7 @@
 package gui;
 
 /**
- * Various help classes for the GUI are located in this class.
+ * Various help methods for the GUI are located in this class.
  * @author hkfs89
  *
  */

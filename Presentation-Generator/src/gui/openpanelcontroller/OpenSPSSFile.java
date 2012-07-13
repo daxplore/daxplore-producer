@@ -3,7 +3,7 @@ package gui.openpanelcontroller;
 import gui.GUIFile;
 import gui.GUIMain;
 import gui.view.OpenPanelView;
-import gui.view.OpenSPSSDialog;
+import gui.view.ImportSPSSWizardDialog;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -67,7 +67,7 @@ public class OpenSPSSFile implements ActionListener {
 				try {
 					guiFile.setSpssFile(new SPSSFile(file,"rw"));
 					
-					OpenSPSSDialog spssApprove = new OpenSPSSDialog(this.guiMain, this.guiFile.getSpssFile());
+					ImportSPSSWizardDialog spssApprove = new ImportSPSSWizardDialog(this.guiMain, this.guiFile.getSpssFile());
 					spssApprove.setVisible(true);
 					openPanelView.updateSpssFileInfoText(guiMain, guiFile);
 					
