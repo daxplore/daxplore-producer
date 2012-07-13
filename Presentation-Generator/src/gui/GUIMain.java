@@ -1,6 +1,8 @@
 package gui;
 
 import gui.view.ButtonPanelView;
+import gui.view.EditPanelView;
+import gui.view.GroupsPanelView;
 import gui.view.OpenPanelView;
 
 import java.awt.BorderLayout;
@@ -78,7 +80,7 @@ public class GUIMain {
 			public void run() {
 				try {
 					GUIMain window = new GUIMain();
-					window.frmDaxploreProducer.setVisible(true);
+					window.guiMainFrame.setVisible(true);
 				} catch (Exception e) {
 					e.printStackTrace();
 				}
@@ -87,18 +89,17 @@ public class GUIMain {
 	}
 	
 	// data fields for main class.
-	public JFrame frmDaxploreProducer;
+	public JFrame guiMainFrame;
 	
 	public JFrame getFrmDaxploreProducer() {
-		return frmDaxploreProducer;
+		return guiMainFrame;
 	}
 
 	public void setFrmDaxploreProducer(JFrame frmDaxploreProducer) {
-		this.frmDaxploreProducer = frmDaxploreProducer;
+		this.guiMainFrame = frmDaxploreProducer;
 	}
 
 	final JPanel mainPanel = new JPanel();
-	private ButtonPanelView buttonPanelView = new ButtonPanelView();
 
 	public void switchTo(String label) {
 		CardLayout cl = (CardLayout)(mainPanel.getLayout());
@@ -117,41 +118,35 @@ public class GUIMain {
 	 */
 	private void initGUI() {
 		
-		frmDaxploreProducer = new JFrame();
-		frmDaxploreProducer.setIconImage(Toolkit.getDefaultToolkit().getImage(GUIMain.class.getResource("/gui/resources/Colorful_Chart_Icon_vol2.png")));
-		frmDaxploreProducer.setTitle("Daxplore Producer Developer Version");
-		frmDaxploreProducer.setBounds(100, 100, 900, 787);
-		frmDaxploreProducer.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		frmDaxploreProducer.getContentPane().setLayout(new BorderLayout(0, 0));
+		guiMainFrame = new JFrame();
+		guiMainFrame.setIconImage(Toolkit.getDefaultToolkit().getImage(GUIMain.class.getResource("/gui/resources/Colorful_Chart_Icon_vol2.png")));
+		guiMainFrame.setTitle("Daxplore Producer Developer Version");
+		guiMainFrame.setBounds(100, 100, 900, 787);
+		guiMainFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		guiMainFrame.getContentPane().setLayout(new BorderLayout(0, 0));
 		
 		// file handler init.
 		GUIFile guiFile = new GUIFile();
 		
+		// create main panel window.
 		mainPanel.setBorder(new MatteBorder(0, 1, 0, 0, (Color) Color.GRAY));
 		mainPanel.setLayout(new CardLayout(0, 0));
+		guiMainFrame.getContentPane().add(mainPanel, BorderLayout.CENTER);
 		
-		frmDaxploreProducer.getContentPane().add(mainPanel, BorderLayout.CENTER);
+		// create left button panel.
+		ButtonPanelView buttonPanelView = new ButtonPanelView(this);
+		guiMainFrame.getContentPane().add(buttonPanelView, BorderLayout.WEST);
 		
-		JPanel buttonPanel = buttonPanelView.radioButtonCreator(this);
-		frmDaxploreProducer.getContentPane().add(buttonPanel, BorderLayout.WEST);
-		
+		// add the open panel view.
 		OpenPanelView openPanelView = new OpenPanelView(this, guiFile);
 		mainPanel.add(openPanelView, "openPanel");
 		
-		JPanel groupsPanel = new JPanel();
-		mainPanel.add(groupsPanel, "importPanel");
-		groupsPanel.setLayout(new FlowLayout(FlowLayout.CENTER, 5, 5));
+		// add the groups panel view.
+		GroupsPanelView groupsPanelView = new GroupsPanelView(this, guiFile);
+		mainPanel.add(groupsPanelView, "groupsPanel");
 		
-		JLabel lblOldImportPanel = new JLabel("GroupsPanel");
-		groupsPanel.add(lblOldImportPanel);
-		
-		JPanel editPanel = new JPanel();
-		mainPanel.add(editPanel, "editPanel");
-		editPanel.setLayout(null);
-		
-		JLabel lblEdit = new JLabel("Edit");
-		lblEdit.setBounds(397, 5, 42, 16);
-		editPanel.add(lblEdit);
-		
+		// add the edit panel view.
+		EditPanelView editPanelView = new EditPanelView(this, guiFile);
+		mainPanel.add(editPanelView, "editPanel");	
 	}
 }

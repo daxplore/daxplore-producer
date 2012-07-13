@@ -2,10 +2,10 @@ package gui.view;
 
 import gui.GUIFile;
 import gui.GUIMain;
-import gui.openpanel.CreateDaxploreFile;
-import gui.openpanel.ImportSPSSFile;
-import gui.openpanel.OpenDaxploreFile;
-import gui.openpanel.OpenSPSSFile;
+import gui.openpanelcontroller.CreateDaxploreFile;
+import gui.openpanelcontroller.ImportSPSSFile;
+import gui.openpanelcontroller.OpenDaxploreFile;
+import gui.openpanelcontroller.OpenSPSSFile;
 
 import java.awt.FlowLayout;
 import java.text.SimpleDateFormat;
@@ -137,6 +137,7 @@ public class OpenPanelView extends JPanel {
 		setLayout(gl_openPanel);
 	}
 
+	// getters and setters.
 	public JTextField getFileNameField() {
 		return fileNameField;
 	}

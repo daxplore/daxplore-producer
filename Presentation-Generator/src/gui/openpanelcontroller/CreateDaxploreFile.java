@@ -1,4 +1,4 @@
-package gui.openpanel;
+package gui.openpanelcontroller;
 
 import gui.GUIFile;
 import gui.GUIMain;
@@ -66,7 +66,7 @@ public final class CreateDaxploreFile implements ActionListener {
 			FileNameExtensionFilter filter = new FileNameExtensionFilter("Daxplore Files", "daxplore");
 			fc.setFileFilter(filter);
 
-			int returnVal = fc.showSaveDialog(this.guiMain.frmDaxploreProducer);
+			int returnVal = fc.showSaveDialog(this.guiMain.guiMainFrame);
 
 			if (returnVal == JFileChooser.APPROVE_OPTION) {
 				try {

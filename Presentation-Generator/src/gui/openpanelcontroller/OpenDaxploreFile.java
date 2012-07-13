@@ -1,4 +1,4 @@
-package gui.openpanel;
+package gui.openpanelcontroller;
 
 
 import gui.GUIFile;
@@ -45,7 +45,7 @@ public final class OpenDaxploreFile implements ActionListener {
 			        "Daxplore Files", "daxplore");
 			    fc.setFileFilter(filter);
 			    
-	        int returnVal = fc.showOpenDialog(this.guiMain.frmDaxploreProducer);
+	        int returnVal = fc.showOpenDialog(this.guiMain.guiMainFrame);
 
 	        if (returnVal == JFileChooser.APPROVE_OPTION) {
 	        	try {
@@ -69,7 +69,7 @@ public final class OpenDaxploreFile implements ActionListener {
 				openPanelView.updateTextFields(guiMain, guiFile);
 				
 			} catch (DaxploreException e1) {
-				JOptionPane.showMessageDialog(this.guiMain.frmDaxploreProducer,
+				JOptionPane.showMessageDialog(this.guiMain.guiMainFrame,
 						"You must select a valid daxplore file.",
 						"Daxplore file warning",
 						JOptionPane.ERROR_MESSAGE);
