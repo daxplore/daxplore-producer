@@ -100,27 +100,6 @@ public class GUIMain {
 	final JPanel mainPanel = new JPanel();
 	private ButtonPanelView buttonPanelView = new ButtonPanelView();
 
-
-	// file handler.
-	public GUIFile daxploreDataModel = new GUIFile();
-
-	public SPSSFile getSpssFile() {
-		return daxploreDataModel.getSpssFile();
-	}
-
-	public void setSpssFile(SPSSFile spssFile) {
-		this.daxploreDataModel.setSpssFile(spssFile);
-	}
-
-	
-	public DaxploreFile getDaxploreFile() {
-		return daxploreDataModel.getDaxploreFile();
-	}
-
-	public void setDaxploreFile(DaxploreFile daxploreFile) {
-		this.daxploreDataModel.setDaxploreFile(daxploreFile);
-	}
-	
 	public void switchTo(String label) {
 		CardLayout cl = (CardLayout)(mainPanel.getLayout());
 	    cl.show(mainPanel, label);
@@ -145,6 +124,9 @@ public class GUIMain {
 		frmDaxploreProducer.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		frmDaxploreProducer.getContentPane().setLayout(new BorderLayout(0, 0));
 		
+		// file handler init.
+		GUIFile guiFile = new GUIFile();
+		
 		mainPanel.setBorder(new MatteBorder(0, 1, 0, 0, (Color) Color.GRAY));
 		mainPanel.setLayout(new CardLayout(0, 0));
 		
@@ -153,7 +135,7 @@ public class GUIMain {
 		JPanel buttonPanel = buttonPanelView.radioButtonCreator(this);
 		frmDaxploreProducer.getContentPane().add(buttonPanel, BorderLayout.WEST);
 		
-		OpenPanelView openPanelView = new OpenPanelView(this);
+		OpenPanelView openPanelView = new OpenPanelView(this, guiFile);
 		mainPanel.add(openPanelView, "openPanel");
 		
 		JPanel groupsPanel = new JPanel();

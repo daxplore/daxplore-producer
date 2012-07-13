@@ -1,5 +1,6 @@
 package gui.openpanel;
 
+import gui.GUIFile;
 import gui.GUIMain;
 import gui.view.OpenPanelView;
 
@@ -22,11 +23,13 @@ public final class CreateDaxploreFile implements ActionListener {
 	private final GUIMain guiMain;
 	private final JButton createFileButton;
 	private final OpenPanelView openPanelView;
+	private GUIFile guiFile;
 
-	public CreateDaxploreFile(GUIMain daxploreGUI, OpenPanelView openPanelView, JButton createFileButton) {
-		this.guiMain = daxploreGUI;
+	public CreateDaxploreFile(GUIMain guiMain, GUIFile guiFile, OpenPanelView openPanelView, JButton createFileButton) {
+		this.guiMain = guiMain;
 		this.openPanelView = openPanelView;
 		this.createFileButton = createFileButton;
+		this.guiFile = guiFile;
 	}
 
 	@Override
@@ -67,8 +70,8 @@ public final class CreateDaxploreFile implements ActionListener {
 
 			if (returnVal == JFileChooser.APPROVE_OPTION) {
 				try {
-					if (guiMain.getDaxploreFile() != null) {
-						guiMain.getDaxploreFile().close();
+					if (guiFile.getDaxploreFile() != null) {
+						guiFile.getDaxploreFile().close();
 					}
 				} catch (DaxploreException e2) {
 					System.out.println("Couldn't close file");
@@ -85,8 +88,8 @@ public final class CreateDaxploreFile implements ActionListener {
 				}
 
 				try {
-					guiMain.setDaxploreFile(new DaxploreFile(file, true));
-					openPanelView.updateTextFields(guiMain);
+					guiFile.setDaxploreFile(new DaxploreFile(file, true));
+					openPanelView.updateTextFields(guiMain, guiFile);
 				} catch (DaxploreException e1) {
 					System.out.println("Saving daxplore file failure.");
 					e1.printStackTrace();

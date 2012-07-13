@@ -1,6 +1,7 @@
 package gui.openpanel;
 
 
+import gui.GUIFile;
 import gui.GUIMain;
 import gui.view.OpenPanelView;
 
@@ -26,11 +27,13 @@ import daxplorelib.DaxploreFile;
 public final class OpenDaxploreFile implements ActionListener {
 
 	private final GUIMain guiMain;
+	private GUIFile guiFile;
 	private final JButton openFileButton;
 	private final OpenPanelView openPanelView;
 
-	public OpenDaxploreFile(GUIMain daxploreGUI, OpenPanelView openPanelView, JButton openFileButton) {
-		this.guiMain = daxploreGUI;
+	public OpenDaxploreFile(GUIMain guiMain, GUIFile guiFile, OpenPanelView openPanelView, JButton openFileButton) {
+		this.guiMain = guiMain;
+		this.guiFile = guiFile;
 		this.openPanelView = openPanelView;
 		this.openFileButton = openFileButton;
 	}
@@ -46,8 +49,8 @@ public final class OpenDaxploreFile implements ActionListener {
 
 	        if (returnVal == JFileChooser.APPROVE_OPTION) {
 	        	try {
-	        		if(guiMain.getDaxploreFile() != null) {
-						guiMain.getDaxploreFile().close();	        			
+	        		if(guiFile.getDaxploreFile() != null) {
+						guiFile.getDaxploreFile().close();	        			
 	        		}
 				} catch (DaxploreException e2) {
 					System.out.println("Couldn't close file");
@@ -57,13 +60,13 @@ public final class OpenDaxploreFile implements ActionListener {
 	           File file = fc.getSelectedFile();
 	           System.out.println("Opening: " + file.getName() + ".");
 	           try {
-				guiMain.setDaxploreFile(new DaxploreFile(file, false));
+				guiFile.setDaxploreFile(new DaxploreFile(file, false));
 				
 				// print the contents of daxplore file about section, just for testing.
-				System.out.println("Daxplore file content: " + guiMain.getDaxploreFile().getAbout());
+				System.out.println("Daxplore file content: " + guiFile.getDaxploreFile().getAbout());
 				
 				// update text fields so that file information is properly shown.
-				openPanelView.updateTextFields(guiMain);
+				openPanelView.updateTextFields(guiMain, guiFile);
 				
 			} catch (DaxploreException e1) {
 				JOptionPane.showMessageDialog(this.guiMain.frmDaxploreProducer,

@@ -1,5 +1,6 @@
 package gui.openpanel;
 
+import gui.GUIFile;
 import gui.GUIMain;
 import gui.view.OpenPanelView;
 import gui.view.OpenSPSSDialog;
@@ -21,12 +22,14 @@ import daxplorelib.DaxploreException;
 
 public class OpenSPSSFile implements ActionListener {
 
-	private final GUIMain daxploreGUI;
+	private final GUIMain guiMain;
+	private GUIFile guiFile;
 	private final JButton openSPSSFileButton;
 	private final OpenPanelView openPanelView;
 
-	public OpenSPSSFile(GUIMain daxploreGUI, OpenPanelView openPanelView, JButton openSPSSFileButton) {
-		this.daxploreGUI = daxploreGUI;
+	public OpenSPSSFile(GUIMain guiMain, GUIFile guiFile, OpenPanelView openPanelView, JButton openSPSSFileButton) {
+		this.guiMain = guiMain;
+		this.guiFile = guiFile;
 		this.openPanelView = openPanelView;
 		this.openSPSSFileButton = openSPSSFileButton;
 	}
@@ -39,13 +42,13 @@ public class OpenSPSSFile implements ActionListener {
 					"SPSS Files", "sav");
 			fc.setFileFilter(filter);
 
-			int returnVal = fc.showOpenDialog(this.daxploreGUI.frmDaxploreProducer);
+			int returnVal = fc.showOpenDialog(this.guiMain.frmDaxploreProducer);
 
 			if (returnVal == JFileChooser.APPROVE_OPTION) {
 				
 				try {
-	        		if(daxploreGUI.getSpssFile() != null) {
-						daxploreGUI.getSpssFile().close();	        			
+	        		if(guiFile.getSpssFile() != null) {
+						guiFile.getSpssFile().close();	        			
 	        		}
 				} catch (IOException e1) {
 					System.out.println("Unable to close SPSS file.");
@@ -57,15 +60,15 @@ public class OpenSPSSFile implements ActionListener {
 				
 				// import SPSS file.
 				try {
-					daxploreGUI.setSpssFile(new SPSSFile(file,"rw"));
+					guiFile.setSpssFile(new SPSSFile(file,"rw"));
 					
-					OpenSPSSDialog spssApprove = new OpenSPSSDialog(this.daxploreGUI, this.daxploreGUI.getSpssFile());
+					OpenSPSSDialog spssApprove = new OpenSPSSDialog(this.guiMain, this.guiFile.getSpssFile());
 					spssApprove.setVisible(true);
-					openPanelView.updateSpssFileInfoText(daxploreGUI);
+					openPanelView.updateSpssFileInfoText(guiMain, guiFile);
 					
 				} catch (FileNotFoundException e1) {
 					System.out.println("SPSS file open failed.");
-					JOptionPane.showMessageDialog(this.daxploreGUI.frmDaxploreProducer,
+					JOptionPane.showMessageDialog(this.guiMain.frmDaxploreProducer,
 							"You must select a valid SPSS file.",
 							"Daxplore file warning",
 							JOptionPane.ERROR_MESSAGE);

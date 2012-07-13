@@ -1,7 +1,6 @@
 package gui;
 
 import org.opendatafoundation.data.spss.SPSSFile;
-
 import daxplorelib.DaxploreFile;
 
 public class GUIFile {

@@ -1,5 +1,6 @@
 package gui.openpanel;
 
+import gui.GUIFile;
 import gui.GUIMain;
 import gui.view.OpenPanelView;
 
@@ -34,9 +35,9 @@ import daxplorelib.DaxploreFile;
 public class ImportSPSSFile implements ActionListener, PropertyChangeListener {
 	
 	private final GUIMain guiMain;
+	private final ImportSPSSFile importSpssFileInstance; // for instance save.
+	private GUIFile guiFile;
 	
-	private final ImportSPSSFile importSpssFileInstance;
-
 	public ImportSPSSFile getImportSpssFileInstance() {
 		return importSpssFileInstance;
 	}
@@ -46,15 +47,16 @@ public class ImportSPSSFile implements ActionListener, PropertyChangeListener {
 	private final OpenPanelView openPanelView;
 	private Task task;
 	
-	// TODO: Allow for configuration of charsets in future?
+	// TODO: To be implemented: user should be able to choose which charset is to be used based on string information.
 	public String charsetName = "ISO-8859-1";
 
-	public ImportSPSSFile(GUIMain daxploreGUI, OpenPanelView openPanelView, JButton importSPSSFileButton, JProgressBar importSPSSFileProgressBar) {
-		this.guiMain = daxploreGUI;
+	public ImportSPSSFile(GUIMain guiMain, GUIFile guiFile, OpenPanelView openPanelView, JButton importSPSSFileButton, JProgressBar importSPSSFileProgressBar) {
+		this.guiMain = guiMain;
+		this.guiFile = guiFile;
 		this.openPanelView = openPanelView;
 		this.importSpssFileButton = importSPSSFileButton;
 		this.importSpssFileProgressBar = importSPSSFileProgressBar;
-		importSpssFileInstance = this;
+		importSpssFileInstance = this;  // saving instance.
 	}
 	
 	class Task extends SwingWorker<Void, Void> {
@@ -102,7 +104,7 @@ public class ImportSPSSFile implements ActionListener, PropertyChangeListener {
 		
 		if (e.getSource() == importSpssFileButton) {
 			
-			if (guiMain.getSpssFile() == null) {
+			if (guiFile.getSpssFile() == null) {
 				JOptionPane.showMessageDialog(this.guiMain.frmDaxploreProducer,
 						"You must open an SPSS file before you can import it.",
 						"Daxplore file warning",
@@ -111,7 +113,7 @@ public class ImportSPSSFile implements ActionListener, PropertyChangeListener {
 				
 			}
 			
-			if (guiMain.getDaxploreFile() == null) {
+			if (guiFile.getDaxploreFile() == null) {
 				JOptionPane.showMessageDialog(this.guiMain.frmDaxploreProducer,
 						"Create or open a daxplore project file before you import an SPSS file.",
 						"Daxplore file warning",
@@ -130,12 +132,12 @@ public class ImportSPSSFile implements ActionListener, PropertyChangeListener {
 				return;
 			}
 			
-			File importFile = guiMain.getSpssFile().file;
+			File importFile = guiFile.getSpssFile().file;
 			
 			try {
 				importSpssFileButton.setEnabled(false);
 		        guiMain.frmDaxploreProducer.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
-				guiMain.getDaxploreFile().importSPSS(importFile, charset);
+				guiFile.getDaxploreFile().importSPSS(importFile, charset);
 				//Instances of javax.swing.SwingWorker are not reusuable, so
 		        //we create new instances as needed.
 		        task = new Task();
@@ -144,7 +146,7 @@ public class ImportSPSSFile implements ActionListener, PropertyChangeListener {
 				
 				// update open panel text fields to ensure the latest file updates are displayed
 				// after a successful spss import.
-				openPanelView.updateTextFields(guiMain);
+				openPanelView.updateTextFields(guiMain, guiFile);
 				openPanelView.setSpssFileInfoText(openPanelView.getSpssFileInfoText() + "\nSPSS file successfully imported!");
 				
 			} catch (FileNotFoundException e2) {
