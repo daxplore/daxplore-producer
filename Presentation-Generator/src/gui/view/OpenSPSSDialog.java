@@ -62,7 +62,7 @@ public class OpenSPSSDialog extends JDialog {
 		setTitle("Inspect SPSS file");
 		setBounds(100, 100, 762, 622);
 		getContentPane().setLayout(new BorderLayout());
-		contentPanel.setLayout(daxploreGUI.frmDaxploreProducer.getLayout());
+		contentPanel.setLayout(daxploreGUI.guiMainFrame.getLayout());
 		contentPanel.setBorder(new EmptyBorder(5, 5, 5, 5));
 		getContentPane().add(contentPanel, BorderLayout.CENTER);
 		contentPanel.setLayout(new BoxLayout(contentPanel, BoxLayout.X_AXIS));

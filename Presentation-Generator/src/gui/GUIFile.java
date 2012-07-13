@@ -3,6 +3,11 @@ package gui;
 import org.opendatafoundation.data.spss.SPSSFile;
 import daxplorelib.DaxploreFile;
 
+/**
+ * Main file handler for GUI. Contains instances of daxplore file and SPSS file.
+ * @author jorgenrosen
+ *
+ */
 public class GUIFile {
 	private DaxploreFile daxploreFile;
 	private SPSSFile spssFile;

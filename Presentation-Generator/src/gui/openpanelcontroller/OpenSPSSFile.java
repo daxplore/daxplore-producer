@@ -1,4 +1,4 @@
-package gui.openpanel;
+package gui.openpanelcontroller;
 
 import gui.GUIFile;
 import gui.GUIMain;
@@ -42,7 +42,7 @@ public class OpenSPSSFile implements ActionListener {
 					"SPSS Files", "sav");
 			fc.setFileFilter(filter);
 
-			int returnVal = fc.showOpenDialog(this.guiMain.frmDaxploreProducer);
+			int returnVal = fc.showOpenDialog(this.guiMain.guiMainFrame);
 
 			if (returnVal == JFileChooser.APPROVE_OPTION) {
 				
@@ -68,7 +68,7 @@ public class OpenSPSSFile implements ActionListener {
 					
 				} catch (FileNotFoundException e1) {
 					System.out.println("SPSS file open failed.");
-					JOptionPane.showMessageDialog(this.guiMain.frmDaxploreProducer,
+					JOptionPane.showMessageDialog(this.guiMain.guiMainFrame,
 							"You must select a valid SPSS file.",
 							"Daxplore file warning",
 							JOptionPane.ERROR_MESSAGE);
