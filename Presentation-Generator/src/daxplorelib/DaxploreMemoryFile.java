@@ -44,7 +44,7 @@ public class DaxploreMemoryFile extends DaxploreFile {
 	protected DaxploreFile baseDaxploreFile;
 	
 	protected DaxploreMemoryFile(Connection connection, boolean copy, DaxploreFile daxploreFile) throws DaxploreException {
-		super(connection, !copy, null);
+		super(connection, true, null);
 		this.baseDaxploreFile = daxploreFile;
 		try {
 			Statement stmt = connection.createStatement();

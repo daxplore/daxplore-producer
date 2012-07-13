@@ -35,16 +35,22 @@ public class RawData {
 			ResultSet rs = stmt.executeQuery();
 			rs.next();
 			table.sql = rs.getString("sql");
+			stmt.close();
 		}
 	}
 	
 	public void importSPSS(SPSSFile spssFile, Charset charset, RawMeta metadata) throws SQLException, DaxploreException {
 		this.metadata = metadata;
-		Statement stmt = connection.createStatement();
-		Map<String, VariableType> columns = metadata.getColumnMap();
+		
 		if(SQLTools.tableExists("rawdata", connection)) {
+			Statement stmt = connection.createStatement();
 			stmt.executeUpdate("DROP TABLE " + table.name);
+			stmt.close();
 		}
+		
+		Map<String, VariableType> columns = metadata.getColumnMap();
+		
+		Statement stmt = connection.createStatement();
 		String createString = createRawDataTableString(columns, connection);
 		
 		table.sql = createString;

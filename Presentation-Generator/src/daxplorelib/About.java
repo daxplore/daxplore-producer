@@ -39,6 +39,7 @@ public class About {
 			lastupdate = (Date) creation.clone();
 			stmt = database.createStatement();
 			stmt.executeUpdate(table.sql);
+			stmt.close();
 			PreparedStatement prepared = database.prepareStatement("INSERT INTO about VALUES (?, ?, ?, ?, ?, ?)");
 			prepared.setInt(1, filetypeversionmajor);
 			prepared.setInt(2, filetypeversionminor);
@@ -47,7 +48,8 @@ public class About {
 			prepared.setLong(5, 0);
 			prepared.setString(6, "");
 			prepared.execute();
-			stmt.close();
+			prepared.close();
+			
 		}else{
 			stmt = database.createStatement();
 			stmt.execute("SELECT * FROM about");
