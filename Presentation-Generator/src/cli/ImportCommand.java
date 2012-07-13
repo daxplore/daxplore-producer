@@ -3,8 +3,21 @@ package cli;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.nio.ByteBuffer;
+import java.nio.CharBuffer;
 import java.nio.charset.Charset;
+import java.nio.charset.CharsetDecoder;
+import java.nio.charset.CharsetEncoder;
 import java.util.List;
+import java.util.Set;
+
+import org.opendatafoundation.data.FileFormatInfo;
+import org.opendatafoundation.data.FileFormatInfo.ASCIIFormat;
+import org.opendatafoundation.data.FileFormatInfo.Compatibility;
+import org.opendatafoundation.data.spss.SPSSFile;
+import org.opendatafoundation.data.spss.SPSSFileException;
+
+import tools.SPSSTools;
 
 import com.beust.jcommander.Parameter;
 import com.beust.jcommander.Parameters;
@@ -50,6 +63,9 @@ public class ImportCommand {
 		@Parameter(names = "--charset", description = "Import with charachterset")
 		public String charsetName = "ISO-8859-1";
 		
+		@Parameter(names = "--test", description = "Checks for Non-ASCII strings, import will not be performed")
+		boolean test = false;
+		
 		@Parameter(description = "file to import", arity = 1, converter = FileConverter.class, required = true)
 		public List<File> files;
 		
@@ -70,29 +86,46 @@ public class ImportCommand {
 				System.out.println("Charset error");
 				return;
 			}
-			try {
-				DaxploreFile daxplorefile = new DaxploreFile(projectFile, false);
-				System.out.println("Importing...");
-				daxplorefile.importSPSS(importFile, charset);
-				System.out.println("Data imported");
-				daxplorefile.importSPSS(importFile, charset);
-				System.out.println("Data imported 2nd time");
-			} catch (FileNotFoundException e) {
-				System.out.println("Havn't we tested this already");
-				e.printStackTrace();
-				return;
-			} catch (IOException e) {
-				e.printStackTrace();
-				return;
-			} catch (DaxploreException e) {
-				// TODO Auto-generated catch block
-				System.out.println(e.getMessage());
-				Exception e2 = e.getOriginalException();
-				if(e2 != null) {
-					e2.printStackTrace();
+			if(test) {
+				System.out.println("Non-ASCII strings:");
+				try {
+					Set<String> stringset = SPSSTools.getNonAsciiStrings(importFile);
+					//CharsetDecoder decoder = charset.newDecoder();
+					for(String s: stringset) {
+						System.out.println(s);
+						//CharBuffer r = decoder.decode(ByteBuffer.wrap(s.getBytes()));
+						//System.out.println(r.toString());
+					}
+				} catch (Exception e) {
+					e.printStackTrace();
+					System.out.println("Failure");
 				}
-				e.printStackTrace();
-				return;
+				
+			} else {
+			try {
+					DaxploreFile daxplorefile = new DaxploreFile(projectFile, false);
+					System.out.println("Importing...");
+					daxplorefile.importSPSS(importFile, charset);
+					System.out.println("Data imported");
+					daxplorefile.importSPSS(importFile, charset);
+					System.out.println("Data imported 2nd time");
+				} catch (FileNotFoundException e) {
+					System.out.println("Havn't we tested this already");
+					e.printStackTrace();
+					return;
+				} catch (IOException e) {
+					e.printStackTrace();
+					return;
+				} catch (DaxploreException e) {
+					// TODO Auto-generated catch block
+					System.out.println(e.getMessage());
+					Exception e2 = e.getOriginalException();
+					if(e2 != null) {
+						e2.printStackTrace();
+					}
+					e.printStackTrace();
+					return;
+				}
 			}
 		}
 	}
