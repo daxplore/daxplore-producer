@@ -174,99 +174,14 @@ public class DaxploreGUI {
 		frmDaxploreProducer.getContentPane().setLayout(new BorderLayout(0, 0));
 		
 		openPanelView.setSpssFileInfoText(new JTextPane());
-		
+		openPanelView.updateSpssFileInfoText(this);
 		final JPanel mainPanel = new JPanel();
 		mainPanel.setBorder(new MatteBorder(0, 1, 0, 0, (Color) Color.GRAY));
 		frmDaxploreProducer.getContentPane().add(mainPanel, BorderLayout.CENTER);
 		mainPanel.setLayout(new CardLayout(0, 0));
 		
-		JPanel openPanel = new JPanel();
+		JPanel openPanel = openPanelView.createOpenPanel(this);
 		mainPanel.add(openPanel, "openPanel");
-		
-		JPanel metaDataPanel = new JPanel();
-		metaDataPanel.setBorder(new TitledBorder(null, "Daxplore file information", TitledBorder.LEADING, TitledBorder.TOP, null, null));
-		
-		JLabel fileNameLabel = new JLabel("Filename:");
-		fileNameLabel.setBounds(19, 81, 115, 15);
-		
-		JLabel importDateLabel = new JLabel("Import date:");
-		importDateLabel.setBounds(19, 209, 115, 15);
-		
-		JPanel importSPSSPanel = new JPanel();
-		importSPSSPanel.setBorder(new TitledBorder(null, "Import SPSS File", TitledBorder.LEADING, TitledBorder.TOP, null, null));
-		GroupLayout gl_openPanel = new GroupLayout(openPanel);
-		gl_openPanel.setHorizontalGroup(
-			gl_openPanel.createParallelGroup(Alignment.TRAILING)
-				.addGroup(gl_openPanel.createSequentialGroup()
-					.addContainerGap()
-					.addGroup(gl_openPanel.createParallelGroup(Alignment.TRAILING)
-						.addComponent(importSPSSPanel, Alignment.LEADING, GroupLayout.DEFAULT_SIZE, 784, Short.MAX_VALUE)
-						.addComponent(metaDataPanel, Alignment.LEADING, GroupLayout.DEFAULT_SIZE, 784, Short.MAX_VALUE))
-					.addContainerGap())
-		);
-		gl_openPanel.setVerticalGroup(
-			gl_openPanel.createParallelGroup(Alignment.LEADING)
-				.addGroup(gl_openPanel.createSequentialGroup()
-					.addContainerGap()
-					.addComponent(metaDataPanel, GroupLayout.PREFERRED_SIZE, 379, GroupLayout.PREFERRED_SIZE)
-					.addPreferredGap(ComponentPlacement.RELATED)
-					.addComponent(importSPSSPanel, GroupLayout.PREFERRED_SIZE, 343, GroupLayout.PREFERRED_SIZE)
-					.addContainerGap(25, Short.MAX_VALUE))
-		);
-		
-		JButton openSPSSFileButton = new JButton("Open SPSS file...");
-		openSPSSFileButton.setBounds(20, 50, 153, 27);
-		openSPSSFileButton.addActionListener(new OpenSPSSFile(this, openSPSSFileButton));
-		
-		JScrollPane importTableScrollPane = new JScrollPane();
-		importTableScrollPane.setBounds(20, 89, 763, 217);
-		
-		// progress bar for import spss panel goes here.
-		JProgressBar importSpssFileProgressBar = new JProgressBar();
-		importSpssFileProgressBar.setBounds(600, 307, 183, 19);
-		importSPSSPanel.add(importSpssFileProgressBar);
-		
-		JButton importSpssFileButton = new JButton("");
-		importSpssFileButton.addActionListener(new ImportSPSSFile(this, importSpssFileButton, importSpssFileProgressBar));
-		importSpssFileButton.setToolTipText("Import SPSS file");
-		importSpssFileButton.setIcon(new ImageIcon(DaxploreGUI.class.getResource("/gui/resources/Arrow-Up-48.png")));
-		importSpssFileButton.setBounds(332, 19, 90, 58);
-		
-		importTableScrollPane.setViewportView(openPanelView.getSpssFileInfoText());
-		importSPSSPanel.setLayout(null);
-		importSPSSPanel.add(importSpssFileButton);
-		importSPSSPanel.add(openSPSSFileButton);
-		importSPSSPanel.add(importTableScrollPane);
-		
-		JLabel creationDateLabel = new JLabel("Creation date:");
-		creationDateLabel.setBounds(19, 114, 115, 15);
-		
-		JLabel lastImportedFileLabel = new JLabel("Last import filename:");
-		lastImportedFileLabel.setBounds(19, 174, 135, 15);
-		
-		metaDataPanel.setLayout(null);
-		metaDataPanel.add(fileNameLabel);
-		metaDataPanel.add(openPanelView.getFileNameField());
-		metaDataPanel.add(importDateLabel);
-		metaDataPanel.add(openPanelView.getImportDateField());
-		metaDataPanel.add(creationDateLabel);
-		metaDataPanel.add(openPanelView.getCreationDateField());
-		metaDataPanel.add(lastImportedFileLabel);
-		metaDataPanel.add(openPanelView.getLastImportFileNameField());
-		
-		JButton openFileButton = new JButton("Open file...");
-		openFileButton.setBounds(19, 35, 135, 27);
-		metaDataPanel.add(openFileButton);
-		openFileButton.setToolTipText("Opens a daxplore file");
-		openFileButton.addActionListener(new OpenDaxploreFile(this, openFileButton));
-		
-		JButton createNewFileButton = new JButton("Create new file...");
-		createNewFileButton.setBounds(168, 35, 135, 27);
-		metaDataPanel.add(createNewFileButton);
-		createNewFileButton.addActionListener(new CreateDaxploreFile(this, createNewFileButton));
-		createNewFileButton.setToolTipText("Creates a new daxplore project file");
-		
-		openPanel.setLayout(gl_openPanel);
 		
 		JPanel groupsPanel = new JPanel();
 		mainPanel.add(groupsPanel, "importPanel");
