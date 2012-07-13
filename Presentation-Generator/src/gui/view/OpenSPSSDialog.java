@@ -113,6 +113,7 @@ public class OpenSPSSDialog extends JDialog {
 		ffi.asciiFormat = ASCIIFormat.CSV;
 		ffi.compatibility = Compatibility.GENERIC;
 		try {
+			sf.logFlag = false;
 			sf.loadMetadata();
 			temp = File.createTempFile("spsscsv", ".csv.tmp");
 			sf.exportData(temp, ffi);
