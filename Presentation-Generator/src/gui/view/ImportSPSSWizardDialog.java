@@ -132,7 +132,7 @@ public class ImportSPSSWizardDialog extends JDialog {
 		}
 
 		Dimension d = new Dimension(1000, 800);
-		setSize(d);
+		setSize(new Dimension(696, 449));
 		String[] columns = new String[sf.getVariableCount()];
 		Object[][] data = new Object[sf.getRecordCount()][sf.getVariableCount()];
 		for(int i = 0; i < sf.getVariableCount(); i++){
