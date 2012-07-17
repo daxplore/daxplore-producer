@@ -5,7 +5,6 @@ import gui.GUIMain;
 import gui.view.OpenPanelView;
 
 import java.awt.Cursor;
-import java.awt.Dimension;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.beans.PropertyChangeEvent;
@@ -20,15 +19,10 @@ import java.util.Random;
 import java.util.StringTokenizer;
 
 import javax.swing.JButton;
-import javax.swing.JFileChooser;
 import javax.swing.JOptionPane;
-import javax.swing.JProgressBar;
 import javax.swing.JTable;
 import javax.swing.SwingWorker;
-import javax.swing.filechooser.FileNameExtensionFilter;
-import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableColumn;
-import javax.swing.table.TableModel;
 
 import org.opendatafoundation.data.FileFormatInfo;
 import org.opendatafoundation.data.FileFormatInfo.ASCIIFormat;
@@ -37,10 +31,7 @@ import org.opendatafoundation.data.spss.SPSSFile;
 import org.opendatafoundation.data.spss.SPSSFileException;
 import org.opendatafoundation.data.spss.SPSSVariable;
 
-import com.sun.media.sound.Toolkit;
-
 import daxplorelib.DaxploreException;
-import daxplorelib.DaxploreFile;
 
 /**
  * SPSS file import class to GUI.

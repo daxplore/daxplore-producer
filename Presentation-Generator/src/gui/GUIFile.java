@@ -6,7 +6,7 @@ import org.opendatafoundation.data.spss.SPSSFile;
 import daxplorelib.DaxploreFile;
 
 /**
- * Main file handler for GUI. Contains instances of daxplore file and SPSS file.
+ * Main file handler for GUI. Contains instances of DaxploreFile and File.
  * @author jorgenrosen
  *
  */

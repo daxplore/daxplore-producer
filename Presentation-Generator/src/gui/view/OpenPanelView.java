@@ -20,6 +20,10 @@ import javax.swing.JTextField;
 import javax.swing.JTextPane;
 import javax.swing.LayoutStyle.ComponentPlacement;
 import javax.swing.border.TitledBorder;
+import java.awt.Dimension;
+import java.awt.Component;
+import javax.swing.Box;
+import java.awt.BorderLayout;
 
 public class OpenPanelView extends JPanel {
 	
@@ -72,15 +76,16 @@ public class OpenPanelView extends JPanel {
 					.addComponent(importSPSSPanel, GroupLayout.PREFERRED_SIZE, 343, GroupLayout.PREFERRED_SIZE)
 					.addContainerGap(25, Short.MAX_VALUE))
 		);
+		importSPSSPanel.setLayout(new BorderLayout(0, 0));
 		
 		JScrollPane importTableScrollPane = new JScrollPane();
 		
 		importTableScrollPane.setViewportView(spssFileInfoText);
-		importSPSSPanel.setLayout(new BoxLayout(importSPSSPanel, BoxLayout.X_AXIS));
 		importSPSSPanel.add(importTableScrollPane);
 		
 		JButton importWizardButton = new JButton("Import SPSS file...");
-		importTableScrollPane.setColumnHeaderView(importWizardButton);
+		importSPSSPanel.add(importWizardButton, BorderLayout.SOUTH);
+		importWizardButton.setPreferredSize(new Dimension(84, 28));
 		importWizardButton.addActionListener(new ActionListener() {
 			
 			@Override

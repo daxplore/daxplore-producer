@@ -20,14 +20,14 @@ public final class CharsetComboBoxAction implements ActionListener {
 	/**
 	 * 
 	 */
-	private final ImportSPSSWizardDialog comboBoxAction;
+	private final ImportSPSSWizardDialog importWizardParent;
 	private GUIFile guiFile;
 
 	/**
 	 * @param importSPSSWizardDialog
 	 */
 	public CharsetComboBoxAction(ImportSPSSWizardDialog importSPSSWizardDialog, GUIFile guiFile) {
-		comboBoxAction = importSPSSWizardDialog;
+		importWizardParent = importSPSSWizardDialog;
 		this.guiFile = guiFile;
 	}
 
@@ -49,9 +49,9 @@ public final class CharsetComboBoxAction implements ActionListener {
 					stringList.addElement(es);
 				}
 				
-				JList encodedStringsList = new JList(stringList);
+				JList<String> encodedStringsList = new JList<String>(stringList);
 				
-				comboBoxAction.setEncodingList(encodedStringsList);
+				importWizardParent.setEncodingList(encodedStringsList);
 			} catch (Exception e1) {
 				// TODO Auto-generated catch block
 				e1.printStackTrace();

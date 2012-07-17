@@ -10,10 +10,8 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 
-import javax.swing.JDialog;
 import javax.swing.JFileChooser;
 import javax.swing.JOptionPane;
-import javax.swing.JPanel;
 import javax.swing.filechooser.FileNameExtensionFilter;
 
 import org.opendatafoundation.data.spss.SPSSFile;
@@ -24,12 +22,12 @@ public final class OpenSpssFileAction implements ActionListener {
 	 * 
 	 */
 	private GUIFile guiFile;
-	private Component hostPanel;
+	private ImportSPSSWizardDialog hostPanel;
 
 	/**
 	 * @param importSPSSWizardDialog
 	 */
-	public OpenSpssFileAction(Component hostPanel, GUIFile guiFile) {
+	public OpenSpssFileAction(ImportSPSSWizardDialog hostPanel, GUIFile guiFile) {
 		this.hostPanel = hostPanel;
 		this.guiFile = guiFile;
 	}
@@ -55,6 +53,8 @@ public final class OpenSpssFileAction implements ActionListener {
 				spssFile.close();
 				
 				guiFile.setSpssFile(file);
+				String text = "File selected: " + guiFile.getSpssFile().getName();
+				hostPanel.setSpssFileInfoText(text);
 				
 			} catch (FileNotFoundException e1) {
 				System.out.println("SPSS file open failed.");
@@ -66,7 +66,10 @@ public final class OpenSpssFileAction implements ActionListener {
 				// TODO Auto-generated catch block
 				e1.printStackTrace();
 			} catch (SPSSFileException e1) {
-				// TODO Auto-generated catch block
+				System.out.println("Not a valid SPSS file.");
+				JOptionPane.showMessageDialog(this.hostPanel,
+						"You must select a valid SPSS file.",
+						"Daxplore file warning", JOptionPane.ERROR_MESSAGE);
 				e1.printStackTrace();
 			}
 		}
