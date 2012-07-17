@@ -1,5 +1,7 @@
 package gui;
 
+import java.io.File;
+
 import org.opendatafoundation.data.spss.SPSSFile;
 import daxplorelib.DaxploreFile;
 
@@ -10,7 +12,7 @@ import daxplorelib.DaxploreFile;
  */
 public class GUIFile {
 	private DaxploreFile daxploreFile;
-	private SPSSFile spssFile;
+	private File spssFile;
 
 	public GUIFile() {
 	}
@@ -23,11 +25,11 @@ public class GUIFile {
 		this.daxploreFile = daxploreFile;
 	}
 
-	public SPSSFile getSpssFile() {
+	public File getSpssFile() {
 		return spssFile;
 	}
 
-	public void setSpssFile(SPSSFile spssFile) {
+	public void setSpssFile(File spssFile) {
 		this.spssFile = spssFile;
 	}
 }

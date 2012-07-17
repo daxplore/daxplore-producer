@@ -1,4 +1,4 @@
-package gui.openpanelcontroller;
+package gui.opencontroller;
 
 
 import gui.GUIFile;
@@ -24,14 +24,14 @@ import daxplorelib.DaxploreFile;
  * Handles the operations of the daxplore project file button.
  * 
  */
-public final class OpenDaxploreFile implements ActionListener {
+public final class OpenDaxploreFileAction implements ActionListener {
 
 	private final GUIMain guiMain;
 	private GUIFile guiFile;
 	private final JButton openFileButton;
 	private final OpenPanelView openPanelView;
 
-	public OpenDaxploreFile(GUIMain guiMain, GUIFile guiFile, OpenPanelView openPanelView, JButton openFileButton) {
+	public OpenDaxploreFileAction(GUIMain guiMain, GUIFile guiFile, OpenPanelView openPanelView, JButton openFileButton) {
 		this.guiMain = guiMain;
 		this.guiFile = guiFile;
 		this.openPanelView = openPanelView;

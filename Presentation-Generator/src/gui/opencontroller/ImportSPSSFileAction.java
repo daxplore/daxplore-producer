@@ -1,4 +1,4 @@
-package gui.openpanelcontroller;
+package gui.opencontroller;
 
 import gui.GUIFile;
 import gui.GUIMain;
@@ -47,25 +47,23 @@ import daxplorelib.DaxploreFile;
  * @author jorgenrosen
  *
  */
-public class ImportSPSSFile implements ActionListener, PropertyChangeListener {
+public class ImportSPSSFileAction implements ActionListener, PropertyChangeListener {
 	
 	private final GUIMain guiMain;
 	private GUIFile guiFile;
 
 	private final JButton importSpssFileButton;
-	private final JProgressBar importSpssFileProgressBar;
 	private final OpenPanelView openPanelView;
 	private Task task;
 	
 	// TODO: To be implemented: user should be able to choose which charset is to be used based on string information.
 	public String charsetName = "ISO-8859-1";
 
-	public ImportSPSSFile(GUIMain guiMain, GUIFile guiFile, OpenPanelView openPanelView, JButton importSPSSFileButton, JProgressBar importSPSSFileProgressBar) {
+	public ImportSPSSFileAction(GUIMain guiMain, GUIFile guiFile, OpenPanelView openPanelView, JButton importSPSSFileButton) {
 		this.guiMain = guiMain;
 		this.guiFile = guiFile;
 		this.openPanelView = openPanelView;
 		this.importSpssFileButton = importSPSSFileButton;
-		this.importSpssFileProgressBar = importSPSSFileProgressBar;
 	}
 	
 	/**
@@ -147,6 +145,8 @@ public class ImportSPSSFile implements ActionListener, PropertyChangeListener {
 	/**
 	 * Used for the progress bar, injected override class.
 	 * @author hkfs89
+	 * 
+	 * TODO: Currently not in use, code kept in place for future use.
 	 *
 	 */
 	class Task extends SwingWorker<Void, Void> {
@@ -184,8 +184,6 @@ public class ImportSPSSFile implements ActionListener, PropertyChangeListener {
 	// called when task changes.
 	public void propertyChange(PropertyChangeEvent evt) {
         if ("progress" == evt.getPropertyName()) {
-            int progress = (Integer) evt.getNewValue();
-            importSpssFileProgressBar.setValue(progress);
         } 
     }
 
@@ -222,7 +220,7 @@ public class ImportSPSSFile implements ActionListener, PropertyChangeListener {
 				return;
 			}
 			
-			File importFile = guiFile.getSpssFile().file;
+			File importFile = guiFile.getSpssFile();
 			
 			try {
 				importSpssFileButton.setEnabled(false);

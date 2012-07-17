@@ -1,4 +1,4 @@
-package gui.openpanelcontroller;
+package gui.opencontroller;
 
 import gui.GUIFile;
 import gui.GUIMain;
@@ -23,14 +23,14 @@ import daxplorelib.DaxploreFile;
  * @author hkfs89
  *
  */
-public final class CreateDaxploreFile implements ActionListener {
+public final class CreateDaxploreFileAction implements ActionListener {
 
 	private final GUIMain guiMain;
 	private final JButton createFileButton;
 	private final OpenPanelView openPanelView;
 	private GUIFile guiFile;
 
-	public CreateDaxploreFile(GUIMain guiMain, GUIFile guiFile, OpenPanelView openPanelView, JButton createFileButton) {
+	public CreateDaxploreFileAction(GUIMain guiMain, GUIFile guiFile, OpenPanelView openPanelView, JButton createFileButton) {
 		this.guiMain = guiMain;
 		this.openPanelView = openPanelView;
 		this.createFileButton = createFileButton;

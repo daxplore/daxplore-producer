@@ -2,26 +2,23 @@ package gui.view;
 
 import gui.GUIFile;
 import gui.GUIMain;
-import gui.openpanelcontroller.CreateDaxploreFile;
-import gui.openpanelcontroller.ImportSPSSFile;
-import gui.openpanelcontroller.OpenDaxploreFile;
-import gui.openpanelcontroller.OpenSPSSFile;
+import gui.opencontroller.CreateDaxploreFileAction;
+import gui.opencontroller.OpenDaxploreFileAction;
 
-import java.awt.FlowLayout;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.text.SimpleDateFormat;
 
+import javax.swing.BoxLayout;
 import javax.swing.GroupLayout;
 import javax.swing.GroupLayout.Alignment;
-import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
-import javax.swing.JProgressBar;
 import javax.swing.JScrollPane;
 import javax.swing.JTextField;
 import javax.swing.JTextPane;
 import javax.swing.LayoutStyle.ComponentPlacement;
-import javax.swing.border.MatteBorder;
 import javax.swing.border.TitledBorder;
 
 public class OpenPanelView extends JPanel {
@@ -32,7 +29,7 @@ public class OpenPanelView extends JPanel {
 	private JTextField lastImportFileNameField = new JTextField();
 	public JTextPane spssFileInfoText = new JTextPane();
 	
-	public OpenPanelView(GUIMain guiMain, GUIFile guiFile) {
+	public OpenPanelView(final GUIMain guiMain, final GUIFile guiFile) {
 		fileNameField.setEditable(false);
 		fileNameField.setBounds(166, 75, 240, 27);
 		fileNameField.setColumns(10);
@@ -76,29 +73,22 @@ public class OpenPanelView extends JPanel {
 					.addContainerGap(25, Short.MAX_VALUE))
 		);
 		
-		JButton openSPSSFileButton = new JButton("Open SPSS file...");
-		openSPSSFileButton.setBounds(20, 50, 153, 27);
-		openSPSSFileButton.addActionListener(new OpenSPSSFile(guiMain, guiFile, this, openSPSSFileButton));
-		
 		JScrollPane importTableScrollPane = new JScrollPane();
-		importTableScrollPane.setBounds(20, 89, 763, 217);
-		
-		// progress bar for import spss panel goes here.
-		JProgressBar importSpssFileProgressBar = new JProgressBar();
-		importSpssFileProgressBar.setBounds(600, 307, 183, 19);
-		importSPSSPanel.add(importSpssFileProgressBar);
-		
-		JButton importSpssFileButton = new JButton("");
-		importSpssFileButton.addActionListener(new ImportSPSSFile(guiMain, guiFile, this, importSpssFileButton, importSpssFileProgressBar));
-		importSpssFileButton.setToolTipText("Import SPSS file");
-		importSpssFileButton.setIcon(new ImageIcon(GUIMain.class.getResource("/gui/resources/Arrow-Up-48.png")));
-		importSpssFileButton.setBounds(332, 19, 90, 58);
 		
 		importTableScrollPane.setViewportView(spssFileInfoText);
-		importSPSSPanel.setLayout(null);
-		importSPSSPanel.add(importSpssFileButton);
-		importSPSSPanel.add(openSPSSFileButton);
+		importSPSSPanel.setLayout(new BoxLayout(importSPSSPanel, BoxLayout.X_AXIS));
 		importSPSSPanel.add(importTableScrollPane);
+		
+		JButton importWizardButton = new JButton("Import SPSS file...");
+		importTableScrollPane.setColumnHeaderView(importWizardButton);
+		importWizardButton.addActionListener(new ActionListener() {
+			
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				ImportSPSSWizardDialog importWizardDialog = new ImportSPSSWizardDialog(guiMain, guiFile);
+				importWizardDialog.setVisible(true);
+			}
+		});
 		
 		JLabel fileNameLabel = new JLabel("Filename:");
 		fileNameLabel.setBounds(19, 81, 115, 15);
@@ -126,12 +116,12 @@ public class OpenPanelView extends JPanel {
 		openFileButton.setBounds(19, 35, 135, 27);
 		daxploreFilePanel.add(openFileButton);
 		openFileButton.setToolTipText("Opens a daxplore file");
-		openFileButton.addActionListener(new OpenDaxploreFile(guiMain, guiFile, this, openFileButton));
+		openFileButton.addActionListener(new OpenDaxploreFileAction(guiMain, guiFile, this, openFileButton));
 		
 		JButton createNewFileButton = new JButton("Create new file...");
 		createNewFileButton.setBounds(168, 35, 135, 27);
 		daxploreFilePanel.add(createNewFileButton);
-		createNewFileButton.addActionListener(new CreateDaxploreFile(guiMain, guiFile, this, createNewFileButton));
+		createNewFileButton.addActionListener(new CreateDaxploreFileAction(guiMain, guiFile, this, createNewFileButton));
 		createNewFileButton.setToolTipText("Creates a new daxplore project file");
 		
 		setLayout(gl_openPanel);
@@ -145,8 +135,8 @@ public class OpenPanelView extends JPanel {
 		if (guiFile.getSpssFile() != null) {
 			spssFileInfoText.setText(
 					"SPSS file ready for import: " +
-					guiFile.getSpssFile().file.getName() + "\n" +
-					guiFile.getSpssFile().file.getAbsolutePath());
+					guiFile.getSpssFile().getName() + "\n" +
+					guiFile.getSpssFile().getAbsolutePath());
 		}
 	}
 

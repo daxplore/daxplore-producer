@@ -1,6 +1,9 @@
 package gui.view;
 
+import gui.GUIFile;
 import gui.GUIMain;
+import gui.opencontroller.CharsetComboBoxAction;
+import gui.opencontroller.OpenSpssFileAction;
 
 import java.awt.BorderLayout;
 import java.awt.Dimension;
@@ -33,15 +36,25 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
+import java.nio.charset.Charset;
+import java.util.SortedMap;
 import java.util.StringTokenizer;
 import java.awt.CardLayout;
 import javax.swing.JComboBox;
 import javax.swing.JLabel;
+import javax.swing.border.LineBorder;
+import java.awt.Color;
+import javax.swing.border.BevelBorder;
+import javax.swing.border.EtchedBorder;
+import java.awt.Component;
+import javax.swing.Box;
+import javax.swing.JList;
 
 /**
  * Import SPSS dialog wizard.
+ * 
  * @author hkfs89
- *
+ * 
  */
 public class ImportSPSSWizardDialog extends JDialog {
 
@@ -49,7 +62,8 @@ public class ImportSPSSWizardDialog extends JDialog {
 	private JDialog dialog;
 
 	private final JPanel contentPanel = new JPanel();
-	
+	private JScrollPane encodingListPanel;
+
 	public JDialog getDialog() {
 		return dialog;
 	}
@@ -62,35 +76,63 @@ public class ImportSPSSWizardDialog extends JDialog {
 	 * Create the dialog.
 	 * 
 	 * @param spssFile
-	 * @param daxploreGUI
+	 * @param guiMain
 	 */
-	public ImportSPSSWizardDialog(final GUIMain daxploreGUI, SPSSFile spssFile) {
+	public ImportSPSSWizardDialog(final GUIMain guiMain, GUIFile guiFile) {
 		setDialog(this);
 		setTitle("Inspect SPSS file");
 		setBounds(100, 100, 762, 622);
 		getContentPane().setLayout(new BorderLayout());
-		contentPanel.setLayout(daxploreGUI.guiMainFrame.getLayout());
+		contentPanel.setLayout(guiMain.guiMainFrame.getLayout());
 		contentPanel.setBorder(new EmptyBorder(5, 5, 5, 5));
 		getContentPane().add(contentPanel, BorderLayout.CENTER);
 		contentPanel.setLayout(new CardLayout(0, 0));
-	
+
 		JPanel openFilePanel = new JPanel();
 		contentPanel.add(openFilePanel, "openFilePanel");
-
+		openFilePanel.setLayout(new BorderLayout(0, 0));
+		
+		JButton openSpssFileButton = new JButton("Open SPSS file...");
+		openSpssFileButton.addActionListener(new OpenSpssFileAction(this, guiFile));
+		
+		openSpssFileButton.setPreferredSize(new Dimension(38, 27));
+		openFilePanel.add(openSpssFileButton, BorderLayout.NORTH);
+		
+		JPanel fileInfoPanel = new JPanel();
+		fileInfoPanel.setBorder(new EtchedBorder(EtchedBorder.LOWERED, null,
+				null));
+		openFilePanel.add(fileInfoPanel, BorderLayout.CENTER);
 
 		JPanel encodingPanel = new JPanel();
 		contentPanel.add(encodingPanel, "encodingPanel");
-		encodingPanel.setLayout(new BoxLayout(encodingPanel, BoxLayout.X_AXIS));
-	
+		encodingPanel.setLayout(new BorderLayout(0, 0));
+
 		JPanel specifyEncodingPanel = new JPanel();
-		encodingPanel.add(specifyEncodingPanel);
+		encodingPanel.add(specifyEncodingPanel, BorderLayout.NORTH);
 
 		JLabel lblNewLabel = new JLabel("Specify encoding:");
 		specifyEncodingPanel.add(lblNewLabel);
-
-		JComboBox encodingComboBox = new JComboBox();
+		
+		JComboBox<String> encodingComboBox = new JComboBox<String>();
+		encodingComboBox.addActionListener(new CharsetComboBoxAction(this, guiFile));
 		specifyEncodingPanel.add(encodingComboBox);
+		
+		encodingListPanel = new JScrollPane();
+		//encodingListPanel.setLayout(new BorderLayout(0, 0));
+		//encodingPanel.add(encodingListPanel, BorderLayout.CENTER);
+		
+		
+		JList list = new JList();
+		//encodingListPanel.add(list, BorderLayout.CENTER);
+		encodingListPanel.getViewport().setView(list);
+		
+		SortedMap<String, Charset> cset = Charset.availableCharsets();
 
+		// populate the combobox with available charsets.
+		for (String charname : cset.keySet()) {
+			encodingComboBox.addItem(charname);
+		}
+		
 		JPanel tablePanel = new JPanel();
 		contentPanel.add(tablePanel, "tablePanel");
 
@@ -100,22 +142,28 @@ public class ImportSPSSWizardDialog extends JDialog {
 
 		JButton nextButton = new JButton("Next");
 		nextButton.addActionListener(new ActionListener() {
-				public void actionPerformed(ActionEvent e) {
-				getDialog().dispose();
-				}
-			});
+			public void actionPerformed(ActionEvent e) {
+				CardLayout cl = (CardLayout)(contentPanel.getLayout());
+			    cl.next(contentPanel);
+			}
+		});
 		nextButton.setActionCommand("OK");
 		buttonPane.add(nextButton);
 		getRootPane().setDefaultButton(nextButton);
-				
+
 		JButton cancelButton = new JButton("Cancel");
 		cancelButton.addActionListener(new ActionListener() {
-				public void actionPerformed(ActionEvent e) {
-					getDialog().dispose();
-				}
-			});
+			public void actionPerformed(ActionEvent e) {
+				getDialog().dispose();
+			}
+		});
 		cancelButton.setActionCommand("Cancel");
 		buttonPane.add(cancelButton);
-		
+
+	}
+	
+	public void setEncodingList(JList list) {
+		encodingListPanel.getViewport().setView(list);
+		encodingListPanel.validate();
 	}
 }
