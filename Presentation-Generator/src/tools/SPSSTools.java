@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.nio.charset.Charset;
 import java.nio.charset.CharsetEncoder;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.Set;
 
 import org.opendatafoundation.data.FileFormatInfo;
@@ -17,19 +18,23 @@ import org.opendatafoundation.data.spss.SPSSVariable;
 
 public class SPSSTools {
 	
-	public static Set<String> getNonAsciiStrings(File spssFile) throws Exception {
+	public static Set<String> getNonAsciiStrings(File spssFile, Charset charset) throws Exception {
 		Set<String> stringSet = new HashSet<String>();
-		Charset charset = Charset.forName("US-ASCII");
-		CharsetEncoder asciiEncoder = charset.newEncoder();
+		Charset ascii = Charset.forName("US-ASCII");
+		CharsetEncoder asciiEncoder = ascii.newEncoder();
 		SPSSFile sf = null;
+		SPSSFile sf2 = null;
 		try {
 			FileFormatInfo ffi = new FileFormatInfo();
 			ffi.namesOnFirstLine = false;
 			ffi.asciiFormat = ASCIIFormat.CSV;
 			ffi.compatibility = Compatibility.GENERIC;
-			sf = new SPSSFile(spssFile, charset);
+			sf = new SPSSFile(spssFile, ascii);
 			sf.logFlag = false;
 			sf.loadMetadata();
+			sf2 = new SPSSFile(spssFile, charset);
+			sf2.logFlag = false;
+			sf2.loadMetadata();
 			
 		} catch (SPSSFileException e) {
 			e.printStackTrace();
@@ -46,25 +51,32 @@ public class SPSSTools {
 		
 		for(int i = 0; i < sf.getVariableCount(); i++){
 			SPSSVariable var = sf.getVariable(i);
+			SPSSVariable var2 = sf2.getVariable(i);
 			String s = var.getShortName();
 			if(!asciiEncoder.canEncode(s)){
-				stringSet.add(s);
+				stringSet.add(var2.getShortName());
 			}
 			s = var.getName();
 			if(!asciiEncoder.canEncode(s)){
-				stringSet.add(s);
+				stringSet.add(var2.getName());
 			}
 			s = var.getLabel();
 			if(!asciiEncoder.canEncode(s)){
-				stringSet.add(s);
+				stringSet.add(var2.getLabel());
 			}
-			for(String s2: var.categoryMap.keySet()){
-				if(!asciiEncoder.canEncode(s2)){
-					stringSet.add(s2);
+			Iterator<String> iter = var.categoryMap.keySet().iterator();
+			Iterator<String> iter2 = var.categoryMap.keySet().iterator();
+			
+			while(iter.hasNext()) {
+				String ss = iter.next();
+				String ss2 = iter2.next();
+				if(!asciiEncoder.canEncode(ss)){
+					stringSet.add(ss2);
 				}
 			}
 		}
 		sf.close();
+		sf2.close();
 		return stringSet;
 	}
 }

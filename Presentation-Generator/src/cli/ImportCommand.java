@@ -6,11 +6,15 @@ import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.Reader;
+import java.nio.ByteBuffer;
+import java.nio.CharBuffer;
 import java.nio.charset.Charset;
+import java.nio.charset.CharsetDecoder;
 import java.util.List;
 import java.util.Locale;
 import java.util.Set;
 
+import tools.Pair;
 import tools.SPSSTools;
 
 import com.beust.jcommander.Parameter;
@@ -84,12 +88,11 @@ public class ImportCommand {
 			if(test) {
 				System.out.println("Non-ASCII strings:");
 				try {
-					Set<String> stringset = SPSSTools.getNonAsciiStrings(importFile);
+					Set<String> stringset = SPSSTools.getNonAsciiStrings(importFile, charset);
 					//CharsetDecoder decoder = charset.newDecoder();
 					for(String s: stringset) {
 						System.out.println(s);
-						//CharBuffer r = decoder.decode(ByteBuffer.wrap(s.getBytes()));
-						//System.out.println(r.toString());
+						//CharBuffer r = decoder.decode(ByteBuffer.wrap(s));
 					}
 				} catch (Exception e) {
 					e.printStackTrace();
