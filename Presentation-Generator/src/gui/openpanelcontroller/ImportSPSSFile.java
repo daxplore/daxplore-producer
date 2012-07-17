@@ -5,22 +5,37 @@ import gui.GUIMain;
 import gui.view.OpenPanelView;
 
 import java.awt.Cursor;
+import java.awt.Dimension;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.FileReader;
 import java.io.IOException;
 import java.nio.charset.Charset;
 import java.util.Random;
+import java.util.StringTokenizer;
 
 import javax.swing.JButton;
 import javax.swing.JFileChooser;
 import javax.swing.JOptionPane;
 import javax.swing.JProgressBar;
+import javax.swing.JTable;
 import javax.swing.SwingWorker;
 import javax.swing.filechooser.FileNameExtensionFilter;
+import javax.swing.table.DefaultTableModel;
+import javax.swing.table.TableColumn;
+import javax.swing.table.TableModel;
+
+import org.opendatafoundation.data.FileFormatInfo;
+import org.opendatafoundation.data.FileFormatInfo.ASCIIFormat;
+import org.opendatafoundation.data.FileFormatInfo.Compatibility;
+import org.opendatafoundation.data.spss.SPSSFile;
+import org.opendatafoundation.data.spss.SPSSFileException;
+import org.opendatafoundation.data.spss.SPSSVariable;
 
 import com.sun.media.sound.Toolkit;
 
@@ -51,6 +66,82 @@ public class ImportSPSSFile implements ActionListener, PropertyChangeListener {
 		this.openPanelView = openPanelView;
 		this.importSpssFileButton = importSPSSFileButton;
 		this.importSpssFileProgressBar = importSPSSFileProgressBar;
+	}
+	
+	/**
+	 * Creates a temporary file on disc and imports SPSS file information as well as outputs it to a table display.
+	 * @param sf
+	 * @return TableColumn
+	 */
+	public TableColumn SPSSTable(SPSSFile sf) {
+		File temp;
+		FileFormatInfo ffi = new FileFormatInfo();
+		ffi.namesOnFirstLine = false;
+		ffi.asciiFormat = ASCIIFormat.CSV;
+		ffi.compatibility = Compatibility.GENERIC;
+		BufferedReader br = null;
+		
+		JTable table = null;
+		
+		try {
+			sf.logFlag = false;
+			sf.loadMetadata();
+			temp = File.createTempFile("spsscsv", ".csv.tmp");
+			sf.exportData(temp, ffi);
+		} catch (IOException e) {
+			e.printStackTrace();
+			return null;
+		} catch (SPSSFileException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			return null;
+		}
+		
+		String[] columns = new String[sf.getVariableCount()];
+		Object[][] data = new Object[sf.getRecordCount()][sf.getVariableCount()];
+		for(int i = 0; i < sf.getVariableCount(); i++){
+			SPSSVariable var = sf.getVariable(i);
+			columns[i] = var.getShortName();
+			System.out.print(sf.getVariable(i).getShortName() + ", ");
+		}
+
+		try {
+			br = new BufferedReader(new FileReader(temp));
+			String line;
+			int l = 0;
+			while((line = br.readLine()) != null){
+				StringTokenizer st = new StringTokenizer(line, ",");
+				int c = 0;
+				while(st.hasMoreTokens()){
+					data[l][c] = st.nextToken();
+					c++;
+				}
+				l++;
+			}
+		} catch (FileNotFoundException e) {
+			System.out.println("FileNotFoundException");
+			e.printStackTrace();
+			
+		} catch (IOException e) {
+			System.out.println("IOException");
+			System.out.print(e.toString());
+			e.printStackTrace();
+		}
+		
+		// disallow editing of table fields through this model.
+		/* TableModel model = new TableModel(data, columns) {
+			private static final long serialVersionUID = 1L;
+
+			public boolean isCellEditable(int rowIndex, int mColIndex) {
+		        return false;
+		      }
+		    }; */
+		TableColumn column = new TableColumn();
+		for (int i = 0; i < 5; i++) {
+			column = table.getColumnModel().getColumn(i);
+			column.setPreferredWidth(50);
+		}
+		return column;
 	}
 	
 	/**
