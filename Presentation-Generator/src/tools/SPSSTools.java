@@ -52,11 +52,7 @@ public class SPSSTools {
 		for(int i = 0; i < sf.getVariableCount(); i++){
 			SPSSVariable var = sf.getVariable(i);
 			SPSSVariable var2 = sf2.getVariable(i);
-			String s = var.getShortName();
-			if(!asciiEncoder.canEncode(s)){
-				stringSet.add(var2.getShortName());
-			}
-			s = var.getName();
+			String s = var.getName();
 			if(!asciiEncoder.canEncode(s)){
 				stringSet.add(var2.getName());
 			}

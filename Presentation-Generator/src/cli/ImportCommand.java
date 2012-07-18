@@ -6,15 +6,11 @@ import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.Reader;
-import java.nio.ByteBuffer;
-import java.nio.CharBuffer;
 import java.nio.charset.Charset;
-import java.nio.charset.CharsetDecoder;
 import java.util.List;
 import java.util.Locale;
 import java.util.Set;
 
-import tools.Pair;
 import tools.SPSSTools;
 
 import com.beust.jcommander.Parameter;

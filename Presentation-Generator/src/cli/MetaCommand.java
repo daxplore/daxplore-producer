@@ -1,14 +1,6 @@
 package cli;
 
-import java.io.BufferedReader;
-import java.io.BufferedWriter;
 import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileReader;
-import java.io.FileWriter;
-import java.io.IOException;
-
-import org.opendatafoundation.data.FileFormatInfo;
 
 import tools.MyTools;
 
@@ -17,11 +9,7 @@ import com.beust.jcommander.Parameter;
 import com.beust.jcommander.ParameterException;
 import com.beust.jcommander.Parameters;
 
-import daxplorelib.DaxploreException;
-import daxplorelib.DaxploreFile;
-import daxplorelib.metadata.MetaData;
 import daxplorelib.metadata.MetaData.Formats;
-import daxplorelib.raw.RawImport;
 
 @Parameters(commandDescription = "Manage metadata")
 public class MetaCommand {
@@ -103,8 +91,8 @@ public class MetaCommand {
 
 	
 	public void run(File file){
-		MetaData metadata;
-		/*try {
+		/*MetaData metadata;
+		try {
 			DaxploreFile daxplorefile = new DaxploreFile(file, false);
 			
 			if(src.format == dest.format){

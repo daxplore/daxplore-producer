@@ -5,7 +5,6 @@ import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.util.Locale;
 
-import com.beust.jcommander.Parameter;
 import com.beust.jcommander.Parameters;
 
 import daxplorelib.DaxploreException;
