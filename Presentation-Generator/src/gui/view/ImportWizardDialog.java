@@ -81,21 +81,6 @@ public class ImportWizardDialog extends JDialog implements PropertyChangeListene
      * The String-based action command for the 'Cancel' button.
      */    
     public static final String CANCEL_BUTTON_ACTION_COMMAND = "CancelButtonActionCommand";
-        
-
-    // The i18n text used for the buttons. Loaded from a property resource file.    
-    
-    public static String BACK_TEXT;
-    public static String NEXT_TEXT;
-    public static String FINISH_TEXT;
-    public static String CANCEL_TEXT;
-
-    // The image icons used for the buttons. Filenames are loaded from a property resource file.    
-
-    public static Icon BACK_ICON;
-    public static Icon NEXT_ICON;
-    public static Icon FINISH_ICON;
-    public static Icon CANCEL_ICON;
 
     private ImportWizardModel importWizardModel;
     
@@ -117,7 +102,7 @@ public class ImportWizardDialog extends JDialog implements PropertyChangeListene
 	public ImportWizardDialog(final GUIMain guiMain, GUIFile guiFile) {
 		
 		this.dialog = this;
-		initcomponents(guiMain, guiFile);	
+		initcomponents(guiMain, guiFile);	// create the dialogue.
 	}
 	
 	public String getSpssFileInfoText() {
@@ -247,6 +232,10 @@ public class ImportWizardDialog extends JDialog implements PropertyChangeListene
 			}
 		});
 		
+		nextButton.setActionCommand(NEXT_BUTTON_ACTION_COMMAND);
+		buttonPanel.add(nextButton);
+		getRootPane().setDefaultButton(nextButton);
+		
 		backButton = new JButton("Back");
 		backButton.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
@@ -256,7 +245,9 @@ public class ImportWizardDialog extends JDialog implements PropertyChangeListene
 		});
 		
 		backButton.setPreferredSize(new Dimension(80, 28));
+		backButton.setActionCommand(BACK_BUTTON_ACTION_COMMAND);
 		buttonPanel.add(backButton);
+		
 		nextButton.setActionCommand("Next");
 		buttonPanel.add(nextButton);
 		getRootPane().setDefaultButton(nextButton);
@@ -272,7 +263,7 @@ public class ImportWizardDialog extends JDialog implements PropertyChangeListene
 		horizontalStrut.setPreferredSize(new Dimension(50, 0));
 		buttonPanel.add(horizontalStrut);
 		
-		cancelButton.setActionCommand("Cancel");
+		cancelButton.setActionCommand(CANCEL_BUTTON_ACTION_COMMAND);
 		buttonPanel.add(cancelButton);
 	}
 }

@@ -1,5 +1,6 @@
 package gui.controller;
 
+import gui.model.ImportWizardModel;
 import gui.view.ImportWizardDialog;
 
 import java.awt.*;
@@ -52,8 +53,8 @@ public class ImportWizardController implements ActionListener {
 
     private void nextButtonPressed() {
  
-        WizardModel model = importWizardDialog.getModel();
-        WizardPanelDescriptor descriptor = model.getCurrentPanelDescriptor();
+        ImportWizardModel model = importWizardDialog.getModel();
+        ImportWizardDescriptor descriptor = model.getCurrentPanelDescriptor();
         
         //  If it is a finishable panel, close down the dialog. Otherwise,
         //  get the ID that the current panel identifies as the next panel,
@@ -61,7 +62,7 @@ public class ImportWizardController implements ActionListener {
         
         Object nextPanelDescriptor = descriptor.getNextPanelDescriptor();
         
-        if (nextPanelDescriptor instanceof WizardPanelDescriptor.FinishIdentifier) {
+        if (nextPanelDescriptor instanceof ImportWizardDescriptor.FinishIdentifier) {
             importWizardDialog.close(Wizard.FINISH_RETURN_CODE);
         } else {        
             importWizardDialog.setCurrentPanel(nextPanelDescriptor);
@@ -71,8 +72,8 @@ public class ImportWizardController implements ActionListener {
 
     private void backButtonPressed() {
  
-        WizardModel model = importWizardDialog.getModel();
-        WizardPanelDescriptor descriptor = model.getCurrentPanelDescriptor();
+        ImportWizardModel model = importWizardDialog.getModel();
+        ImportWizardDescriptor descriptor = model.getCurrentPanelDescriptor();
  
         //  Get the descriptor that the current panel identifies as the previous
         //  panel, and display it.
