@@ -6,12 +6,18 @@ package gui;
  *
  */
 public class GUITools {
+	
+	static boolean checkFlag = false; // activate the version check?
 
 	/**
 	 * Checks if user is running Java 7 or above. Returns true if so.
 	 * @return
 	 */
 	public static boolean javaVersionCheck() {
+		
+		if (checkFlag == false)
+			return true;
+		
 		String javaVersion = System.getProperty("java.version");
 		System.out.println("Java version " + javaVersion + " was found.");
 		String[] javaVersionSplit = javaVersion.split("\\.");

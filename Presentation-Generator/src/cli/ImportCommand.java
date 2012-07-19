@@ -151,7 +151,7 @@ public class ImportCommand {
 			DaxploreFile dax;
 			Reader r;
 			
-			System.out.println("Importing texts for locale: " + locale.toLanguageTag());
+			System.out.println("Importing texts for locale: " + locale.getLanguage());
 			try {
 				dax = DaxploreFile.createFromExistingFile(file);
 			} catch (DaxploreException e) {

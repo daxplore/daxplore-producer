@@ -2,8 +2,8 @@ package gui.view;
 
 import gui.GUIFile;
 import gui.GUIMain;
-import gui.opencontroller.CreateDaxploreFileAction;
-import gui.opencontroller.OpenDaxploreFileAction;
+import gui.controller.CreateDaxploreFileAction;
+import gui.controller.OpenDaxploreFileAction;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -90,7 +90,7 @@ public class OpenPanelView extends JPanel {
 			
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				ImportSPSSWizardDialog importWizardDialog = new ImportSPSSWizardDialog(guiMain, guiFile);
+				ImportWizardDialog importWizardDialog = new ImportWizardDialog(guiMain, guiFile);
 				importWizardDialog.setVisible(true);
 			}
 		});

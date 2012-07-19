@@ -1,0 +1,86 @@
+package gui.controller;
+
+
+import gui.GUIFile;
+import gui.GUIMain;
+import gui.view.OpenPanelView;
+
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.io.File;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+
+import javax.swing.JButton;
+import javax.swing.JFileChooser;
+import javax.swing.JOptionPane;
+import javax.swing.filechooser.FileNameExtensionFilter;
+
+import daxplorelib.DaxploreException;
+import daxplorelib.DaxploreFile;
+
+
+/**
+ * Handles the operations of the daxplore project file button.
+ * 
+ */
+public final class OpenDaxploreFileAction implements ActionListener {
+
+	private final GUIMain guiMain;
+	private GUIFile guiFile;
+	private final JButton openFileButton;
+	private final OpenPanelView openPanelView;
+
+	public OpenDaxploreFileAction(GUIMain guiMain, GUIFile guiFile, OpenPanelView openPanelView, JButton openFileButton) {
+		this.guiMain = guiMain;
+		this.guiFile = guiFile;
+		this.openPanelView = openPanelView;
+		this.openFileButton = openFileButton;
+	}
+	
+	public void actionPerformed(ActionEvent e) {
+		if (e.getSource() == openFileButton) {
+			JFileChooser fc = new JFileChooser();
+			FileNameExtensionFilter filter = new FileNameExtensionFilter(
+			        "Daxplore Files", "daxplore");
+			    fc.setFileFilter(filter);
+			    
+	        int returnVal = fc.showOpenDialog(this.guiMain.guiMainFrame);
+
+	        if (returnVal == JFileChooser.APPROVE_OPTION) {
+	        	try {
+	        		if(guiFile.getDaxploreFile() != null) {
+						guiFile.getDaxploreFile().close();	        			
+	        		}
+				} catch (DaxploreException e2) {
+					JOptionPane.showMessageDialog(this.guiMain.guiMainFrame,
+							"Something went wrong when trying to close old daxplore file.",
+							"Daxplore file warning",
+							JOptionPane.ERROR_MESSAGE);
+					e2.printStackTrace();
+					return;
+				}
+	           File file = fc.getSelectedFile();
+	           System.out.println("Opening: " + file.getName() + ".");
+	           try {
+				guiFile.setDaxploreFile(DaxploreFile.createFromExistingFile(file));
+				
+				// print the contents of daxplore file about section, just for testing.
+				System.out.println("Daxplore file content: " + guiFile.getDaxploreFile().getAbout());
+				
+				// update text fields so that file information is properly shown.
+				openPanelView.updateTextFields(guiMain, guiFile);
+				
+			} catch (DaxploreException e1) {
+				JOptionPane.showMessageDialog(this.guiMain.guiMainFrame,
+						"You must select a valid daxplore file.",
+						"Daxplore file warning",
+						JOptionPane.ERROR_MESSAGE);
+				e1.printStackTrace();
+			}
+	        } else {
+	           System.out.println("Open command cancelled by user.");
+	        }
+		}
+	}
+}

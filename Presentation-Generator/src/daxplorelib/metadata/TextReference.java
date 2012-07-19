@@ -48,7 +48,7 @@ public class TextReference implements JSONAware, Comparable<TextReference> {
 	public String get(Locale locale) throws SQLException {
 		PreparedStatement stmt = connection.prepareStatement("SELECT text FROM texts WHERE ref = ? AND locale = ?");
 		stmt.setString(1, reference);
-		stmt.setString(2, locale.toLanguageTag()); //TODO: let Daniel choose locale representation
+		stmt.setString(2, locale.getLanguage()); //TODO: let Daniel choose locale representation
 		stmt.execute();
 		ResultSet rs = stmt.getResultSet();
 		if(rs.next()) {
@@ -69,7 +69,7 @@ public class TextReference implements JSONAware, Comparable<TextReference> {
 		if( get(locale) == null) {
 			PreparedStatement stmt = connection.prepareStatement("INSERT INTO texts (ref, locale, text) VALUES (?, ?, ?)");
 			stmt.setString(1, reference);
-			stmt.setString(2, locale.toLanguageTag());
+			stmt.setString(2, locale.getLanguage());
 			stmt.setString(3, text);
 			stmt.execute();
 			stmt.close();
@@ -77,7 +77,7 @@ public class TextReference implements JSONAware, Comparable<TextReference> {
 			PreparedStatement stmt = connection.prepareStatement("UPDATE texts SET text = ? WHERE ref = ? AND locale = ?");
 			stmt.setString(1, text);
 			stmt.setString(2, reference);
-			stmt.setString(3, locale.toLanguageTag());
+			stmt.setString(3, locale.getLanguage());
 			stmt.execute();
 			stmt.close();
 		}
@@ -86,7 +86,7 @@ public class TextReference implements JSONAware, Comparable<TextReference> {
 	public boolean has(Locale locale) throws SQLException {
 		PreparedStatement stmt = connection.prepareStatement("SELECT text FROM texts WHERE ref = ? AND locale = ?");
 		stmt.setString(1, reference);
-		stmt.setString(2, locale.toLanguageTag()); //TODO: let Daniel choose locale representation
+		stmt.setString(2, locale.getLanguage()); //TODO: let Daniel choose locale representation
 		stmt.execute();
 		ResultSet rs = stmt.getResultSet();
 		boolean has = rs.next();
