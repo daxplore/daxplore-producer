@@ -258,8 +258,6 @@ public class ImportWizardModel {
         }
     }
     
-    
-    
     public void addPropertyChangeListener(PropertyChangeListener p) {
         propertyChangeSupport.addPropertyChangeListener(p);
     }

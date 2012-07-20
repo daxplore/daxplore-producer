@@ -2,14 +2,14 @@ package gui.view;
 
 import gui.GUIFile;
 import gui.GUIMain;
-import gui.controller.CreateDaxploreFileAction;
-import gui.controller.OpenDaxploreFileAction;
+import gui.controller.OpenController;
 
+import java.awt.BorderLayout;
+import java.awt.Dimension;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.text.SimpleDateFormat;
 
-import javax.swing.BoxLayout;
 import javax.swing.GroupLayout;
 import javax.swing.GroupLayout.Alignment;
 import javax.swing.JButton;
@@ -20,10 +20,6 @@ import javax.swing.JTextField;
 import javax.swing.JTextPane;
 import javax.swing.LayoutStyle.ComponentPlacement;
 import javax.swing.border.TitledBorder;
-import java.awt.Dimension;
-import java.awt.Component;
-import javax.swing.Box;
-import java.awt.BorderLayout;
 
 public class OpenPanelView extends JPanel {
 	
@@ -32,6 +28,13 @@ public class OpenPanelView extends JPanel {
 	private JTextField creationDateField = new JTextField();
 	private JTextField lastImportFileNameField = new JTextField();
 	public JTextPane spssFileInfoText = new JTextPane();
+	private JButton openFileButton;
+	private JButton createNewFileButton;
+	private JButton importWizardButton;
+	
+	public static final String OPEN_BUTTON_ACTION_COMMAND = "OpenButtonActionCommand";
+	public static final String CREATE_BUTTON_ACTION_COMMAND = "CreateButtonActionCommand";
+	public static final String IMPORT_BUTTON_ACTION_COMMAND = "ImportButtonActionCommand";
 	
 	public OpenPanelView(final GUIMain guiMain, final GUIFile guiFile) {
 		fileNameField.setEditable(false);
@@ -83,7 +86,7 @@ public class OpenPanelView extends JPanel {
 		importTableScrollPane.setViewportView(spssFileInfoText);
 		importSPSSPanel.add(importTableScrollPane);
 		
-		JButton importWizardButton = new JButton("Import SPSS file...");
+		importWizardButton = new JButton("Import SPSS file...");
 		importSPSSPanel.add(importWizardButton, BorderLayout.SOUTH);
 		importWizardButton.setPreferredSize(new Dimension(84, 28));
 		importWizardButton.addActionListener(new ActionListener() {
@@ -117,16 +120,16 @@ public class OpenPanelView extends JPanel {
 		daxploreFilePanel.add(lastImportedFileLabel);
 		daxploreFilePanel.add(lastImportFileNameField);
 		
-		JButton openFileButton = new JButton("Open file...");
+		openFileButton = new JButton("Open file...");
 		openFileButton.setBounds(19, 35, 135, 27);
 		daxploreFilePanel.add(openFileButton);
 		openFileButton.setToolTipText("Opens a daxplore file");
-		openFileButton.addActionListener(new OpenDaxploreFileAction(guiMain, guiFile, this, openFileButton));
+		openFileButton.addActionListener(new OpenController(guiMain, guiFile, this, openFileButton));
 		
-		JButton createNewFileButton = new JButton("Create new file...");
+		createNewFileButton = new JButton("Create new file...");
 		createNewFileButton.setBounds(168, 35, 135, 27);
 		daxploreFilePanel.add(createNewFileButton);
-		createNewFileButton.addActionListener(new CreateDaxploreFileAction(guiMain, guiFile, this, createNewFileButton));
+		createNewFileButton.addActionListener(new OpenController(guiMain, guiFile, this, createNewFileButton));
 		createNewFileButton.setToolTipText("Creates a new daxplore project file");
 		
 		setLayout(gl_openPanel);
