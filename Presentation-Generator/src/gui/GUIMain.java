@@ -89,14 +89,10 @@ public class GUIMain {
 	}
 	
 	// data fields for main class.
-	public JFrame guiMainFrame;
+	private JFrame guiMainFrame;
 	
-	public JFrame getFrmDaxploreProducer() {
+	public JFrame getGuiMainFrame() {
 		return guiMainFrame;
-	}
-
-	public void setFrmDaxploreProducer(JFrame frmDaxploreProducer) {
-		this.guiMainFrame = frmDaxploreProducer;
 	}
 
 	final JPanel mainPanel = new JPanel();

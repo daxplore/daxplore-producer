@@ -21,8 +21,16 @@ import javax.swing.JTextPane;
 import javax.swing.LayoutStyle.ComponentPlacement;
 import javax.swing.border.TitledBorder;
 
+/**
+ * Open panel view, displays the open and create daxplore file function as well as the import
+ * SPSS file wizard button and information panel. If a file is loaded, the panels will show
+ * file information.
+ * @author hkfs89
+ *
+ */
 public class OpenPanelView extends JPanel {
 	
+	private static final long serialVersionUID = 1L;
 	private JTextField fileNameField = new JTextField();
 	private JTextField importDateField = new JTextField();;
 	private JTextField creationDateField = new JTextField();
@@ -36,6 +44,11 @@ public class OpenPanelView extends JPanel {
 	public static final String CREATE_BUTTON_ACTION_COMMAND = "CreateButtonActionCommand";
 	public static final String IMPORT_BUTTON_ACTION_COMMAND = "ImportButtonActionCommand";
 	
+	/**
+	 * OpenPanelView constructor.
+	 * @param guiMain
+	 * @param guiFile
+	 */
 	public OpenPanelView(final GUIMain guiMain, final GUIFile guiFile) {
 		fileNameField.setEditable(false);
 		fileNameField.setBounds(166, 75, 240, 27);
@@ -140,9 +153,9 @@ public class OpenPanelView extends JPanel {
 	
 	/**
 	 * Updates text field for the SPSS file information in the open panel dialog.
-	 * @param guiMain TODO
+	 * @param guiMain
 	 */
-	public void updateSpssFileInfoText(GUIMain guiMain, GUIFile guiFile) {
+	public void updateSpssFileInfoText(GUIFile guiFile) {
 		if (guiFile.getSpssFile() != null) {
 			spssFileInfoText.setText(
 					"SPSS file ready for import: " +
@@ -153,9 +166,9 @@ public class OpenPanelView extends JPanel {
 
 	/**
 	 * Updates text fields in the open panel dialog to display daxplore file information.
-	 * @param guiMain TODO
+	 * @param guiMain
 	 */
-	public void updateTextFields(GUIMain guiMain, GUIFile guiFile) {
+	public void updateTextFields(GUIFile guiFile) {
 		
 		SimpleDateFormat formatter = new SimpleDateFormat("dd/MM/yyyy");
 		

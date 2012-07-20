@@ -2,9 +2,7 @@ package gui.view;
 
 import gui.GUIFile;
 import gui.GUIMain;
-import gui.controller.CharsetComboBoxAction;
 import gui.controller.ImportWizardController;
-import gui.controller.OpenSpssFileAction;
 import gui.model.ImportWizardModel;
 
 import java.awt.BorderLayout;
@@ -12,13 +10,17 @@ import java.awt.CardLayout;
 import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
+import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
 import java.nio.charset.Charset;
 import java.util.SortedMap;
 
 import javax.swing.Box;
-import javax.swing.Icon;
+import javax.swing.GroupLayout;
+import javax.swing.GroupLayout.Alignment;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JDialog;
@@ -26,17 +28,10 @@ import javax.swing.JLabel;
 import javax.swing.JList;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
+import javax.swing.JTextPane;
+import javax.swing.LayoutStyle.ComponentPlacement;
 import javax.swing.border.EmptyBorder;
 import javax.swing.border.EtchedBorder;
-import javax.swing.BoxLayout;
-import net.miginfocom.swing.MigLayout;
-import javax.swing.GroupLayout;
-import javax.swing.GroupLayout.Alignment;
-import javax.swing.LayoutStyle.ComponentPlacement;
-import javax.swing.JTextPane;
-import java.awt.Toolkit;
-import java.beans.PropertyChangeEvent;
-import java.beans.PropertyChangeListener;
 
 /**
  * This class implements a basic wizard dialog, where the programmer can
@@ -50,20 +45,20 @@ public class ImportWizardDialog extends JDialog implements PropertyChangeListene
 
 	private static final long serialVersionUID = 1L;
 	private JDialog dialog;
+	 private ImportWizardModel importWizardModel;
 	
-  
+	 // descriptor control flags.
     public static final int FINISH_RETURN_CODE = 0;
     public static final int CANCEL_RETURN_CODE = 1;
     public static final int ERROR_RETURN_CODE = 2;
         
+    // field identifiers for action commands.
     public static final String NEXT_BUTTON_ACTION_COMMAND = "NextButtonActionCommand";
     public static final String BACK_BUTTON_ACTION_COMMAND = "BackButtonActionCommand";
     public static final String CANCEL_BUTTON_ACTION_COMMAND = "CancelButtonActionCommand"; 
     public static final String OPEN_SPSS_FILE_ACTION_COMMAND = "OpenSpssFileActionCommand";
-	public static final String CHARSET_COMBO_BOX_ACTION = "CharsetComboBoxAction";
+	public static final String ENCODING_COMBO_BOX_ACTION = "EncodingComboBoxAction";
 	public static final String IMPORT_SPSS_FILE_ACTION = "ImportSpssFileAction";
-
-    private ImportWizardModel importWizardModel;
     
 	private final JPanel contentPanel = new JPanel();
 	private JScrollPane encodingListPanel;
@@ -131,7 +126,7 @@ public class ImportWizardDialog extends JDialog implements PropertyChangeListene
 		setTitle("SPSS File Wizard");
 		setBounds(100, 100, 762, 622);
 		getContentPane().setLayout(new BorderLayout());
-		contentPanel.setLayout(guiMain.guiMainFrame.getLayout());
+		contentPanel.setLayout(guiMain.getGuiMainFrame().getLayout());
 		contentPanel.setBorder(new EmptyBorder(5, 5, 5, 5));
 		getContentPane().add(contentPanel, BorderLayout.CENTER);
 		contentPanel.setLayout(cardLayout);
@@ -140,7 +135,8 @@ public class ImportWizardDialog extends JDialog implements PropertyChangeListene
 		contentPanel.add(openFilePanel, "openFilePanel");
 		
 		openSpssFileButton = new JButton("Open SPSS file...");
-		openSpssFileButton.addActionListener(new OpenSpssFileAction(this, guiFile));
+		openSpssFileButton.setActionCommand(OPEN_SPSS_FILE_ACTION_COMMAND);
+		openSpssFileButton.addActionListener(new ImportWizardController(guiMain, this, guiFile));
 		
 		openSpssFileButton.setPreferredSize(new Dimension(38, 27));
 		
@@ -184,7 +180,8 @@ public class ImportWizardDialog extends JDialog implements PropertyChangeListene
 		specifyEncodingPanel.add(lblNewLabel);
 		
 		encodingComboBox = new JComboBox();
-		encodingComboBox.addActionListener(new CharsetComboBoxAction(this, guiFile));
+		encodingComboBox.setActionCommand(ENCODING_COMBO_BOX_ACTION);
+		encodingComboBox.addActionListener(new ImportWizardController(guiMain, this, guiFile));
 		specifyEncodingPanel.add(encodingComboBox);
 		
 		encodingListPanel = new JScrollPane();
@@ -246,5 +243,9 @@ public class ImportWizardDialog extends JDialog implements PropertyChangeListene
 		
 		cancelButton.setActionCommand(CANCEL_BUTTON_ACTION_COMMAND);
 		buttonPanel.add(cancelButton);
+	}
+
+	public ImportWizardModel getModel() {
+		return importWizardModel;
 	}
 }

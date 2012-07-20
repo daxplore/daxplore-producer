@@ -2,14 +2,12 @@ package gui.controller;
 
 import gui.GUIFile;
 import gui.GUIMain;
-import gui.view.ImportWizardDialog;
 import gui.view.OpenPanelView;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
 
-import javax.swing.JButton;
 import javax.swing.JFileChooser;
 import javax.swing.JOptionPane;
 import javax.swing.filechooser.FileNameExtensionFilter;
@@ -36,12 +34,16 @@ public final class OpenController implements ActionListener {
 	
 	@Override
 	public void actionPerformed(ActionEvent e) {
-		if (e.getActionCommand().equals(openPanelView.CREATE_BUTTON_ACTION_COMMAND))
+		if (e.getActionCommand().equals(OpenPanelView.CREATE_BUTTON_ACTION_COMMAND))
             createButtonPressed();
-        else if (e.getActionCommand().equals(openPanelView.OPEN_BUTTON_ACTION_COMMAND))
+        else if (e.getActionCommand().equals(OpenPanelView.OPEN_BUTTON_ACTION_COMMAND))
             openButtonPressed();
 	}
 
+	/**
+	 * Method triggers when create button is pressed. Loads a create file panel and controls
+	 * creation of daxplore files.
+	 */
 	public void createButtonPressed() {
 		
 		final JFileChooser fc = new JFileChooser() {
@@ -74,7 +76,7 @@ public final class OpenController implements ActionListener {
 				"Daxplore Files", "daxplore");
 		fc.setFileFilter(filter);
 
-		int returnVal = fc.showSaveDialog(this.guiMain.guiMainFrame);
+		int returnVal = fc.showSaveDialog(this.guiMain.getGuiMainFrame());
 
 		if (returnVal == JFileChooser.APPROVE_OPTION) {
 			try {
@@ -97,7 +99,7 @@ public final class OpenController implements ActionListener {
 
 			try {
 				guiFile.setDaxploreFile(DaxploreFile.createWithNewFile(file));
-				openPanelView.updateTextFields(guiMain, guiFile);
+				openPanelView.updateTextFields(guiFile);
 			} catch (DaxploreException e1) {
 				System.out.println("Saving daxplore file failure.");
 				e1.printStackTrace();
@@ -106,6 +108,9 @@ public final class OpenController implements ActionListener {
 		}
 	}
 
+	/**
+	 * Method triggers when open button is pressed and executes an open file dialog panel.
+	 */
 	public void openButtonPressed() {
 		
 		JFileChooser fc = new JFileChooser();
@@ -113,7 +118,7 @@ public final class OpenController implements ActionListener {
 				"Daxplore Files", "daxplore");
 		fc.setFileFilter(filter);
 
-		int returnVal = fc.showOpenDialog(this.guiMain.guiMainFrame);
+		int returnVal = fc.showOpenDialog(this.guiMain.getGuiMainFrame());
 
 		if (returnVal == JFileChooser.APPROVE_OPTION) {
 			try {
@@ -138,10 +143,10 @@ public final class OpenController implements ActionListener {
 
 				// update text fields so that file information is properly
 				// shown.
-				openPanelView.updateTextFields(guiMain, guiFile);
+				openPanelView.updateTextFields(guiFile);
 
 			} catch (DaxploreException e1) {
-				JOptionPane.showMessageDialog(this.guiMain.guiMainFrame,
+				JOptionPane.showMessageDialog(this.guiMain.getGuiMainFrame(),
 						"You must select a valid daxplore file.",
 						"Daxplore file warning", JOptionPane.ERROR_MESSAGE);
 				e1.printStackTrace();

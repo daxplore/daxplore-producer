@@ -162,8 +162,6 @@ public class ImportWizardDescriptor {
 
     }    
     
-    
-    
     static class FinishIdentifier {
         public static final String ID = "FINISH";
     }
