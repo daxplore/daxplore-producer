@@ -87,6 +87,7 @@ public class OpenPanelView extends JPanel {
 		importSPSSPanel.add(importTableScrollPane);
 		
 		importWizardButton = new JButton("Import SPSS file...");
+		importWizardButton.setActionCommand(IMPORT_BUTTON_ACTION_COMMAND);
 		importSPSSPanel.add(importWizardButton, BorderLayout.SOUTH);
 		importWizardButton.setPreferredSize(new Dimension(84, 28));
 		importWizardButton.addActionListener(new ActionListener() {
@@ -122,14 +123,16 @@ public class OpenPanelView extends JPanel {
 		
 		openFileButton = new JButton("Open file...");
 		openFileButton.setBounds(19, 35, 135, 27);
+		openFileButton.setActionCommand(OPEN_BUTTON_ACTION_COMMAND);
 		daxploreFilePanel.add(openFileButton);
 		openFileButton.setToolTipText("Opens a daxplore file");
-		openFileButton.addActionListener(new OpenController(guiMain, guiFile, this, openFileButton));
+		openFileButton.addActionListener(new OpenController(guiMain, guiFile, this));
 		
 		createNewFileButton = new JButton("Create new file...");
 		createNewFileButton.setBounds(168, 35, 135, 27);
+		createNewFileButton.setActionCommand(CREATE_BUTTON_ACTION_COMMAND);
 		daxploreFilePanel.add(createNewFileButton);
-		createNewFileButton.addActionListener(new OpenController(guiMain, guiFile, this, createNewFileButton));
+		createNewFileButton.addActionListener(new OpenController(guiMain, guiFile, this));
 		createNewFileButton.setToolTipText("Creates a new daxplore project file");
 		
 		setLayout(gl_openPanel);

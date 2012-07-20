@@ -51,36 +51,17 @@ public class ImportWizardDialog extends JDialog implements PropertyChangeListene
 	private static final long serialVersionUID = 1L;
 	private JDialog dialog;
 	
-	/**
-     * Indicates that the 'Finish' button was pressed to close the dialog.
-     */    
+  
     public static final int FINISH_RETURN_CODE = 0;
-    
-    /**
-     * Indicates that the 'Cancel' button was pressed to close the dialog, or
-     * the user pressed the close box in the corner of the window.
-     */    
     public static final int CANCEL_RETURN_CODE = 1;
-    
-    /**
-     * Indicates that the dialog closed due to an internal error.
-     */    
     public static final int ERROR_RETURN_CODE = 2;
         
-    /**
-     * The String-based action command for the 'Next' button.
-     */    
     public static final String NEXT_BUTTON_ACTION_COMMAND = "NextButtonActionCommand";
-    
-    /**
-     * The String-based action command for the 'Back' button.
-     */    
     public static final String BACK_BUTTON_ACTION_COMMAND = "BackButtonActionCommand";
-    
-    /**
-     * The String-based action command for the 'Cancel' button.
-     */    
-    public static final String CANCEL_BUTTON_ACTION_COMMAND = "CancelButtonActionCommand";
+    public static final String CANCEL_BUTTON_ACTION_COMMAND = "CancelButtonActionCommand"; 
+    public static final String OPEN_SPSS_FILE_ACTION_COMMAND = "OpenSpssFileActionCommand";
+	public static final String CHARSET_COMBO_BOX_ACTION = "CharsetComboBoxAction";
+	public static final String IMPORT_SPSS_FILE_ACTION = "ImportSpssFileAction";
 
     private ImportWizardModel importWizardModel;
     
@@ -92,6 +73,7 @@ public class ImportWizardDialog extends JDialog implements PropertyChangeListene
 	private JButton backButton;
 	private JButton cancelButton;
 	private JTextPane spssFileInfoText;
+	private JComboBox encodingComboBox;
 	
 	/**
 	 * Constructor.
@@ -201,8 +183,7 @@ public class ImportWizardDialog extends JDialog implements PropertyChangeListene
 		JLabel lblNewLabel = new JLabel("Specify encoding:");
 		specifyEncodingPanel.add(lblNewLabel);
 		
-		// combo box operations
-		JComboBox encodingComboBox = new JComboBox();
+		encodingComboBox = new JComboBox();
 		encodingComboBox.addActionListener(new CharsetComboBoxAction(this, guiFile));
 		specifyEncodingPanel.add(encodingComboBox);
 		

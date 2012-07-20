@@ -25,26 +25,24 @@ import daxplorelib.DaxploreFile;
 public final class OpenController implements ActionListener {
 
 	private final GUIMain guiMain;
-	private final JButton button;
 	private final OpenPanelView openPanelView;
 	private GUIFile guiFile;
 
-	public OpenController(GUIMain guiMain, GUIFile guiFile, OpenPanelView openPanelView, JButton button) {
+	public OpenController(GUIMain guiMain, GUIFile guiFile, OpenPanelView openPanelView) {
 		this.guiMain = guiMain;
 		this.openPanelView = openPanelView;
-		this.button = button;
 		this.guiFile = guiFile;
 	}
 	
 	@Override
 	public void actionPerformed(ActionEvent e) {
-		if (e.getActionCommand().equals(openPanelView.CANCEL_BUTTON_ACTION_COMMAND))
+		if (e.getActionCommand().equals(openPanelView.CREATE_BUTTON_ACTION_COMMAND))
             createButtonPressed();
-        else if (e.getActionCommand().equals(openPanelView.BACK_BUTTON_ACTION_COMMAND))
+        else if (e.getActionCommand().equals(openPanelView.OPEN_BUTTON_ACTION_COMMAND))
             openButtonPressed();
 	}
 
-	public void openButtonPressed() {
+	public void createButtonPressed() {
 		
 		final JFileChooser fc = new JFileChooser() {
 
@@ -107,40 +105,15 @@ public final class OpenController implements ActionListener {
 			System.out.println("Saving: " + file.getName());
 		}
 	}
-	
-	public void createButtonPressed() {
-		
-		final JFileChooser fc = new JFileChooser() {
 
-	        private static final long serialVersionUID = 7919427933588163126L;
-	        
-	        // override default operation of approveSelection() so it can handle overwriting files.
-	        public void approveSelection() {
-	            File f = getSelectedFile();
-	            if (f.exists() && getDialogType() == SAVE_DIALOG) {
-	                int result = JOptionPane.showConfirmDialog(this,
-	                        "The file exists, overwrite?", "Existing file",
-	                        JOptionPane.YES_NO_CANCEL_OPTION);
-	                switch (result) {
-	                case JOptionPane.YES_OPTION:
-	                    super.approveSelection();
-	                    return;
-	                case JOptionPane.CANCEL_OPTION:
-	                    cancelSelection();
-	                    return;
-	                default:
-	                    return;
-	                }
-	            }
-	            super.approveSelection();
-	        }
-	    };
-	    
+	public void openButtonPressed() {
+		
+		JFileChooser fc = new JFileChooser();
 		FileNameExtensionFilter filter = new FileNameExtensionFilter(
 				"Daxplore Files", "daxplore");
 		fc.setFileFilter(filter);
 
-		int returnVal = fc.showSaveDialog(this.guiMain.guiMainFrame);
+		int returnVal = fc.showOpenDialog(this.guiMain.guiMainFrame);
 
 		if (returnVal == JFileChooser.APPROVE_OPTION) {
 			try {
@@ -152,23 +125,29 @@ public final class OpenController implements ActionListener {
 				e2.printStackTrace();
 				return;
 			}
-
-			// set the appropriate file ending.
 			File file = fc.getSelectedFile();
-			String name = file.getName();
-			if (name.indexOf('.') == -1) {
-				name += ".daxplore";
-				file = new File(file.getParentFile(), name);
-			}
-
+			System.out.println("Opening: " + file.getName() + ".");
 			try {
-				guiFile.setDaxploreFile(DaxploreFile.createWithNewFile(file));
+				guiFile.setDaxploreFile(DaxploreFile
+						.createFromExistingFile(file));
+
+				// print the contents of daxplore file about section, just for
+				// testing.
+				System.out.println("Daxplore file content: "
+						+ guiFile.getDaxploreFile().getAbout());
+
+				// update text fields so that file information is properly
+				// shown.
 				openPanelView.updateTextFields(guiMain, guiFile);
+
 			} catch (DaxploreException e1) {
-				System.out.println("Saving daxplore file failure.");
+				JOptionPane.showMessageDialog(this.guiMain.guiMainFrame,
+						"You must select a valid daxplore file.",
+						"Daxplore file warning", JOptionPane.ERROR_MESSAGE);
 				e1.printStackTrace();
 			}
-			System.out.println("Saving: " + file.getName());
+		} else {
+			System.out.println("Open command cancelled by user.");
 		}
 	}
 }

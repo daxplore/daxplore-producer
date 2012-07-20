@@ -115,8 +115,9 @@ public class ImportWizardModel {
      * Sets the current panel to that identified by the Object passed in.
      * @param id Object-based panel identifier
      * @return boolean indicating success or failure
+     * @throws ImportWizardDescriptorNotFoundException 
      */    
-     boolean setCurrentPanel(Object id) {
+     boolean setCurrentPanel(Object id) throws ImportWizardDescriptorNotFoundException {
 
         //  First, get the hashtable reference to the panel that should
         //  be displayed.
