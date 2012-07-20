@@ -132,6 +132,20 @@ public class TextReference implements JSONAware, Comparable<TextReference> {
 		return list;
 	}
 	
+	public static List<Locale> getAllLocales(Connection connection) throws SQLException {
+		Statement stmt = connection.createStatement();
+		ResultSet rs = stmt.executeQuery("SELECT DISTINCT locale FROM texts ORDER BY locale");
+		List<Locale> list = new LinkedList<Locale>();
+		while(rs.next()) {
+			String loc = rs.getString("locale");
+			if(!rs.wasNull() && !"".equals(loc)) {
+				list.add(new Locale(loc));
+			}
+		}
+		stmt.close();
+		return list;
+	}
+	
 	public boolean equalsLocale(TextReference other, Locale locale) throws SQLException {
 		if(has(locale) && other.has(locale)) {
 			return get(locale).equals(other.get(locale));

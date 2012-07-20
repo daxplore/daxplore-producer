@@ -175,6 +175,14 @@ public class MetaGroup implements JSONAware{
 		}
 	}
 	
+	public void setIndex(int index) throws SQLException {
+		PreparedStatement stmt = connection.prepareStatement("UPDATE metagroup SET ind = ? WHERE id = ?");
+		stmt.setInt(1, index);
+		stmt.setInt(2, id);
+		stmt.executeUpdate();
+		stmt.close();
+	}
+	
 	public static List<MetaGroup> getAll(Connection connection) throws SQLException {
 		Statement stmt = connection.createStatement();
 		ResultSet rs = stmt.executeQuery("SELECT id FROM metagroup ORDER BY id ASC");

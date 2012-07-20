@@ -431,6 +431,14 @@ public class MetaData {
 		}
 	}
 	
+	public List<Locale> getAllLocales() throws DaxploreException {
+		try {
+			return TextReference.getAllLocales(connection);
+		} catch (SQLException e){
+			throw new DaxploreException("SQLException while trying to get locales", e);
+		}
+	}
+	
 	public List<DaxploreTable> getTables() {
 		List<DaxploreTable> list = new LinkedList<DaxploreTable>();
 		list.add(MetaQuestion.table);
