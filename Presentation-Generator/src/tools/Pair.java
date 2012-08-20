@@ -1,64 +1,49 @@
 package tools;
 
-/*
- * Copied from http://stackoverflow.com/questions/779414/java-generics-pairstring-string-stored-in-hashmap-not-retrieving-key-value-p
- */
+public class Pair<K, V> implements Comparable<Pair<K, V>> {
+	protected final K key;
+	protected final V value;
 
-public class Pair<TYPEA, TYPEB> implements Comparable<Pair<TYPEA, TYPEB>> {
-	protected final TYPEA Key_;
-	protected final TYPEB Value_;
-
-	public Pair(TYPEA key, TYPEB value) {
-		Key_ = key;
-		Value_ = value;
+	public Pair(K key, V value) throws NullPointerException {
+		if (key == null || value == null) {
+			throw new NullPointerException();
+		}
+		this.key = key;
+		this.value = value;
 	}
 
-	public TYPEA getKey() {
-		return Key_;
+	public K getKey() {
+		return key;
 	}
 
-	public TYPEB getValue() {
-		return Value_;
+	public V getValue() {
+		return value;
 	}
 
 	public String toString() {
-		System.out.println("in toString()");
-		StringBuffer buff = new StringBuffer();
-		buff.append("Key: ");
-		buff.append(Key_);
-		buff.append("\tValue: ");
-		buff.append(Value_);
-		return (buff.toString());
+		return "Key: " + key + "\tValue: " + value;
 	}
 
-	public int compareTo(Pair<TYPEA, TYPEB> p1) {
-		System.out.println("in compareTo()");
-		if (null != p1) {
-			if (p1.equals(this)) {
+	public int compareTo(Pair<K, V> otherPair) {
+		if (null != otherPair) {
+			if (otherPair.equals(this)) {
 				return 0;
-			} else if (p1.hashCode() > this.hashCode()) {
+			} else if (otherPair.hashCode() > this.hashCode()) {
 				return 1;
-			} else if (p1.hashCode() < this.hashCode()) {
+			} else if (otherPair.hashCode() < this.hashCode()) {
 				return -1;
 			}
 		}
-		return (-1);
+		return -1;
 	}
 
-	public boolean equals(Pair<TYPEA, TYPEB> p1) {
-		System.out.println("in equals()");
-		if (null != p1) {
-			if (p1.Key_.equals(this.Key_) && p1.Value_.equals(this.Value_)) {
-				return (true);
-			}
-		}
-		return (false);
+	public boolean equals(Pair<K, V> otherPair) {
+		return otherPair != null
+				&& otherPair.key.equals(this.key)
+				&& otherPair.value.equals(this.value);
 	}
 
 	public int hashCode() {
-		int hashCode = Key_.hashCode() + (31 * Value_.hashCode());
-		System.out
-				.println("in hashCode() [" + Integer.toString(hashCode) + "]");
-		return (hashCode);
+		return key.hashCode() + 31 * value.hashCode();
 	}
 }
