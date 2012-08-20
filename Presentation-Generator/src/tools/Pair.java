@@ -4,7 +4,7 @@ public class Pair<K, V> implements Comparable<Pair<K, V>> {
 	protected final K key;
 	protected final V value;
 
-	public Pair(K key, V value) throws NullPointerException {
+	public Pair(K key, V value) {
 		if (key == null || value == null) {
 			throw new NullPointerException();
 		}
