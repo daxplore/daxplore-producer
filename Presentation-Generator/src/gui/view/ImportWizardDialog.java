@@ -59,6 +59,10 @@ public class ImportWizardDialog extends JDialog implements PropertyChangeListene
     public static final String OPEN_SPSS_FILE_ACTION_COMMAND = "OpenSpssFileActionCommand";
 	public static final String ENCODING_COMBO_BOX_ACTION = "EncodingComboBoxAction";
 	public static final String IMPORT_SPSS_FILE_ACTION = "ImportSpssFileAction";
+	public static final Object CANCEL_TEXT = null;
+	public static final Object BACK_TEXT = null;
+	public static final Object FINISH_TEXT = null;
+	public static final Object NEXT_TEXT = null;
     
 	private final JPanel contentPanel = new JPanel();
 	private JScrollPane encodingListPanel;
@@ -247,5 +251,15 @@ public class ImportWizardDialog extends JDialog implements PropertyChangeListene
 
 	public ImportWizardModel getModel() {
 		return importWizardModel;
+	}
+
+	public void close(int cancelReturnCode) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	public void setCurrentPanel(Object nextPanelDescriptor) {
+		// TODO Auto-generated method stub
+		
 	}
 }

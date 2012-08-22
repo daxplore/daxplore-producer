@@ -66,7 +66,6 @@ public class ImportWizardModel {
     private ImportWizardDescriptor currentPanel;
     
     private HashMap panelHashmap;
-    
     private HashMap buttonTextHashmap;
     private HashMap buttonIconHashmap;
     private HashMap buttonEnabledHashmap;
@@ -145,7 +144,7 @@ public class ImportWizardModel {
         return buttonTextHashmap.get(BACK_BUTTON_TEXT_PROPERTY);
     }
     
-    void setBackButtonText(Object newText) {
+    public void setBackButtonText(Object newText) {
         
         Object oldText = getBackButtonText();        
         if (!newText.equals(oldText)) {
@@ -158,7 +157,7 @@ public class ImportWizardModel {
         return buttonTextHashmap.get(NEXT_FINISH_BUTTON_TEXT_PROPERTY);
     }
     
-    void setNextFinishButtonText(Object newText) {
+    public void setNextFinishButtonText(Object newText) {
         
         Object oldText = getNextFinishButtonText();        
         if (!newText.equals(oldText)) {
@@ -171,7 +170,7 @@ public class ImportWizardModel {
         return buttonTextHashmap.get(CANCEL_BUTTON_TEXT_PROPERTY);
     }
     
-    void setCancelButtonText(Object newText) {
+    public void setCancelButtonText(Object newText) {
         
         Object oldText = getCancelButtonText();        
         if (!newText.equals(oldText)) {
