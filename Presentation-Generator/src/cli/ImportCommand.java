@@ -113,7 +113,7 @@ public class ImportCommand {
 				} catch (DaxploreException e) {
 					// TODO Auto-generated catch block
 					System.out.println(e.getMessage());
-					Exception e2 = e.getOriginalException();
+					Throwable e2 = e.getCause();
 					if(e2 != null) {
 						e2.printStackTrace();
 					}
