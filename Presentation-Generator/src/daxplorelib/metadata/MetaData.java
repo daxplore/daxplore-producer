@@ -251,9 +251,9 @@ public class MetaData {
 			List<TextReference> allTexts = getAllTextReferences();
 			for(TextReference tr: allTexts) {
 				if(tr.has(locale)) {
-					properties.put(tr.getRef(), tr.get(locale));
+					properties.setProperty(tr.getRef(), tr.get(locale));
 				} else {
-					properties.put(tr.getRef(), "");
+					properties.setProperty(tr.getRef(), "");
 				}
 			}
 		} catch (SQLException e) {
