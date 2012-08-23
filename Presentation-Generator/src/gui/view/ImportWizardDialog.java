@@ -3,6 +3,8 @@ package gui.view;
 import gui.GUIFile;
 import gui.GUIMain;
 import gui.controller.ImportWizardController;
+import gui.controller.ImportWizardDescriptor;
+import gui.model.ImportWizardDescriptorNotFoundException;
 import gui.model.ImportWizardModel;
 
 import java.awt.BorderLayout;
@@ -44,8 +46,9 @@ import javax.swing.border.EtchedBorder;
 public class ImportWizardDialog extends JDialog implements PropertyChangeListener {
 
 	private static final long serialVersionUID = 1L;
-	private JDialog dialog;
-	 private ImportWizardModel importWizardModel;
+	private JDialog importWizardDialog;
+	private ImportWizardModel importWizardModel;
+	private ImportWizardController importWizardController;
 	
 	 // descriptor control flags.
     public static final int FINISH_RETURN_CODE = 0;
@@ -74,6 +77,8 @@ public class ImportWizardDialog extends JDialog implements PropertyChangeListene
 	private JTextPane spssFileInfoText;
 	private JComboBox encodingComboBox;
 	
+	private int returnCode;
+	
 	/**
 	 * Constructor.
 	 * 
@@ -82,7 +87,9 @@ public class ImportWizardDialog extends JDialog implements PropertyChangeListene
 	 */
 	public ImportWizardDialog(final GUIMain guiMain, GUIFile guiFile) {
 		
-		this.dialog = this;
+		importWizardController = new ImportWizardController(guiMain, this, guiFile);
+		importWizardModel = new ImportWizardModel();
+		importWizardDialog = this;
 		initcomponents(guiMain, guiFile);	// create the dialogue.
 	}
 	
@@ -95,18 +102,18 @@ public class ImportWizardDialog extends JDialog implements PropertyChangeListene
 	}
 
 	public JDialog getDialog() {
-		return dialog;
+		return importWizardDialog;
 	}
 
 	public void setDialog(JDialog dialog) {
-		this.dialog = dialog;
+		this.importWizardDialog = dialog;
 	}
 	
 	public Component getOnwer() {
-		return this.dialog.getOwner();
+		return this.importWizardDialog.getOwner();
 	}
 
-	void setBackButtonEnabled(boolean b) {
+	public void setBackButtonEnabled(boolean b) {
 	    backButton.setEnabled(b);
 	}
 	void setNextButtonEnabled(boolean b) {
@@ -118,10 +125,96 @@ public class ImportWizardDialog extends JDialog implements PropertyChangeListene
 		encodingListPanel.validate();
 	}
 	
-	@Override
-	public void propertyChange(PropertyChangeEvent evt) {
-		// TODO Auto-generated method stub
-		
+	/**
+     * Add a Component as a panel for the wizard dialog by registering its
+     * WizardPanelDescriptor object. Each panel is identified by a unique Object-based
+     * identifier (often a String), which can be used by the setCurrentPanel()
+     * method to display the panel at runtime.
+     * @param id An Object-based identifier used to identify the WizardPanelDescriptor object.
+     * @param panel ImportWizardDescriptor object which contains helpful information about the panel.
+     */    
+    public void registerWizardPanel(Object id, ImportWizardDescriptor panel) {
+        
+        //  Add the incoming panel to our JPanel display that is managed by
+        //  the CardLayout layout manager.
+        
+        contentPanel.add(panel.getPanelComponent(), id);
+        
+        //  Set a callback to the current wizard.
+        
+        panel.setWizard(this);
+        
+        //  Place a reference to it in the model. 
+        
+        importWizardModel.registerPanel(id, panel);
+    }  
+    
+    /**
+     * Displays the panel identified by the object passed in. This is the same Object-based
+     * identified used when registering the panel.
+     * @param id The Object-based identifier of the panel to be displayed.
+     * @throws ImportWizardDescriptorNotFoundException 
+     */    
+    public void setCurrentPanel(Object id) {
+
+        //  Get the hashtable reference to the panel that should
+        //  be displayed. If the identifier passed in is null, then close
+        //  the dialog.
+        
+        if (id == null)
+            close(ERROR_RETURN_CODE);
+        
+        ImportWizardDescriptor oldPanelDescriptor = importWizardModel.getCurrentPanelDescriptor();
+        if (oldPanelDescriptor != null)
+            oldPanelDescriptor.aboutToHidePanel();
+        
+        importWizardModel.setCurrentPanel(id);
+        importWizardModel.getCurrentPanelDescriptor().aboutToDisplayPanel();
+        
+        //  Show the panel in the dialog.
+        
+        cardLayout.show(contentPanel, id.toString());
+        importWizardModel.getCurrentPanelDescriptor().displayingPanel();        
+        
+        
+    }
+	
+    /**
+     * Method used to listen for property change events from the model and update the
+     * dialog's graphical components as necessary.
+     * @param evt PropertyChangeEvent passed from the model to signal that one of its properties has changed value.
+     */    
+    public void propertyChange(PropertyChangeEvent evt) {
+        
+        if (evt.getPropertyName().equals(ImportWizardModel.CURRENT_PANEL_DESCRIPTOR_PROPERTY)) {
+            importWizardController.resetButtonsToPanelRules(); 
+        } else if (evt.getPropertyName().equals(ImportWizardModel.NEXT_FINISH_BUTTON_TEXT_PROPERTY)) {            
+            nextButton.setText(evt.getNewValue().toString());
+        } else if (evt.getPropertyName().equals(ImportWizardModel.BACK_BUTTON_TEXT_PROPERTY)) {            
+            backButton.setText(evt.getNewValue().toString());
+        } else if (evt.getPropertyName().equals(ImportWizardModel.CANCEL_BUTTON_TEXT_PROPERTY)) {            
+            cancelButton.setText(evt.getNewValue().toString());
+        } else if (evt.getPropertyName().equals(ImportWizardModel.NEXT_FINISH_BUTTON_ENABLED_PROPERTY)) {            
+            nextButton.setEnabled(((Boolean)evt.getNewValue()).booleanValue());
+        } else if (evt.getPropertyName().equals(ImportWizardModel.BACK_BUTTON_ENABLED_PROPERTY)) {            
+            backButton.setEnabled(((Boolean)evt.getNewValue()).booleanValue());
+        } else if (evt.getPropertyName().equals(ImportWizardModel.CANCEL_BUTTON_ENABLED_PROPERTY)) {            
+            cancelButton.setEnabled(((Boolean)evt.getNewValue()).booleanValue());
+        }
+        
+    }
+    
+    /**
+     * Closes the dialog and sets the return code to the integer parameter.
+     * @param code The return code.
+     */    
+    public void close(int code) {
+        returnCode = code;
+        importWizardDialog.dispose();
+    }
+    
+    public ImportWizardModel getModel() {
+		return importWizardModel;
 	}
 	
 	private void initcomponents(final GUIMain guiMain, GUIFile guiFile) {
@@ -140,7 +233,7 @@ public class ImportWizardDialog extends JDialog implements PropertyChangeListene
 		
 		openSpssFileButton = new JButton("Open SPSS file...");
 		openSpssFileButton.setActionCommand(OPEN_SPSS_FILE_ACTION_COMMAND);
-		openSpssFileButton.addActionListener(new ImportWizardController(guiMain, this, guiFile));
+		openSpssFileButton.addActionListener(importWizardController);
 		
 		openSpssFileButton.setPreferredSize(new Dimension(38, 27));
 		
@@ -167,6 +260,7 @@ public class ImportWizardDialog extends JDialog implements PropertyChangeListene
 					.addComponent(openSpssFileButton, GroupLayout.PREFERRED_SIZE, 28, GroupLayout.PREFERRED_SIZE)
 					.addContainerGap(148, Short.MAX_VALUE))
 		);
+		
 		fileInfoPanel.setLayout(new BorderLayout(0, 0));
 		
 		spssFileInfoText = new JTextPane();
@@ -185,7 +279,7 @@ public class ImportWizardDialog extends JDialog implements PropertyChangeListene
 		
 		encodingComboBox = new JComboBox();
 		encodingComboBox.setActionCommand(ENCODING_COMBO_BOX_ACTION);
-		encodingComboBox.addActionListener(new ImportWizardController(guiMain, this, guiFile));
+		encodingComboBox.addActionListener(importWizardController);
 		specifyEncodingPanel.add(encodingComboBox);
 		
 		encodingListPanel = new JScrollPane();
@@ -207,39 +301,24 @@ public class ImportWizardDialog extends JDialog implements PropertyChangeListene
 
 		nextButton = new JButton("Next");
 		nextButton.setPreferredSize(new Dimension(80, 28));
-		nextButton.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				CardLayout cl = (CardLayout)(contentPanel.getLayout());
-			    cl.next(contentPanel);
-			}
-		});
+		nextButton.addActionListener(importWizardController);
 		
 		nextButton.setActionCommand(NEXT_BUTTON_ACTION_COMMAND);
 		buttonPanel.add(nextButton);
 		getRootPane().setDefaultButton(nextButton);
 		
 		backButton = new JButton("Back");
-		backButton.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent arg0) {
-				CardLayout cl = (CardLayout)(contentPanel.getLayout());
-			    cl.previous(contentPanel);
-			}
-		});
+		backButton.addActionListener(new ImportWizardController(guiMain, this, guiFile));
 		
 		backButton.setPreferredSize(new Dimension(80, 28));
 		backButton.setActionCommand(BACK_BUTTON_ACTION_COMMAND);
 		buttonPanel.add(backButton);
 		
-		nextButton.setActionCommand("Next");
 		buttonPanel.add(nextButton);
 		getRootPane().setDefaultButton(nextButton);
 
 		cancelButton = new JButton("Cancel");
-		cancelButton.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				getDialog().dispose();
-			}
-		});
+		cancelButton.addActionListener(importWizardController);
 		
 		Component horizontalStrut = Box.createHorizontalStrut(20);
 		horizontalStrut.setPreferredSize(new Dimension(50, 0));
@@ -247,19 +326,5 @@ public class ImportWizardDialog extends JDialog implements PropertyChangeListene
 		
 		cancelButton.setActionCommand(CANCEL_BUTTON_ACTION_COMMAND);
 		buttonPanel.add(cancelButton);
-	}
-
-	public ImportWizardModel getModel() {
-		return importWizardModel;
-	}
-
-	public void close(int cancelReturnCode) {
-		// TODO Auto-generated method stub
-		
-	}
-
-	public void setCurrentPanel(Object nextPanelDescriptor) {
-		// TODO Auto-generated method stub
-		
 	}
 }

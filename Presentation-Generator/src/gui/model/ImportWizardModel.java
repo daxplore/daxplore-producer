@@ -16,7 +16,6 @@ import javax.swing.border.*;
  * the model, in its current form, is not intended to be subclassed. 
  */
 
-
 public class ImportWizardModel {
 
     /**
@@ -101,7 +100,7 @@ public class ImportWizardModel {
      * @param id Object-based identifier
      * @param descriptor WizardPanelDescriptor that describes the panel
      */    
-     void registerPanel(Object id, ImportWizardDescriptor descriptor) {
+     public void registerPanel(Object id, ImportWizardDescriptor descriptor) {
         
         //  Place a reference to it in a hashtable so we can access it later
         //  when it is about to be displayed.
@@ -116,7 +115,7 @@ public class ImportWizardModel {
      * @return boolean indicating success or failure
      * @throws ImportWizardDescriptorNotFoundException 
      */    
-     boolean setCurrentPanel(Object id) throws ImportWizardDescriptorNotFoundException {
+     public boolean setCurrentPanel(Object id) {
 
         //  First, get the hashtable reference to the panel that should
         //  be displayed.
@@ -128,7 +127,7 @@ public class ImportWizardModel {
         //  false.
         
         if (nextPanel == null)
-            throw new ImportWizardDescriptorNotFoundException();   
+            return false;
 
         ImportWizardDescriptor oldPanel = currentPanel;
         currentPanel = nextPanel;

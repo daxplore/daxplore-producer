@@ -2,6 +2,10 @@ package gui.view;
 
 import gui.GUIFile;
 import gui.GUIMain;
+import gui.controller.CharsetPanelDescriptor;
+import gui.controller.FinalImportPanelDescriptor;
+import gui.controller.ImportFilePanelDescriptor;
+import gui.controller.ImportWizardDescriptor;
 import gui.controller.OpenController;
 
 import java.awt.BorderLayout;
@@ -14,6 +18,7 @@ import javax.swing.GroupLayout;
 import javax.swing.GroupLayout.Alignment;
 import javax.swing.JButton;
 import javax.swing.JLabel;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTextField;
@@ -107,7 +112,29 @@ public class OpenPanelView extends JPanel {
 			
 			@Override
 			public void actionPerformed(ActionEvent e) {
+
+				if (guiFile.getDaxploreFile() == null) {
+					JOptionPane
+							.showMessageDialog(
+									guiMain.getGuiMainFrame(),
+									"Create or open a daxplore project file before you import an SPSS file.",
+									"Daxplore file warning", JOptionPane.ERROR_MESSAGE);
+					return;
+				}
+				
 				ImportWizardDialog importWizardDialog = new ImportWizardDialog(guiMain, guiFile);
+				
+				ImportWizardDescriptor descriptor1 = new ImportFilePanelDescriptor();
+		        importWizardDialog.registerWizardPanel(ImportFilePanelDescriptor.IDENTIFIER, descriptor1);
+		        
+				ImportWizardDescriptor descriptor2 = new CharsetPanelDescriptor();
+		        importWizardDialog.registerWizardPanel(CharsetPanelDescriptor.IDENTIFIER, descriptor2);
+		        
+				ImportWizardDescriptor descriptor3 = new FinalImportPanelDescriptor();
+		        importWizardDialog.registerWizardPanel(FinalImportPanelDescriptor.IDENTIFIER, descriptor3);
+		        
+		        importWizardDialog.setCurrentPanel(ImportFilePanelDescriptor.IDENTIFIER);
+		        
 				importWizardDialog.setVisible(true);
 			}
 		});

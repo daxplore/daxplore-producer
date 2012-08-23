@@ -79,7 +79,7 @@ public class ImportWizardDescriptor {
         panelIdentifier = id;
     }
     
-    final void setWizard(ImportWizardDialog w) {
+    public final void setWizard(ImportWizardDialog w) {
         ImportWizardDialog = w;
     }
     

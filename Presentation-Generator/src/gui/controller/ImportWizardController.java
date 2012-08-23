@@ -2,6 +2,7 @@ package gui.controller;
 
 import gui.GUIFile;
 import gui.GUIMain;
+import gui.model.ImportWizardDescriptorNotFoundException;
 import gui.model.ImportWizardModel;
 import gui.view.ImportWizardDialog;
 import gui.view.OpenPanelView;
@@ -69,10 +70,10 @@ public class ImportWizardController implements ActionListener {
         if (evt.getActionCommand().equals(ImportWizardDialog.CANCEL_BUTTON_ACTION_COMMAND))
             cancelButtonPressed();
         else if (evt.getActionCommand().equals(ImportWizardDialog.BACK_BUTTON_ACTION_COMMAND))
-            backButtonPressed();
-        else if (evt.getActionCommand().equals(ImportWizardDialog.NEXT_BUTTON_ACTION_COMMAND))
-            nextButtonPressed();
-        else if (evt.getActionCommand().equals(ImportWizardDialog.OPEN_SPSS_FILE_ACTION_COMMAND))
+			backButtonPressed();
+		else if (evt.getActionCommand().equals(ImportWizardDialog.NEXT_BUTTON_ACTION_COMMAND))
+			nextButtonPressed();
+		else if (evt.getActionCommand().equals(ImportWizardDialog.OPEN_SPSS_FILE_ACTION_COMMAND))
             openSpssFileAction();
         else if (evt.getActionCommand().equals(ImportWizardDialog.ENCODING_COMBO_BOX_ACTION))
             charsetComboBoxAction(evt);
@@ -259,7 +260,7 @@ public class ImportWizardController implements ActionListener {
         
     }
 
-    void resetButtonsToPanelRules() {
+    public void resetButtonsToPanelRules() {
     
         //  Reset the buttons to support the original panel rules,
         //  including whether the next or back buttons are enabled or
