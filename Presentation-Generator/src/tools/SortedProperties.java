@@ -1,10 +1,3 @@
-/**
- * Based on the how-to http://www.rgagnon.com/javadetails/java-0614.html using
- * the terms given in the
- * <a href="http://www.rgagnon.com/varia/faq-e.htm#license">FAQ</a>: 
- * <i>"There is no restriction to use individual How-To in a development
- * (compiled/source) but a mention is appreciated."</i>
- */
 package tools;
 
 import java.util.Collections;
@@ -15,6 +8,12 @@ import java.util.Vector;
 /**
  * An extention of the Properties class where the properties are sorted
  * by key when written to file.
+ * 
+ * <p>Based on the How-To <a href="http://www.rgagnon.com/javadetails/java-0614.html">
+ * Sort Properties when saving</a> using the terms given in the
+ * <a href="http://www.rgagnon.com/varia/faq-e.htm#license">FAQ</a>: 
+ * <i>"There is no restriction to use individual How-To in a development
+ * (compiled/source) but a mention is appreciated."</i></p>
  */
 public class SortedProperties extends Properties {
 	/**
