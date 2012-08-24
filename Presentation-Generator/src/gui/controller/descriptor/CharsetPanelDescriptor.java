@@ -1,6 +1,6 @@
-package gui.controller;
+package gui.controller.descriptor;
 
-import gui.view.CharsetPanel;
+import gui.view.panel.CharsetPanel;
 
 public class CharsetPanelDescriptor extends ImportWizardDescriptor {
 
@@ -15,6 +15,6 @@ public class CharsetPanelDescriptor extends ImportWizardDescriptor {
     }
     
     public Object getBackPanelDescriptor() {
-        return ImportFilePanelDescriptor.IDENTIFIER;
+        return OpenFilePanelDescriptor.IDENTIFIER;
     }  
 }

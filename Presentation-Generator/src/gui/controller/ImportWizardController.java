@@ -2,6 +2,7 @@ package gui.controller;
 
 import gui.GUIFile;
 import gui.GUIMain;
+import gui.controller.descriptor.ImportWizardDescriptor;
 import gui.model.ImportWizardDescriptorNotFoundException;
 import gui.model.ImportWizardModel;
 import gui.view.ImportWizardDialog;
@@ -149,6 +150,9 @@ public class ImportWizardController implements ActionListener {
 		}
 	}
 
+	/**
+	 * Opens up a file dialogue with options to open SPSS files.
+	 */
     public void openSpssFileAction() {
 		JFileChooser fc = new JFileChooser();
 		FileNameExtensionFilter filter = new FileNameExtensionFilter(
@@ -222,7 +226,7 @@ public class ImportWizardController implements ActionListener {
 			}
 		}
 	}
-         
+    
     private void cancelButtonPressed() {
         
         hostPanel.close(ImportWizardDialog.CANCEL_RETURN_CODE);

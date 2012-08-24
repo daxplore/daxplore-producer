@@ -2,11 +2,11 @@ package gui.view;
 
 import gui.GUIFile;
 import gui.GUIMain;
-import gui.controller.CharsetPanelDescriptor;
-import gui.controller.FinalImportPanelDescriptor;
-import gui.controller.ImportFilePanelDescriptor;
-import gui.controller.ImportWizardDescriptor;
 import gui.controller.OpenController;
+import gui.controller.descriptor.CharsetPanelDescriptor;
+import gui.controller.descriptor.FinalImportPanelDescriptor;
+import gui.controller.descriptor.ImportWizardDescriptor;
+import gui.controller.descriptor.OpenFilePanelDescriptor;
 
 import java.awt.BorderLayout;
 import java.awt.Dimension;
@@ -124,8 +124,8 @@ public class OpenPanelView extends JPanel {
 				
 				ImportWizardDialog importWizardDialog = new ImportWizardDialog(guiMain, guiFile);
 				
-				ImportWizardDescriptor descriptor1 = new ImportFilePanelDescriptor();
-		        importWizardDialog.registerWizardPanel(ImportFilePanelDescriptor.IDENTIFIER, descriptor1);
+				ImportWizardDescriptor descriptor1 = new OpenFilePanelDescriptor();
+		        importWizardDialog.registerWizardPanel(OpenFilePanelDescriptor.IDENTIFIER, descriptor1);
 		        
 				ImportWizardDescriptor descriptor2 = new CharsetPanelDescriptor();
 		        importWizardDialog.registerWizardPanel(CharsetPanelDescriptor.IDENTIFIER, descriptor2);
@@ -133,7 +133,7 @@ public class OpenPanelView extends JPanel {
 				ImportWizardDescriptor descriptor3 = new FinalImportPanelDescriptor();
 		        importWizardDialog.registerWizardPanel(FinalImportPanelDescriptor.IDENTIFIER, descriptor3);
 		        
-		        importWizardDialog.setCurrentPanel(ImportFilePanelDescriptor.IDENTIFIER);
+		        importWizardDialog.setCurrentPanel(OpenFilePanelDescriptor.IDENTIFIER);
 		        
 				importWizardDialog.setVisible(true);
 			}

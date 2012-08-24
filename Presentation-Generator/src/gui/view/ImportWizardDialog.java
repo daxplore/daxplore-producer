@@ -3,9 +3,10 @@ package gui.view;
 import gui.GUIFile;
 import gui.GUIMain;
 import gui.controller.ImportWizardController;
-import gui.controller.ImportWizardDescriptor;
+import gui.controller.descriptor.ImportWizardDescriptor;
 import gui.model.ImportWizardDescriptorNotFoundException;
 import gui.model.ImportWizardModel;
+import gui.view.panel.OpenFilePanel;
 
 import java.awt.BorderLayout;
 import java.awt.CardLayout;
@@ -15,6 +16,8 @@ import java.awt.FlowLayout;
 import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.WindowEvent;
+import java.awt.event.WindowListener;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.nio.charset.Charset;
@@ -43,12 +46,13 @@ import javax.swing.border.EtchedBorder;
  * uses a CardLayout manager, the order of the panels is not linear. Each panel
  * determines at runtime what its next and previous panel will be.
  */
-public class ImportWizardDialog extends JDialog implements PropertyChangeListener {
+public class ImportWizardDialog extends JDialog implements PropertyChangeListener, WindowListener {
 
 	private static final long serialVersionUID = 1L;
 	private JDialog importWizardDialog;
 	private ImportWizardModel importWizardModel;
 	private ImportWizardController importWizardController;
+	private GUIFile guiFile;
 	
 	 // descriptor control flags.
     public static final int FINISH_RETURN_CODE = 0;
@@ -62,10 +66,11 @@ public class ImportWizardDialog extends JDialog implements PropertyChangeListene
     public static final String OPEN_SPSS_FILE_ACTION_COMMAND = "OpenSpssFileActionCommand";
 	public static final String ENCODING_COMBO_BOX_ACTION = "EncodingComboBoxAction";
 	public static final String IMPORT_SPSS_FILE_ACTION = "ImportSpssFileAction";
-	public static final Object CANCEL_TEXT = null;
-	public static final Object BACK_TEXT = null;
-	public static final Object FINISH_TEXT = null;
-	public static final Object NEXT_TEXT = null;
+	
+	public static final String CANCEL_TEXT = "Cancel";
+	public static final String BACK_TEXT = "Back";
+	public static final String FINISH_TEXT = "Finish";
+	public static final String NEXT_TEXT = "Next";
     
 	private final JPanel contentPanel = new JPanel();
 	private JScrollPane encodingListPanel;
@@ -90,7 +95,16 @@ public class ImportWizardDialog extends JDialog implements PropertyChangeListene
 		importWizardController = new ImportWizardController(guiMain, this, guiFile);
 		importWizardModel = new ImportWizardModel();
 		importWizardDialog = this;
+		this.setGuiFile(guiFile);
 		initcomponents(guiMain, guiFile);	// create the dialogue.
+	}
+	
+	public GUIFile getGuiFile() {
+		return guiFile;
+	}
+
+	private void setGuiFile(GUIFile guiFile) {
+		this.guiFile = guiFile;
 	}
 	
 	public String getSpssFileInfoText() {
@@ -117,15 +131,7 @@ public class ImportWizardDialog extends JDialog implements PropertyChangeListene
 		encodingListPanel.getViewport().setView(list);
 		encodingListPanel.validate();
 	}
-	
-	/**
-     * Add a Component as a panel for the wizard dialog by registering its
-     * WizardPanelDescriptor object. Each panel is identified by a unique Object-based
-     * identifier (often a String), which can be used by the setCurrentPanel()
-     * method to display the panel at runtime.
-     * @param id An Object-based identifier used to identify the WizardPanelDescriptor object.
-     * @param panel ImportWizardDescriptor object which contains helpful information about the panel.
-     */    
+	  
     public void registerWizardPanel(Object id, ImportWizardDescriptor panel) {
         
         //  Add the incoming panel to our JPanel display that is managed by
@@ -141,13 +147,7 @@ public class ImportWizardDialog extends JDialog implements PropertyChangeListene
         
         importWizardModel.registerPanel(id, panel);
     }  
-    
-    /**
-     * Displays the panel identified by the object passed in. This is the same Object-based
-     * identified used when registering the panel.
-     * @param id The Object-based identifier of the panel to be displayed.
-     * @throws ImportWizardDescriptorNotFoundException 
-     */    
+       
     public void setCurrentPanel(Object id) {
 
         //  Get the hashtable reference to the panel that should
@@ -171,12 +171,7 @@ public class ImportWizardDialog extends JDialog implements PropertyChangeListene
         
         
     }
-	
-    /**
-     * Method used to listen for property change events from the model and update the
-     * dialog's graphical components as necessary.
-     * @param evt PropertyChangeEvent passed from the model to signal that one of its properties has changed value.
-     */    
+	   
     public void propertyChange(PropertyChangeEvent evt) {
         
         if (evt.getPropertyName().equals(ImportWizardModel.CURRENT_PANEL_DESCRIPTOR_PROPERTY)) {
@@ -194,7 +189,6 @@ public class ImportWizardDialog extends JDialog implements PropertyChangeListene
         } else if (evt.getPropertyName().equals(ImportWizardModel.CANCEL_BUTTON_ENABLED_PROPERTY)) {            
             cancelButton.setEnabled(((Boolean)evt.getNewValue()).booleanValue());
         }
-        
     }
     
     /**
@@ -258,7 +252,16 @@ public class ImportWizardDialog extends JDialog implements PropertyChangeListene
 		return importWizardModel;
 	}
 	
+    /**
+     * Code relevant to the creation of the dialogue basic layout, next, back and cancel buttons
+     * goes here. Seperate the cardpanel views to different descriptor files and panel views to
+     * control the flow of the wizard dialogue.
+     */
 	private void initcomponents(final GUIMain guiMain, GUIFile guiFile) {
+		
+		importWizardModel.addPropertyChangeListener(this);       
+        importWizardController = new ImportWizardController(guiMain, this, guiFile);       
+		
 		setIconImage(Toolkit.getDefaultToolkit().getImage(ImportWizardDialog.class.getResource("/gui/resources/Arrow-Up-48.png")));
 		setDialog(this);
 		setTitle("SPSS File Wizard");
@@ -268,17 +271,20 @@ public class ImportWizardDialog extends JDialog implements PropertyChangeListene
 		contentPanel.setBorder(new EmptyBorder(5, 5, 5, 5));
 		getContentPane().add(contentPanel, BorderLayout.CENTER);
 		contentPanel.setLayout(cardLayout);
-
-		JPanel openFilePanel = new JPanel();
-		contentPanel.add(openFilePanel, "openFilePanel");
+		addWindowListener(this);
 		
-		openSpssFileButton = new JButton("Open SPSS file...");
-		openSpssFileButton.setActionCommand(OPEN_SPSS_FILE_ACTION_COMMAND);
-		openSpssFileButton.addActionListener(importWizardController);
+		// TODO: Remove code below and sort it out in panel files.
 		
-		openSpssFileButton.setPreferredSize(new Dimension(38, 27));
+		// OpenFilePanel openFilePanel = new OpenFilePanel();
+		// contentPanel.add(openFilePanel, "openFilePanel");
 		
-		JPanel fileInfoPanel = new JPanel();
+		// openSpssFileButton = new JButton("Open SPSS file...");
+		// openSpssFileButton.setActionCommand(OPEN_SPSS_FILE_ACTION_COMMAND);
+		// openSpssFileButton.addActionListener(importWizardController);
+		
+		// openSpssFileButton.setPreferredSize(new Dimension(38, 27));
+		
+		/* JPanel fileInfoPanel = new JPanel();
 		fileInfoPanel.setBorder(new EtchedBorder(EtchedBorder.LOWERED, null, null));
 		GroupLayout gl_openFilePanel = new GroupLayout(openFilePanel);
 		gl_openFilePanel.setHorizontalGroup(
@@ -300,41 +306,41 @@ public class ImportWizardDialog extends JDialog implements PropertyChangeListene
 					.addPreferredGap(ComponentPlacement.UNRELATED)
 					.addComponent(openSpssFileButton, GroupLayout.PREFERRED_SIZE, 28, GroupLayout.PREFERRED_SIZE)
 					.addContainerGap(148, Short.MAX_VALUE))
-		);
+		); */
 		
-		fileInfoPanel.setLayout(new BorderLayout(0, 0));
+		// fileInfoPanel.setLayout(new BorderLayout(0, 0));
 		
-		spssFileInfoText = new JTextPane();
-		fileInfoPanel.add(spssFileInfoText, BorderLayout.CENTER);
-		openFilePanel.setLayout(gl_openFilePanel);
+		// spssFileInfoText = new JTextPane();
+		// fileInfoPanel.add(spssFileInfoText, BorderLayout.CENTER);
+		// openFilePanel.setLayout(gl_openFilePanel);
 
-		JPanel encodingPanel = new JPanel();
-		contentPanel.add(encodingPanel, "encodingPanel");
-		encodingPanel.setLayout(new BorderLayout(0, 0));
+		// JPanel encodingPanel = new JPanel();
+		// contentPanel.add(encodingPanel, "encodingPanel");
+		// encodingPanel.setLayout(new BorderLayout(0, 0));
 
-		JPanel specifyEncodingPanel = new JPanel();
-		encodingPanel.add(specifyEncodingPanel, BorderLayout.NORTH);
+		// JPanel specifyEncodingPanel = new JPanel();
+		// encodingPanel.add(specifyEncodingPanel, BorderLayout.NORTH);
 
-		JLabel lblNewLabel = new JLabel("Specify encoding:");
-		specifyEncodingPanel.add(lblNewLabel);
+		// JLabel lblNewLabel = new JLabel("Specify encoding:");
+		// specifyEncodingPanel.add(lblNewLabel);
 		
-		encodingComboBox = new JComboBox();
-		encodingComboBox.setActionCommand(ENCODING_COMBO_BOX_ACTION);
-		encodingComboBox.addActionListener(importWizardController);
-		specifyEncodingPanel.add(encodingComboBox);
+		// encodingComboBox = new JComboBox();
+		// encodingComboBox.setActionCommand(ENCODING_COMBO_BOX_ACTION);
+		// encodingComboBox.addActionListener(importWizardController);
+		// specifyEncodingPanel.add(encodingComboBox);
 		
-		encodingListPanel = new JScrollPane();
-		encodingPanel.add(encodingListPanel, BorderLayout.CENTER);
+		// encodingListPanel = new JScrollPane();
+		// encodingPanel.add(encodingListPanel, BorderLayout.CENTER);
 		
-		SortedMap<String, Charset> cset = Charset.availableCharsets();
+		// SortedMap<String, Charset> cset = Charset.availableCharsets();
 
 		// populate the combobox with available charsets.
-		for (String charname : cset.keySet()) {
-			encodingComboBox.addItem(charname);
-		}
+		// for (String charname : cset.keySet()) {
+		//	encodingComboBox.addItem(charname);
+		// }
 		
-		JPanel tablePanel = new JPanel();
-		contentPanel.add(tablePanel, "tablePanel");
+		// JPanel tablePanel = new JPanel();
+		// contentPanel.add(tablePanel, "tablePanel");
 
 		JPanel buttonPanel = new JPanel();
 		buttonPanel.setLayout(new FlowLayout(FlowLayout.RIGHT));
@@ -349,7 +355,7 @@ public class ImportWizardDialog extends JDialog implements PropertyChangeListene
 		getRootPane().setDefaultButton(nextButton);
 		
 		backButton = new JButton("Back");
-		backButton.addActionListener(new ImportWizardController(guiMain, this, guiFile));
+		backButton.addActionListener(importWizardController);
 		
 		backButton.setPreferredSize(new Dimension(80, 28));
 		backButton.setActionCommand(BACK_BUTTON_ACTION_COMMAND);
@@ -367,5 +373,47 @@ public class ImportWizardDialog extends JDialog implements PropertyChangeListene
 		
 		cancelButton.setActionCommand(CANCEL_BUTTON_ACTION_COMMAND);
 		buttonPanel.add(cancelButton);
+	}
+
+	@Override
+	public void windowOpened(WindowEvent e) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void windowClosing(WindowEvent e) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void windowClosed(WindowEvent e) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void windowIconified(WindowEvent e) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void windowDeiconified(WindowEvent e) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void windowActivated(WindowEvent e) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void windowDeactivated(WindowEvent e) {
+		// TODO Auto-generated method stub
+		
 	}
 }

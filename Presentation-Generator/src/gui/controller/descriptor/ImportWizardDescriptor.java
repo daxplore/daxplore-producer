@@ -1,4 +1,4 @@
-package gui.controller;
+package gui.controller.descriptor;
 
 import java.awt.*;
 import javax.swing.*;
@@ -23,7 +23,7 @@ public class ImportWizardDescriptor {
     public static final FinishIdentifier FINISH = new FinishIdentifier();
     
     private ImportWizardDialog ImportWizardDialog;
-    private Component targetPanel;
+    protected Component targetPanel;
     private Object panelIdentifier;
     
     /**
@@ -162,7 +162,7 @@ public class ImportWizardDescriptor {
 
     }    
     
-    static class FinishIdentifier {
+    public static class FinishIdentifier {
         public static final String ID = "FINISH";
     }
 }

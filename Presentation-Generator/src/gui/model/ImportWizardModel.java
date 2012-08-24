@@ -1,6 +1,6 @@
 package gui.model;
 
-import gui.controller.ImportWizardDescriptor;
+import gui.controller.descriptor.ImportWizardDescriptor;
 
 import java.beans.*;
 import java.awt.*;

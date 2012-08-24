@@ -1,6 +1,6 @@
-package gui.controller;
+package gui.controller.descriptor;
 
-import gui.view.FinalImportPanel;
+import gui.view.panel.FinalImportPanel;
 
 public class FinalImportPanelDescriptor extends ImportWizardDescriptor {
 
