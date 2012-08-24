@@ -218,7 +218,7 @@ public class ImportWizardModel {
     } 
         
     
-    Boolean getBackButtonEnabled() {
+    public Boolean getBackButtonEnabled() {
         return (Boolean)buttonEnabledHashmap.get(BACK_BUTTON_ENABLED_PROPERTY);
     }
     
@@ -231,7 +231,7 @@ public class ImportWizardModel {
         }
     }
 
-    Boolean getNextFinishButtonEnabled() {
+    public Boolean getNextFinishButtonEnabled() {
         return (Boolean)buttonEnabledHashmap.get(NEXT_FINISH_BUTTON_ENABLED_PROPERTY);
     }
     
@@ -244,11 +244,11 @@ public class ImportWizardModel {
         }
     }
     
-    Boolean getCancelButtonEnabled() {
+    public Boolean getCancelButtonEnabled() {
         return (Boolean)buttonEnabledHashmap.get(CANCEL_BUTTON_ENABLED_PROPERTY);
     }
     
-    void setCancelButtonEnabled(Boolean newValue) {
+    public void setCancelButtonEnabled(Boolean newValue) {
         
         Boolean oldValue = getCancelButtonEnabled();        
         if (newValue != oldValue) {

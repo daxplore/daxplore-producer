@@ -112,13 +112,6 @@ public class ImportWizardDialog extends JDialog implements PropertyChangeListene
 	public Component getOnwer() {
 		return this.importWizardDialog.getOwner();
 	}
-
-	public void setBackButtonEnabled(boolean b) {
-	    backButton.setEnabled(b);
-	}
-	void setNextButtonEnabled(boolean b) {
-	    nextButton.setEnabled(b);
-	}
 	
 	public void setEncodingList(JList list) {
 		encodingListPanel.getViewport().setView(list);
@@ -202,6 +195,54 @@ public class ImportWizardDialog extends JDialog implements PropertyChangeListene
             cancelButton.setEnabled(((Boolean)evt.getNewValue()).booleanValue());
         }
         
+    }
+    
+    /**
+     * Mirrors the WizardModel method of the same name.
+     * @return A boolean indicating if the button is enabled.
+     */  
+    public boolean getBackButtonEnabled() {
+        return importWizardModel.getBackButtonEnabled().booleanValue();
+    }
+
+   /**
+     * Mirrors the WizardModel method of the same name.
+     * @param boolean newValue The new enabled status of the button.
+     */ 
+    public void setBackButtonEnabled(boolean newValue) {
+    	importWizardModel.setBackButtonEnabled(new Boolean(newValue));
+    }
+
+   /**
+     * Mirrors the WizardModel method of the same name.
+     * @return A boolean indicating if the button is enabled.
+     */ 
+    public boolean getNextFinishButtonEnabled() {
+        return importWizardModel.getNextFinishButtonEnabled().booleanValue();
+    }
+
+   /**
+     * Mirrors the WizardModel method of the same name.
+     * @param boolean newValue The new enabled status of the button.
+     */ 
+    public void setNextFinishButtonEnabled(boolean newValue) {
+    	importWizardModel.setNextFinishButtonEnabled(new Boolean(newValue));
+    }
+ 
+   /**
+     * Mirrors the WizardModel method of the same name.
+     * @return A boolean indicating if the button is enabled.
+     */ 
+    public boolean getCancelButtonEnabled() {
+        return importWizardModel.getCancelButtonEnabled().booleanValue();
+    }
+
+    /**
+     * Mirrors the WizardModel method of the same name.
+     * @param boolean newValue The new enabled status of the button.
+     */ 
+    public void setCancelButtonEnabled(boolean newValue) {
+    	importWizardModel.setCancelButtonEnabled(new Boolean(newValue));
     }
     
     /**

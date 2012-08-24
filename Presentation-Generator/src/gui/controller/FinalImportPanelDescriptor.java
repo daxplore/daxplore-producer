@@ -11,10 +11,10 @@ public class FinalImportPanelDescriptor extends ImportWizardDescriptor {
     }
     
     public Object getNextPanelDescriptor() {
-        return FinalImportPanelDescriptor.IDENTIFIER;
+        return FINISH;
     }
     
     public Object getBackPanelDescriptor() {
-        return null;
+        return CharsetPanelDescriptor.IDENTIFIER;
     }  
 }

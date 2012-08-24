@@ -10,10 +10,12 @@ public class ImportFilePanelDescriptor extends ImportWizardDescriptor {
         super(IDENTIFIER, new ImportFilePanel());
     }
     
+    @Override
     public Object getNextPanelDescriptor() {
         return CharsetPanelDescriptor.IDENTIFIER;
     }
     
+    @Override
     public Object getBackPanelDescriptor() {
         return null;
     }
