@@ -61,6 +61,7 @@ public class PairTest {
 
 	@Test
 	public void testCompareTo() {
+		assertTrue(pair1.equals(pair1));
 		assertTrue(pair1.equals(pair2));
 
 		assertFalse(pair1.equals(pair3));
@@ -73,5 +74,9 @@ public class PairTest {
 		assertFalse(pp1.equals(pp3));
 		assertFalse(pp1.equals(pp4));
 		assertFalse(pp3.equals(pp4));
+		
+		Pair<Object, Object> nada1 = new Pair<Object, Object>(new Object(), new Object());
+		Pair<Object, Object> nada2 = new Pair<Object, Object>(new Object(), new Object());
+		assertFalse(nada1.equals(nada2));
 	}
 }
