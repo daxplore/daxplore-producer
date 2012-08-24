@@ -25,7 +25,7 @@ public class CleanTextsCommand {
 		} catch (DaxploreException e) {
 			System.out.println("Could not open daxplorefile (not a daxplorefile?)");
 			System.out.println(e.getMessage());
-			Exception e2 = e.getOriginalException();
+			Throwable e2 = e.getCause();
 			if(e2 != null) {
 				e2.printStackTrace();
 			}
@@ -38,7 +38,7 @@ public class CleanTextsCommand {
 		} catch (DaxploreException e) {
 			System.out.println("Could not get metadata");
 			System.out.println(e.getMessage());
-			Exception e2 = e.getOriginalException();
+			Throwable e2 = e.getCause();
 			if(e2 != null) {
 				e2.printStackTrace();
 			}
@@ -50,7 +50,7 @@ public class CleanTextsCommand {
 		} catch (DaxploreException e) {
 			System.out.println("Could not transfer metadata");
 			System.out.println(e.getMessage());
-			Exception e2 = e.getOriginalException();
+			Throwable e2 = e.getCause();
 			if(e2 != null) {
 				e2.printStackTrace();
 			}
@@ -63,7 +63,7 @@ public class CleanTextsCommand {
 		} catch (DaxploreException e) {
 			System.out.println("Closing error");
 			System.out.println(e.getMessage());
-			Exception e2 = e.getOriginalException();
+			Throwable e2 = e.getCause();
 			if(e2 != null) {
 				e2.printStackTrace();
 			}

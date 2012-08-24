@@ -44,7 +44,7 @@ public class InfoCommand {
 			}
 		} catch (DaxploreException e) {
 			// TODO Auto-generated catch block
-			e.getOriginalException().printStackTrace();
+			e.getCause().printStackTrace();
 		}
 	}
 }
