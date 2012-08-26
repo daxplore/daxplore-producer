@@ -1,11 +1,7 @@
-package gui.controller;
+package gui.importwizard;
 
 import gui.GUIFile;
 import gui.GUIMain;
-import gui.controller.descriptor.ImportWizardDescriptor;
-import gui.model.ImportWizardDescriptorNotFoundException;
-import gui.model.ImportWizardModel;
-import gui.view.ImportWizardDialog;
 import gui.view.OpenPanelView;
 
 import java.awt.*;

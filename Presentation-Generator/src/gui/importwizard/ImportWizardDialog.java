@@ -1,12 +1,7 @@
-package gui.view;
+package gui.importwizard;
 
 import gui.GUIFile;
 import gui.GUIMain;
-import gui.controller.ImportWizardController;
-import gui.controller.descriptor.ImportWizardDescriptor;
-import gui.model.ImportWizardDescriptorNotFoundException;
-import gui.model.ImportWizardModel;
-import gui.view.panel.OpenFilePanel;
 
 import java.awt.BorderLayout;
 import java.awt.CardLayout;

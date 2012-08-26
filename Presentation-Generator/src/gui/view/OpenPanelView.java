@@ -3,10 +3,11 @@ package gui.view;
 import gui.GUIFile;
 import gui.GUIMain;
 import gui.controller.OpenController;
-import gui.controller.descriptor.CharsetPanelDescriptor;
-import gui.controller.descriptor.FinalImportPanelDescriptor;
-import gui.controller.descriptor.ImportWizardDescriptor;
-import gui.controller.descriptor.OpenFilePanelDescriptor;
+import gui.importwizard.CharsetPanelDescriptor;
+import gui.importwizard.FinalImportPanelDescriptor;
+import gui.importwizard.ImportWizardDescriptor;
+import gui.importwizard.ImportWizardDialog;
+import gui.importwizard.OpenFilePanelDescriptor;
 
 import java.awt.BorderLayout;
 import java.awt.Dimension;
