@@ -10,7 +10,7 @@ import java.awt.event.ActionEvent;
 public class OpenFilePanel extends JPanel {
 
 	private JButton openFileButton;
-	private JLabel fileOpenLabel;
+	protected JLabel fileOpenLabel;
 	
 	public OpenFilePanel() {
 		

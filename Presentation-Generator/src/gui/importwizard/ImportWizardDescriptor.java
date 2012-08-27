@@ -21,7 +21,7 @@ public class ImportWizardDescriptor {
     public static final FinishIdentifier FINISH = new FinishIdentifier();
     
     private ImportWizardDialog ImportWizardDialog;
-    protected Component targetPanel;
+    private Component targetPanel;
     private Object panelIdentifier;
     
     /**

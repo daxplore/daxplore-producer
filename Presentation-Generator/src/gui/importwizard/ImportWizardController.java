@@ -38,9 +38,7 @@ import tools.SPSSTools;
  */
 public class ImportWizardController implements ActionListener {
     
-    private GUIMain guiMain;
 	private ImportWizardDialog hostPanel;
-    private GUIFile guiFile;
     
     // TODO: To be implemented: user should be able to choose which charset is to be used based on string information.
  	public String charsetName = "ISO-8859-1";
@@ -50,10 +48,8 @@ public class ImportWizardController implements ActionListener {
      * which it uses to update the button components and access the WizardModel.
      * @param w A callback to the Wizard component that created this controller.
      */    
-    public ImportWizardController(GUIMain guiMain, ImportWizardDialog w, GUIFile guiFile) {
-        this.guiMain = guiMain;
+    public ImportWizardController(ImportWizardDialog w) {
     	this.hostPanel = w;
-        this.guiFile = guiFile;
     }
 
     /**
@@ -70,29 +66,22 @@ public class ImportWizardController implements ActionListener {
 			backButtonPressed();
 		else if (evt.getActionCommand().equals(ImportWizardDialog.NEXT_BUTTON_ACTION_COMMAND))
 			nextButtonPressed();
-		else if (evt.getActionCommand().equals(ImportWizardDialog.OPEN_SPSS_FILE_ACTION_COMMAND))
-            openSpssFileAction();
-        else if (evt.getActionCommand().equals(ImportWizardDialog.ENCODING_COMBO_BOX_ACTION))
-            charsetComboBoxAction(evt);
-        else if (evt.getActionCommand().equals(ImportWizardDialog.IMPORT_SPSS_FILE_ACTION))
-            importSpssFileAction();
-        
     }
     
 	public void importSpssFileAction() {
 
-		if (guiFile.getSpssFile() == null) {
-			JOptionPane.showMessageDialog(this.guiMain.getGuiMainFrame(),
+		if (hostPanel.getGuiMain().getGuiFile().getSpssFile() == null) {
+			JOptionPane.showMessageDialog(this.hostPanel.getGuiMain().getGuiMainFrame(),
 					"You must open an SPSS file before you can import it.",
 					"Daxplore file warning", JOptionPane.ERROR_MESSAGE);
 			return;
 
 		}
 
-		if (guiFile.getDaxploreFile() == null) {
+		if (hostPanel.getGuiMain().getGuiFile().getDaxploreFile() == null) {
 			JOptionPane
 					.showMessageDialog(
-							this.guiMain.getGuiMainFrame(),
+							this.hostPanel.getGuiMain().getGuiMainFrame(),
 							"Create or open a daxplore project file before you import an SPSS file.",
 							"Daxplore file warning", JOptionPane.ERROR_MESSAGE);
 			return;
@@ -102,20 +91,20 @@ public class ImportWizardController implements ActionListener {
 		try {
 			charset = Charset.forName(charsetName);
 		} catch (Exception e1) {
-			JOptionPane.showMessageDialog(this.guiMain.getGuiMainFrame(),
+			JOptionPane.showMessageDialog(this.hostPanel.getGuiMain().getGuiMainFrame(),
 					"Unable to create charset, aborting import.",
 					"Daxplore file warning", JOptionPane.ERROR_MESSAGE);
 			return;
 		}
 
-		File importFile = guiFile.getSpssFile();
+		File importFile = hostPanel.getGuiMain().getGuiFile().getSpssFile();
 
 		try {
 			// importSpssFileButton.setEnabled(false); // TODO: Update it for
 			// the wizard.
-			guiMain.getGuiMainFrame().setCursor(
+			hostPanel.getGuiMain().getGuiMainFrame().setCursor(
 					Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
-			guiFile.getDaxploreFile().importSPSS(importFile, charset);
+			hostPanel.getGuiMain().getGuiFile().getDaxploreFile().importSPSS(importFile, charset);
 
 			// update open panel text fields to ensure the latest file updates
 			// are displayed
@@ -126,69 +115,23 @@ public class ImportWizardController implements ActionListener {
 			//				+ "\nSPSS file successfully imported!");
 
 		} catch (FileNotFoundException e2) {
-			JOptionPane.showMessageDialog(this.guiMain.getGuiMainFrame(),
+			JOptionPane.showMessageDialog(this.hostPanel.getGuiMain().getGuiMainFrame(),
 					"Unable to find the SPSS file.", "Daxplore file warning",
 					JOptionPane.ERROR_MESSAGE);
 			e2.printStackTrace();
 			return;
 		} catch (IOException e2) {
-			JOptionPane.showMessageDialog(this.guiMain.getGuiMainFrame(),
+			JOptionPane.showMessageDialog(this.hostPanel.getGuiMain().getGuiMainFrame(),
 					"File import error.", "Daxplore file warning",
 					JOptionPane.ERROR_MESSAGE);
 			e2.printStackTrace();
 			return;
 		} catch (DaxploreException e2) {
-			JOptionPane.showMessageDialog(this.guiMain.getGuiMainFrame(),
+			JOptionPane.showMessageDialog(this.hostPanel.getGuiMain().getGuiMainFrame(),
 					"Unable to import file, aborting operation.",
 					"Daxplore file warning", JOptionPane.ERROR_MESSAGE);
 			e2.printStackTrace();
 			return;
-		}
-	}
-
-	/**
-	 * Opens up a file dialogue with options to open SPSS files.
-	 */
-    public void openSpssFileAction() {
-		JFileChooser fc = new JFileChooser();
-		FileNameExtensionFilter filter = new FileNameExtensionFilter(
-				"SPSS Files", "sav");
-		fc.setFileFilter(filter);
-
-		int returnVal = fc.showOpenDialog(this.hostPanel);
-
-		if (returnVal == JFileChooser.APPROVE_OPTION) {
-
-			File file = fc.getSelectedFile();
-			System.out.println("Opening file: " + file.getName() + ".");
-
-			// import SPSS file.
-			try {
-				SPSSFile spssFile = new SPSSFile(file, "r");
-				spssFile.logFlag = false;
-				spssFile.loadMetadata();
-				spssFile.close();
-				
-				guiFile.setSpssFile(file);
-				String text = "File selected: " + guiFile.getSpssFile().getName();
-				hostPanel.setSpssFileInfoText(text);
-				
-			} catch (FileNotFoundException e1) {
-				System.out.println("SPSS file open failed.");
-				JOptionPane.showMessageDialog(this.hostPanel,
-						"You must select a valid SPSS file.",
-						"Daxplore file warning", JOptionPane.ERROR_MESSAGE);
-				e1.printStackTrace();
-			} catch (IOException e1) {
-				// TODO Auto-generated catch block
-				e1.printStackTrace();
-			} catch (SPSSFileException e1) {
-				System.out.println("Not a valid SPSS file.");
-				JOptionPane.showMessageDialog(this.hostPanel,
-						"You must select a valid SPSS file.",
-						"Daxplore file warning", JOptionPane.ERROR_MESSAGE);
-				e1.printStackTrace();
-			}
 		}
 	}
     
@@ -200,11 +143,13 @@ public class ImportWizardController implements ActionListener {
 		
 		String charsetType = (String) charsetSource.getSelectedItem();
 		
-		if(charsetType != null && !charsetType.equals("") && guiFile.getSpssFile() != null) {
+		if(charsetType != null && !charsetType.equals("") && 
+				hostPanel.getGuiMain().getGuiFile().getSpssFile() != null) {
 			Charset charset = Charset.forName(charsetType);
 			DefaultComboBoxModel stringList = new DefaultComboBoxModel();
 			try {
-				Set<String> encodedStrings = SPSSTools.getNonAsciiStrings(guiFile.getSpssFile(), charset);
+				Set<String> encodedStrings = SPSSTools.getNonAsciiStrings(
+						hostPanel.getGuiMain().getGuiFile().getSpssFile(), charset);
 				
 				for (String es: encodedStrings) {
 					stringList.addElement(es);

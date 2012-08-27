@@ -43,11 +43,13 @@ import javax.swing.border.EtchedBorder;
  */
 public class ImportWizardDialog extends JDialog implements PropertyChangeListener, WindowListener {
 
+	// storage classes.
 	private static final long serialVersionUID = 1L;
+	private GUIMain guiMain;
+
 	private JDialog importWizardDialog;
 	private ImportWizardModel importWizardModel;
 	private ImportWizardController importWizardController;
-	private GUIFile guiFile;
 	
 	 // descriptor control flags.
     public static final int FINISH_RETURN_CODE = 0;
@@ -58,24 +60,19 @@ public class ImportWizardDialog extends JDialog implements PropertyChangeListene
     public static final String NEXT_BUTTON_ACTION_COMMAND = "NextButtonActionCommand";
     public static final String BACK_BUTTON_ACTION_COMMAND = "BackButtonActionCommand";
     public static final String CANCEL_BUTTON_ACTION_COMMAND = "CancelButtonActionCommand"; 
-    public static final String OPEN_SPSS_FILE_ACTION_COMMAND = "OpenSpssFileActionCommand";
-	public static final String ENCODING_COMBO_BOX_ACTION = "EncodingComboBoxAction";
-	public static final String IMPORT_SPSS_FILE_ACTION = "ImportSpssFileAction";
 	
 	public static final String CANCEL_TEXT = "Cancel";
 	public static final String BACK_TEXT = "Back";
 	public static final String FINISH_TEXT = "Finish";
 	public static final String NEXT_TEXT = "Next";
     
+	// elements specific for the import wizard components.
 	private final JPanel contentPanel = new JPanel();
 	private JScrollPane encodingListPanel;
 	private CardLayout cardLayout = new CardLayout(0,0);
-	private JButton openSpssFileButton;
 	private JButton nextButton;
 	private JButton backButton;
 	private JButton cancelButton;
-	private JTextPane spssFileInfoText;
-	private JComboBox encodingComboBox;
 	
 	private int returnCode;
 	
@@ -85,30 +82,24 @@ public class ImportWizardDialog extends JDialog implements PropertyChangeListene
 	 * @param spssFile
 	 * @param guiMain
 	 */
-	public ImportWizardDialog(final GUIMain guiMain, GUIFile guiFile) {
+	public ImportWizardDialog(final GUIMain guiMain) {
 		
-		importWizardController = new ImportWizardController(guiMain, this, guiFile);
+		importWizardController = new ImportWizardController(this);
 		importWizardModel = new ImportWizardModel();
 		importWizardDialog = this;
-		this.setGuiFile(guiFile);
-		initcomponents(guiMain, guiFile);	// create the dialogue.
+		this.guiMain = guiMain;
+		initcomponents();	// create the dialogue.
 	}
 	
-	public GUIFile getGuiFile() {
-		return guiFile;
+	// getters and setters be here.
+	public GUIMain getGuiMain() {
+		return guiMain;
 	}
 
-	private void setGuiFile(GUIFile guiFile) {
-		this.guiFile = guiFile;
-	}
-	
-	public String getSpssFileInfoText() {
-		return spssFileInfoText.getText();
+	public void setGuiMain(GUIMain guiMain) {
+		this.guiMain = guiMain;
 	}
 
-	public void setSpssFileInfoText(String spssFileInfoText) {
-		this.spssFileInfoText.setText(spssFileInfoText);
-	}
 
 	public JDialog getDialog() {
 		return importWizardDialog;
@@ -252,10 +243,10 @@ public class ImportWizardDialog extends JDialog implements PropertyChangeListene
      * goes here. Seperate the cardpanel views to different descriptor files and panel views to
      * control the flow of the wizard dialogue.
      */
-	private void initcomponents(final GUIMain guiMain, GUIFile guiFile) {
+	private void initcomponents() {
 		
 		importWizardModel.addPropertyChangeListener(this);       
-        importWizardController = new ImportWizardController(guiMain, this, guiFile);       
+        importWizardController = new ImportWizardController(this);       
 		
 		setIconImage(Toolkit.getDefaultToolkit().getImage(ImportWizardDialog.class.getResource("/gui/resources/Arrow-Up-48.png")));
 		setDialog(this);
@@ -269,45 +260,6 @@ public class ImportWizardDialog extends JDialog implements PropertyChangeListene
 		addWindowListener(this);
 		
 		// TODO: Remove code below and sort it out in panel files.
-		
-		// OpenFilePanel openFilePanel = new OpenFilePanel();
-		// contentPanel.add(openFilePanel, "openFilePanel");
-		
-		// openSpssFileButton = new JButton("Open SPSS file...");
-		// openSpssFileButton.setActionCommand(OPEN_SPSS_FILE_ACTION_COMMAND);
-		// openSpssFileButton.addActionListener(importWizardController);
-		
-		// openSpssFileButton.setPreferredSize(new Dimension(38, 27));
-		
-		/* JPanel fileInfoPanel = new JPanel();
-		fileInfoPanel.setBorder(new EtchedBorder(EtchedBorder.LOWERED, null, null));
-		GroupLayout gl_openFilePanel = new GroupLayout(openFilePanel);
-		gl_openFilePanel.setHorizontalGroup(
-			gl_openFilePanel.createParallelGroup(Alignment.TRAILING)
-				.addGroup(gl_openFilePanel.createSequentialGroup()
-					.addGap(93)
-					.addComponent(fileInfoPanel, GroupLayout.PREFERRED_SIZE, 536, GroupLayout.PREFERRED_SIZE)
-					.addContainerGap(107, Short.MAX_VALUE))
-				.addGroup(gl_openFilePanel.createSequentialGroup()
-					.addContainerGap(307, Short.MAX_VALUE)
-					.addComponent(openSpssFileButton, GroupLayout.PREFERRED_SIZE, 166, GroupLayout.PREFERRED_SIZE)
-					.addGap(277))
-		);
-		gl_openFilePanel.setVerticalGroup(
-			gl_openFilePanel.createParallelGroup(Alignment.LEADING)
-				.addGroup(gl_openFilePanel.createSequentialGroup()
-					.addGap(39)
-					.addComponent(fileInfoPanel, GroupLayout.PREFERRED_SIZE, 317, GroupLayout.PREFERRED_SIZE)
-					.addPreferredGap(ComponentPlacement.UNRELATED)
-					.addComponent(openSpssFileButton, GroupLayout.PREFERRED_SIZE, 28, GroupLayout.PREFERRED_SIZE)
-					.addContainerGap(148, Short.MAX_VALUE))
-		); */
-		
-		// fileInfoPanel.setLayout(new BorderLayout(0, 0));
-		
-		// spssFileInfoText = new JTextPane();
-		// fileInfoPanel.add(spssFileInfoText, BorderLayout.CENTER);
-		// openFilePanel.setLayout(gl_openFilePanel);
 
 		// JPanel encodingPanel = new JPanel();
 		// contentPanel.add(encodingPanel, "encodingPanel");

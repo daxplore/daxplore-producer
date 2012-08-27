@@ -89,7 +89,16 @@ public class GUIMain {
 	
 	// data fields for main class.
 	private JFrame guiMainFrame;
+	private GUIFile guiFile;
 	
+	public GUIFile getGuiFile() {
+		return guiFile;
+	}
+
+	public void setGuiFile(GUIFile guiFile) {
+		this.guiFile = guiFile;
+	}
+
 	public JFrame getGuiMainFrame() {
 		return guiMainFrame;
 	}
@@ -121,7 +130,7 @@ public class GUIMain {
 		guiMainFrame.getContentPane().setLayout(new BorderLayout(0, 0));
 		
 		// file handler init.
-		GUIFile guiFile = new GUIFile();
+		guiFile = new GUIFile();
 		
 		// create main panel window.
 		mainPanel.setBorder(new MatteBorder(0, 1, 0, 0, (Color) Color.GRAY));

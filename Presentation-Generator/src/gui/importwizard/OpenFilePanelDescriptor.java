@@ -23,13 +23,13 @@ public class OpenFilePanelDescriptor extends ImportWizardDescriptor implements A
     
     public OpenFilePanelDescriptor() {
     	super(IDENTIFIER, new OpenFilePanel());
-    	openFilePanel = (OpenFilePanel)targetPanel;
+    	openFilePanel = (OpenFilePanel) super.getPanelComponent();
     	openFilePanel.openFileButtonActionListener(this);
     }
     
     @Override
     public Object getNextPanelDescriptor() {
-        return CharsetPanelDescriptor.IDENTIFIER;
+    	return CharsetPanelDescriptor.IDENTIFIER;
     }
     
     @Override
@@ -66,8 +66,9 @@ public class OpenFilePanelDescriptor extends ImportWizardDescriptor implements A
 				spssFile.loadMetadata();
 				spssFile.close();
 				
-				getWizard().getGuiFile().setSpssFile(file);
-				String text = "File selected: " + getWizard().getGuiFile().getSpssFile().getName();
+				getWizard().getGuiMain().getGuiFile().setSpssFile(file);
+				String text = "File selected: " + getWizard().getGuiMain().getGuiFile().getSpssFile().getName();
+				openFilePanel.fileOpenLabel.setText(text);
 				System.out.println(text);
 				
 			} catch (FileNotFoundException e1) {
