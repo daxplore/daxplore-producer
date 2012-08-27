@@ -65,7 +65,7 @@ public class ImportWizardDialog extends JDialog implements PropertyChangeListene
     // no resource file is used so the strings for button text is stored here.
 	public static final String CANCEL_TEXT = "Cancel";
 	public static final String BACK_TEXT = "Back";
-	public static final String FINISH_TEXT = "Finish";
+	public static final String FINISH_TEXT = "Import >>";
 	public static final String NEXT_TEXT = "Next";
     
 	// elements specific for the import wizard components.

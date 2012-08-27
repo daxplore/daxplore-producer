@@ -52,9 +52,8 @@ public class OpenPanelView extends JPanel {
 	/**
 	 * OpenPanelView constructor.
 	 * @param guiMain
-	 * @param guiFile
 	 */
-	public OpenPanelView(final GUIMain guiMain, final GUIFile guiFile) {
+	public OpenPanelView(final GUIMain guiMain) {
 		fileNameField.setEditable(false);
 		fileNameField.setBounds(166, 75, 240, 27);
 		fileNameField.setColumns(10);
@@ -113,7 +112,7 @@ public class OpenPanelView extends JPanel {
 			@Override
 			public void actionPerformed(ActionEvent e) {
 
-				if (guiFile.getDaxploreFile() == null) {
+				if (guiMain.getGuiFile().getDaxploreFile() == null) {
 					JOptionPane
 							.showMessageDialog(
 									guiMain.getGuiMainFrame(),
@@ -124,14 +123,14 @@ public class OpenPanelView extends JPanel {
 				
 				ImportWizardDialog importWizardDialog = new ImportWizardDialog(guiMain);
 				
-				ImportWizardDescriptor descriptor1 = new OpenFilePanelDescriptor();
-		        importWizardDialog.registerWizardPanel(OpenFilePanelDescriptor.IDENTIFIER, descriptor1);
+				ImportWizardDescriptor openFilePanelDescriptor = new OpenFilePanelDescriptor();
+		        importWizardDialog.registerWizardPanel(OpenFilePanelDescriptor.IDENTIFIER, openFilePanelDescriptor);
 		        
-				ImportWizardDescriptor descriptor2 = new CharsetPanelDescriptor();
-		        importWizardDialog.registerWizardPanel(CharsetPanelDescriptor.IDENTIFIER, descriptor2);
+				ImportWizardDescriptor charsetPanelDescriptor = new CharsetPanelDescriptor();
+		        importWizardDialog.registerWizardPanel(CharsetPanelDescriptor.IDENTIFIER, charsetPanelDescriptor);
 		        
-				ImportWizardDescriptor descriptor3 = new FinalImportPanelDescriptor();
-		        importWizardDialog.registerWizardPanel(FinalImportPanelDescriptor.IDENTIFIER, descriptor3);
+				ImportWizardDescriptor finalImportPanelDescriptor = new FinalImportPanelDescriptor();
+		        importWizardDialog.registerWizardPanel(FinalImportPanelDescriptor.IDENTIFIER, finalImportPanelDescriptor);
 		        
 		        importWizardDialog.setCurrentPanel(OpenFilePanelDescriptor.IDENTIFIER);
 		        
@@ -166,13 +165,13 @@ public class OpenPanelView extends JPanel {
 		openFileButton.setActionCommand(OPEN_BUTTON_ACTION_COMMAND);
 		daxploreFilePanel.add(openFileButton);
 		openFileButton.setToolTipText("Opens a daxplore file");
-		openFileButton.addActionListener(new OpenController(guiMain, guiFile, this));
+		openFileButton.addActionListener(new OpenController(guiMain, this));
 		
 		createNewFileButton = new JButton("Create new file...");
 		createNewFileButton.setBounds(168, 35, 135, 27);
 		createNewFileButton.setActionCommand(CREATE_BUTTON_ACTION_COMMAND);
 		daxploreFilePanel.add(createNewFileButton);
-		createNewFileButton.addActionListener(new OpenController(guiMain, guiFile, this));
+		createNewFileButton.addActionListener(new OpenController(guiMain, this));
 		createNewFileButton.setToolTipText("Creates a new daxplore project file");
 		
 		setLayout(gl_openPanel);

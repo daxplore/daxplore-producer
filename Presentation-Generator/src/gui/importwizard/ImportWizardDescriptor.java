@@ -20,7 +20,7 @@ public class ImportWizardDescriptor {
      */    
     public static final FinishIdentifier FINISH = new FinishIdentifier();
     
-    private ImportWizardDialog ImportWizardDialog;
+    private ImportWizardDialog importWizardDialog;
     private Component targetPanel;
     private Object panelIdentifier;
     
@@ -78,7 +78,7 @@ public class ImportWizardDescriptor {
     }
     
     public final void setWizard(ImportWizardDialog w) {
-        ImportWizardDialog = w;
+        importWizardDialog = w;
     }
     
     /**
@@ -86,7 +86,7 @@ public class ImportWizardDescriptor {
      * @return The Wizard class hosting this descriptor.
      */    
     public final ImportWizardDialog getWizard() {
-        return ImportWizardDialog;
+        return importWizardDialog;
     }   
 
     /**
@@ -94,7 +94,7 @@ public class ImportWizardDescriptor {
      * @return The current WizardModel for this Wizard component.
      */    
     public ImportWizardModel getWizardModel() {
-        return ImportWizardDialog.getModel();
+        return importWizardDialog.getModel();
     }
     
     //  Override this method to provide an Object-based identifier

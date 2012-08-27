@@ -12,7 +12,7 @@ public class GroupsPanelView extends JPanel {
 	
 	private JLabel lblGroupsPanel = new JLabel();
 	
-	public GroupsPanelView(GUIMain guiMain, GUIFile guiFile) {
+	public GroupsPanelView(GUIMain guiMain) {
 		
 		setLayout(new FlowLayout(FlowLayout.CENTER, 5, 5));
 		

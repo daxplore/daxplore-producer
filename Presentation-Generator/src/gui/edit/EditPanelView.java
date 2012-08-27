@@ -13,7 +13,7 @@ public class EditPanelView extends JPanel {
 	 * @param guiFile 
 	 * @param guiMain 
 	 */
-	public EditPanelView(GUIMain guiMain, GUIFile guiFile) {
+	public EditPanelView(GUIMain guiMain) {
 		
 		JLabel EditPanelLabel = new JLabel("Edit Panel");
 		add(EditPanelLabel);

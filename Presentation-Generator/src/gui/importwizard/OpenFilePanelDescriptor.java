@@ -61,7 +61,7 @@ public class OpenFilePanelDescriptor extends ImportWizardDescriptor implements A
 			File file = fc.getSelectedFile();
 			System.out.println("Opening file: " + file.getName() + ".");
 
-			// import SPSS file.
+			// save SPSS file.
 			try {
 				SPSSFile spssFile = new SPSSFile(file, "r");
 				spssFile.logFlag = false;

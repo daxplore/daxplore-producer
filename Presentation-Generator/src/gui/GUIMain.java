@@ -142,15 +142,15 @@ public class GUIMain {
 		guiMainFrame.getContentPane().add(buttonPanelView, BorderLayout.WEST);
 		
 		// add the open panel view.
-		OpenPanelView openPanelView = new OpenPanelView(this, guiFile);
+		OpenPanelView openPanelView = new OpenPanelView(this);
 		mainPanel.add(openPanelView, "openPanel");
 		
 		// add the groups panel view.
-		GroupsPanelView groupsPanelView = new GroupsPanelView(this, guiFile);
+		GroupsPanelView groupsPanelView = new GroupsPanelView(this);
 		mainPanel.add(groupsPanelView, "groupsPanel");
 		
 		// add the edit panel view.
-		EditPanelView editPanelView = new EditPanelView(this, guiFile);
+		EditPanelView editPanelView = new EditPanelView(this);
 		mainPanel.add(editPanelView, "editPanel");	
 	}
 }
