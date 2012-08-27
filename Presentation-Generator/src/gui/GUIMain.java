@@ -1,9 +1,8 @@
 package gui;
 
-import gui.view.ButtonPanelView;
-import gui.view.EditPanelView;
-import gui.view.GroupsPanelView;
-import gui.view.OpenPanelView;
+import gui.edit.EditPanelView;
+import gui.groups.GroupsPanelView;
+import gui.open.OpenPanelView;
 
 import java.awt.BorderLayout;
 import java.awt.CardLayout;

@@ -1,4 +1,4 @@
-package gui.view;
+package gui.edit;
 
 import gui.GUIFile;
 import gui.GUIMain;

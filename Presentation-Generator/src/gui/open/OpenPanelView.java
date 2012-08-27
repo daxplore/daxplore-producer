@@ -1,8 +1,7 @@
-package gui.view;
+package gui.open;
 
 import gui.GUIFile;
 import gui.GUIMain;
-import gui.controller.OpenController;
 import gui.importwizard.CharsetPanelDescriptor;
 import gui.importwizard.FinalImportPanelDescriptor;
 import gui.importwizard.ImportWizardDescriptor;

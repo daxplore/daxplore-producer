@@ -2,7 +2,7 @@ package gui.importwizard;
 
 import gui.GUIFile;
 import gui.GUIMain;
-import gui.view.OpenPanelView;
+import gui.open.OpenPanelView;
 
 import java.awt.*;
 import java.awt.event.*;

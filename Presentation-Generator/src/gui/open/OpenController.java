@@ -1,8 +1,7 @@
-package gui.controller;
+package gui.open;
 
 import gui.GUIFile;
 import gui.GUIMain;
-import gui.view.OpenPanelView;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;

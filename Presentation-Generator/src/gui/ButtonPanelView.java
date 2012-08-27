@@ -1,6 +1,5 @@
-package gui.view;
+package gui;
 
-import gui.GUIMain;
 
 import java.awt.CardLayout;
 import java.awt.Color;

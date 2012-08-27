@@ -1,4 +1,4 @@
-package gui.view;
+package gui.groups;
 
 import java.awt.FlowLayout;
 
