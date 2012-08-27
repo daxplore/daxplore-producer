@@ -24,7 +24,8 @@ public class OpenFilePanelDescriptor extends ImportWizardDescriptor implements A
     public OpenFilePanelDescriptor() {
     	super(IDENTIFIER, new OpenFilePanel());
     	openFilePanel = (OpenFilePanel) super.getPanelComponent();
-    	openFilePanel.openFileButtonActionListener(this);
+    	openFilePanel.addOpenFileButtonActionListener(this);
+    	openFilePanel.openFileButton.setActionCommand(OPEN_SPSS_FILE_BUTTON_COMMAND);
     }
     
     @Override
@@ -39,6 +40,7 @@ public class OpenFilePanelDescriptor extends ImportWizardDescriptor implements A
 
 	@Override
 	public void actionPerformed(ActionEvent e) {
+		if (e.getActionCommand().equals(OpenFilePanelDescriptor.OPEN_SPSS_FILE_BUTTON_COMMAND))
             openSpssFileAction();
 		
 	}

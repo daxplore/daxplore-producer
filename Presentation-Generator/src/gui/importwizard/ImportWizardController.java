@@ -40,9 +40,6 @@ public class ImportWizardController implements ActionListener {
     
 	private ImportWizardDialog hostPanel;
     
-    // TODO: To be implemented: user should be able to choose which charset is to be used based on string information.
- 	public String charsetName = "ISO-8859-1";
-    
     /**
      * This constructor accepts a reference to the Wizard component that created it,
      * which it uses to update the button components and access the WizardModel.
@@ -89,7 +86,7 @@ public class ImportWizardController implements ActionListener {
 
 		Charset charset;
 		try {
-			charset = Charset.forName(charsetName);
+			charset = Charset.forName(hostPanel.getModel().getCharsetName());
 		} catch (Exception e1) {
 			JOptionPane.showMessageDialog(this.hostPanel.getGuiMain().getGuiMainFrame(),
 					"Unable to create charset, aborting import.",
@@ -132,39 +129,6 @@ public class ImportWizardController implements ActionListener {
 					"Daxplore file warning", JOptionPane.ERROR_MESSAGE);
 			e2.printStackTrace();
 			return;
-		}
-	}
-    
-    public void charsetComboBoxAction(ActionEvent e) {
-		if(!(e.getSource() instanceof JComboBox)) {
-			return;
-		}
-		JComboBox charsetSource = (JComboBox) e.getSource();
-		
-		String charsetType = (String) charsetSource.getSelectedItem();
-		
-		if(charsetType != null && !charsetType.equals("") && 
-				hostPanel.getGuiMain().getGuiFile().getSpssFile() != null) {
-			Charset charset = Charset.forName(charsetType);
-			DefaultComboBoxModel stringList = new DefaultComboBoxModel();
-			try {
-				Set<String> encodedStrings = SPSSTools.getNonAsciiStrings(
-						hostPanel.getGuiMain().getGuiFile().getSpssFile(), charset);
-				
-				for (String es: encodedStrings) {
-					stringList.addElement(es);
-				}
-				
-				JList encodedStringsList = new JList(stringList);
-				
-				charsetName = charset.name();
-				hostPanel.setEncodingList(encodedStringsList);
-			} catch (Exception e1) {
-				JOptionPane.showMessageDialog(this.hostPanel,
-						"That encoding type is not supported.",
-						"Encoding error", JOptionPane.ERROR_MESSAGE);
-				e1.printStackTrace();
-			}
 		}
 	}
     

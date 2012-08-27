@@ -16,8 +16,19 @@ import javax.swing.border.*;
  */
 
 public class ImportWizardModel {
+	
+	// current charset selected.
+	public String charsetName = null;
 
-    /**
+    public String getCharsetName() {
+		return charsetName;
+	}
+
+	public void setCharsetName(String charsetName) {
+		this.charsetName = charsetName;
+	}
+
+	/**
      * Identification string for the current panel.
      */    
     public static final String CURRENT_PANEL_DESCRIPTOR_PROPERTY = "currentPanelDescriptorProperty";

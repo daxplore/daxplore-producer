@@ -122,7 +122,7 @@ public class OpenPanelView extends JPanel {
 					return;
 				}
 				
-				ImportWizardDialog importWizardDialog = new ImportWizardDialog(guiMain, guiFile);
+				ImportWizardDialog importWizardDialog = new ImportWizardDialog(guiMain);
 				
 				ImportWizardDescriptor descriptor1 = new OpenFilePanelDescriptor();
 		        importWizardDialog.registerWizardPanel(OpenFilePanelDescriptor.IDENTIFIER, descriptor1);

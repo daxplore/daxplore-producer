@@ -43,10 +43,11 @@ import javax.swing.border.EtchedBorder;
  */
 public class ImportWizardDialog extends JDialog implements PropertyChangeListener, WindowListener {
 
-	// storage classes.
-	private static final long serialVersionUID = 1L;
-	private GUIMain guiMain;
 
+	private static final long serialVersionUID = 1L;
+	
+	// store instances of classes that will be used.
+	private GUIMain guiMain;
 	private JDialog importWizardDialog;
 	private ImportWizardModel importWizardModel;
 	private ImportWizardController importWizardController;
@@ -61,6 +62,7 @@ public class ImportWizardDialog extends JDialog implements PropertyChangeListene
     public static final String BACK_BUTTON_ACTION_COMMAND = "BackButtonActionCommand";
     public static final String CANCEL_BUTTON_ACTION_COMMAND = "CancelButtonActionCommand"; 
 	
+    // no resource file is used so the strings for button text is stored here.
 	public static final String CANCEL_TEXT = "Cancel";
 	public static final String BACK_TEXT = "Back";
 	public static final String FINISH_TEXT = "Finish";
@@ -68,7 +70,6 @@ public class ImportWizardDialog extends JDialog implements PropertyChangeListene
     
 	// elements specific for the import wizard components.
 	private final JPanel contentPanel = new JPanel();
-	private JScrollPane encodingListPanel;
 	private CardLayout cardLayout = new CardLayout(0,0);
 	private JButton nextButton;
 	private JButton backButton;
@@ -79,7 +80,6 @@ public class ImportWizardDialog extends JDialog implements PropertyChangeListene
 	/**
 	 * Constructor.
 	 * 
-	 * @param spssFile
 	 * @param guiMain
 	 */
 	public ImportWizardDialog(final GUIMain guiMain) {
@@ -100,7 +100,6 @@ public class ImportWizardDialog extends JDialog implements PropertyChangeListene
 		this.guiMain = guiMain;
 	}
 
-
 	public JDialog getDialog() {
 		return importWizardDialog;
 	}
@@ -111,11 +110,6 @@ public class ImportWizardDialog extends JDialog implements PropertyChangeListene
 	
 	public Component getOnwer() {
 		return this.importWizardDialog.getOwner();
-	}
-	
-	public void setEncodingList(JList list) {
-		encodingListPanel.getViewport().setView(list);
-		encodingListPanel.validate();
 	}
 	  
     public void registerWizardPanel(Object id, ImportWizardDescriptor panel) {
@@ -157,7 +151,8 @@ public class ImportWizardDialog extends JDialog implements PropertyChangeListene
         
         
     }
-	   
+	
+    // used to update button properties as events are triggered.
     public void propertyChange(PropertyChangeEvent evt) {
         
         if (evt.getPropertyName().equals(ImportWizardModel.CURRENT_PANEL_DESCRIPTOR_PROPERTY)) {
@@ -239,9 +234,8 @@ public class ImportWizardDialog extends JDialog implements PropertyChangeListene
 	}
 	
     /**
-     * Code relevant to the creation of the dialogue basic layout, next, back and cancel buttons
-     * goes here. Seperate the cardpanel views to different descriptor files and panel views to
-     * control the flow of the wizard dialogue.
+     * Code relevant to the creation of the dialog, basic layout, next, back and cancel buttons
+     * goes here. Descriptors are used as controllers and panel views for display in separate files.
      */
 	private void initcomponents() {
 		
@@ -293,31 +287,25 @@ public class ImportWizardDialog extends JDialog implements PropertyChangeListene
 		buttonPanel.setLayout(new FlowLayout(FlowLayout.RIGHT));
 		getContentPane().add(buttonPanel, BorderLayout.SOUTH);
 
-		nextButton = new JButton("Next");
-		nextButton.setPreferredSize(new Dimension(80, 28));
-		nextButton.addActionListener(importWizardController);
-		
-		nextButton.setActionCommand(NEXT_BUTTON_ACTION_COMMAND);
-		buttonPanel.add(nextButton);
-		getRootPane().setDefaultButton(nextButton);
-		
 		backButton = new JButton("Back");
 		backButton.addActionListener(importWizardController);
-		
 		backButton.setPreferredSize(new Dimension(80, 28));
 		backButton.setActionCommand(BACK_BUTTON_ACTION_COMMAND);
 		buttonPanel.add(backButton);
 		
+		nextButton = new JButton("Next");
+		nextButton.setPreferredSize(new Dimension(80, 28));
+		nextButton.addActionListener(importWizardController);
+		nextButton.setActionCommand(NEXT_BUTTON_ACTION_COMMAND);
 		buttonPanel.add(nextButton);
 		getRootPane().setDefaultButton(nextButton);
-
-		cancelButton = new JButton("Cancel");
-		cancelButton.addActionListener(importWizardController);
 		
 		Component horizontalStrut = Box.createHorizontalStrut(20);
 		horizontalStrut.setPreferredSize(new Dimension(50, 0));
 		buttonPanel.add(horizontalStrut);
 		
+		cancelButton = new JButton("Cancel");
+		cancelButton.addActionListener(importWizardController);
 		cancelButton.setActionCommand(CANCEL_BUTTON_ACTION_COMMAND);
 		buttonPanel.add(cancelButton);
 	}

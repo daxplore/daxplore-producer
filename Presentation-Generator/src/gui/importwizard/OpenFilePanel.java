@@ -9,9 +9,12 @@ import java.awt.event.ActionEvent;
 
 public class OpenFilePanel extends JPanel {
 
-	private JButton openFileButton;
+	protected JButton openFileButton;
 	protected JLabel fileOpenLabel;
 	
+	/**
+	 * Constructor.
+	 */
 	public OpenFilePanel() {
 		
 		openFileButton = new JButton("Open SPSS File");
@@ -22,7 +25,7 @@ public class OpenFilePanel extends JPanel {
 		
 	}
 	
-	public void openFileButtonActionListener(ActionListener l) {
+	public void addOpenFileButtonActionListener(ActionListener l) {
 		openFileButton.addActionListener(l);
 	}
 
