@@ -46,7 +46,9 @@ public class FinalImportPanelDescriptor extends ImportWizardDescriptor {
     
     @Override
     public void aboutToDisplayPanel() {
-    	finalImportPanel.showTable(SPSSTable(getWizard().getGuiMain().getGuiFile().getSpssFile()));
+    	
+    	DefaultTableModel model = spssTable(getWizard().getGuiMain().getGuiFile().getSpssFile());
+    	finalImportPanel.showTable(model);
     }
     
     /**
@@ -86,19 +88,12 @@ public class FinalImportPanelDescriptor extends ImportWizardDescriptor {
 		File importFile = getWizard().getGuiMain().getGuiFile().getSpssFile();
 
 		try {
-			// importSpssFileButton.setEnabled(false); 
-			// TODO: Update it for the wizard.
+			
 			getWizard().getGuiMain().getGuiMainFrame().setCursor(
 					Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
 			getWizard().getGuiMain().getGuiFile().getDaxploreFile().importSPSS(importFile, charset);
 
-			// update open panel text fields to ensure the latest file updates
-			// are displayed
-			// after a successful spss import.
-			//openPanelView.updateTextFields(guiFile);
-			//openPanelView.spssFileInfoText
-			//		.setText(openPanelView.spssFileInfoText.getText()
-			//				+ "\nSPSS file successfully imported!");
+			// TODO: Display information that file has been imported.
 
 		} catch (FileNotFoundException e2) {
 			JOptionPane.showMessageDialog(this.getWizard().getGuiMain().getGuiMainFrame(),
@@ -126,7 +121,7 @@ public class FinalImportPanelDescriptor extends ImportWizardDescriptor {
 	 * @param sf
 	 * @return TableColumn
 	 */
-	public DefaultTableModel SPSSTable(File file) {
+	public DefaultTableModel spssTable(File file) {
 		File temp;
 		FileFormatInfo ffi = new FileFormatInfo();
 		ffi.namesOnFirstLine = false;
@@ -134,7 +129,6 @@ public class FinalImportPanelDescriptor extends ImportWizardDescriptor {
 		ffi.compatibility = Compatibility.GENERIC;
 		BufferedReader br = null;
 		
-		JTable table = null;
 		SPSSFile sf = null;
 		try {
 			sf = new SPSSFile(file, "r");
@@ -162,6 +156,7 @@ public class FinalImportPanelDescriptor extends ImportWizardDescriptor {
 		for(int i = 0; i < sf.getVariableCount(); i++){
 			SPSSVariable var = sf.getVariable(i);
 			columns[i] = var.getShortName();
+			// just for testing output so we can see data is being processed.
 			System.out.print(sf.getVariable(i).getShortName() + ", ");
 		}
 

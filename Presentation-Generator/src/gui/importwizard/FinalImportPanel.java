@@ -11,20 +11,21 @@ import javax.swing.table.TableModel;
 import java.awt.BorderLayout;
 
 public class FinalImportPanel extends JPanel {
-	private JTable table;
+	private JTable table = new JTable();
+	private JScrollPane scrollPane;
 
 	public FinalImportPanel() {
 		setLayout(new BorderLayout(0, 0));
 		
-		JScrollPane scrollPane = new JScrollPane();
-		add(scrollPane, BorderLayout.CENTER);
+		scrollPane = new JScrollPane();
+		scrollPane.setColumnHeaderView(table);
 		
-		scrollPane.setViewportView(table);
+		add(scrollPane, BorderLayout.CENTER);
 		
 	}
 	
 	public void showTable(DefaultTableModel model) {
-		table = new JTable(model){
+		table = new JTable(model) {
 			public boolean isCellEditable(int rowIndex, int colIndex) {
 				return false; //Disallow the editing of any cell
 			}
@@ -34,6 +35,7 @@ public class FinalImportPanel extends JPanel {
 		for (int i = 0; i < 5; i++) {
 			column = table.getColumnModel().getColumn(i);
 			column.setPreferredWidth(50);
+		
 		}
 	}
 }
