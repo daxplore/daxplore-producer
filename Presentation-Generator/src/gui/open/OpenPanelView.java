@@ -45,6 +45,16 @@ public class OpenPanelView extends JPanel {
 	private JButton createNewFileButton;
 	private JButton importWizardButton;
 	
+	private OpenController openController;
+	
+	public OpenController getOpenController() {
+		return openController;
+	}
+
+	public void setOpenController(OpenController openController) {
+		this.openController = openController;
+	}
+
 	public static final String OPEN_BUTTON_ACTION_COMMAND = "OpenButtonActionCommand";
 	public static final String CREATE_BUTTON_ACTION_COMMAND = "CreateButtonActionCommand";
 	public static final String IMPORT_BUTTON_ACTION_COMMAND = "ImportButtonActionCommand";
@@ -54,21 +64,23 @@ public class OpenPanelView extends JPanel {
 	 * @param guiMain
 	 */
 	public OpenPanelView(final GUIMain guiMain) {
-		fileNameField.setEditable(false);
-		fileNameField.setBounds(166, 75, 240, 27);
-		fileNameField.setColumns(10);
+		
+		openController = new OpenController(guiMain, this);
+		getFileNameField().setEditable(false);
+		getFileNameField().setBounds(166, 75, 240, 27);
+		getFileNameField().setColumns(10);
 
-		importDateField.setEditable(false);
-		importDateField.setBounds(166, 203, 240, 27);
-		importDateField.setColumns(10);
+		getImportDateField().setEditable(false);
+		getImportDateField().setBounds(166, 203, 240, 27);
+		getImportDateField().setColumns(10);
 
-		creationDateField.setEditable(false);
-		creationDateField.setBounds(166, 108, 240, 27);
-		creationDateField.setColumns(10);
+		getCreationDateField().setEditable(false);
+		getCreationDateField().setBounds(166, 108, 240, 27);
+		getCreationDateField().setColumns(10);
 
-		lastImportFileNameField.setEditable(false);
-		lastImportFileNameField.setBounds(166, 168, 240, 27);
-		lastImportFileNameField.setColumns(10);
+		getLastImportFileNameField().setEditable(false);
+		getLastImportFileNameField().setBounds(166, 168, 240, 27);
+		getLastImportFileNameField().setColumns(10);
 		
 		JPanel daxploreFilePanel = new JPanel();
 		daxploreFilePanel.setBorder(new TitledBorder(null, "Daxplore file information", TitledBorder.LEADING, TitledBorder.TOP, null, null));
@@ -152,76 +164,60 @@ public class OpenPanelView extends JPanel {
 		
 		daxploreFilePanel.setLayout(null);
 		daxploreFilePanel.add(fileNameLabel);
-		daxploreFilePanel.add(fileNameField);
+		daxploreFilePanel.add(getFileNameField());
 		daxploreFilePanel.add(importDateLabel);
-		daxploreFilePanel.add(importDateField);
+		daxploreFilePanel.add(getImportDateField());
 		daxploreFilePanel.add(creationDateLabel);
-		daxploreFilePanel.add(creationDateField);
+		daxploreFilePanel.add(getCreationDateField());
 		daxploreFilePanel.add(lastImportedFileLabel);
-		daxploreFilePanel.add(lastImportFileNameField);
+		daxploreFilePanel.add(getLastImportFileNameField());
 		
 		openFileButton = new JButton("Open file...");
 		openFileButton.setBounds(19, 35, 135, 27);
 		openFileButton.setActionCommand(OPEN_BUTTON_ACTION_COMMAND);
 		daxploreFilePanel.add(openFileButton);
 		openFileButton.setToolTipText("Opens a daxplore file");
-		openFileButton.addActionListener(new OpenController(guiMain, this));
+		openFileButton.addActionListener(openController);
 		
 		createNewFileButton = new JButton("Create new file...");
 		createNewFileButton.setBounds(168, 35, 135, 27);
 		createNewFileButton.setActionCommand(CREATE_BUTTON_ACTION_COMMAND);
 		daxploreFilePanel.add(createNewFileButton);
-		createNewFileButton.addActionListener(new OpenController(guiMain, this));
+		createNewFileButton.addActionListener(openController);
 		createNewFileButton.setToolTipText("Creates a new daxplore project file");
 		
 		setLayout(gl_openPanel);
 	}
-	
-	/**
-	 * Updates text field for the SPSS file information in the open panel dialog.
-	 * @param guiMain
-	 */
-	public void updateSpssFileInfoText(GUIFile guiFile) {
-		if (guiFile.getSpssFile() != null) {
-			spssFileInfoText.setText(
-					"SPSS file ready for import: " +
-					guiFile.getSpssFile().getName() + "\n" +
-					guiFile.getSpssFile().getAbsolutePath());
-		}
+
+	public JTextField getFileNameField() {
+		return fileNameField;
 	}
 
-	/**
-	 * Updates text fields in the open panel dialog to display daxplore file information.
-	 * @param guiMain
-	 */
-	public void updateTextFields(GUIFile guiFile) {
-		
-		SimpleDateFormat formatter = new SimpleDateFormat("dd/MM/yyyy");
-		
-		// set the text fields if we have a daxplore file loaded.
-		if (guiFile.getDaxploreFile() != null) {
-			// update text fields with appropriate data.
-			fileNameField.setText(guiFile.getDaxploreFile().getFile().getName());
-			
-			// check if it's a newly created file, if so, it doesn't contain certain fields.
-			String importFilename = guiFile.getDaxploreFile().getAbout().getImportFilename();
-			if (importFilename != null && !"".equals(importFilename)) {
-				lastImportFileNameField.setText(guiFile.getDaxploreFile().getAbout().getImportFilename());
-				// date must first be converted to the appropriate format before returned as string.
-				if (guiFile.getDaxploreFile().getAbout().getImportDate() != null) {
-				importDateField.setText(formatter.format(guiFile.getDaxploreFile().getAbout().getImportDate()));
-				} else {
-					importDateField.setText("");
-				}
-			} else {
-				lastImportFileNameField.setText("");
-				importDateField.setText("");
-			}
-			
-			creationDateField.setText(
-			formatter.format(guiFile.getDaxploreFile().getAbout().getCreationDate()));
-		}
+	public void setFileNameField(JTextField fileNameField) {
+		this.fileNameField = fileNameField;
 	}
 
+	public JTextField getLastImportFileNameField() {
+		return lastImportFileNameField;
+	}
 
+	public void setLastImportFileNameField(JTextField lastImportFileNameField) {
+		this.lastImportFileNameField = lastImportFileNameField;
+	}
+
+	public JTextField getImportDateField() {
+		return importDateField;
+	}
+
+	public void setImportDateField(JTextField importDateField) {
+		this.importDateField = importDateField;
+	}
+
+	public JTextField getCreationDateField() {
+		return creationDateField;
+	}
+
+	public void setCreationDateField(JTextField creationDateField) {
+		this.creationDateField = creationDateField;
+	}
 }

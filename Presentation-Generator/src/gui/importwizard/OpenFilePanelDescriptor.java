@@ -43,7 +43,23 @@ public class OpenFilePanelDescriptor extends ImportWizardDescriptor implements A
 		if (e.getActionCommand().equals(OpenFilePanelDescriptor.OPEN_SPSS_FILE_BUTTON_COMMAND))
             openSpssFileAction();
 		
+		setNextButtonAccordingToFile();
+		
 	}
+	
+	@Override
+	public void aboutToDisplayPanel() {
+		if (getWizard().getGuiMain().getGuiFile().getSpssFile() == null)
+            getWizard().setNextFinishButtonEnabled(false);
+	}
+	
+    private void setNextButtonAccordingToFile() {
+    	// keep next button disabled until a file has been loaded into memory.
+         if (getWizard().getGuiMain().getGuiFile().getSpssFile() == null)
+            getWizard().setNextFinishButtonEnabled(false);
+         else
+            getWizard().setNextFinishButtonEnabled(true);           
+    }
 
 	/**
 	 * Opens up a file dialogue with options to open SPSS files.

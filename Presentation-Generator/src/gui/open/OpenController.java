@@ -6,6 +6,7 @@ import gui.GUIMain;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
+import java.text.SimpleDateFormat;
 
 import javax.swing.JFileChooser;
 import javax.swing.JOptionPane;
@@ -96,7 +97,7 @@ public final class OpenController implements ActionListener {
 
 			try {
 				guiMain.getGuiFile().setDaxploreFile(DaxploreFile.createWithNewFile(file));
-				openPanelView.updateTextFields(guiMain.getGuiFile());
+				updateTextFields();
 			} catch (DaxploreException e1) {
 				System.out.println("Saving daxplore file failure.");
 				e1.printStackTrace();
@@ -140,7 +141,7 @@ public final class OpenController implements ActionListener {
 
 				// update text fields so that file information is properly
 				// shown.
-				openPanelView.updateTextFields(guiMain.getGuiFile());
+				updateTextFields();
 
 			} catch (DaxploreException e1) {
 				JOptionPane.showMessageDialog(this.guiMain.getGuiMainFrame(),
@@ -150,6 +151,52 @@ public final class OpenController implements ActionListener {
 			}
 		} else {
 			System.out.println("Open command cancelled by user.");
+		}
+	}
+	
+	/**
+	 * Updates text field for the SPSS file information in the open panel dialog.
+	 * @param guiMain
+	 */
+	public void updateSpssFileInfoText() {
+		if (guiMain.getGuiFile().getSpssFile() != null) {
+			openPanelView.spssFileInfoText.setText(
+					"SPSS file successfully imported!\n" +
+						guiMain.getGuiFile().getSpssFile().getName() + "\n" +
+						guiMain.getGuiFile().getSpssFile().getAbsolutePath());
+		}
+	}
+
+	/**
+	 * Updates text fields in the open panel dialog to display daxplore file information.
+	 * @param guiMain
+	 */
+	public void updateTextFields() {
+		
+		SimpleDateFormat formatter = new SimpleDateFormat("dd/MM/yyyy");
+		
+		// set the text fields if we have a daxplore file loaded.
+		if (guiMain.getGuiFile().getDaxploreFile() != null) {
+			// update text fields with appropriate data.
+			openPanelView.getFileNameField().setText(guiMain.getGuiFile().getDaxploreFile().getFile().getName());
+			
+			// check if it's a newly created file, if so, it doesn't contain certain fields.
+			String importFilename = guiMain.getGuiFile().getDaxploreFile().getAbout().getImportFilename();
+			if (importFilename != null && !"".equals(importFilename)) {
+				openPanelView.getLastImportFileNameField().setText(guiMain.getGuiFile().getDaxploreFile().getAbout().getImportFilename());
+				// date must first be converted to the appropriate format before returned as string.
+				if (guiMain.getGuiFile().getDaxploreFile().getAbout().getImportDate() != null) {
+				openPanelView.getImportDateField().setText(formatter.format(guiMain.getGuiFile().getDaxploreFile().getAbout().getImportDate()));
+				} else {
+					openPanelView.getImportDateField().setText("");
+				}
+			} else {
+				openPanelView.getLastImportFileNameField().setText("");
+				openPanelView.getImportDateField().setText("");
+			}
+			
+			openPanelView.getCreationDateField().setText(
+			formatter.format(guiMain.getGuiFile().getDaxploreFile().getAbout().getCreationDate()));
 		}
 	}
 }

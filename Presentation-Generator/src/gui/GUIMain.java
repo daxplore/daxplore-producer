@@ -90,7 +90,22 @@ public class GUIMain {
 	// data fields for main class.
 	private JFrame guiMainFrame;
 	private GUIFile guiFile;
+	final JPanel mainPanel = new JPanel();
 	
+	private OpenPanelView openPanelView;
+	private GroupsPanelView groupsPanelView;
+	private EditPanelView editPanelView;
+	private ButtonPanelView buttonPanelView;
+	
+	// getters and setters.
+	public ButtonPanelView getButtonPanelView() {
+		return buttonPanelView;
+	}
+
+	public void setButtonPanelView(ButtonPanelView buttonPanelView) {
+		this.buttonPanelView = buttonPanelView;
+	}
+
 	public GUIFile getGuiFile() {
 		return guiFile;
 	}
@@ -103,7 +118,29 @@ public class GUIMain {
 		return guiMainFrame;
 	}
 
-	final JPanel mainPanel = new JPanel();
+	public OpenPanelView getOpenPanelView() {
+		return openPanelView;
+	}
+
+	public void setOpenPanelView(OpenPanelView openPanelView) {
+		this.openPanelView = openPanelView;
+	}
+
+	public GroupsPanelView getGroupsPanelView() {
+		return groupsPanelView;
+	}
+
+	public void setGroupsPanelView(GroupsPanelView groupsPanelView) {
+		this.groupsPanelView = groupsPanelView;
+	}
+
+	public EditPanelView getEditPanelView() {
+		return editPanelView;
+	}
+
+	public void setEditPanelView(EditPanelView editPanelView) {
+		this.editPanelView = editPanelView;
+	}
 
 	public void switchTo(String label) {
 		CardLayout cl = (CardLayout)(mainPanel.getLayout());
@@ -137,20 +174,16 @@ public class GUIMain {
 		mainPanel.setLayout(new CardLayout(0, 0));
 		guiMainFrame.getContentPane().add(mainPanel, BorderLayout.CENTER);
 		
-		// create left button panel.
-		ButtonPanelView buttonPanelView = new ButtonPanelView(this);
+		buttonPanelView = new ButtonPanelView(this);
 		guiMainFrame.getContentPane().add(buttonPanelView, BorderLayout.WEST);
 		
-		// add the open panel view.
-		OpenPanelView openPanelView = new OpenPanelView(this);
+		openPanelView = new OpenPanelView(this);
 		mainPanel.add(openPanelView, "openPanel");
 		
-		// add the groups panel view.
-		GroupsPanelView groupsPanelView = new GroupsPanelView(this);
+		groupsPanelView = new GroupsPanelView(this);
 		mainPanel.add(groupsPanelView, "groupsPanel");
 		
-		// add the edit panel view.
-		EditPanelView editPanelView = new EditPanelView(this);
+		editPanelView = new EditPanelView(this);
 		mainPanel.add(editPanelView, "editPanel");	
 	}
 }
