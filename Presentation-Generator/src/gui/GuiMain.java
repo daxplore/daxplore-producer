@@ -28,7 +28,7 @@ import daxplorelib.DaxploreFile;
 /**
  * Main window handler class. Initialization of application goes here.
  */
-public class GUIMain {
+public class GuiMain {
 
 	/**
 	 * Main execution loop, includes the thread handler, required for swing
@@ -38,7 +38,7 @@ public class GUIMain {
 	public static void main(String[] args) {
 		
 		// do a java version check, if target system doesn't have java 7, exit.
-		if (GUITools.javaVersionCheck() != true) {
+		if (GuiTools.javaVersionCheck() != true) {
 			JOptionPane.showMessageDialog(null,
 					"This program only supports Java 7 or higher.",
 					"Daxplore warning",
@@ -78,7 +78,7 @@ public class GUIMain {
 		EventQueue.invokeLater(new Runnable() {
 			public void run() {
 				try {
-					GUIMain window = new GUIMain();
+					GuiMain window = new GuiMain();
 					window.guiMainFrame.setVisible(true);
 				} catch (Exception e) {
 					e.printStackTrace();
@@ -89,7 +89,7 @@ public class GUIMain {
 	
 	// data fields for main class.
 	private JFrame guiMainFrame;
-	private GUIFile guiFile;
+	private GuiFile guiFile;
 	final JPanel mainPanel = new JPanel();
 	
 	private OpenPanelView openPanelView;
@@ -106,11 +106,11 @@ public class GUIMain {
 		this.buttonPanelView = buttonPanelView;
 	}
 
-	public GUIFile getGuiFile() {
+	public GuiFile getGuiFile() {
 		return guiFile;
 	}
 
-	public void setGuiFile(GUIFile guiFile) {
+	public void setGuiFile(GuiFile guiFile) {
 		this.guiFile = guiFile;
 	}
 
@@ -150,7 +150,7 @@ public class GUIMain {
 	/**
 	 * Create the application.
 	 */
-	public GUIMain() {
+	public GuiMain() {
 		initGUI();
 	}
 
@@ -160,14 +160,14 @@ public class GUIMain {
 	private void initGUI() {
 		
 		guiMainFrame = new JFrame();
-		guiMainFrame.setIconImage(Toolkit.getDefaultToolkit().getImage(GUIMain.class.getResource("/gui/resources/Colorful_Chart_Icon_vol2.png")));
+		guiMainFrame.setIconImage(Toolkit.getDefaultToolkit().getImage(GuiMain.class.getResource("/gui/resources/Colorful_Chart_Icon_vol2.png")));
 		guiMainFrame.setTitle("Daxplore Producer Developer Version");
 		guiMainFrame.setBounds(100, 100, 900, 787);
 		guiMainFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		guiMainFrame.getContentPane().setLayout(new BorderLayout(0, 0));
 		
 		// file handler init.
-		guiFile = new GUIFile();
+		guiFile = new GuiFile();
 		
 		// create main panel window.
 		mainPanel.setBorder(new MatteBorder(0, 1, 0, 0, (Color) Color.GRAY));

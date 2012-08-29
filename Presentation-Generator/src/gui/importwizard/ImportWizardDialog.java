@@ -1,7 +1,7 @@
 package gui.importwizard;
 
-import gui.GUIFile;
-import gui.GUIMain;
+import gui.GuiFile;
+import gui.GuiMain;
 
 import java.awt.BorderLayout;
 import java.awt.CardLayout;
@@ -47,7 +47,7 @@ public class ImportWizardDialog extends JDialog implements PropertyChangeListene
 	private static final long serialVersionUID = 1L;
 	
 	// store instances of classes that will be used.
-	private GUIMain guiMain;
+	private GuiMain guiMain;
 	private JDialog importWizardDialog;
 	private ImportWizardModel importWizardModel;
 	private ImportWizardController importWizardController;
@@ -82,7 +82,7 @@ public class ImportWizardDialog extends JDialog implements PropertyChangeListene
 	 * 
 	 * @param guiMain
 	 */
-	public ImportWizardDialog(final GUIMain guiMain) {
+	public ImportWizardDialog(final GuiMain guiMain) {
 		
 		importWizardController = new ImportWizardController(this);
 		importWizardModel = new ImportWizardModel();
@@ -92,11 +92,11 @@ public class ImportWizardDialog extends JDialog implements PropertyChangeListene
 	}
 	
 	// getters and setters be here.
-	public GUIMain getGuiMain() {
+	public GuiMain getGuiMain() {
 		return guiMain;
 	}
 
-	public void setGuiMain(GUIMain guiMain) {
+	public void setGuiMain(GuiMain guiMain) {
 		this.guiMain = guiMain;
 	}
 

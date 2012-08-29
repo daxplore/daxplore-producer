@@ -21,7 +21,7 @@ import javax.swing.border.TitledBorder;
  */
 public class ButtonPanelView extends JPanel {
 	
-	public ButtonPanelView(final GUIMain guiMain) {
+	public ButtonPanelView(final GuiMain guiMain) {
 		
 		ButtonGroup buttonGroup = new ButtonGroup();
 		
@@ -39,10 +39,10 @@ public class ButtonPanelView extends JPanel {
 		});
 		
 		OpenButton.setRolloverEnabled(false);
-		OpenButton.setSelectedIcon(new ImageIcon(GUIMain.class.getResource("/gui/resources/8_selected.png")));
+		OpenButton.setSelectedIcon(new ImageIcon(GuiMain.class.getResource("/gui/resources/8_selected.png")));
 		OpenButton.setBorder(new TitledBorder(null, "", TitledBorder.LEADING, TitledBorder.TOP, null, null));
 		buttonGroup.add(OpenButton);
-		OpenButton.setIcon(new ImageIcon(GUIMain.class.getResource("/gui/resources/8.png")));
+		OpenButton.setIcon(new ImageIcon(GuiMain.class.getResource("/gui/resources/8.png")));
 		add(OpenButton);
 
 		// groups button.
@@ -70,11 +70,11 @@ public class ButtonPanelView extends JPanel {
 			}
 		});
 		
-		EditButton.setSelectedIcon(new ImageIcon(GUIMain.class.getResource("/gui/resources/21_selected.png")));
+		EditButton.setSelectedIcon(new ImageIcon(GuiMain.class.getResource("/gui/resources/21_selected.png")));
 		EditButton.setRolloverEnabled(false);
 		EditButton.setBorder(new TitledBorder(null, "", TitledBorder.LEADING, TitledBorder.TOP, null, null));
 		buttonGroup.add(EditButton);
-		EditButton.setIcon(new ImageIcon(GUIMain.class.getResource("/gui/resources/21.png")));
+		EditButton.setIcon(new ImageIcon(GuiMain.class.getResource("/gui/resources/21.png")));
 		add(EditButton);
 	}
 }

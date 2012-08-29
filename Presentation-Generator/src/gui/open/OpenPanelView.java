@@ -1,7 +1,7 @@
 package gui.open;
 
-import gui.GUIFile;
-import gui.GUIMain;
+import gui.GuiFile;
+import gui.GuiMain;
 import gui.importwizard.CharsetPanelDescriptor;
 import gui.importwizard.FinalImportPanelDescriptor;
 import gui.importwizard.ImportWizardDescriptor;
@@ -46,7 +46,12 @@ public class OpenPanelView extends JPanel {
 	private JButton importWizardButton;
 	
 	private OpenController openController;
+
+	public static final String OPEN_BUTTON_ACTION_COMMAND = "OpenButtonActionCommand";
+	public static final String CREATE_BUTTON_ACTION_COMMAND = "CreateButtonActionCommand";
+	public static final String IMPORT_BUTTON_ACTION_COMMAND = "ImportButtonActionCommand";
 	
+	// getters and setters.
 	public OpenController getOpenController() {
 		return openController;
 	}
@@ -54,16 +59,44 @@ public class OpenPanelView extends JPanel {
 	public void setOpenController(OpenController openController) {
 		this.openController = openController;
 	}
+	
+	public JTextField getFileNameField() {
+		return fileNameField;
+	}
 
-	public static final String OPEN_BUTTON_ACTION_COMMAND = "OpenButtonActionCommand";
-	public static final String CREATE_BUTTON_ACTION_COMMAND = "CreateButtonActionCommand";
-	public static final String IMPORT_BUTTON_ACTION_COMMAND = "ImportButtonActionCommand";
+	public void setFileNameField(JTextField fileNameField) {
+		this.fileNameField = fileNameField;
+	}
+
+	public JTextField getLastImportFileNameField() {
+		return lastImportFileNameField;
+	}
+
+	public void setLastImportFileNameField(JTextField lastImportFileNameField) {
+		this.lastImportFileNameField = lastImportFileNameField;
+	}
+
+	public JTextField getImportDateField() {
+		return importDateField;
+	}
+
+	public void setImportDateField(JTextField importDateField) {
+		this.importDateField = importDateField;
+	}
+
+	public JTextField getCreationDateField() {
+		return creationDateField;
+	}
+
+	public void setCreationDateField(JTextField creationDateField) {
+		this.creationDateField = creationDateField;
+	}
 	
 	/**
 	 * OpenPanelView constructor.
 	 * @param guiMain
 	 */
-	public OpenPanelView(final GUIMain guiMain) {
+	public OpenPanelView(final GuiMain guiMain) {
 		
 		openController = new OpenController(guiMain, this);
 		getFileNameField().setEditable(false);
@@ -187,37 +220,5 @@ public class OpenPanelView extends JPanel {
 		createNewFileButton.setToolTipText("Creates a new daxplore project file");
 		
 		setLayout(gl_openPanel);
-	}
-
-	public JTextField getFileNameField() {
-		return fileNameField;
-	}
-
-	public void setFileNameField(JTextField fileNameField) {
-		this.fileNameField = fileNameField;
-	}
-
-	public JTextField getLastImportFileNameField() {
-		return lastImportFileNameField;
-	}
-
-	public void setLastImportFileNameField(JTextField lastImportFileNameField) {
-		this.lastImportFileNameField = lastImportFileNameField;
-	}
-
-	public JTextField getImportDateField() {
-		return importDateField;
-	}
-
-	public void setImportDateField(JTextField importDateField) {
-		this.importDateField = importDateField;
-	}
-
-	public JTextField getCreationDateField() {
-		return creationDateField;
-	}
-
-	public void setCreationDateField(JTextField creationDateField) {
-		this.creationDateField = creationDateField;
 	}
 }

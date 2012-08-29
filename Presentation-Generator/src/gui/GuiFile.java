@@ -14,11 +14,11 @@ import daxplorelib.DaxploreFile;
  * @author jorgenrosen
  *
  */
-public class GUIFile {
+public class GuiFile {
 	private DaxploreFile daxploreFile = null;
 	private File spssFile = null;
 
-	public GUIFile() {
+	public GuiFile() {
 	}
 
 	public DaxploreFile getDaxploreFile() {

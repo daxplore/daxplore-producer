@@ -5,7 +5,7 @@ package gui;
  * @author hkfs89
  *
  */
-public class GUITools {
+public class GuiTools {
 	
 	static boolean checkFlag = false; // activate the version check?
 

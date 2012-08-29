@@ -1,7 +1,7 @@
 package gui.open;
 
-import gui.GUIFile;
-import gui.GUIMain;
+import gui.GuiFile;
+import gui.GuiMain;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -22,10 +22,10 @@ import daxplorelib.DaxploreFile;
  */
 public final class OpenController implements ActionListener {
 
-	private final GUIMain guiMain;
+	private final GuiMain guiMain;
 	private final OpenPanelView openPanelView;
 
-	public OpenController(GUIMain guiMain, OpenPanelView openPanelView) {
+	public OpenController(GuiMain guiMain, OpenPanelView openPanelView) {
 		this.guiMain = guiMain;
 		this.openPanelView = openPanelView;
 	}

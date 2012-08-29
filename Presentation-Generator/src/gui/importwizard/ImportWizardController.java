@@ -136,8 +136,7 @@ public class ImportWizardController implements ActionListener {
     }
     
     /**
-     * Handles SPSS file import.
-     * TODO: Update with more information.
+     * Handles spss file import 
      */
 	public void importSpssFileAction() {
 
@@ -158,7 +157,8 @@ public class ImportWizardController implements ActionListener {
 							"Daxplore file warning", JOptionPane.ERROR_MESSAGE);
 			return;
 		}
-
+		
+		// charsets are stored in the wizard model. Retrieve it from there.
 		Charset charset;
 		try {
 			charset = Charset.forName(hostPanel.getModel().getCharsetName());
@@ -173,11 +173,11 @@ public class ImportWizardController implements ActionListener {
 
 		try {
 			
-			hostPanel.setCursor(
-					Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
+			// show the wait cursor in case the import takes a long time.
+			hostPanel.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
 			hostPanel.getGuiMain().getGuiFile().getDaxploreFile().importSPSS(importFile, charset);
 
-			// update file information text.
+			// NOTE: Information on successful file import is updated elsewhere.
 
 		} catch (FileNotFoundException e2) {
 			JOptionPane.showMessageDialog(this.hostPanel.getGuiMain().getGuiMainFrame(),
