@@ -19,52 +19,90 @@ import javax.swing.border.BevelBorder;
 import javax.swing.LayoutStyle.ComponentPlacement;
 import javax.swing.JList;
 import javax.swing.JButton;
+import javax.swing.SwingConstants;
 
 public class GroupsPanelView extends JPanel {
 	
 	private JLabel lblGroupsPanel = new JLabel();
-	private JTable table;
-	private JTable table_1;
-	private JTable table_2;
+	private JTable questionsTable;
+	private JTable perspectiveTable;
+	private JTable editTable;
 	
 	public GroupsPanelView(GuiMain guiMain) {
 		
 		JPanel questionsPanel = new JPanel();
-		questionsPanel.setBounds(6, 6, 326, 729);
+		questionsPanel.setBounds(6, 43, 334, 692);
 		questionsPanel.setBorder(new BevelBorder(BevelBorder.LOWERED, null, null, null, null));
 		
-		JPanel groupsPanel = new JPanel();
-		groupsPanel.setBounds(344, 6, 354, 321);
-		groupsPanel.setBorder(new BevelBorder(BevelBorder.LOWERED, null, null, null, null));
-		
 		JPanel editPanel = new JPanel();
-		editPanel.setBounds(344, 339, 354, 396);
+		editPanel.setBounds(388, 43, 310, 284);
 		editPanel.setBorder(new BevelBorder(BevelBorder.LOWERED, null, null, null, null));
 		
-		JButton btnNewButton = new JButton("Edit");
-		btnNewButton.setBounds(725, 6, 49, 28);
-		
-		JLabel lblGroupFlow = new JLabel("No file loaded");
-		editPanel.add(lblGroupFlow);
-		
-		JLabel lblEditField = new JLabel("No file loaded");
-		groupsPanel.add(lblEditField);
+		JButton saveButton = new JButton("Save");
+		saveButton.setBounds(710, 43, 90, 28);
 		setLayout(null);
-		add(btnNewButton);
+		add(saveButton);
+		
+		JButton editButton = new JButton("Edit");
+		editButton.setBounds(710, 83, 90, 28);
+		add(editButton);
+		
+		JButton languageButton = new JButton("Language");
+		languageButton.setBounds(710, 123, 90, 28);
+		add(languageButton);
+		
+		JButton addPerspectiveButton = new JButton("+");
+		addPerspectiveButton.setBounds(604, 339, 46, 33);
+		add(addPerspectiveButton);
+		
+		JButton removeButton = new JButton("-");
+		removeButton.setBounds(651, 339, 46, 33);
+		add(removeButton);
+		
+		JButton importQuestionButton = new JButton("->");
+		importQuestionButton.setBounds(341, 149, 46, 50);
+		add(importQuestionButton);
+		
+		JLabel editQuestionsLabel = new JLabel("Edit questions");
+		editQuestionsLabel.setHorizontalAlignment(SwingConstants.LEFT);
+		editQuestionsLabel.setBounds(503, 15, 96, 16);
+		add(editQuestionsLabel);
+		
+		JLabel perspectiveLabel = new JLabel("Perspective");
+		perspectiveLabel.setBounds(503, 346, 78, 16);
+		add(perspectiveLabel);
+		
+		JLabel questionsLabel = new JLabel("Questions");
+		questionsLabel.setHorizontalAlignment(SwingConstants.CENTER);
+		questionsLabel.setBounds(138, 15, 72, 16);
+		add(questionsLabel);
 		add(questionsPanel);
+		questionsPanel.setLayout(new BorderLayout(0, 0));
 		
-		JLabel lblNewLabel = new JLabel("No file loaded");
-		questionsPanel.add(lblNewLabel);
+		JScrollPane questionsScrollPane = new JScrollPane();
+		questionsPanel.add(questionsScrollPane);
 		
-		table = new JTable();
-		questionsPanel.add(table);
+		questionsTable = new JTable();
+		questionsScrollPane.setViewportView(questionsTable);
 		add(editPanel);
+		editPanel.setLayout(new BorderLayout(0, 0));
 		
-		table_2 = new JTable();
-		editPanel.add(table_2);
-		add(groupsPanel);
+		JScrollPane editScrollPane = new JScrollPane();
 		
-		table_1 = new JTable();
-		groupsPanel.add(table_1);
+		editTable = new JTable();
+		editScrollPane.setViewportView(editTable);
+		editPanel.add(editScrollPane);
+		
+		JPanel perspectivePanel = new JPanel();
+		perspectivePanel.setBounds(388, 376, 310, 359);
+		perspectivePanel.setBorder(new BevelBorder(BevelBorder.LOWERED, null, null, null, null));
+		add(perspectivePanel);
+		perspectivePanel.setLayout(new BorderLayout(0, 0));
+		
+		JScrollPane perspectiveScrollPane = new JScrollPane();
+		perspectivePanel.add(perspectiveScrollPane);
+		
+		perspectiveTable = new JTable();
+		perspectiveScrollPane.setViewportView(perspectiveTable);
 	}
 }

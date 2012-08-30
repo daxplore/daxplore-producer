@@ -196,14 +196,6 @@ public class OpenPanelView extends JPanel {
 		lastImportedFileLabel.setBounds(19, 174, 135, 15);
 		
 		daxploreFilePanel.setLayout(null);
-		daxploreFilePanel.add(fileNameLabel);
-		daxploreFilePanel.add(getFileNameField());
-		daxploreFilePanel.add(importDateLabel);
-		daxploreFilePanel.add(getImportDateField());
-		daxploreFilePanel.add(creationDateLabel);
-		daxploreFilePanel.add(getCreationDateField());
-		daxploreFilePanel.add(lastImportedFileLabel);
-		daxploreFilePanel.add(getLastImportFileNameField());
 		
 		openFileButton = new JButton("Open file...");
 		openFileButton.setBounds(19, 35, 135, 27);
@@ -218,6 +210,14 @@ public class OpenPanelView extends JPanel {
 		daxploreFilePanel.add(createNewFileButton);
 		createNewFileButton.addActionListener(openController);
 		createNewFileButton.setToolTipText("Creates a new daxplore project file");
+		daxploreFilePanel.add(fileNameLabel);
+		daxploreFilePanel.add(getFileNameField());
+		daxploreFilePanel.add(importDateLabel);
+		daxploreFilePanel.add(getImportDateField());
+		daxploreFilePanel.add(creationDateLabel);
+		daxploreFilePanel.add(getCreationDateField());
+		daxploreFilePanel.add(lastImportedFileLabel);
+		daxploreFilePanel.add(getLastImportFileNameField());
 		
 		setLayout(gl_openPanel);
 	}

@@ -83,6 +83,7 @@ public class ImportWizardDialog extends JDialog implements PropertyChangeListene
 	 * @param guiMain
 	 */
 	public ImportWizardDialog(final GuiMain guiMain) {
+		setModal(true);
 		
 		importWizardController = new ImportWizardController(this);
 		importWizardModel = new ImportWizardModel();

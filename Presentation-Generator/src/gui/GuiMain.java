@@ -3,6 +3,7 @@ package gui;
 import gui.edit.EditPanelView;
 import gui.groups.GroupsPanelView;
 import gui.open.OpenPanelView;
+import gui.tools.ToolsPanelView;
 
 import java.awt.BorderLayout;
 import java.awt.CardLayout;
@@ -96,6 +97,7 @@ public class GuiMain {
 	private GroupsPanelView groupsPanelView;
 	private EditPanelView editPanelView;
 	private ButtonPanelView buttonPanelView;
+	private ToolsPanelView toolsPanelView;
 	
 	// getters and setters.
 	public ButtonPanelView getButtonPanelView() {
@@ -174,6 +176,7 @@ public class GuiMain {
 		mainPanel.setLayout(new CardLayout(0, 0));
 		guiMainFrame.getContentPane().add(mainPanel, BorderLayout.CENTER);
 		
+		// panel views. TODO: Remake the controller interface.
 		buttonPanelView = new ButtonPanelView(this);
 		guiMainFrame.getContentPane().add(buttonPanelView, BorderLayout.WEST);
 		
@@ -184,6 +187,9 @@ public class GuiMain {
 		mainPanel.add(groupsPanelView, "groupsPanel");
 		
 		editPanelView = new EditPanelView(this);
-		mainPanel.add(editPanelView, "editPanel");	
+		mainPanel.add(editPanelView, "editPanel");
+		
+		toolsPanelView = new ToolsPanelView(this);
+		mainPanel.add(toolsPanelView, "toolsPanel");
 	}
 }

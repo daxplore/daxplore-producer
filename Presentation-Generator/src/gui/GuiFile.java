@@ -37,7 +37,21 @@ public class GuiFile {
 		this.spssFile = spssFile;
 	}
 	
+	public void resetDaxploreFile() {
+		daxploreFile = null;
+	}
+	
 	public void resetSpssFile() {
 		spssFile = null;
+	}
+	
+	/**
+	 * Returns true if a daxplore file is loaded into the system.
+	 */
+	public boolean isSet() {
+		if (daxploreFile == null)
+			return true;
+		else
+			return false;
 	}
 }
