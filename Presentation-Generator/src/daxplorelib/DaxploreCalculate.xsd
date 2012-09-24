@@ -1,127 +1,136 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <xsd:schema xmlns:xsd="http://www.w3.org/2001/XMLSchema" targetNamespace="http://www.example.org/DaxploreCalculate" xmlns:dax="http://www.example.org/DaxploreCalculate" elementFormDefault="qualified">
 	
-	<xsd:element name="TimeSeriesLong">
-		<xsd:complexType>
-			<xsd:sequence minOccurs="1" maxOccurs="unbounded">
-				<xsd:element ref="dax:TimePointLong" />
-			</xsd:sequence>
-		</xsd:complexType>
-	</xsd:element>
-	
-	<xsd:element name="TimePointLong">
-		<xsd:complexType>
-			<xsd:sequence>
-				<xsd:element name="name" type="xsd:string" />
-			</xsd:sequence>
-			<xsd:attribute name="id" type="xsd:ID" />
-		</xsd:complexType>
-	</xsd:element>
-	
-	<xsd:element name="TimeSeriesShort">
-		<xsd:complexType>
-			<xsd:sequence>
-				<xsd:element name="column" type="xsd:string" />
+	<xsd:complexType name="QuestionType">
+		<xsd:sequence>
+			<xsd:choice>
 				<xsd:sequence minOccurs="1" maxOccurs="unbounded">
-					<xsd:element ref="dax:TimePointShort" />
+					<xsd:element name="Variable" type="dax:VariableLongType" />
 				</xsd:sequence>
+				<xsd:sequence minOccurs="1" maxOccurs="unbounded">
+					<xsd:element name="Variable" type="dax:VariableShortType" />
+				</xsd:sequence>
+			</xsd:choice>
+		</xsd:sequence>
+		<xsd:attribute name="id" type="xsd:IDREF" use="required" />
+	</xsd:complexType>
+	
+	
+	
+	<!-- Time series types -->
+	
+	<xsd:complexType name="TimeSeriesLongType">
+		<xsd:sequence minOccurs="1" maxOccurs="unbounded">
+			<xsd:element type="dax:TimePointLongType" />
+		</xsd:sequence>
+	</xsd:complexType>
+	
+	<xsd:complexType name="TimePointLongType">
+		<xsd:sequence>
+			<xsd:element name="name" type="xsd:string" />
+		</xsd:sequence>
+		<xsd:attribute name="id" type="xsd:ID" use="required" />
+	</xsd:complexType>
+
+	<xsd:complexType name="TimeSeriesShortType">
+		<xsd:sequence>
+			<xsd:element name="column" type="xsd:string" />
+			<xsd:sequence minOccurs="1" maxOccurs="unbounded">
+				<xsd:element type="dax:TimePointShortType" />
 			</xsd:sequence>
-		</xsd:complexType>
-	</xsd:element>
-	
-	<xsd:element name="TimePointShort">
-		<xsd:complexType>
-			<xsd:sequence>
-				<xsd:element name="name" type="xsd:string" />
-				<xsd:element name="value" type="xsd:integer" />
-			</xsd:sequence>
-			<xsd:attribute name="id" type="xsd:ID" />
-		</xsd:complexType>
-	</xsd:element>
-	
-		
-	
-	<xsd:element name="Calculations">
-    	<xsd:complexType>
-    		<xsd:sequence>
-    			<xsd:element ref="dax:Variables"></xsd:element>
-    		</xsd:sequence>
-    	</xsd:complexType>
-    </xsd:element>
+		</xsd:sequence>
+	</xsd:complexType>
 
-    <xsd:element name="Variable">
-        <xsd:complexType>
-	    	<xsd:sequence>
-				<xsd:element name="column">
-				    <xsd:complexType>
-				    	<xsd:sequence>
-				    		<xsd:element name="value" maxOccurs="unbounded" minOccurs="0">
-				    			<xsd:complexType>
-				    				<xsd:simpleContent>
-				    					<xsd:extension base="xsd:integer">
-				    						<xsd:attribute name="ignore" type="xsd:boolean" default="false"></xsd:attribute>
-				    						<xsd:attribute name="original" type="xsd:int"></xsd:attribute>
-				    					</xsd:extension>
-				    				</xsd:simpleContent>
-				    			</xsd:complexType>
-				    		</xsd:element>
-				    	</xsd:sequence>
-				    	<xsd:attribute name="sqlName" type="xsd:string"></xsd:attribute>
-				    	<xsd:attribute name="time" type="xsd:IDREF"></xsd:attribute>
-				    </xsd:complexType>
-				</xsd:element>
-	        </xsd:sequence>
-	    	<xsd:attribute name="id" use="required" type="xsd:ID"></xsd:attribute>
-    	</xsd:complexType>
-    </xsd:element>
+	<xsd:complexType name="TimePointShortType">
+		<xsd:sequence>
+			<xsd:element name="name" type="xsd:string" />
+			<xsd:element name="value" type="xsd:integer" />
+		</xsd:sequence>
+		<xsd:attribute name="id" type="xsd:ID" use="required" />
+	</xsd:complexType>
 	
-
-    <xsd:element name="Question">
-    	<xsd:complexType>
-    		<xsd:sequence>
-    			<xsd:element name="Calc" maxOccurs="unbounded" minOccurs="0">
-    				<xsd:complexType>
-    					<xsd:choice>
-    						<xsd:element name="var" type="xsd:IDREF"></xsd:element>
-    						<xsd:element ref="dax:Variable"></xsd:element>
-    					</xsd:choice>
-    				</xsd:complexType>
-    			</xsd:element>
-    		</xsd:sequence>
-    	</xsd:complexType>
-    </xsd:element>
-    
-	<xsd:element name="Questions">
-    	<xsd:complexType>
-    		<xsd:sequence>
-    			<xsd:element ref="dax:Question" maxOccurs="unbounded" minOccurs="0"></xsd:element>
-    		</xsd:sequence>
-    	</xsd:complexType>
-    </xsd:element>
-    
-
-	<xsd:element name="TimeSeries">
-		<xsd:complexType>
-			<xsd:sequence>
-				<xsd:element ref="dax:Time"></xsd:element>
-			</xsd:sequence>
-		</xsd:complexType>
-	</xsd:element>
-
-	<xsd:element name="Time">
-		<xsd:complexType>
-			<xsd:attribute name="id" use="required" type="xsd:ID"></xsd:attribute>
-		</xsd:complexType>
-	</xsd:element>
 	
-	<xsd:simpleType name="CALC_TYPE">
-		<xsd:restriction base="xsd:string">
-			<xsd:enumeration value="Crosstabs" />
-			<xsd:enumeration value="ChiSquared" />
-			<xsd:enumeration value="PearsonCorrelation" />
-			<xsd:enumeration value="Regression" />
-			<xsd:enumeration value="Spearmans_rs" />
-			<xsd:enumeration value="AverageAndStandardDeviation" />
+	
+	<!-- Variable types -->
+	
+	<xsd:complexType name="VariableListType">
+		<xsd:simpleContent>
+			<xsd:extension base="xsd:IDREFS">
+				<xsd:attribute name="id" type="xsd:ID" use="required" />
+			</xsd:extension>
+		</xsd:simpleContent>
+	</xsd:complexType>
+	
+	<xsd:complexType name="VariableLongType">
+		<xsd:sequence minOccurs="1" maxOccurs="unbounded">
+			<xsd:element type="dax:ColumnLongType" />
+		</xsd:sequence>
+		<xsd:attribute name="id" type="xsd:ID" use="required" />
+	</xsd:complexType>
+	
+	<xsd:complexType name="VariableShortType">
+		<xsd:sequence>
+			<xsd:element type="dax:ColumnType" />
+			<xsd:element name="TimePointRefs" type="xsd:IDREFS" />
+		</xsd:sequence>
+		<xsd:attribute name="id" type="xsd:ID" use="required" />
+	</xsd:complexType>
+	
+	
+	
+	<!-- Column types (part of variables) --> 
+	
+	<xsd:complexType name="ColumnType">
+		<xsd:sequence>
+			<xsd:element name="ColumnName" type="dax:noSpaceToken" />
+			<xsd:element name="Transformations">
+				<xsd:complexType>
+					<xsd:sequence minOccurs="1" maxOccurs="unbounded">
+						<xsd:element name="Transform" type="dax:transformType" />
+					</xsd:sequence>
+				</xsd:complexType>
+			</xsd:element>
+		</xsd:sequence>
+	</xsd:complexType>
+	
+	<xsd:complexType name="ColumnLongType">
+		<xsd:complexContent>
+			<xsd:extension base="Column">
+				<xsd:sequence>
+					<xsd:element name="TimePointRef" type="xsd:IDREF" />
+				</xsd:sequence>
+			</xsd:extension>
+		</xsd:complexContent>
+	</xsd:complexType>
+	
+	
+	
+	<!-- Transformations types (part of Column) -->
+	
+	<xsd:complexType name="transformType">
+		<xsd:simpleContent>
+			<xsd:extension base="dax:transformString">
+				<xsd:attribute name="value">
+					<xsd:simpleType>
+						<xsd:restriction base="xsd:token">
+							<xsd:pattern value="(\d+)|ignore" />
+						</xsd:restriction>
+					</xsd:simpleType>
+				</xsd:attribute>
+			</xsd:extension>
+		</xsd:simpleContent>
+	</xsd:complexType>
+	
+	<xsd:simpleType name="transformString">
+		<xsd:restriction base="xsd:token">
+			<xsd:pattern value="\d+(-\d+)?(,\d+(-\d+)?)*" />
 		</xsd:restriction>
 	</xsd:simpleType>
+	
+	<xsd:simpleType name="noSpaceToken">
+		<xsd:restriction base="xsd:token">
+			<xsd:pattern value="[\S]+" />
+		</xsd:restriction>
+	</xsd:simpleType>
+
 </xsd:schema>
