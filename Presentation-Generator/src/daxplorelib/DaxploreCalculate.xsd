@@ -4,13 +4,10 @@
 	<xsd:complexType name="QuestionType">
 		<xsd:sequence>
 			<xsd:choice>
-				<xsd:sequence minOccurs="1" maxOccurs="unbounded">
-					<xsd:element name="Variable" type="dax:VariableLongType" />
-				</xsd:sequence>
-				<xsd:sequence minOccurs="1" maxOccurs="unbounded">
-					<xsd:element name="Variable" type="dax:VariableShortType" />
-				</xsd:sequence>
+				<xsd:element name="Variable" type="dax:VariableLongType" />
+				<xsd:element name="Variable" type="dax:VariableShortType" />
 			</xsd:choice>
+			<xsd:element name="Calculations" type="dax:CalcListType" />
 		</xsd:sequence>
 		<xsd:attribute name="id" type="xsd:IDREF" use="required" />
 	</xsd:complexType>
@@ -127,10 +124,56 @@
 		</xsd:restriction>
 	</xsd:simpleType>
 	
+	
+	
+	<!-- Calculation types -->
+	
+	<xsd:complexType name="CalcListType">
+		<xsd:sequence minOccurs="0" maxOccurs="unbounded">
+			<xsd:choice>
+				<xsd:element type="dax:Crosstabs2" />
+				<xsd:element type="dax:Crosstabs3" />
+				<xsd:element type="dax:Boxplotish" />
+			</xsd:choice>
+		</xsd:sequence>
+	</xsd:complexType>
+	
+	<xsd:complexType name="Crosstabs2">
+		<xsd:sequence>
+			<xsd:element name="Var1" type="xsd:IDREF" />
+			<xsd:element name="Var2List" type="xsd:IDREFS" />
+		</xsd:sequence>
+	</xsd:complexType>
+	
+	<xsd:complexType name="Crosstabs3">
+		<xsd:sequence>
+			<xsd:element name="Var1" type="xsd:IDREF" />
+			<xsd:element name="Var2List" type="xsd:IDREFS" />
+			<xsd:element name="Var3List" type="xsd:IDREFS" />
+		</xsd:sequence>
+	</xsd:complexType>
+	
+	<xsd:complexType name="Boxplotish">
+		<xsd:sequence>
+			<xsd:element name="Var1" type="xsd:IDREF" />
+			<xsd:element name="Var2List" type="xsd:IDREFS" />
+		</xsd:sequence>
+	</xsd:complexType>
+	
+	
+	
+	<!-- General stuff -->
+	
 	<xsd:simpleType name="noSpaceToken">
 		<xsd:restriction base="xsd:token">
 			<xsd:pattern value="[\S]+" />
 		</xsd:restriction>
 	</xsd:simpleType>
+	
+	
+	
+	<!-- Possible root elements -->
+	
+	<xsd:element name="Question" type="QuestionType" />
 
 </xsd:schema>
