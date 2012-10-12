@@ -73,26 +73,20 @@
 		<xsd:attribute name="id" type="xsd:ID" use="required" />
 	</xsd:complexType>
 	
-	
+	<!-- Column in sclae?!?!?!? -->
 	
 	<!-- Column types (part of variables) --> 
 	
 	<xsd:complexType name="ColumnType">
 		<xsd:sequence>
 			<xsd:element name="ColumnName" type="dax:noSpaceToken" />
-			<xsd:element name="Transformations">
-				<xsd:complexType>
-					<xsd:sequence minOccurs="1" maxOccurs="unbounded">
-						<xsd:element name="Transform" type="dax:transformType" />
-					</xsd:sequence>
-				</xsd:complexType>
-			</xsd:element>
+			<xsd:element name="Scale" type="dax:ScaleType" />
 		</xsd:sequence>
 	</xsd:complexType>
 	
 	<xsd:complexType name="ColumnLongType">
 		<xsd:complexContent>
-			<xsd:extension base="Column">
+			<xsd:extension base="dax:ColumnType">
 				<xsd:sequence>
 					<xsd:element name="TimePointRef" type="xsd:IDREF" />
 				</xsd:sequence>
@@ -101,24 +95,26 @@
 	</xsd:complexType>
 	
 	
+	<!-- Scale types -->
 	
-	<!-- Transformations types (part of Column) -->
-	
-	<xsd:complexType name="transformType">
-		<xsd:simpleContent>
-			<xsd:extension base="dax:transformString">
-				<xsd:attribute name="value">
-					<xsd:simpleType>
-						<xsd:restriction base="xsd:token">
-							<xsd:pattern value="(\d+)|ignore" />
-						</xsd:restriction>
-					</xsd:simpleType>
-				</xsd:attribute>
-			</xsd:extension>
-		</xsd:simpleContent>
+	<xsd:complexType name="ScaleType">
+		<xsd:sequence>
+			<!-- <Option> element order defines order of options in Scale -->
+			<xsd:element name="Option" type="dax:ScaleOptionType" minOccurs="0" maxOccurs="unbounded" />
+			<xsd:element name="Ignore" type="dax:ScaleOptionTransformType" minOccurs="0" maxOccurs="1" />
+		</xsd:sequence>
+		<xsd:attribute name="id" type="xsd:IDREF" />
 	</xsd:complexType>
 	
-	<xsd:simpleType name="transformString">
+	<xsd:complexType name="ScaleOptionType">
+		<xsd:sequence>
+			<xsd:element name="TextRef" type="dax:TextReferenceType" />
+			<xsd:element name="Value" type="xsd:decimal" />
+			<xsd:element name="Transform" type="dax:ScaleOptionTransformType" />
+		</xsd:sequence>
+	</xsd:complexType>
+	
+	<xsd:simpleType name="ScaleOptionTransformType">
 		<xsd:restriction base="xsd:token">
 			<xsd:pattern value="\d+(-\d+)?(,\d+(-\d+)?)*" />
 		</xsd:restriction>
@@ -160,7 +156,13 @@
 		</xsd:sequence>
 	</xsd:complexType>
 	
-	
+	<!-- Text Reference stuff -->
+
+	<xsd:simpleType name="TextReferenceType">
+		<xsd:restriction base="xsd:token">
+			<xsd:pattern value="[\S]+" />
+		</xsd:restriction>
+	</xsd:simpleType>
 	
 	<!-- General stuff -->
 	
