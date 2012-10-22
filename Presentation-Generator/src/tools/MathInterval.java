@@ -21,6 +21,15 @@ public class MathInterval{
 			}
 		}
 		
+		public Interval(String inter) {
+			lowInclusive = inter.charAt(0) == '[';
+			highInclusive = inter.charAt(inter.length() -1) == ']';
+			inter = inter.substring(1, inter.length()-1);
+			String[] numbers = inter.split(",");
+			low = Double.parseDouble(numbers[0]);
+			high = Double.parseDouble(numbers[1]);
+		}
+		
 		public boolean contains(double value) {
 			return (value > low  | (lowInclusive  & value == low )) &
 				   (value < high | (highInclusive & value == high)); 
@@ -39,12 +48,40 @@ public class MathInterval{
 				throw new AssertionError();
 			}
 		}
+		
+		public String toString() {
+			return (lowInclusive ? "[": "(") + 
+					low + "," + high + 
+					(highInclusive ? "]" : ")");
+		}
 	}
 	
 	List<Interval> intervals = new LinkedList<Interval>();
 	
-	public MathInterval(String intervalString) {
+	public static void main(String[] args){
+		//System.out.println(Double.valueOf("-inf"));
+		//System.out.println(Double.valueOf("-Inf"));
+		//System.out.println(Double.valueOf("-infinity"));
+		System.out.println(Double.valueOf("-Infinity"));
 		
+		double d = Double.parseDouble("-Infinity");
+		String a ="look " + d;
+		System.out.println(a);
+		
+		MathInterval mi = new MathInterval("[-Infinity, -1)U[0,5]");
+		System.out.println(mi);
+		MathInterval mi2 = new MathInterval("[-3, -1]U[2,7]");
+		System.out.println(mi2);
+		mi.unionWith(mi2);
+		System.out.println(mi);
+		
+	}
+	
+	public MathInterval(String intervalString) {
+		String[] interStrings = intervalString.split("U");
+		for(String inter: interStrings) {
+			intervals.add(new Interval(inter));
+		}
 	}
 	
 	public MathInterval(double a, boolean aInclusive, double b, boolean bInclusive) {
@@ -113,8 +150,6 @@ public class MathInterval{
 		
 		intervals = interlist;
 	}
-	
-	
 	
 	protected Interval combine(Interval interval1, Interval interval2) {
 		boolean lowIncluded = interval1.contains(interval2.low);
@@ -186,6 +221,6 @@ public class MathInterval{
 	
 	@Override
 	public String toString() {
-		return null;
+		return MyTools.join(intervals, "U");
 	}
 }
