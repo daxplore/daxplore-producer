@@ -116,7 +116,7 @@
 	
 	<xsd:simpleType name="ScaleOptionTransformType">
 		<xsd:restriction base="xsd:token">
-			<xsd:pattern value="\d+(-\d+)?(,\d+(-\d+)?)*" />
+			<xsd:pattern value="*" />
 		</xsd:restriction>
 	</xsd:simpleType>
 	

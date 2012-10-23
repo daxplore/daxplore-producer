@@ -18,6 +18,7 @@ import org.json.simple.JSONObject;
 import daxplorelib.DaxploreTable;
 
 import tools.MyTools;
+import tools.NumberlineCoverage;
 import tools.Pair;
 
 public class MetaScale {
@@ -67,10 +68,10 @@ public class MetaScale {
 	
 	public class Option {
 		TextReference textRef;
-		int value;
-		MetaScaleTransformation transformation;
+		double value;
+		NumberlineCoverage transformation;
 		
-		public Option(TextReference textRef, int value, MetaScaleTransformation transformation) {
+		public Option(TextReference textRef, double value, NumberlineCoverage transformation) {
 			this.textRef = textRef; this.value = value; this.transformation = transformation;
 		}
 	}
@@ -113,18 +114,19 @@ public class MetaScale {
 	/**
 	 * 
 	 * @param value
-	 * @return -1 equals ignore
+	 * @throws Exception 
 	 */
-	public int transform(int value) {
+	public double transform(double value) throws Exception {
 		for(Option opt: options) {
 			if(opt.transformation.contains(value)) {
 				return opt.value;
 			}
 		}
-		if(ignore.transformation.contains(value)) {
-			return -1;
-		}
-		throw new Error(); //TODO
+		throw new Exception("Ignore Exception");
+	}
+	
+	public boolean ignored(double value) {
+		return ignore.transformation.contains(value);
 	}
 	
 }

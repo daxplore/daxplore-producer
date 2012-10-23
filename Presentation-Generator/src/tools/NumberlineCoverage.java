@@ -7,14 +7,16 @@ import java.util.List;
 /**
  * @author Axel Winkler, Daniel Dunér
  */
-public class MathInterval{
+public class NumberlineCoverage {
 	
 	protected class Interval implements Cloneable{
 		double low, high;
 		boolean lowInclusive, highInclusive;
 		
-		public Interval(double low, boolean lowInclusive, double high, boolean highInclusive) {
-			if(high >= low) {
+		public Interval(double low, boolean lowInclusive, double high, boolean highInclusive) throws NumberlineCoverageException {
+			if(high == low & !lowInclusive & ! highInclusive) {
+				throw new NumberlineCoverageException("Nonexistant interval");
+			} else if(high >= low) {
 				this.low = low; this.high = high; this.lowInclusive = lowInclusive; this.highInclusive = highInclusive;
 			} else {
 				this.low = high; this.high = low; this.lowInclusive = highInclusive; this.highInclusive = lowInclusive;				
@@ -50,49 +52,56 @@ public class MathInterval{
 		}
 		
 		public String toString() {
-			return (lowInclusive ? "[": "(") + 
+			return low==high?
+					low + "":
+					(lowInclusive ? "[": "(") + 
 					low + "," + high + 
 					(highInclusive ? "]" : ")");
 		}
 	}
 	
-	List<Interval> intervals = new LinkedList<Interval>();
-	
-	public static void main(String[] args){
-		//System.out.println(Double.valueOf("-inf"));
-		//System.out.println(Double.valueOf("-Inf"));
-		//System.out.println(Double.valueOf("-infinity"));
-		System.out.println(Double.valueOf("-Infinity"));
-		
-		double d = Double.parseDouble("-Infinity");
-		String a ="look " + d;
-		System.out.println(a);
-		
-		MathInterval mi = new MathInterval("[-Infinity, -1)U[0,5]");
-		System.out.println(mi);
-		MathInterval mi2 = new MathInterval("[-3, -1]U[2,7]");
-		System.out.println(mi2);
-		mi.unionWith(mi2);
-		System.out.println(mi);
+	@SuppressWarnings("serial")
+	public class NumberlineCoverageException extends Exception {
+
+		public NumberlineCoverageException(String string) {
+			super(string);
+		}
 		
 	}
 	
-	public MathInterval(String intervalString) {
+	List<Interval> intervals = new LinkedList<Interval>();
+	
+	public static void main(String[] args){
+
+		
+	}
+	
+	public NumberlineCoverage(String intervalString) {
 		String[] interStrings = intervalString.split("U");
 		for(String inter: interStrings) {
 			intervals.add(new Interval(inter));
 		}
 	}
 	
-	public MathInterval(double a, boolean aInclusive, double b, boolean bInclusive) {
+	public NumberlineCoverage(double a, boolean aInclusive, double b, boolean bInclusive) throws NumberlineCoverageException {
 		intervals.add(new Interval(a, aInclusive, b, bInclusive));
 	}
 	
-	protected void addInterval(Interval interval) {
-		addInterval(interval.low, interval.lowInclusive, interval.high, interval.highInclusive);
+	public NumberlineCoverage() {}
+	
+	public void addNumber(double a) {
+		try {
+			addInterval(a, true, a, true);
+		} catch (NumberlineCoverageException e) {
+			throw new AssertionError();
+		}
 	}
 	
-	public void addInterval(double a, boolean aInclusive, double b, boolean bInclusive) {
+	protected void addInterval(Interval interval) {
+		addInterval(interval.clone());
+	}
+	
+	public void addInterval(double a, boolean aInclusive, double b, boolean bInclusive) throws NumberlineCoverageException {
 		Interval newInterval = new Interval(a, aInclusive, b, bInclusive);
 		List<Interval> interlist = new LinkedList<Interval>();
 		
@@ -109,8 +118,14 @@ public class MathInterval{
 					(newInterval.low == oldInterval.high &
 					(newInterval.lowInclusive | oldInterval.highInclusive))) {
 				interlist.add(oldInterval);
+				if(i == intervals.size() -1) {
+					interlist.add(newInterval);
+				}
 			} else {
 				newInterval = combine(oldInterval, newInterval);
+				if(i == intervals.size() -1) {
+					interlist.add(newInterval);
+				}
 			}
 		}
 		intervals = interlist;
@@ -121,31 +136,50 @@ public class MathInterval{
 	}
 	
 	public void removeInterval(double a, boolean aInclusive, double b, boolean bInclusive) {
-		Interval newInterval = new Interval(a, aInclusive, b, bInclusive);
+		Interval newInterval;
+		try {
+			newInterval = new Interval(a, aInclusive, b, bInclusive);
+		} catch (NumberlineCoverageException e) {
+			return;
+		}
 		List<Interval> interlist = new LinkedList<Interval>();
 		
-		for(int i = 0; i < intervals.size(); i++) {
-			Interval oldInterval = intervals.get(i);
-			boolean lowContained = oldInterval.contains(newInterval.low);
-			boolean highContained = oldInterval.contains(newInterval.high);
-			if(newInterval.high < oldInterval.low | 
-					(newInterval.high == oldInterval.low & 
-					!(newInterval.highInclusive & oldInterval.lowInclusive))) { // if newInterval is before oldInterval (with consideration to edges)
-				for(; i < intervals.size(); i++) {
-					interlist.add(intervals.get(i));
-				}
-			} else if(newInterval.low > oldInterval.high | 
-					(newInterval.low == oldInterval.high &
-					!(newInterval.lowInclusive & oldInterval.highInclusive))) {
-				interlist.add(oldInterval);
-			} else if(!lowContained & highContained) { 
-				interlist.add(new Interval(newInterval.high, !newInterval.highInclusive, oldInterval.high, oldInterval.highInclusive));
-			} else if(lowContained & !highContained) { 
-				interlist.add(new Interval(oldInterval.low, oldInterval.lowInclusive, newInterval.low, !newInterval.lowInclusive));
-			} else if(lowContained & highContained) {
-				interlist.add(new Interval(oldInterval.low, oldInterval.lowInclusive, newInterval.low, !newInterval.lowInclusive));
-				interlist.add(new Interval(newInterval.high, !newInterval.highInclusive, oldInterval.high, oldInterval.highInclusive));
-			} // else if oldInterval is contained in new, remove old.
+		try {
+			for(int i = 0; i < intervals.size(); i++) {
+				Interval oldInterval = intervals.get(i);
+				boolean lowContained = oldInterval.contains(newInterval.low);
+				boolean lowEquals = oldInterval.low == newInterval.low & (newInterval.lowInclusive | !oldInterval.lowInclusive);
+				boolean highContained = oldInterval.contains(newInterval.high);
+				boolean highEquals = oldInterval.high == newInterval.high & (newInterval.highInclusive | !oldInterval.highInclusive);
+				if(newInterval.high < oldInterval.low | 
+						(newInterval.high == oldInterval.low & 
+						!(newInterval.highInclusive & oldInterval.lowInclusive))) { // if newInterval is before oldInterval (with consideration to edges)
+					for(; i < intervals.size(); i++) {
+						interlist.add(intervals.get(i));
+					}
+				} else if(newInterval.low > oldInterval.high | 
+						(newInterval.low == oldInterval.high &
+						!(newInterval.lowInclusive & oldInterval.highInclusive))) {
+					interlist.add(oldInterval);
+				} else if(!lowContained & highContained) {
+					if(!highEquals) {
+						interlist.add(new Interval(newInterval.high, !newInterval.highInclusive, oldInterval.high, oldInterval.highInclusive));
+					}
+				} else if(lowContained & !highContained) { 
+					if(!lowEquals) {
+						interlist.add(new Interval(oldInterval.low, oldInterval.lowInclusive, newInterval.low, !newInterval.lowInclusive));
+					}
+				} else if(lowContained & highContained) {
+					if(!lowEquals) {
+						interlist.add(new Interval(oldInterval.low, oldInterval.lowInclusive, newInterval.low, !newInterval.lowInclusive));
+					}
+					if(!highEquals) {
+						interlist.add(new Interval(newInterval.high, !newInterval.highInclusive, oldInterval.high, oldInterval.highInclusive));
+					}
+				} // else if oldInterval is contained in new, remove old.
+			}
+		}catch (NumberlineCoverageException e) {
+			throw new AssertionError();
 		}
 		
 		intervals = interlist;
@@ -157,29 +191,33 @@ public class MathInterval{
 		if(lowIncluded & highIncluded) {
 			return interval1;
 		} else if(lowIncluded) {
-			return new Interval(interval1.low, interval1.lowInclusive, interval2.high, interval2.highInclusive);
+			try {
+				return new Interval(interval1.low, interval1.lowInclusive, interval2.high, interval2.highInclusive);
+			} catch (NumberlineCoverageException e) {
+				throw new AssertionError();
+			}
 		} else if(highIncluded) {
-			return new Interval(interval2.low, interval2.lowInclusive, interval1.high, interval1.highInclusive);
+			try {
+				return new Interval(interval2.low, interval2.lowInclusive, interval1.high, interval1.highInclusive);
+			} catch (NumberlineCoverageException e) {
+				throw new AssertionError();
+			}
 		} else return null;
 	}
 	
-	public void addValue(double value) {
-		addInterval(value, true, value, true);
-	}
-	
-	public void unionWith(MathInterval otherInterval) {
+	public void unionWith(NumberlineCoverage otherInterval) {
 		for(Interval interval: otherInterval.intervals) {
 			addInterval(interval);
 		}
 	}
 	
-	public void differenceWith(MathInterval otherInterval) {
+	public void differenceWith(NumberlineCoverage otherInterval) {
 		for(Interval interval: otherInterval.intervals) {
 			removeInterval(interval);
 		}
 	}
 	
-	public void intersectWith(MathInterval otherInterval) {
+	public void intersectWith(NumberlineCoverage otherInterval) {
 		List<Interval> interlist = new LinkedList<Interval>();
 		
 		for(Interval newInterval: otherInterval.intervals) {
@@ -196,9 +234,17 @@ public class MathInterval{
 						!(newInterval.lowInclusive & oldInterval.highInclusive))) {
 					break;
 				} else if(!lowContained & highContained) {
-					interlist.add(new Interval(oldInterval.low, oldInterval.lowInclusive, newInterval.high, newInterval.highInclusive));
+					try {
+						interlist.add(new Interval(oldInterval.low, oldInterval.lowInclusive, newInterval.high, newInterval.highInclusive));
+					} catch (NumberlineCoverageException e) {
+						throw new AssertionError();
+					}
 				} else if(lowContained & !highContained) { 
-					interlist.add(new Interval(newInterval.low, newInterval.lowInclusive, oldInterval.high, oldInterval.highInclusive));
+					try {
+						interlist.add(new Interval(newInterval.low, newInterval.lowInclusive, oldInterval.high, oldInterval.highInclusive));
+					} catch (NumberlineCoverageException e) {
+						throw new AssertionError();
+					}
 				} else if(lowContained & highContained) {
 					interlist.add(newInterval.clone());
 				} else { // else if oldInterval is contained in new, keep old
