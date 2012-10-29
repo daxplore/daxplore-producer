@@ -16,15 +16,21 @@ import org.json.simple.JSONAware;
 import org.json.simple.JSONObject;
 
 import daxplorelib.DaxploreTable;
+import daxplorelib.SQLTools;
 
 import tools.MyTools;
 import tools.NumberlineCoverage;
 import tools.Pair;
 
 public class MetaScale {
-	protected static final DaxploreTable table = 
-			new DaxploreTable("CREATE TABLE metascale (id INTEGER, textref STRING, ord INTEGER, value REAL)", "metascale");
-
+	
+	protected static final DaxploreTable maintable = new DaxploreTable(
+			"CREATE TABLE metascale (id INTEGER PRIMARY KEY, ignore STRING)"
+			, "metascale");
+	protected static final DaxploreTable optiontable = new DaxploreTable(
+			"CREATE TABLE metascaleoption (FOREIGN KEY(scaleid) REFERENCES metascale(id), textref STRING, ord INTEGER, value REAL, transform STRING)"
+			, "metascaleoption");
+	
 	public class MetaScaleManager {
 		Map<Integer, MetaScale> scaleMap = new HashMap<Integer, MetaScale>();
 		Connection connection;
@@ -33,32 +39,100 @@ public class MetaScale {
 			this.connection = connection;
 		}
 		
-		protected void init() {
-			
-		}
-		
-		public MetaScale getMetaScale(int id) {
-			if(scaleMap.containsKey(id)) {
-				return scaleMap.get(id);
-			} else {
-				//get stuff from db here and create a metascale
-				return null;
+		protected void init() throws SQLException {
+			if(!SQLTools.tableExists(maintable.name, connection)) {
+				Statement stmt = connection.createStatement();
+				stmt.executeUpdate(maintable.sql);
+			}
+			if(!SQLTools.tableExists(optiontable.name, connection)) {
+				Statement stmt = connection.createStatement();
+				stmt.executeUpdate(optiontable.sql);
 			}
 		}
 		
-		public MetaScale createMetaScale() {
-			//create MetaScale here (look at MetaScale(List<Pair<TextReference,Double>>, Connection) for code
-			return null;
+		public MetaScale getMetaScale(int id) throws SQLException {
+			if(scaleMap.containsKey(id)) {
+				return scaleMap.get(id);
+			} else {
+				PreparedStatement stmt = connection.prepareStatement("SELECT * FROM metascale WHERE id = ?");
+				stmt.setInt(1, id);
+				ResultSet rs = stmt.executeQuery();
+				rs.next();
+				NumberlineCoverage ignore = new NumberlineCoverage(rs.getString("ignore"));
+				
+				stmt = connection.prepareStatement("SELECT * FROM metascaleoption WHERE id = ? ORDER BY ord");
+				stmt.setInt(1, id);
+				rs = stmt.executeQuery();
+				
+				List<Option> options = new LinkedList<Option>();
+				
+				while(rs.next()) {
+					options.add(
+							new Option(
+									new TextReference(rs.getString("textref"), connection), 
+									rs.getDouble("value"), 
+									new NumberlineCoverage(rs.getString("transform"))));
+				}
+				MetaScale ms = new MetaScale(id, options, ignore);
+				scaleMap.put(id, ms);
+				return ms;
+			}
+		}
+		
+		public MetaScale createMetaScale(List<Option> options, NumberlineCoverage ignore) throws SQLException {
+			PreparedStatement createScaleStmt = connection.prepareStatement("INSERT INTO metascale (ignore) VALUES (?)");
+			createScaleStmt.setString(1, ignore.toString());
+			createScaleStmt.execute();
+			
+			int id = SQLTools.lastId(maintable.name, connection);
+			
+			PreparedStatement addOptionStmt = connection.prepareStatement("INSERT INTO metascaleoption (scaleid, textref, ord, value, transform) VALUES (?, ?, ?, ?, ?)");
+			
+			int ord = 0;
+			for(Option opt: options) {
+				ord++;
+				addOptionStmt.setInt(1, id);
+				addOptionStmt.setString(2, opt.textRef.getRef());
+				addOptionStmt.setInt(3, ord);
+				addOptionStmt.setDouble(4, opt.value);
+				addOptionStmt.setString(5, opt.transformation.toString());
+				addOptionStmt.addBatch();
+			}
+			addOptionStmt.executeBatch();
+			
+			MetaScale ms = new MetaScale(id, options, ignore);
+			scaleMap.put(id, ms);
+			return ms;
 		}
 		
 		public void remove(int id) {
 			
 		}
 		
-		public void saveAll() {
+		public void saveAll() throws SQLException {
+			PreparedStatement scaleStmt = connection.prepareStatement("UPDATE metascale SET ignore = ? WHERE id = ? ");
+			PreparedStatement removeOptionStmt = connection.prepareStatement("DELETE FROM metascaleoption WHERE scaleid = ?");
+			PreparedStatement addOptionStmt = connection.prepareStatement("INSERT INTO metascaleoption (scaleid, textref, ord, value, transform) VALUES (?, ?, ?, ?, ?)");
 			for(MetaScale ms: scaleMap.values()) {
 				if(ms.modified) {
-					//Save here
+					scaleStmt.setInt(2, ms.id);
+					scaleStmt.setString(1, ms.ignore.toString());
+					scaleStmt.executeUpdate();
+					
+					removeOptionStmt.setInt(1, ms.id);
+					removeOptionStmt.executeUpdate();
+					
+					int ord = 0;
+					for(Option opt: ms.options) {
+						ord++;
+						addOptionStmt.setInt(1, ms.id);
+						addOptionStmt.setString(2, opt.textRef.getRef());
+						addOptionStmt.setInt(3, ord);
+						addOptionStmt.setDouble(4, opt.value);
+						addOptionStmt.setString(5, opt.transformation.toString());
+						addOptionStmt.addBatch();
+					}
+					addOptionStmt.executeBatch();
 					ms.modified = false;
 				}
 			}
@@ -79,14 +153,15 @@ public class MetaScale {
 	
 	/** Each Option's position is defined by the order of this list */
 	List<Option> options;
-	Option ignore;
+	NumberlineCoverage ignore;
 
 	int id;
 	boolean modified = false;
 	
-	public MetaScale(int id, List<Option> options) {
+	public MetaScale(int id, List<Option> options, NumberlineCoverage ignore) {
 		this.id = id;
 		this.options = options;
+		this.ignore = ignore;
 	}
 	
 	public int getId() {
@@ -102,11 +177,11 @@ public class MetaScale {
 		modified = true;
 	}
 
-	public Option getIgnoreOption() {
+	public NumberlineCoverage getIgnoreOption() {
 		return ignore;
 	}
 	
-	public void setIgnoreOption(Option ignore) {
+	public void setIgnoreOption(NumberlineCoverage ignore) {
 		this.ignore = ignore;
 		modified = true;
 	}
@@ -126,7 +201,7 @@ public class MetaScale {
 	}
 	
 	public boolean ignored(double value) {
-		return ignore.transformation.contains(value);
+		return ignore.contains(value);
 	}
 	
 }

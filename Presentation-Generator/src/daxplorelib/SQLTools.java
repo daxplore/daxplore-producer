@@ -96,4 +96,11 @@ public class SQLTools {
 		stmt.close();
 		return true;
 	}
+	
+	public static int lastId(String tablename, Connection connection) throws SQLException {
+		PreparedStatement stmt = connection.prepareStatement("SELECT seq FROM sqlite_sequence WHERE name = ?");
+		ResultSet rs = stmt.executeQuery();
+		rs.next();
+		return rs.getInt("seq");
+	}
 }
