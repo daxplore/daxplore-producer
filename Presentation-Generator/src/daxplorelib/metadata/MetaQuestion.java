@@ -5,226 +5,150 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.util.LinkedList;
+import java.util.HashMap;
 import java.util.List;
-
-import org.json.simple.JSONArray;
-import org.json.simple.JSONAware;
-import org.json.simple.JSONObject;
+import java.util.Map;
 
 import daxplorelib.DaxploreTable;
+import daxplorelib.SQLTools;
+import daxplorelib.metadata.MetaScale.MetaScaleManager;
 
-import tools.MyTools;
-
-/*
- * questionobject
-{
-	id: string
-	data: <dataobject>,
-	longtext: <stringreference>,
-	shorttext: <stringreference>,
-	options: [<stringreference>],
-}
- */
-
-public class MetaQuestion implements JSONAware, Comparable<MetaQuestion> {
-	protected static final DaxploreTable table = new DaxploreTable("CREATE TABLE metaquestion (id TEXT PRIMARY KEY, fulltextref TEXT, shorttextref TEXT, scale INTEGER, calculation INTEGER)", "metaquestion");
-	String id;
-	MetaCalculation calculation;
+public class MetaQuestion {
 	
-	final Connection connection;
+	protected static final DaxploreTable table = new DaxploreTable(
+			"CREATE TABLE metaquestion (id INTEGER PRIMARY KEY, FOREIGN KEY(scaleid) REFERENCE metascale(id), fulltextref TEXT, shorttextref TEXT, calculation INTEGER)",
+			"metaquestion");
 	
-	public MetaQuestion(String id, TextReference fullTextRef, TextReference shortTextRef, MetaCalculation calculation, MetaScale scale, Connection connection) throws SQLException{
-		this.id = id;
-		this.connection = connection;
+	public class MetaQuestionManager {
 		
-		PreparedStatement stmt = connection.prepareStatement("SELECT * FROM metaquestion WHERE id = ?");
-		stmt.setString(1, id);
-		stmt.execute();
-		if(stmt.getResultSet().next()) {
-			stmt.close();
-			stmt = connection.prepareStatement("UPDATE metaquestion SET fulltextref = ?, shorttextref = ?, scale = ?, calculation = ? WHERE id = ?");
-			stmt.setString(1, fullTextRef.getRef());
-			stmt.setString(2, shortTextRef.getRef());
-			if(scale != null) {
-				stmt.setInt(3, scale.getID());
-			} else {
-				stmt.setNull(3, java.sql.Types.INTEGER);
-			}
-			stmt.setInt(4, calculation.getID());
-			stmt.setString(5, id);
-			stmt.executeUpdate();
-			stmt.close();
-		} else {
-			stmt.close();
-			stmt = connection.prepareStatement("INSERT INTO metaquestion (id, fulltextref, shorttextref, scale, calculation) VALUES (?, ?, ?, ?, ?)");
-			stmt.setString(1, id);
-			stmt.setString(2, fullTextRef.getRef());
-			stmt.setString(3, shortTextRef.getRef());
-			if(scale != null) {
-				stmt.setInt(4, scale.getID());
-			} else {
-				stmt.setNull(3, java.sql.Types.INTEGER);
-			}
-			stmt.setInt(5, calculation.getID());
-			stmt.executeUpdate();
-			stmt.close();
+		private Connection connection;
+		protected MetaScaleManager metascaleManager;
+		protected Map<Integer, MetaQuestion> questionMap = new HashMap<Integer, MetaQuestion>();
+		
+		public MetaQuestionManager(Connection connection, MetaScaleManager metascaleManager) {
+			this.connection = connection;
+			this.metascaleManager = metascaleManager;
+			
 		}
 		
+		public void init() throws SQLException {
+			if(!SQLTools.tableExists("metaquestion", connection)) {
+				Statement stmt = connection.createStatement();
+				stmt.executeUpdate(table.sql);
+			}
+		}
+		
+		public MetaQuestion getMetaQuestion(int id) throws SQLException {
+			if(questionMap.containsKey(id)) {
+				return questionMap.get(id);
+			} else {
+				PreparedStatement stmt = connection.prepareStatement("SELECT * FROM metaquestion WHERE id = ?");
+				stmt.setInt(1, id);
+				ResultSet rs = stmt.executeQuery();
+				rs.next();
+				TextReference fullTextRef = new TextReference(rs.getString("fulltextref"), connection);
+				TextReference shortTextRef = new TextReference(rs.getString("shorttextref"), connection);
+				MetaScale scale = metascaleManager.getMetaScale(rs.getInt("scaleid"));
+				MetaCalculation calculation = new MetaCalculation(rs.getInt("calculation"), connection);
+				
+				MetaQuestion mq = new MetaQuestion(id, shortTextRef, fullTextRef, scale, calculation);
+				questionMap.put(id, mq);
+				return mq;				
+			}
+		}
+		
+		public MetaQuestion createMetaQuestion(TextReference shortTextRef, TextReference fullTextRef, MetaScale scale, MetaCalculation calculation) throws SQLException {
+			PreparedStatement stmt = connection.prepareStatement("INSERT INTO metaquestion (scaleid, fulltextref, shorttextref, calculation) VALUES (?, ?, ? .?)");
+			stmt.setInt(1, scale.getId());
+			stmt.setString(2, fullTextRef.getRef());
+			stmt.setString(3, shortTextRef.getRef());
+			stmt.setInt(4, calculation.getID());
+			stmt.executeUpdate();
+			
+			int id = SQLTools.lastId("metaquestion", connection);
+			
+			MetaQuestion mq = new MetaQuestion(id, shortTextRef, fullTextRef, scale, calculation);
+			questionMap.put(id, mq);
+			
+			return mq;
+		}
+		
+		public void remove(int id) {
+			//TODO: implement
+		}
+		
+		public void saveAll() throws SQLException {
+			PreparedStatement stmt = connection.prepareStatement("UPDATE metaquestion SET scaleid = ?, fulltextref = ?, shorttextref = ?, calculation = ? WHERE id = ?");
+			for(MetaQuestion mq: questionMap.values()) {
+				if(mq.modified) {
+					stmt.setInt(1, mq.scale.getId());
+					stmt.setString(2, mq.fullTextRef.getRef());
+					stmt.setString(3, mq.shortTextRef.getRef());
+					stmt.setInt(4, mq.calculation.getID());
+					stmt.setInt(5, mq.id);
+					stmt.executeUpdate();
+					mq.modified = false;
+				}
+			}
+		}
+		
+		public List<MetaQuestion> getAll() {
+			return null; //TODO: implement
+		}
+	}
+	
+	protected int id;
+	protected TextReference shortTextRef, fullTextRef;
+	protected MetaScale scale;
+	protected MetaCalculation calculation;
+	
+	protected boolean modified = false;
+	
+	protected MetaQuestion(int id, TextReference shortTextRef, TextReference fullTextRef, MetaScale scale, MetaCalculation calculation) {
+		this.id = id;
+		this.shortTextRef = shortTextRef;
+		this.fullTextRef = fullTextRef;
+		this.scale = scale;
 		this.calculation = calculation;
 	}
-		
-	public MetaQuestion(String id, Connection connection) {
-		this.id = id;
-		this.connection = connection;
-	}
 	
-	public MetaQuestion(JSONObject obj, Connection connection) throws SQLException{
-		this((String)obj.get("id"), 
-				new TextReference((String)obj.get("fulltext"), connection), 
-				new TextReference((String)obj.get("shorttext"), connection), 
-				new MetaCalculation((String)obj.get("data"), connection), 
-				obj.containsKey("scale") ? new MetaScale((JSONArray)obj.get("scale"), connection, true) : null, //MetaScale should be null if there is no scale
-				connection
-				);
-	}
-	
-	public String getId(){
+	public int getId() {
 		return id;
 	}
 	
-	public TextReference getFullTextRef() throws SQLException{
-		PreparedStatement stmt = connection.prepareStatement("SELECT fulltextref FROM metaquestion WHERE id = ?");
-		stmt.setString(1, id);
-		ResultSet rs = stmt.executeQuery();
-		if(rs.next()) {
-			TextReference tr = new TextReference(rs.getString("fulltextref"), connection);
-			stmt.close();
-			return tr;
-		} else {
-			stmt.close();
-			return null;
-		}
+	public TextReference getShortTextRef() {
+		return shortTextRef;
 	}
 	
-	/**
-	 * Updates fulltextref in the database.
-	 * @param ref
-	 * @throws SQLException
-	 */
-	public void setFullTextRef(TextReference ref) throws SQLException {
-		PreparedStatement stmt = connection.prepareStatement("UPDATE metaquestion SET fulltextref = ? WHERE id = ?");
-		stmt.setString(1, ref.getRef());
-		stmt.setString(2, id);
-		stmt.executeUpdate();
-		stmt.close();
+	public void setShortTextRef(TextReference shortTextRef) {
+		this.shortTextRef = shortTextRef;
+		this.modified = true;
 	}
 	
-	public TextReference getShortTextRef() throws SQLException{
-		PreparedStatement stmt = connection.prepareStatement("SELECT shorttextref FROM metaquestion WHERE id = ?");
-		stmt.setString(1, id);
-		ResultSet rs = stmt.executeQuery();
-		if(rs.next()) {
-			TextReference tr = new TextReference(rs.getString("shorttextref"), connection);
-			stmt.close();
-			return tr;
-		} else {
-			stmt.close();
-			return null;
-		}
+	public TextReference getFullTextRef() {
+		return fullTextRef;
 	}
 	
-	/**
-	 * Updates shorttextref in the database.
-	 * @param ref
-	 * @throws SQLException
-	 */
-	public void setShortTextRef(TextReference ref) throws SQLException {
-		PreparedStatement stmt = connection.prepareStatement("UPDATE metaquestion SET shorttextref = ? WHERE id = ?");
-		stmt.setString(1, ref.getRef());
-		stmt.setString(2, id);
-		stmt.executeUpdate();
-		stmt.close();
+	public void setFullTextRef(TextReference fullTextRef) {
+		this.fullTextRef = fullTextRef;
+		this.modified = true;
 	}
 	
-	public MetaScale getScale() throws SQLException{
-		PreparedStatement stmt = connection.prepareStatement("SELECT scale FROM metaquestion WHERE id = ?");
-		stmt.setString(1, id);
-		ResultSet rs = stmt.executeQuery();
-		if(rs.next()) {
-			int scaleid = rs.getInt("scale");
-			if(rs.wasNull()) {
-				stmt.close();
-				return null;
-			} else {
-				MetaScale ms = new MetaScale(scaleid, connection);
-				stmt.close();
-				return ms;
-			}
-		} else {
-			stmt.close();
-			return null;
-		}
+	public MetaScale getScale() {
+		return scale;
 	}
 	
-	/**
-	 * Updates metascale in the database.
-	 * @param scale
-	 * @throws SQLException
-	 */
-	public void setScale(MetaScale scale) throws SQLException {
-		PreparedStatement stmt = connection.prepareStatement("UPDATE metaquestion SET scale = ? WHERE id = ?");
-		stmt.setInt(1, scale.getID());
-		stmt.setString(2, id);
-		stmt.executeUpdate();
-		stmt.close();
+	public void setScale(MetaScale scale) {
+		this.scale = scale;
+		this.modified = true;
 	}
 	
-	public MetaCalculation getCalculation() throws SQLException {
-		PreparedStatement stmt = connection.prepareStatement("SELECT calculation FROM metaquestion WHERE id = ?");
-		stmt.setString(1, id);
-		ResultSet rs = stmt.executeQuery();
-		if(rs.next()) {
-			MetaCalculation mc = new MetaCalculation(rs.getInt("calculation"), connection);
-			stmt.close();
-			return mc;
-		} else {
-			stmt.close();
-			return null;
-		}
+	public MetaCalculation getCalculation() {
+		return calculation;
 	}
 	
-	public static List<MetaQuestion> getAll(Connection connection) throws SQLException {
-		Statement stmt = connection.createStatement();
-		ResultSet rs = stmt.executeQuery("SELECT id FROM metaquestion ORDER BY id asc");
-		List<MetaQuestion> list = new LinkedList<MetaQuestion>();
-		while(rs.next()) {
-			list.add(new MetaQuestion(rs.getString("id"), connection));
-		}
-		stmt.close();
-		return list;
-	}
-
-	@Override
-	public int compareTo(MetaQuestion arg0) {
-		return id.compareTo(arg0.id);
-	}
-	
-	@SuppressWarnings("unchecked")
-	@Override
-	public String toJSONString() {
-		JSONObject obj = new JSONObject();
-		obj.put("id", id);
-		try {
-			obj.put("fulltext", getFullTextRef());
-			obj.put("shorttext", getShortTextRef());
-			MetaScale scale = getScale();
-			if(scale != null) {
-				obj.put("options", getScale());
-			}
-		} catch (SQLException e) {
-			MyTools.printSQLExeption(e);
-		}
-		return obj.toJSONString();
+	public void setCalculation(MetaCalculation calculation) {
+		this.calculation = calculation;
+		this.modified = true;
 	}
 }

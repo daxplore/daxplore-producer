@@ -106,7 +106,7 @@ public class MetaScale {
 		}
 		
 		public void remove(int id) {
-			
+			//TODO: implement
 		}
 		
 		public void saveAll() throws SQLException {
@@ -152,11 +152,11 @@ public class MetaScale {
 	
 	
 	/** Each Option's position is defined by the order of this list */
-	List<Option> options;
-	NumberlineCoverage ignore;
+	protected List<Option> options;
+	protected NumberlineCoverage ignore;
 
-	int id;
-	boolean modified = false;
+	protected int id;
+	protected boolean modified = false;
 	
 	public MetaScale(int id, List<Option> options, NumberlineCoverage ignore) {
 		this.id = id;

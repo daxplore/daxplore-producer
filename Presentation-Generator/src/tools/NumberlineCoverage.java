@@ -24,12 +24,18 @@ public class NumberlineCoverage {
 		}
 		
 		public Interval(String inter) {
-			lowInclusive = inter.charAt(0) == '[';
-			highInclusive = inter.charAt(inter.length() -1) == ']';
-			inter = inter.substring(1, inter.length()-1);
-			String[] numbers = inter.split(",");
-			low = Double.parseDouble(numbers[0]);
-			high = Double.parseDouble(numbers[1]);
+			try { // really an if-statement: if(inter is double)
+				Double value = Double.valueOf(inter);
+				low = value;high = value; 
+				lowInclusive = true; highInclusive = true;
+			} catch (NumberFormatException e) {
+				lowInclusive = inter.charAt(0) == '[';
+				highInclusive = inter.charAt(inter.length() -1) == ']';
+				inter = inter.substring(1, inter.length()-1);
+				String[] numbers = inter.split(",");
+				low = Double.parseDouble(numbers[0]);
+				high = Double.parseDouble(numbers[1]);
+			}
 		}
 		
 		public boolean contains(double value) {

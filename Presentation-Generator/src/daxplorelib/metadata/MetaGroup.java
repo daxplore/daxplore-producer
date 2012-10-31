@@ -51,7 +51,7 @@ public class MetaGroup implements JSONAware{
 		this.id = id;
 	}
 	
-	public MetaGroup(TextReference textref, int index, GroupType type, List<MetaQuestion> questions, Connection connection) throws SQLException {
+	public MetaGroup(TextReference textref, int index, GroupType type, List<MetaQuestionOld> questions, Connection connection) throws SQLException {
 		this.connection = connection;
 		
 		// Check if group already exists.
@@ -82,17 +82,17 @@ public class MetaGroup implements JSONAware{
 	
 	public MetaGroup(JSONObject obj, GroupType type, Connection connection) throws SQLException {
 		this(new TextReference((String)obj.get("textref"), connection), (Integer)obj.get("index"), type, null, connection);
-		List<MetaQuestion> questions = new LinkedList<MetaQuestion>();
+		List<MetaQuestionOld> questions = new LinkedList<MetaQuestionOld>();
 		JSONArray questionArr = (JSONArray) obj.get("questions");
 		for(int i = 0; i < questionArr.size(); i++) {
-			questions.add(new MetaQuestion((String)questionArr.get(i), connection));
+			questions.add(new MetaQuestionOld((String)questionArr.get(i), connection));
 		}
 		addQuestions(questions);
 	}
 	
-	protected void addQuestions(List<MetaQuestion> questions) throws SQLException{
+	protected void addQuestions(List<MetaQuestionOld> questions) throws SQLException{
 		PreparedStatement stmt = connection.prepareStatement("INSERT INTO metagrouprel (groupid, questionid) VALUES (?, ?)");
-		for(MetaQuestion q: questions){
+		for(MetaQuestionOld q: questions){
 			stmt.setInt(1, id);
 			stmt.setString(2, q.getId());
 			stmt.executeUpdate();
@@ -149,13 +149,13 @@ public class MetaGroup implements JSONAware{
 		}
 	}
 
-	public List<MetaQuestion> getQuestions() throws SQLException {
-		List<MetaQuestion> list = new LinkedList<MetaQuestion>();
+	public List<MetaQuestionOld> getQuestions() throws SQLException {
+		List<MetaQuestionOld> list = new LinkedList<MetaQuestionOld>();
 		PreparedStatement stmt = connection.prepareStatement("SELECT questionid FROM metagrouprel WHERE groupid = ?");
 		stmt.setInt(1, id);
 		ResultSet rs = stmt.executeQuery();
 		while(rs.next()) {
-			list.add(new MetaQuestion(rs.getString("questionid"), connection));
+			list.add(new MetaQuestionOld(rs.getString("questionid"), connection));
 		}
 		stmt.close();
 		return list;
@@ -202,7 +202,7 @@ public class MetaGroup implements JSONAware{
 			obj.put("textref", getTextRef());
 			obj.put("index", getIndex());
 			JSONArray questions = new JSONArray();
-			for(MetaQuestion q : getQuestions()){
+			for(MetaQuestionOld q : getQuestions()){
 				questions.add(q.getId());
 			}
 			obj.put("questions", questions);

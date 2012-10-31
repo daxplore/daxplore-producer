@@ -46,7 +46,7 @@ public class MetaData {
 		SQLTools.createIfNotExists(TextReference.table, connection);
 		SQLTools.createIfNotExists(MetaGroup.table, connection);
 		SQLTools.createIfNotExists(MetaGroup.table2, connection);
-		SQLTools.createIfNotExists(MetaQuestion.table, connection);
+		SQLTools.createIfNotExists(MetaQuestionOld.table, connection);
 		SQLTools.createIfNotExists(MetaScale.table, connection);
 		SQLTools.createIfNotExists(MetaCalculation.table, connection);
 		stmt.close();
@@ -97,7 +97,7 @@ public class MetaData {
 				
 				TextReference shorttext = new TextReference(rmq.column + "shorttext", connection);
 				
-				new MetaQuestion(rmq.column, fulltext, shorttext, calc, scale, connection);
+				new MetaQuestionOld(rmq.column, fulltext, shorttext, calc, scale, connection);
 			}
 		} catch (SQLException e) {
 			throw new DaxploreException("Failed to transfer metadata from raw", e);
@@ -132,7 +132,7 @@ public class MetaData {
 					List questions = (List) json.get(key);
 					for(Object o: questions) {
 						JSONObject q = (JSONObject)o;
-						new MetaQuestion(q, connection);
+						new MetaQuestionOld(q, connection);
 					}
 				} else if("groups".equals(key)) {
 					JSONObject groups = (JSONObject)json.get(key);
@@ -164,9 +164,9 @@ public class MetaData {
 		JSONObject jsonroot = new JSONObject();
 		
 		//export questions
-		List<MetaQuestion> questions = getAllQuestions();
+		List<MetaQuestionOld> questions = getAllQuestions();
 		JSONArray questionArr = new JSONArray();
-		for(MetaQuestion q: questions) {
+		for(MetaQuestionOld q: questions) {
 			questionArr.add(q);
 		}
 		jsonroot.put("questions", questionArr);
@@ -331,8 +331,8 @@ public class MetaData {
 			
 			//System.out.println("Altering questions to use generic scales...");
 			//Change all questions to use new generic scales
-			List<MetaQuestion> allquestions = MetaQuestion.getAll(connection);
-			for(MetaQuestion q: allquestions) {
+			List<MetaQuestionOld> allquestions = MetaQuestionOld.getAll(connection);
+			for(MetaQuestionOld q: allquestions) {
 				if(scaleMap.containsKey(q.getScale())) {
 					q.setScale(scaleMap.get(q.getScale()));
 				}
@@ -407,9 +407,9 @@ public class MetaData {
 		}
 	}
 	
-	public List<MetaQuestion> getAllQuestions() throws DaxploreException {
+	public List<MetaQuestionOld> getAllQuestions() throws DaxploreException {
 		try {
-			return MetaQuestion.getAll(connection);
+			return MetaQuestionOld.getAll(connection);
 		} catch (SQLException e) {
 			throw new DaxploreException("SQLExpection while trying to get groups", e);
 		}
@@ -441,7 +441,7 @@ public class MetaData {
 	
 	public List<DaxploreTable> getTables() {
 		List<DaxploreTable> list = new LinkedList<DaxploreTable>();
-		list.add(MetaQuestion.table);
+		list.add(MetaQuestionOld.table);
 		list.add(MetaGroup.table);
 		list.add(MetaGroup.table2);
 		list.add(MetaScale.table);
