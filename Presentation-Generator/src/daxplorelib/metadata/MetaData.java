@@ -28,13 +28,20 @@ import daxplorelib.DaxploreException;
 import daxplorelib.DaxploreFile;
 import daxplorelib.DaxploreTable;
 import daxplorelib.SQLTools;
+import daxplorelib.metadata.MetaScale.MetaScaleManager;
 import daxplorelib.metadata.MetaGroup.GroupType;
+import daxplorelib.metadata.MetaQuestion.MetaQuestionManager;
+import daxplorelib.metadata.TextReference.TextReferenceManager;
 import daxplorelib.raw.RawMeta;
 import daxplorelib.raw.RawMeta.RawMetaQuestion;
 
 public class MetaData {
 	
 	Connection connection;
+	
+	MetaQuestionManager metaQuestionManager;
+	MetaScaleManager metaScaleManager;
+	TextReferenceManager textsManager;
 	
 	public enum Formats {
 		DATABASE,RESOURCE,JSON,RAW
@@ -344,7 +351,7 @@ public class MetaData {
 			List<TextReference> toBeRemoved = new LinkedList<TextReference>();
 			for(MetaScale s: scaleMap.keySet()) {
 				List<Pair<TextReference, Double>> refs = s.getRefereceList();
-				s.remove();
+				//s.remove(); //TODO: Use manager
 				for(Pair<TextReference, Double> p: refs) {
 					toBeRemoved.add(p.getKey());
 					//p.getKey().remove();
@@ -352,7 +359,7 @@ public class MetaData {
 			}
 			System.out.println(".");
 			for(TextReference tr: toBeRemoved) {
-				tr.remove();
+				textsManager.remove(tr.getRef());
 			}
 			connection.commit();
 			System.out.println("Done");
@@ -384,7 +391,7 @@ public class MetaData {
 		List<TextReference> reflist = getAllTextReferences();
 		try {
 			for(TextReference tr: reflist) {
-				tr.clearNulls();
+				//tr.clearNulls(); //TODO: no longer necessary?
 			}
 			connection.commit();
 		} catch (SQLException e) {
@@ -407,9 +414,9 @@ public class MetaData {
 		}
 	}
 	
-	public List<MetaQuestionOld> getAllQuestions() throws DaxploreException {
+	public List<MetaQuestion> getAllQuestions() throws DaxploreException {
 		try {
-			return MetaQuestionOld.getAll(connection);
+			return metaQuestionManager.getAll();
 		} catch (SQLException e) {
 			throw new DaxploreException("SQLExpection while trying to get groups", e);
 		}
@@ -417,7 +424,7 @@ public class MetaData {
 	
 	public List<MetaScale> getAllScales() throws DaxploreException {
 		try {
-			return MetaScale.getAll(connection);
+			return metaScaleManager.getAll();
 		} catch (SQLException e) {
 			throw new DaxploreException("SQLExpection while trying to get groups", e);
 		}
@@ -425,7 +432,7 @@ public class MetaData {
 	
 	public List<TextReference> getAllTextReferences() throws DaxploreException {
 		try {
-			return TextReference.getAll(connection);
+			return textsManager.getAll();
 		} catch (SQLException e) {
 			throw new DaxploreException("SQLExpection while trying to get groups", e);
 		}
@@ -433,7 +440,7 @@ public class MetaData {
 	
 	public List<Locale> getAllLocales() throws DaxploreException {
 		try {
-			return TextReference.getAllLocales(connection);
+			return textsManager.getAllLocales();
 		} catch (SQLException e){
 			throw new DaxploreException("SQLException while trying to get locales", e);
 		}
@@ -444,7 +451,8 @@ public class MetaData {
 		list.add(MetaQuestionOld.table);
 		list.add(MetaGroup.table);
 		list.add(MetaGroup.table2);
-		list.add(MetaScale.table);
+		list.add(MetaScale.maintable);
+		list.add(MetaScale.optiontable);
 		list.add(MetaCalculation.table);
 		list.add(TextReference.table);
 		return list;

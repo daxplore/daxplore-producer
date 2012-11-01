@@ -12,6 +12,7 @@ import java.util.Map;
 import daxplorelib.DaxploreTable;
 import daxplorelib.SQLTools;
 import daxplorelib.metadata.MetaScale.MetaScaleManager;
+import daxplorelib.metadata.TextReference.TextReferenceManager;
 
 public class MetaQuestion {
 	
@@ -23,12 +24,13 @@ public class MetaQuestion {
 		
 		private Connection connection;
 		protected MetaScaleManager metascaleManager;
+		protected TextReferenceManager textsManager;
 		protected Map<Integer, MetaQuestion> questionMap = new HashMap<Integer, MetaQuestion>();
 		
-		public MetaQuestionManager(Connection connection, MetaScaleManager metascaleManager) {
+		public MetaQuestionManager(Connection connection, MetaScaleManager metascaleManager, TextReferenceManager textsManager) {
 			this.connection = connection;
 			this.metascaleManager = metascaleManager;
-			
+			this.textsManager = textsManager;
 		}
 		
 		public void init() throws SQLException {
@@ -38,7 +40,7 @@ public class MetaQuestion {
 			}
 		}
 		
-		public MetaQuestion getMetaQuestion(int id) throws SQLException {
+		public MetaQuestion get(int id) throws SQLException {
 			if(questionMap.containsKey(id)) {
 				return questionMap.get(id);
 			} else {
@@ -46,8 +48,8 @@ public class MetaQuestion {
 				stmt.setInt(1, id);
 				ResultSet rs = stmt.executeQuery();
 				rs.next();
-				TextReference fullTextRef = new TextReference(rs.getString("fulltextref"), connection);
-				TextReference shortTextRef = new TextReference(rs.getString("shorttextref"), connection);
+				TextReference fullTextRef = textsManager.get(rs.getString("fulltextref"));
+				TextReference shortTextRef = textsManager.get(rs.getString("shorttextref"));
 				MetaScale scale = metascaleManager.getMetaScale(rs.getInt("scaleid"));
 				MetaCalculation calculation = new MetaCalculation(rs.getInt("calculation"), connection);
 				
@@ -57,7 +59,7 @@ public class MetaQuestion {
 			}
 		}
 		
-		public MetaQuestion createMetaQuestion(TextReference shortTextRef, TextReference fullTextRef, MetaScale scale, MetaCalculation calculation) throws SQLException {
+		public MetaQuestion create(TextReference shortTextRef, TextReference fullTextRef, MetaScale scale, MetaCalculation calculation) throws SQLException {
 			PreparedStatement stmt = connection.prepareStatement("INSERT INTO metaquestion (scaleid, fulltextref, shorttextref, calculation) VALUES (?, ?, ? .?)");
 			stmt.setInt(1, scale.getId());
 			stmt.setString(2, fullTextRef.getRef());
@@ -92,7 +94,7 @@ public class MetaQuestion {
 			}
 		}
 		
-		public List<MetaQuestion> getAll() {
+		public List<MetaQuestion> getAll() throws SQLException{
 			return null; //TODO: implement
 		}
 	}

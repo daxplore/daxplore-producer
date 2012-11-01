@@ -17,6 +17,7 @@ import org.json.simple.JSONObject;
 
 import daxplorelib.DaxploreTable;
 import daxplorelib.SQLTools;
+import daxplorelib.metadata.TextReference.TextReferenceManager;
 
 import tools.MyTools;
 import tools.NumberlineCoverage;
@@ -34,9 +35,11 @@ public class MetaScale {
 	public class MetaScaleManager {
 		Map<Integer, MetaScale> scaleMap = new HashMap<Integer, MetaScale>();
 		Connection connection;
+		protected TextReferenceManager textsManager;
 		
-		public MetaScaleManager(Connection connection) {
+		public MetaScaleManager(Connection connection, TextReferenceManager textsManager) {
 			this.connection = connection;
+			this.textsManager = textsManager;
 		}
 		
 		protected void init() throws SQLException {
@@ -69,7 +72,7 @@ public class MetaScale {
 				while(rs.next()) {
 					options.add(
 							new Option(
-									new TextReference(rs.getString("textref"), connection), 
+									textsManager.get(rs.getString("textref")), 
 									rs.getDouble("value"), 
 									new NumberlineCoverage(rs.getString("transform"))));
 				}
@@ -137,6 +140,10 @@ public class MetaScale {
 				}
 			}
 			//save all unsaved MetaScales
+		}
+		
+		public List<MetaScale> getAll() throws SQLException {
+			return null; //TODO: implement
 		}
 	}
 	
