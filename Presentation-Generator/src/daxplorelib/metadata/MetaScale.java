@@ -53,7 +53,7 @@ public class MetaScale {
 			}
 		}
 		
-		public MetaScale getMetaScale(int id) throws SQLException {
+		public MetaScale get(int id) throws SQLException {
 			if(scaleMap.containsKey(id)) {
 				return scaleMap.get(id);
 			} else {
@@ -82,7 +82,7 @@ public class MetaScale {
 			}
 		}
 		
-		public MetaScale createMetaScale(List<Option> options, NumberlineCoverage ignore) throws SQLException {
+		public MetaScale create(List<Option> options, NumberlineCoverage ignore) throws SQLException {
 			PreparedStatement createScaleStmt = connection.prepareStatement("INSERT INTO metascale (ignore) VALUES (?)");
 			createScaleStmt.setString(1, ignore.toString());
 			createScaleStmt.execute();

@@ -17,7 +17,7 @@ import daxplorelib.metadata.TextReference.TextReferenceManager;
 public class MetaQuestion {
 	
 	protected static final DaxploreTable table = new DaxploreTable(
-			"CREATE TABLE metaquestion (id INTEGER PRIMARY KEY, FOREIGN KEY(scaleid) REFERENCE metascale(id), fulltextref TEXT, shorttextref TEXT, calculation INTEGER)",
+			"CREATE TABLE metaquestion (id TEXT UNIQUE, FOREIGN KEY(scaleid) REFERENCE metascale(id), fulltextref TEXT, shorttextref TEXT, calculation INTEGER)",
 			"metaquestion");
 	
 	public class MetaQuestionManager {
@@ -25,7 +25,7 @@ public class MetaQuestion {
 		private Connection connection;
 		protected MetaScaleManager metascaleManager;
 		protected TextReferenceManager textsManager;
-		protected Map<Integer, MetaQuestion> questionMap = new HashMap<Integer, MetaQuestion>();
+		protected Map<String, MetaQuestion> questionMap = new HashMap<String, MetaQuestion>();
 		
 		public MetaQuestionManager(Connection connection, MetaScaleManager metascaleManager, TextReferenceManager textsManager) {
 			this.connection = connection;
@@ -40,17 +40,17 @@ public class MetaQuestion {
 			}
 		}
 		
-		public MetaQuestion get(int id) throws SQLException {
+		public MetaQuestion get(String id) throws SQLException {
 			if(questionMap.containsKey(id)) {
 				return questionMap.get(id);
 			} else {
 				PreparedStatement stmt = connection.prepareStatement("SELECT * FROM metaquestion WHERE id = ?");
-				stmt.setInt(1, id);
+				stmt.setString(1, id);
 				ResultSet rs = stmt.executeQuery();
 				rs.next();
 				TextReference fullTextRef = textsManager.get(rs.getString("fulltextref"));
 				TextReference shortTextRef = textsManager.get(rs.getString("shorttextref"));
-				MetaScale scale = metascaleManager.getMetaScale(rs.getInt("scaleid"));
+				MetaScale scale = metascaleManager.get(rs.getInt("scaleid"));
 				MetaCalculation calculation = new MetaCalculation(rs.getInt("calculation"), connection);
 				
 				MetaQuestion mq = new MetaQuestion(id, shortTextRef, fullTextRef, scale, calculation);
@@ -59,15 +59,14 @@ public class MetaQuestion {
 			}
 		}
 		
-		public MetaQuestion create(TextReference shortTextRef, TextReference fullTextRef, MetaScale scale, MetaCalculation calculation) throws SQLException {
-			PreparedStatement stmt = connection.prepareStatement("INSERT INTO metaquestion (scaleid, fulltextref, shorttextref, calculation) VALUES (?, ?, ? .?)");
+		public MetaQuestion create(String id, TextReference shortTextRef, TextReference fullTextRef, MetaScale scale, MetaCalculation calculation) throws SQLException {
+			PreparedStatement stmt = connection.prepareStatement("INSERT INTO metaquestion (id, scaleid, fulltextref, shorttextref, calculation) VALUES (?, ?, ?, ? ,?)");
+			stmt.setString(1, id);
 			stmt.setInt(1, scale.getId());
 			stmt.setString(2, fullTextRef.getRef());
 			stmt.setString(3, shortTextRef.getRef());
 			stmt.setInt(4, calculation.getID());
 			stmt.executeUpdate();
-			
-			int id = SQLTools.lastId("metaquestion", connection);
 			
 			MetaQuestion mq = new MetaQuestion(id, shortTextRef, fullTextRef, scale, calculation);
 			questionMap.put(id, mq);
@@ -87,7 +86,7 @@ public class MetaQuestion {
 					stmt.setString(2, mq.fullTextRef.getRef());
 					stmt.setString(3, mq.shortTextRef.getRef());
 					stmt.setInt(4, mq.calculation.getID());
-					stmt.setInt(5, mq.id);
+					stmt.setString(5, mq.id);
 					stmt.executeUpdate();
 					mq.modified = false;
 				}
@@ -99,14 +98,14 @@ public class MetaQuestion {
 		}
 	}
 	
-	protected int id;
+	protected String id;
 	protected TextReference shortTextRef, fullTextRef;
 	protected MetaScale scale;
 	protected MetaCalculation calculation;
 	
 	protected boolean modified = false;
 	
-	protected MetaQuestion(int id, TextReference shortTextRef, TextReference fullTextRef, MetaScale scale, MetaCalculation calculation) {
+	protected MetaQuestion(String id, TextReference shortTextRef, TextReference fullTextRef, MetaScale scale, MetaCalculation calculation) {
 		this.id = id;
 		this.shortTextRef = shortTextRef;
 		this.fullTextRef = fullTextRef;
@@ -114,7 +113,7 @@ public class MetaQuestion {
 		this.calculation = calculation;
 	}
 	
-	public int getId() {
+	public String getId() {
 		return id;
 	}
 	

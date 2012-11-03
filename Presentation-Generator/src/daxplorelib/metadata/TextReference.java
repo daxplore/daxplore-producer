@@ -6,7 +6,6 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.sql.Types;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
@@ -32,10 +31,7 @@ public class TextReference implements JSONAware, Comparable<TextReference> {
 		}
 		
 		public void init() throws SQLException {
-			if(!SQLTools.tableExists(table.name, connection)) {
-				Statement stmt = connection.createStatement();
-				stmt.execute(table.sql);
-			}
+			SQLTools.createIfNotExists(table, connection);
 		}
 		
 		public TextReference get(String refstring) throws SQLException {
