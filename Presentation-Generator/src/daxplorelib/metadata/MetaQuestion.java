@@ -20,16 +20,16 @@ public class MetaQuestion {
 			"CREATE TABLE metaquestion (id TEXT UNIQUE, FOREIGN KEY(scaleid) REFERENCE metascale(id), fulltextref TEXT, shorttextref TEXT, calculation INTEGER)",
 			"metaquestion");
 	
-	public class MetaQuestionManager {
+	public static class MetaQuestionManager {
 		
 		private Connection connection;
 		protected MetaScaleManager metascaleManager;
 		protected TextReferenceManager textsManager;
 		protected Map<String, MetaQuestion> questionMap = new HashMap<String, MetaQuestion>();
 		
-		public MetaQuestionManager(Connection connection, MetaScaleManager metascaleManager, TextReferenceManager textsManager) {
+		public MetaQuestionManager(Connection connection, TextReferenceManager textsManager, MetaScaleManager metaScaleManager) {
 			this.connection = connection;
-			this.metascaleManager = metascaleManager;
+			this.metascaleManager = metaScaleManager;
 			this.textsManager = textsManager;
 		}
 		
@@ -59,7 +59,7 @@ public class MetaQuestion {
 			}
 		}
 		
-		public MetaQuestion create(String id, TextReference shortTextRef, TextReference fullTextRef, MetaScale scale, MetaCalculation calculation) throws SQLException {
+		public MetaQuestion create(String id, TextReference fullTextRef, TextReference shortTextRef, MetaScale scale, MetaCalculation calculation) throws SQLException {
 			PreparedStatement stmt = connection.prepareStatement("INSERT INTO metaquestion (id, scaleid, fulltextref, shorttextref, calculation) VALUES (?, ?, ?, ? ,?)");
 			stmt.setString(1, id);
 			stmt.setInt(1, scale.getId());

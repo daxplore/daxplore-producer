@@ -14,17 +14,16 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 
-import org.json.simple.JSONAware;
-
 import daxplorelib.DaxploreTable;
 import daxplorelib.SQLTools;
 
-public class TextReference implements JSONAware, Comparable<TextReference> {
+public class TextReference implements Comparable<TextReference> {
 	protected static final DaxploreTable table = new DaxploreTable("CREATE TABLE texts (ref TEXT, locale TEXT, text TEXT, UNIQUE ( ref, locale) )", "texts");
 	
-	public class TextReferenceManager {
+	public static class TextReferenceManager {
 		Connection connection;
 		Map<String, TextReference> textMap = new HashMap<String, TextReference>();
+		List<TextReference> toBeRemoved = new LinkedList<TextReference>();
 		
 		public TextReferenceManager(Connection connection) {
 			this.connection = connection;
@@ -34,15 +33,24 @@ public class TextReference implements JSONAware, Comparable<TextReference> {
 			SQLTools.createIfNotExists(table, connection);
 		}
 		
+		/**
+		 * Get a TextReference from refstring. Creates one if it doesn't exist.
+		 * @param refstring
+		 * @return
+		 * @throws SQLException
+		 */
 		public TextReference get(String refstring) throws SQLException {
+			boolean newTextReference = true;
 			PreparedStatement stmt = connection.prepareStatement("SELECT * FROM texts where ref = ?");
 			stmt.setString(1, refstring);
 			ResultSet rs = stmt.executeQuery();
 			Map<Locale, String> localeMap = new HashMap<Locale, String>();
 			while(rs.next()) {
 				localeMap.put(new Locale(rs.getString("locale")), rs.getString("text"));
+				newTextReference = false;
 			}
 			TextReference tr = new TextReference(refstring, localeMap);
+			tr.modified = newTextReference;
 			textMap.put(refstring, tr);
 			return tr;
 		}
@@ -55,11 +63,7 @@ public class TextReference implements JSONAware, Comparable<TextReference> {
 		}
 		
 		public void remove(String refstring) throws SQLException {
-			textMap.remove(refstring);
-			PreparedStatement stmt = connection.prepareStatement("DELETE FROM texts WHERE ref = ?");
-			stmt.setString(1, refstring);
-			stmt.executeUpdate();
-			stmt.close();
+			toBeRemoved.add(textMap.remove(refstring));
 		}
 		
 		public void saveAll() throws SQLException {
@@ -71,7 +75,7 @@ public class TextReference implements JSONAware, Comparable<TextReference> {
 				if(tr.modified) {
 					//first get existing locales
 					Set<Locale> oldLocs = new HashSet<Locale>();
-					localesStmt.setString(1, reference);
+					localesStmt.setString(1, tr.reference);
 					ResultSet rs = localesStmt.executeQuery();
 					while(rs.next()) {
 						String loc = rs.getString("locale");
@@ -108,6 +112,14 @@ public class TextReference implements JSONAware, Comparable<TextReference> {
 					tr.modified = false;
 				}
 			}
+			//Delete those marked to be removed
+			PreparedStatement delete2stmt = connection.prepareStatement("DELETE FROM texts WHERE ref = ?");
+			for(TextReference tr: toBeRemoved) {
+				delete2stmt.setString(1, tr.reference);
+				delete2stmt.addBatch();
+			}
+			delete2stmt.executeBatch();
+			toBeRemoved.clear();
 		}
 		
 
@@ -174,11 +186,6 @@ public class TextReference implements JSONAware, Comparable<TextReference> {
 		if(has(locale) && other.has(locale)) {
 			return get(locale).equals(other.get(locale));
 		} else return false;
-	}
-
-	@Override
-	public String toJSONString() {
-		return '"'+ reference + '"';
 	}
 
 	@Override

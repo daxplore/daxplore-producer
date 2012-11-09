@@ -93,6 +93,10 @@ public class NumberlineCoverage {
 		intervals.add(new Interval(a, aInclusive, b, bInclusive));
 	}
 	
+	public NumberlineCoverage(double number) {
+		addNumber(number);
+	}
+	
 	public NumberlineCoverage() {}
 	
 	public void addNumber(double a) {
@@ -134,6 +138,11 @@ public class NumberlineCoverage {
 				}
 			}
 		}
+
+		if(intervals.size() == 0) {
+			interlist.add(newInterval);
+		}
+		
 		intervals = interlist;
 	}
 	

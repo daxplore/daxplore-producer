@@ -5,32 +5,23 @@ import java.io.Reader;
 import java.io.Writer;
 import java.sql.Connection;
 import java.sql.SQLException;
-import java.sql.Statement;
 import java.util.Iterator;
-import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
-import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Properties;
 
-import org.json.simple.JSONArray;
-import org.json.simple.JSONObject;
-import org.json.simple.parser.ContainerFactory;
-import org.json.simple.parser.JSONParser;
-import org.json.simple.parser.ParseException;
-
 import tools.MyTools;
+import tools.NumberlineCoverage;
 import tools.Pair;
 import tools.SortedProperties;
 import daxplorelib.DaxploreException;
 import daxplorelib.DaxploreFile;
 import daxplorelib.DaxploreTable;
-import daxplorelib.SQLTools;
-import daxplorelib.metadata.MetaScale.MetaScaleManager;
-import daxplorelib.metadata.MetaGroup.GroupType;
+import daxplorelib.metadata.MetaGroup.MetaGroupManager;
 import daxplorelib.metadata.MetaQuestion.MetaQuestionManager;
+import daxplorelib.metadata.MetaScale.MetaScaleManager;
 import daxplorelib.metadata.TextReference.TextReferenceManager;
 import daxplorelib.raw.RawMeta;
 import daxplorelib.raw.RawMeta.RawMetaQuestion;
@@ -42,6 +33,7 @@ public class MetaData {
 	MetaQuestionManager metaQuestionManager;
 	MetaScaleManager metaScaleManager;
 	TextReferenceManager textsManager;
+	MetaGroupManager metaGroupManager;
 	
 	public enum Formats {
 		DATABASE,RESOURCE,JSON,RAW
@@ -49,14 +41,17 @@ public class MetaData {
 	
 	public MetaData(Connection connection) throws SQLException{
 		this.connection = connection;
-		Statement stmt = connection.createStatement();
-		SQLTools.createIfNotExists(TextReference.table, connection);
-		SQLTools.createIfNotExists(MetaGroup.table, connection);
-		SQLTools.createIfNotExists(MetaGroup.table2, connection);
-		SQLTools.createIfNotExists(MetaQuestionOld.table, connection);
-		SQLTools.createIfNotExists(MetaScale.table, connection);
-		SQLTools.createIfNotExists(MetaCalculation.table, connection);
-		stmt.close();
+		textsManager = new TextReferenceManager(connection);
+		textsManager.init();
+		
+		metaScaleManager = new MetaScaleManager(connection, textsManager);
+		metaScaleManager.init();
+		
+		metaQuestionManager = new MetaQuestionManager(connection, textsManager, metaScaleManager);
+		metaQuestionManager.init();
+		
+		metaGroupManager = new MetaGroupManager(connection, textsManager, metaQuestionManager);
+		metaGroupManager.init();
 	}
 
 	/* 
@@ -82,29 +77,29 @@ public class MetaData {
 			while(iter.hasNext()) {
 				System.out.print(".");
 				RawMetaQuestion rmq = iter.next();
-				TextReference fulltext = new TextReference(rmq.column + "_fulltext", connection);
+				TextReference fulltext = textsManager.get(rmq.column + "_fulltext");
 				fulltext.put(rmq.qtext, locale);
 				MetaCalculation calc = new MetaCalculation(rmq.column, connection);
 				MetaScale scale = null;
 				switch(rmq.qtype) {
 				case MAPPED:
-					List<Pair<TextReference, Double>> scalevalues = new LinkedList<Pair<TextReference,Double>>();
+					LinkedList<MetaScale.Option> scaleOptions = new LinkedList<MetaScale.Option>();
 					for(int i = 0; i < rmq.valuelables.size(); i++) {
 						Pair<String, Double> s = rmq.valuelables.get(i);
-						TextReference ref = new TextReference(rmq.column + "_option_" + i, connection);
+						TextReference ref = textsManager.get(rmq.column + "_option_" + i);
 						ref.put(s.getKey(), locale);
-						scalevalues.add(new Pair<TextReference, Double>(ref, s.getValue()));
+						scaleOptions.add(new MetaScale.Option(ref, s.getValue(), new NumberlineCoverage(s.getValue())));
 					}
-					scale = new MetaScale(scalevalues, connection);
+					scale = metaScaleManager.create(scaleOptions, new NumberlineCoverage());
 					break;
 				default:
 					scale = null;
 					break;
 				}
 				
-				TextReference shorttext = new TextReference(rmq.column + "shorttext", connection);
+				TextReference shorttext = textsManager.get(rmq.column + "shorttext");
 				
-				new MetaQuestionOld(rmq.column, fulltext, shorttext, calc, scale, connection);
+				metaQuestionManager.create(rmq.column, fulltext,shorttext, scale, calc);
 			}
 		} catch (SQLException e) {
 			throw new DaxploreException("Failed to transfer metadata from raw", e);
@@ -120,84 +115,12 @@ public class MetaData {
 	
 	@SuppressWarnings({ "rawtypes" })
 	public void importStructure(Reader r) throws IOException {
-		JSONParser parser = new JSONParser();
-		ContainerFactory containerFactory = new ContainerFactory(){
-			public List creatArrayContainer() {
-				return new LinkedList();
-			}
-			public Map createObjectContainer() {
-				return null;
-			}                    
-		};
-		
-		try {
-			JSONObject json = (JSONObject) parser.parse(r, containerFactory);
-			Iterator iter = json.keySet().iterator();
-			while (iter.hasNext()) {
-				String key = (String) iter.next();
-				if("question".equals(key)) {
-					List questions = (List) json.get(key);
-					for(Object o: questions) {
-						JSONObject q = (JSONObject)o;
-						new MetaQuestionOld(q, connection);
-					}
-				} else if("groups".equals(key)) {
-					JSONObject groups = (JSONObject)json.get(key);
-					Iterator giter = json.keySet().iterator();
-					while(giter.hasNext()) {
-						String gkey = (String)giter.next();
-						if("quesions".equals(gkey)) {
-							List qgroups = (List) groups.get(gkey);
-							for(Object o: qgroups) {
-								JSONObject g = (JSONObject)o;
-								new MetaGroup(g, GroupType.QUESTIONS, connection);
-							}
-						} else if ("perspectives".equals(gkey)) {
-							JSONObject g = (JSONObject)groups.get(gkey);
-							new MetaGroup(g, GroupType.PERSPECTIVE, connection);
-						}
-					}
-				}
-			}
-		} catch (ParseException pe) {
-			System.out.println(pe);
-		} catch (SQLException e) {
-			MyTools.printSQLExeption(e);
-		}
+		//TODO: XML
 	}
 	
 	@SuppressWarnings("unchecked")
 	public void exportStructure(Writer w) throws DaxploreException, IOException, SQLException{
-		JSONObject jsonroot = new JSONObject();
-		
-		//export questions
-		List<MetaQuestionOld> questions = getAllQuestions();
-		JSONArray questionArr = new JSONArray();
-		for(MetaQuestionOld q: questions) {
-			questionArr.add(q);
-		}
-		jsonroot.put("questions", questionArr);
-		
-		//export groups
-		List<MetaGroup> groups = getAllGroups();
-		JSONObject groupobj = new JSONObject();
-		JSONArray grouparr = new JSONArray();
-		MetaGroup perspectives = null;
-		for(MetaGroup g: groups) {
-			if(g.getType() == GroupType.QUESTIONS) {
-				grouparr.add(g);				
-			} else {
-				perspectives = g;
-			}
-		}
-		groupobj.put("questions", grouparr);
-		if(perspectives != null) {
-			groupobj.put("perspectives", perspectives);
-		}
-		jsonroot.put("groups", groupobj);
-		
-		w.write(jsonroot.toJSONString());
-		w.close();
+		//TODO: XML
 	}
 	
 	/**
@@ -227,7 +150,7 @@ public class MetaData {
 		try {
 		while(allTexts.hasNext()) {
 			Entry<Object, Object> s = allTexts.next();
-			TextReference tr = new TextReference((String)s.getKey(), connection);
+			TextReference tr = textsManager.get((String)s.getKey());
 			tr.put((String)s.getValue(), locale);
 		}
 		} catch (SQLException e) {
@@ -254,18 +177,13 @@ public class MetaData {
 	public void exportL10n(Writer writer, Locale locale) throws IOException, DaxploreException {
 		Properties properties = new SortedProperties();
 		
-		try {
-			List<TextReference> allTexts = getAllTextReferences();
-			for(TextReference tr: allTexts) {
-				if(tr.has(locale)) {
-					properties.setProperty(tr.getRef(), tr.get(locale));
-				} else {
-					properties.setProperty(tr.getRef(), "");
-				}
+		List<TextReference> allTexts = getAllTextReferences();
+		for(TextReference tr: allTexts) {
+			if(tr.has(locale)) {
+				properties.setProperty(tr.getRef(), tr.get(locale));
+			} else {
+				properties.setProperty(tr.getRef(), "");
 			}
-		} catch (SQLException e) {
-			MyTools.printSQLExeption(e);
-			throw new DaxploreException("Error on Text export", e);
 		}
 		
 		properties.store(writer, null); //Comment can be null Some documentation comment placed on the first row of the file
@@ -279,7 +197,7 @@ public class MetaData {
 		
 	}
 	
-	public void consolidateScales(Locale bylocale) throws DaxploreException {
+	/*public void consolidateScales(Locale bylocale) throws DaxploreException {
 		//TODO: very slow. optimize
 		
 		boolean autocommit = true;
@@ -309,7 +227,7 @@ public class MetaData {
 						List<Pair<TextReference, Double>> oldrefs = us.getRefereceList();
 						List<Pair<TextReference, Double>> newrefs = new LinkedList<Pair<TextReference, Double>>();
 						for(int i = 0; i < oldrefs.size(); i++) {
-							TextReference tr = new TextReference("generic" + (genericScales.size() +1) + "_option_" + i, connection);
+							TextReference tr = textsManager.get("generic" + (genericScales.size() +1) + "_option_" + i);
 							TextReference oldtr = oldrefs.get(i).getKey();
 							List<Locale> locs = oldtr.getLocales();
 							for(Locale loc: locs) {
@@ -350,6 +268,11 @@ public class MetaData {
 			//remove old unused scales
 			List<TextReference> toBeRemoved = new LinkedList<TextReference>();
 			for(MetaScale s: scaleMap.keySet()) {
+				List<MetaScale.Option> refs = s.getOptions();
+				for(MetaScale.Option o: refs) {
+					
+				}
+				
 				List<Pair<TextReference, Double>> refs = s.getRefereceList();
 				//s.remove(); //TODO: Use manager
 				for(Pair<TextReference, Double> p: refs) {
@@ -374,41 +297,11 @@ public class MetaData {
 			MyTools.printSQLExeption(e);
 			throw new DaxploreException("Failed to reenable autocommit", e);
 		}
-	}
-	
-	public void clearNullStrings() throws DaxploreException {
-		boolean autocommit = true;
-		try {
-			//save = sqliteDatabase.setSavepoint();
-			autocommit = connection.getAutoCommit();
-			connection.setAutoCommit(false);
-			connection.setTransactionIsolation(Connection.TRANSACTION_READ_UNCOMMITTED);
-		} catch (SQLException e) {
-			MyTools.printSQLExeption(e);
-			throw new DaxploreException("Failed to disable autocommit", e);
-		}
-		
-		List<TextReference> reflist = getAllTextReferences();
-		try {
-			for(TextReference tr: reflist) {
-				//tr.clearNulls(); //TODO: no longer necessary?
-			}
-			connection.commit();
-		} catch (SQLException e) {
-			throw new DaxploreException("Faild while clearing nulls from strings", e);
-		}
-		
-		try {
-			connection.setAutoCommit(autocommit);
-		} catch (SQLException e) {
-			MyTools.printSQLExeption(e);
-			throw new DaxploreException("Failed to reenable autocommit", e);
-		}
-	}
+	}*/
 	
 	public List<MetaGroup> getAllGroups() throws DaxploreException {
 		try {
-			return MetaGroup.getAll(connection);
+			return metaGroupManager.getAll();
 		} catch (SQLException e) {
 			throw new DaxploreException("SQLExpection while trying to get groups", e);
 		}
@@ -448,7 +341,7 @@ public class MetaData {
 	
 	public List<DaxploreTable> getTables() {
 		List<DaxploreTable> list = new LinkedList<DaxploreTable>();
-		list.add(MetaQuestionOld.table);
+		list.add(MetaQuestion.table);
 		list.add(MetaGroup.table);
 		list.add(MetaGroup.table2);
 		list.add(MetaScale.maintable);

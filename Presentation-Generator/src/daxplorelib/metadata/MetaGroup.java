@@ -20,7 +20,7 @@ public class MetaGroup implements Comparable<MetaGroup> {
 	protected static final DaxploreTable table = new DaxploreTable("CREATE TABLE metagroup (id INTEGER PRIMARY KEY, textref TEXT, ind INTEGER, type INTEGER)", "metagroup");
 	protected static final DaxploreTable table2 = new DaxploreTable("CREATE TABLE metagrouprel (FOREIGN KEY(groupid) REFERENCE metagroup(id), FOREIGN KEY(questionid) REFERENCE metaquestion(id))", "metagrouprel");
 	
-	public class MetaGroupManager {
+	public static class MetaGroupManager {
 		
 		protected Map<Integer, MetaGroup> groupMap = new HashMap<Integer, MetaGroup>();
 		protected List<MetaGroup> toBeRemoved = new LinkedList<MetaGroup>();

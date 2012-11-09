@@ -32,7 +32,7 @@ public class MetaScale {
 			"CREATE TABLE metascaleoption (FOREIGN KEY(scaleid) REFERENCES metascale(id), textref STRING, ord INTEGER, value REAL, transform STRING)"
 			, "metascaleoption");
 	
-	public class MetaScaleManager {
+	public static class MetaScaleManager {
 		Map<Integer, MetaScale> scaleMap = new HashMap<Integer, MetaScale>();
 		Connection connection;
 		protected TextReferenceManager textsManager;
@@ -147,7 +147,7 @@ public class MetaScale {
 		}
 	}
 	
-	public class Option {
+	public static class Option {
 		TextReference textRef;
 		double value;
 		NumberlineCoverage transformation;
