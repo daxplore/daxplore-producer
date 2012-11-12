@@ -11,17 +11,10 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
-import org.json.simple.JSONArray;
-import org.json.simple.JSONAware;
-import org.json.simple.JSONObject;
-
+import tools.NumberlineCoverage;
 import daxplorelib.DaxploreTable;
 import daxplorelib.SQLTools;
 import daxplorelib.metadata.TextReference.TextReferenceManager;
-
-import tools.MyTools;
-import tools.NumberlineCoverage;
-import tools.Pair;
 
 public class MetaScale {
 	
@@ -36,6 +29,8 @@ public class MetaScale {
 		Map<Integer, MetaScale> scaleMap = new HashMap<Integer, MetaScale>();
 		Connection connection;
 		protected TextReferenceManager textsManager;
+		
+		List<MetaScale> toBeRemoved = new LinkedList<MetaScale>();
 		
 		public MetaScaleManager(Connection connection, TextReferenceManager textsManager) {
 			this.connection = connection;
@@ -109,7 +104,7 @@ public class MetaScale {
 		}
 		
 		public void remove(int id) {
-			//TODO: implement
+			toBeRemoved.add(scaleMap.remove(id));
 		}
 		
 		public void saveAll() throws SQLException {
@@ -139,11 +134,27 @@ public class MetaScale {
 					ms.modified = false;
 				}
 			}
-			//save all unsaved MetaScales
+			
+			//remove all to be removed
+			PreparedStatement deleteStmt = connection.prepareStatement("DELETE FROM metascale WHERE id = ?");
+			for(MetaScale ms: toBeRemoved) {
+				deleteStmt.setInt(1, ms.id);
+				deleteStmt.addBatch();
+				removeOptionStmt.setInt(1, ms.id);
+				removeOptionStmt.addBatch();
+			}
+			deleteStmt.executeBatch();
+			removeOptionStmt.executeBatch();
+			toBeRemoved.clear();
+			
 		}
 		
 		public List<MetaScale> getAll() throws SQLException {
-			return null; //TODO: implement
+			ResultSet rs = connection.createStatement().executeQuery("SELECT id FROM metascale");
+			while(rs.next()) {
+				get(rs.getInt("id"));
+			}
+			return new LinkedList<MetaScale>(scaleMap.values());
 		}
 	}
 	
@@ -211,4 +222,14 @@ public class MetaScale {
 		return ignore.contains(value);
 	}
 	
+	public boolean equalsLocale(MetaScale other, Locale byLocale) {
+		if(options.size() != other.options.size()) { return false; }
+		for(int i = 0; i < options.size(); i++) {
+			if(!options.get(i).textRef.get(byLocale).trim().equals(other.options.get(i).textRef.get(byLocale).trim())) { return false; }
+			if(options.get(i).value != other.options.get(i).value) { return false; }
+			if(!options.get(i).transformation.toString().equals(other.options.get(i).transformation.toString())) { return false; }
+		}
+		if(!ignore.toString().equals(other.ignore.toString())) { return false; }
+		return true;
+	}
 }

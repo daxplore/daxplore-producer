@@ -6,6 +6,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.sql.Types;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
@@ -40,19 +41,23 @@ public class TextReference implements Comparable<TextReference> {
 		 * @throws SQLException
 		 */
 		public TextReference get(String refstring) throws SQLException {
-			boolean newTextReference = true;
-			PreparedStatement stmt = connection.prepareStatement("SELECT * FROM texts where ref = ?");
-			stmt.setString(1, refstring);
-			ResultSet rs = stmt.executeQuery();
-			Map<Locale, String> localeMap = new HashMap<Locale, String>();
-			while(rs.next()) {
-				localeMap.put(new Locale(rs.getString("locale")), rs.getString("text"));
-				newTextReference = false;
+			if(textMap.containsKey(refstring)) {
+				return textMap.get(refstring);
+			} else {
+				boolean newTextReference = true;
+				PreparedStatement stmt = connection.prepareStatement("SELECT * FROM texts where ref = ?");
+				stmt.setString(1, refstring);
+				ResultSet rs = stmt.executeQuery();
+				Map<Locale, String> localeMap = new HashMap<Locale, String>();
+				while(rs.next()) {
+					localeMap.put(new Locale(rs.getString("locale")), rs.getString("text"));
+					newTextReference = false;
+				}
+				TextReference tr = new TextReference(refstring, localeMap);
+				tr.modified = newTextReference;
+				textMap.put(refstring, tr);
+				return tr;
 			}
-			TextReference tr = new TextReference(refstring, localeMap);
-			tr.modified = newTextReference;
-			textMap.put(refstring, tr);
-			return tr;
 		}
 		
 		public TextReference create(String refstring) {
@@ -138,7 +143,13 @@ public class TextReference implements Comparable<TextReference> {
 		}
 
 		public List<TextReference> getAll() throws SQLException {
-			return null;//TODO: implement
+			ResultSet rs = connection.createStatement().executeQuery("SELECT ref FROM texts");
+			while(rs.next()) {
+				get(rs.getString("ref"));
+			}
+			LinkedList<TextReference> list = new LinkedList<TextReference>(textMap.values());
+			Collections.sort(list);
+			return list;
 		}
 		
 	}

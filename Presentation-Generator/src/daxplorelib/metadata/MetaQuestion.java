@@ -6,6 +6,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
@@ -26,6 +27,7 @@ public class MetaQuestion {
 		protected MetaScaleManager metascaleManager;
 		protected TextReferenceManager textsManager;
 		protected Map<String, MetaQuestion> questionMap = new HashMap<String, MetaQuestion>();
+		protected LinkedList<MetaQuestion> toBeRemoved = new LinkedList<MetaQuestion>();
 		
 		public MetaQuestionManager(Connection connection, TextReferenceManager textsManager, MetaScaleManager metaScaleManager) {
 			this.connection = connection;
@@ -74,8 +76,8 @@ public class MetaQuestion {
 			return mq;
 		}
 		
-		public void remove(int id) {
-			//TODO: implement
+		public void remove(String id) {
+			toBeRemoved.add(questionMap.remove(id));
 		}
 		
 		public void saveAll() throws SQLException {
@@ -91,10 +93,22 @@ public class MetaQuestion {
 					mq.modified = false;
 				}
 			}
+			
+			PreparedStatement deleteStmt = connection.prepareStatement("DELETE FROM metaquestion WHERE id = ?");
+			for(MetaQuestion mq: toBeRemoved) {
+				deleteStmt.setString(1, mq.id);
+				deleteStmt.addBatch();
+			}
+			deleteStmt.executeBatch();
+			toBeRemoved.clear();
 		}
 		
 		public List<MetaQuestion> getAll() throws SQLException{
-			return null; //TODO: implement
+			ResultSet rs = connection.createStatement().executeQuery("SELECT id FROM metaquestion");
+			while(rs.next()) {
+				get(rs.getString("id"));
+			}
+			return new LinkedList<MetaQuestion>(questionMap.values());
 		}
 	}
 	
