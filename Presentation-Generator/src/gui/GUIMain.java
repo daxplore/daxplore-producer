@@ -1,9 +1,8 @@
 package gui;
 
-import gui.view.ButtonPanelView;
-import gui.view.EditPanelView;
-import gui.view.GroupsPanelView;
-import gui.view.OpenPanelView;
+import gui.edit.EditPanelView;
+import gui.groups.GroupsPanelView;
+import gui.open.OpenPanelView;
 
 import java.awt.BorderLayout;
 import java.awt.CardLayout;
@@ -89,14 +88,19 @@ public class GUIMain {
 	}
 	
 	// data fields for main class.
-	public JFrame guiMainFrame;
+	private JFrame guiMainFrame;
+	private GUIFile guiFile;
 	
-	public JFrame getFrmDaxploreProducer() {
-		return guiMainFrame;
+	public GUIFile getGuiFile() {
+		return guiFile;
 	}
 
-	public void setFrmDaxploreProducer(JFrame frmDaxploreProducer) {
-		this.guiMainFrame = frmDaxploreProducer;
+	public void setGuiFile(GUIFile guiFile) {
+		this.guiFile = guiFile;
+	}
+
+	public JFrame getGuiMainFrame() {
+		return guiMainFrame;
 	}
 
 	final JPanel mainPanel = new JPanel();
@@ -126,7 +130,7 @@ public class GUIMain {
 		guiMainFrame.getContentPane().setLayout(new BorderLayout(0, 0));
 		
 		// file handler init.
-		GUIFile guiFile = new GUIFile();
+		guiFile = new GUIFile();
 		
 		// create main panel window.
 		mainPanel.setBorder(new MatteBorder(0, 1, 0, 0, (Color) Color.GRAY));
@@ -138,15 +142,15 @@ public class GUIMain {
 		guiMainFrame.getContentPane().add(buttonPanelView, BorderLayout.WEST);
 		
 		// add the open panel view.
-		OpenPanelView openPanelView = new OpenPanelView(this, guiFile);
+		OpenPanelView openPanelView = new OpenPanelView(this);
 		mainPanel.add(openPanelView, "openPanel");
 		
 		// add the groups panel view.
-		GroupsPanelView groupsPanelView = new GroupsPanelView(this, guiFile);
+		GroupsPanelView groupsPanelView = new GroupsPanelView(this);
 		mainPanel.add(groupsPanelView, "groupsPanel");
 		
 		// add the edit panel view.
-		EditPanelView editPanelView = new EditPanelView(this, guiFile);
+		EditPanelView editPanelView = new EditPanelView(this);
 		mainPanel.add(editPanelView, "editPanel");	
 	}
 }

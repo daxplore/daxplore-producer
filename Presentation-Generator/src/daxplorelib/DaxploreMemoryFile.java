@@ -175,7 +175,7 @@ public class DaxploreMemoryFile extends DaxploreFile {
 		}
 	}
 	
-	public void copyMetDataToMemory() throws DaxploreException {
+	public void copyMetaDataToMemory() throws DaxploreException {
 		boolean autocommit = true;
 		try {
 			autocommit = connection.getAutoCommit();
