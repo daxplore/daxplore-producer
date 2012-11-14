@@ -14,11 +14,11 @@ import daxplorelib.DaxploreFile;
  * @author jorgenrosen
  *
  */
-public class GUIFile {
+public class GuiFile {
 	private DaxploreFile daxploreFile = null;
 	private File spssFile = null;
 
-	public GUIFile() {
+	public GuiFile() {
 	}
 
 	public DaxploreFile getDaxploreFile() {
@@ -37,7 +37,21 @@ public class GUIFile {
 		this.spssFile = spssFile;
 	}
 	
+	public void resetDaxploreFile() {
+		daxploreFile = null;
+	}
+	
 	public void resetSpssFile() {
 		spssFile = null;
+	}
+	
+	/**
+	 * Returns true if a daxplore file is loaded into the system.
+	 */
+	public boolean isSet() {
+		if (daxploreFile == null)
+			return true;
+		else
+			return false;
 	}
 }

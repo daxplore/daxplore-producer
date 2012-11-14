@@ -1,7 +1,7 @@
 package gui.edit;
 
-import gui.GUIFile;
-import gui.GUIMain;
+import gui.GuiFile;
+import gui.GuiMain;
 
 import javax.swing.JPanel;
 import javax.swing.JLabel;
@@ -13,7 +13,7 @@ public class EditPanelView extends JPanel {
 	 * @param guiFile 
 	 * @param guiMain 
 	 */
-	public EditPanelView(GUIMain guiMain) {
+	public EditPanelView(GuiMain guiMain) {
 		
 		JLabel EditPanelLabel = new JLabel("Edit Panel");
 		add(EditPanelLabel);

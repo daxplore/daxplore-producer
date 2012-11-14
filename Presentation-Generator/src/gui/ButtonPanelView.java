@@ -21,60 +21,131 @@ import javax.swing.border.TitledBorder;
  */
 public class ButtonPanelView extends JPanel {
 	
-	public ButtonPanelView(final GUIMain guiMain) {
+	// data fields.
+	private GuiMain guiMain;
+	private JRadioButton openButton;
+	private JRadioButton groupsButton;
+	private JRadioButton editButton;
+	private JRadioButton toolsButton;
+	
+	
+	// getters and setters.
+	public JRadioButton getOpenButton() {
+		return openButton;
+	}
+
+	public void setOpenButton(JRadioButton openButton) {
+		this.openButton = openButton;
+	}
+
+	public JRadioButton getGroupsButton() {
+		return groupsButton;
+	}
+
+	public void setGroupsButton(JRadioButton groupsButton) {
+		this.groupsButton = groupsButton;
+	}
+
+	public JRadioButton getEditButton() {
+		return editButton;
+	}
+
+	public void setEditButton(JRadioButton editButton) {
+		this.editButton = editButton;
+	}
+
+	public JRadioButton getToolsButton() {
+		return toolsButton;
+	}
+
+	public void setToolsButton(JRadioButton toolsButton) {
+		this.toolsButton = toolsButton;
+	}
+
+	public ButtonPanelView(final GuiMain guiMain) {
 		
 		ButtonGroup buttonGroup = new ButtonGroup();
+		this.guiMain = guiMain;
 		
-		// create the button panel.
+		// create the button panel
 		setBorder(new MatteBorder(0, 0, 0, 1, (Color) Color.LIGHT_GRAY));
 		setLayout(new GridLayout(0, 1, 0, 0));
 		
-		// open button.
-		JRadioButton OpenButton = new JRadioButton("");
-		OpenButton.setToolTipText("Manage file(s)");
-		OpenButton.addItemListener(new ItemListener() {
+		openButton = new JRadioButton("");
+		openButton.setSelected(true);
+		openButton.setToolTipText("Manage file(s)");
+		openButton.addItemListener(new ItemListener() {
 			public void itemStateChanged(ItemEvent e) {
 				guiMain.switchTo("openPanel");
 			}
 		});
-		
-		OpenButton.setRolloverEnabled(false);
-		OpenButton.setSelectedIcon(new ImageIcon(GUIMain.class.getResource("/gui/resources/8_selected.png")));
-		OpenButton.setBorder(new TitledBorder(null, "", TitledBorder.LEADING, TitledBorder.TOP, null, null));
-		buttonGroup.add(OpenButton);
-		OpenButton.setIcon(new ImageIcon(GUIMain.class.getResource("/gui/resources/8.png")));
-		add(OpenButton);
 
-		// groups button.
-		JRadioButton GroupsButton = new JRadioButton("");
-		GroupsButton.setToolTipText("Edit groups and questions");
-		GroupsButton.addItemListener(new ItemListener() {
+		openButton.setRolloverEnabled(false);
+		openButton.setSelectedIcon(new ImageIcon(GuiMain.class.getResource("/gui/resources/8_selected.png")));
+		openButton.setBorder(new TitledBorder(null, "", TitledBorder.LEADING, TitledBorder.TOP, null, null));
+		buttonGroup.add(openButton);
+		openButton.setIcon(new ImageIcon(GuiMain.class.getResource("/gui/resources/8.png")));
+		add(openButton);
+
+		groupsButton = new JRadioButton("");
+		groupsButton.setToolTipText("Edit groups and questions");
+		groupsButton.addItemListener(new ItemListener() {
 			public void itemStateChanged(ItemEvent e) {
 				guiMain.switchTo("groupsPanel");
 			}
 		});
 		
-		GroupsButton.setSelectedIcon(new ImageIcon(ButtonPanelView.class.getResource("/gui/resources/29_selected.png")));
-		GroupsButton.setRolloverEnabled(false);
-		GroupsButton.setBorder(new TitledBorder(null, "", TitledBorder.LEADING, TitledBorder.TOP, null, null));
-		buttonGroup.add(GroupsButton);
-		GroupsButton.setIcon(new ImageIcon(ButtonPanelView.class.getResource("/gui/resources/29.png")));
-		add(GroupsButton);
+		groupsButton.setSelectedIcon(new ImageIcon(ButtonPanelView.class.getResource("/gui/resources/29_selected.png")));
+		groupsButton.setRolloverEnabled(false);
+		groupsButton.setBorder(new TitledBorder(null, "", TitledBorder.LEADING, TitledBorder.TOP, null, null));
+		buttonGroup.add(groupsButton);
+		groupsButton.setIcon(new ImageIcon(ButtonPanelView.class.getResource("/gui/resources/29.png")));
+		add(groupsButton);
 	
-		// edit button.
-		JRadioButton EditButton = new JRadioButton("");
-		EditButton.setToolTipText("*SET TOOL TIP*");
-		EditButton.addItemListener(new ItemListener() {
+		editButton = new JRadioButton("");
+		editButton.setToolTipText("Edit questions");
+		editButton.addItemListener(new ItemListener() {
 			public void itemStateChanged(ItemEvent e) {
 				guiMain.switchTo("editPanel");
 			}
 		});
 		
-		EditButton.setSelectedIcon(new ImageIcon(GUIMain.class.getResource("/gui/resources/21_selected.png")));
-		EditButton.setRolloverEnabled(false);
-		EditButton.setBorder(new TitledBorder(null, "", TitledBorder.LEADING, TitledBorder.TOP, null, null));
-		buttonGroup.add(EditButton);
-		EditButton.setIcon(new ImageIcon(GUIMain.class.getResource("/gui/resources/21.png")));
-		add(EditButton);
+		editButton.setSelectedIcon(new ImageIcon(GuiMain.class.getResource("/gui/resources/21_selected.png")));
+		editButton.setRolloverEnabled(false);
+		editButton.setBorder(new TitledBorder(null, "", TitledBorder.LEADING, TitledBorder.TOP, null, null));
+		buttonGroup.add(editButton);
+		editButton.setIcon(new ImageIcon(GuiMain.class.getResource("/gui/resources/21.png")));
+		add(editButton);
+		
+		toolsButton = new JRadioButton("");
+		toolsButton.setToolTipText("Tools section");
+		toolsButton.addItemListener(new ItemListener() {
+			public void itemStateChanged(ItemEvent e) {
+						guiMain.switchTo("toolsPanel");
+			}
+		});
+				
+		toolsButton.setSelectedIcon(new ImageIcon(ButtonPanelView.class.getResource("/gui/resources/24_selected.png")));
+		toolsButton.setRolloverEnabled(false);
+		toolsButton.setBorder(new TitledBorder(null, "", TitledBorder.LEADING, TitledBorder.TOP, null, null));
+		buttonGroup.add(toolsButton);
+		toolsButton.setIcon(new ImageIcon(ButtonPanelView.class.getResource("/gui/resources/24.png")));
+		add(toolsButton);
+		
+		updateButtonPanel();
+	}
+
+	public void updateButtonPanel() {
+		// disable buttons if no file is loaded.
+		if (guiMain.getGuiFile().isSet()) {
+			groupsButton.setEnabled(false);
+			editButton.setEnabled(false);
+			toolsButton.setEnabled(false);
+		}
+		else {
+			groupsButton.setEnabled(true);
+			editButton.setEnabled(true);
+			toolsButton.setEnabled(true);
+		}
 	}
 }

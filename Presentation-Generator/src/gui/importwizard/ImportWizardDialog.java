@@ -1,7 +1,7 @@
 package gui.importwizard;
 
-import gui.GUIFile;
-import gui.GUIMain;
+import gui.GuiFile;
+import gui.GuiMain;
 
 import java.awt.BorderLayout;
 import java.awt.CardLayout;
@@ -47,7 +47,7 @@ public class ImportWizardDialog extends JDialog implements PropertyChangeListene
 	private static final long serialVersionUID = 1L;
 	
 	// store instances of classes that will be used.
-	private GUIMain guiMain;
+	private GuiMain guiMain;
 	private JDialog importWizardDialog;
 	private ImportWizardModel importWizardModel;
 	private ImportWizardController importWizardController;
@@ -65,7 +65,7 @@ public class ImportWizardDialog extends JDialog implements PropertyChangeListene
     // no resource file is used so the strings for button text is stored here.
 	public static final String CANCEL_TEXT = "Cancel";
 	public static final String BACK_TEXT = "Back";
-	public static final String FINISH_TEXT = "Import >>";
+	public static final String FINISH_TEXT = "Import...";
 	public static final String NEXT_TEXT = "Next";
     
 	// elements specific for the import wizard components.
@@ -82,7 +82,8 @@ public class ImportWizardDialog extends JDialog implements PropertyChangeListene
 	 * 
 	 * @param guiMain
 	 */
-	public ImportWizardDialog(final GUIMain guiMain) {
+	public ImportWizardDialog(final GuiMain guiMain) {
+		setModal(true);
 		
 		importWizardController = new ImportWizardController(this);
 		importWizardModel = new ImportWizardModel();
@@ -92,11 +93,11 @@ public class ImportWizardDialog extends JDialog implements PropertyChangeListene
 	}
 	
 	// getters and setters be here.
-	public GUIMain getGuiMain() {
+	public GuiMain getGuiMain() {
 		return guiMain;
 	}
 
-	public void setGuiMain(GUIMain guiMain) {
+	public void setGuiMain(GuiMain guiMain) {
 		this.guiMain = guiMain;
 	}
 
@@ -226,6 +227,14 @@ public class ImportWizardDialog extends JDialog implements PropertyChangeListene
      */    
     public void close(int code) {
         returnCode = code;
+        
+        // finish the import if the import button is pressed.
+        if (returnCode == FINISH_RETURN_CODE) {
+        	importWizardController.importSpssFileAction();
+        	getGuiMain().getOpenPanelView().getOpenController().updateSpssFileInfoText();
+        	getGuiMain().getOpenPanelView().getOpenController().updateTextFields();
+        }
+        
         importWizardDialog.dispose();
     }
     
@@ -253,36 +262,6 @@ public class ImportWizardDialog extends JDialog implements PropertyChangeListene
 		contentPanel.setLayout(cardLayout);
 		addWindowListener(this);
 		
-		// TODO: Remove code below and sort it out in panel files.
-
-		// JPanel encodingPanel = new JPanel();
-		// contentPanel.add(encodingPanel, "encodingPanel");
-		// encodingPanel.setLayout(new BorderLayout(0, 0));
-
-		// JPanel specifyEncodingPanel = new JPanel();
-		// encodingPanel.add(specifyEncodingPanel, BorderLayout.NORTH);
-
-		// JLabel lblNewLabel = new JLabel("Specify encoding:");
-		// specifyEncodingPanel.add(lblNewLabel);
-		
-		// encodingComboBox = new JComboBox();
-		// encodingComboBox.setActionCommand(ENCODING_COMBO_BOX_ACTION);
-		// encodingComboBox.addActionListener(importWizardController);
-		// specifyEncodingPanel.add(encodingComboBox);
-		
-		// encodingListPanel = new JScrollPane();
-		// encodingPanel.add(encodingListPanel, BorderLayout.CENTER);
-		
-		// SortedMap<String, Charset> cset = Charset.availableCharsets();
-
-		// populate the combobox with available charsets.
-		// for (String charname : cset.keySet()) {
-		//	encodingComboBox.addItem(charname);
-		// }
-		
-		// JPanel tablePanel = new JPanel();
-		// contentPanel.add(tablePanel, "tablePanel");
-
 		JPanel buttonPanel = new JPanel();
 		buttonPanel.setLayout(new FlowLayout(FlowLayout.RIGHT));
 		getContentPane().add(buttonPanel, BorderLayout.SOUTH);

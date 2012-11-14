@@ -41,7 +41,23 @@ public class CharsetPanelDescriptor extends ImportWizardDescriptor implements Ac
 	public void actionPerformed(ActionEvent e) {
 		if (e.getActionCommand().equals(CharsetPanelDescriptor.ENCODING_COMBO_BOX_ACTION))
 			charsetComboBoxAction(e);
+		
+		setNextButtonAccordingToCharset();
 	}
+	
+	@Override
+	public void aboutToDisplayPanel() {
+		if (getWizard().getModel().getCharsetName() == null)
+            getWizard().setNextFinishButtonEnabled(false);
+	}
+	
+	private void setNextButtonAccordingToCharset() {
+    	// keep next button disabled until a charset has been loaded into memory.
+         if (getWizard().getModel().getCharsetName() == null)
+            getWizard().setNextFinishButtonEnabled(false);
+         else
+            getWizard().setNextFinishButtonEnabled(true);           
+    }
 	
 	/**
 	 * Method to handle the encoding charset combo box.

@@ -3,6 +3,7 @@ package gui;
 import gui.edit.EditPanelView;
 import gui.groups.GroupsPanelView;
 import gui.open.OpenPanelView;
+import gui.tools.ToolsPanelView;
 
 import java.awt.BorderLayout;
 import java.awt.CardLayout;
@@ -28,7 +29,7 @@ import daxplorelib.DaxploreFile;
 /**
  * Main window handler class. Initialization of application goes here.
  */
-public class GUIMain {
+public class GuiMain {
 
 	/**
 	 * Main execution loop, includes the thread handler, required for swing
@@ -38,7 +39,7 @@ public class GUIMain {
 	public static void main(String[] args) {
 		
 		// do a java version check, if target system doesn't have java 7, exit.
-		if (GUITools.javaVersionCheck() != true) {
+		if (GuiTools.javaVersionCheck() != true) {
 			JOptionPane.showMessageDialog(null,
 					"This program only supports Java 7 or higher.",
 					"Daxplore warning",
@@ -78,7 +79,7 @@ public class GUIMain {
 		EventQueue.invokeLater(new Runnable() {
 			public void run() {
 				try {
-					GUIMain window = new GUIMain();
+					GuiMain window = new GuiMain();
 					window.guiMainFrame.setVisible(true);
 				} catch (Exception e) {
 					e.printStackTrace();
@@ -89,13 +90,29 @@ public class GUIMain {
 	
 	// data fields for main class.
 	private JFrame guiMainFrame;
-	private GUIFile guiFile;
+	private GuiFile guiFile;
+	final JPanel mainPanel = new JPanel();
 	
-	public GUIFile getGuiFile() {
+	private OpenPanelView openPanelView;
+	private GroupsPanelView groupsPanelView;
+	private EditPanelView editPanelView;
+	private ButtonPanelView buttonPanelView;
+	private ToolsPanelView toolsPanelView;
+	
+	// getters and setters.
+	public ButtonPanelView getButtonPanelView() {
+		return buttonPanelView;
+	}
+
+	public void setButtonPanelView(ButtonPanelView buttonPanelView) {
+		this.buttonPanelView = buttonPanelView;
+	}
+
+	public GuiFile getGuiFile() {
 		return guiFile;
 	}
 
-	public void setGuiFile(GUIFile guiFile) {
+	public void setGuiFile(GuiFile guiFile) {
 		this.guiFile = guiFile;
 	}
 
@@ -103,7 +120,29 @@ public class GUIMain {
 		return guiMainFrame;
 	}
 
-	final JPanel mainPanel = new JPanel();
+	public OpenPanelView getOpenPanelView() {
+		return openPanelView;
+	}
+
+	public void setOpenPanelView(OpenPanelView openPanelView) {
+		this.openPanelView = openPanelView;
+	}
+
+	public GroupsPanelView getGroupsPanelView() {
+		return groupsPanelView;
+	}
+
+	public void setGroupsPanelView(GroupsPanelView groupsPanelView) {
+		this.groupsPanelView = groupsPanelView;
+	}
+
+	public EditPanelView getEditPanelView() {
+		return editPanelView;
+	}
+
+	public void setEditPanelView(EditPanelView editPanelView) {
+		this.editPanelView = editPanelView;
+	}
 
 	public void switchTo(String label) {
 		CardLayout cl = (CardLayout)(mainPanel.getLayout());
@@ -113,7 +152,7 @@ public class GUIMain {
 	/**
 	 * Create the application.
 	 */
-	public GUIMain() {
+	public GuiMain() {
 		initGUI();
 	}
 
@@ -123,34 +162,34 @@ public class GUIMain {
 	private void initGUI() {
 		
 		guiMainFrame = new JFrame();
-		guiMainFrame.setIconImage(Toolkit.getDefaultToolkit().getImage(GUIMain.class.getResource("/gui/resources/Colorful_Chart_Icon_vol2.png")));
+		guiMainFrame.setIconImage(Toolkit.getDefaultToolkit().getImage(GuiMain.class.getResource("/gui/resources/Colorful_Chart_Icon_vol2.png")));
 		guiMainFrame.setTitle("Daxplore Producer Developer Version");
 		guiMainFrame.setBounds(100, 100, 900, 787);
 		guiMainFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		guiMainFrame.getContentPane().setLayout(new BorderLayout(0, 0));
 		
 		// file handler init.
-		guiFile = new GUIFile();
+		guiFile = new GuiFile();
 		
 		// create main panel window.
 		mainPanel.setBorder(new MatteBorder(0, 1, 0, 0, (Color) Color.GRAY));
 		mainPanel.setLayout(new CardLayout(0, 0));
 		guiMainFrame.getContentPane().add(mainPanel, BorderLayout.CENTER);
 		
-		// create left button panel.
-		ButtonPanelView buttonPanelView = new ButtonPanelView(this);
+		// panel views. TODO: Remake the controller interface.
+		buttonPanelView = new ButtonPanelView(this);
 		guiMainFrame.getContentPane().add(buttonPanelView, BorderLayout.WEST);
 		
-		// add the open panel view.
-		OpenPanelView openPanelView = new OpenPanelView(this);
+		openPanelView = new OpenPanelView(this);
 		mainPanel.add(openPanelView, "openPanel");
 		
-		// add the groups panel view.
-		GroupsPanelView groupsPanelView = new GroupsPanelView(this);
+		groupsPanelView = new GroupsPanelView(this);
 		mainPanel.add(groupsPanelView, "groupsPanel");
 		
-		// add the edit panel view.
-		EditPanelView editPanelView = new EditPanelView(this);
-		mainPanel.add(editPanelView, "editPanel");	
+		editPanelView = new EditPanelView(this);
+		mainPanel.add(editPanelView, "editPanel");
+		
+		toolsPanelView = new ToolsPanelView(this);
+		mainPanel.add(toolsPanelView, "toolsPanel");
 	}
 }

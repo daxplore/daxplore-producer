@@ -47,81 +47,25 @@ public class FinalImportPanelDescriptor extends ImportWizardDescriptor {
     @Override
     public void aboutToDisplayPanel() {
     	
-    	DefaultTableModel model = spssTable(getWizard().getGuiMain().getGuiFile().getSpssFile());
+    	// this shouldn't happen, but in case there is no file loaded, just exit.
+    	if (getWizard().getGuiMain().getGuiFile().getSpssFile() == null)
+    		return;
+    	
+    	TableModel model = spssTable(getWizard().getGuiMain().getGuiFile().getSpssFile());
     	finalImportPanel.showTable(model);
     }
     
-    /**
-     * Handles SPSS file import.
-     * TODO: Update with more information.
-     */
-	public void importSpssFileAction() {
-
-		// this should never happen the way the dialog is designed. But we keep this for safety.
-		if (getWizard().getGuiMain().getGuiFile().getSpssFile() == null) {
-			JOptionPane.showMessageDialog(this.getWizard().getGuiMain().getGuiMainFrame(),
-					"You must open an SPSS file before you can import it.",
-					"Daxplore file warning", JOptionPane.ERROR_MESSAGE);
-			return;
-
-		}
-
-		if (getWizard().getGuiMain().getGuiFile().getDaxploreFile() == null) {
-			JOptionPane
-					.showMessageDialog(
-							this.getWizard().getGuiMain().getGuiMainFrame(),
-							"Create or open a daxplore project file before you import an SPSS file.",
-							"Daxplore file warning", JOptionPane.ERROR_MESSAGE);
-			return;
-		}
-
-		Charset charset;
-		try {
-			charset = Charset.forName(getWizard().getModel().getCharsetName());
-		} catch (Exception e1) {
-			JOptionPane.showMessageDialog(this.getWizard().getGuiMain().getGuiMainFrame(),
-					"Unable to create charset, aborting import.",
-					"Daxplore file warning", JOptionPane.ERROR_MESSAGE);
-			return;
-		}
-
-		File importFile = getWizard().getGuiMain().getGuiFile().getSpssFile();
-
-		try {
-			
-			getWizard().getGuiMain().getGuiMainFrame().setCursor(
-					Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
-			getWizard().getGuiMain().getGuiFile().getDaxploreFile().importSPSS(importFile, charset);
-
-			// TODO: Display information that file has been imported.
-
-		} catch (FileNotFoundException e2) {
-			JOptionPane.showMessageDialog(this.getWizard().getGuiMain().getGuiMainFrame(),
-					"Unable to find the SPSS file.", "Daxplore file warning",
-					JOptionPane.ERROR_MESSAGE);
-			e2.printStackTrace();
-			return;
-		} catch (IOException e2) {
-			JOptionPane.showMessageDialog(this.getWizard().getGuiMain().getGuiMainFrame(),
-					"File import error.", "Daxplore file warning",
-					JOptionPane.ERROR_MESSAGE);
-			e2.printStackTrace();
-			return;
-		} catch (DaxploreException e2) {
-			JOptionPane.showMessageDialog(this.getWizard().getGuiMain().getGuiMainFrame(),
-					"Unable to import file, aborting operation.",
-					"Daxplore file warning", JOptionPane.ERROR_MESSAGE);
-			e2.printStackTrace();
-			return;
-		}
-	}
-	
+    @Override
+    public void aboutToHidePanel() {
+    	// not implemented.
+    }
+    
 	/**
 	 * Creates a temporary file on disc and imports SPSS file information as well as outputs it to a table display.
 	 * @param sf
 	 * @return TableColumn
 	 */
-	public DefaultTableModel spssTable(File file) {
+	public TableModel spssTable(File file) {
 		File temp;
 		FileFormatInfo ffi = new FileFormatInfo();
 		ffi.namesOnFirstLine = false;
@@ -133,8 +77,9 @@ public class FinalImportPanelDescriptor extends ImportWizardDescriptor {
 		try {
 			sf = new SPSSFile(file, "r");
 		} catch (FileNotFoundException e1) {
-			// TODO Auto-generated catch block
+			System.out.println("No SPSS file found, exiting.");
 			e1.printStackTrace();
+			return null;
 		}
 		
 		try {
@@ -183,7 +128,7 @@ public class FinalImportPanelDescriptor extends ImportWizardDescriptor {
 			e.printStackTrace();
 		}
 	
-		DefaultTableModel model = new DefaultTableModel(data, columns);
+		TableModel model = new DefaultTableModel(data, columns);
 		
 		return model;
 	}
