@@ -198,7 +198,7 @@ public class MetaData {
 		
 	}
 	
-	public void consolidateScale(Locale bylocale) throws DaxploreException {
+	public void consolidateScales(Locale bylocale) throws DaxploreException {
 		boolean autocommit = true;
 		try {
 			autocommit = connection.getAutoCommit();

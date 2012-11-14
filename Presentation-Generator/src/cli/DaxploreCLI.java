@@ -53,9 +53,6 @@ public class DaxploreCLI {
 		ConsolidateCommand consolidateCommand = new ConsolidateCommand();
 		addCommand(jc, "scalemerge", consolidateCommand);
 		
-		CleanTextsCommand cleanTextsCommand = new CleanTextsCommand();
-		addCommand(jc, "cleantexts", cleanTextsCommand);
-		
 		TestCommand testCommand = new TestCommand();
 		addCommand(jc, "test", testCommand);
 		
@@ -125,8 +122,6 @@ public class DaxploreCLI {
 			transferCommand.run(file);
 		} else if(command.equals("scalemerge")) {
 			consolidateCommand.run(file);
-		} else if(command.equals("cleantexts")) {
-			cleanTextsCommand.run(file);
 		} else if(command.equals("test")) {
 			testCommand.run(file);
 		}

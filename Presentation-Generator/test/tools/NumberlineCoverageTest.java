@@ -4,10 +4,12 @@ import static org.junit.Assert.*;
 
 import org.junit.Test;
 
+import tools.NumberlineCoverage.NumberlineCoverageException;
+
 public class NumberlineCoverageTest {
 
 	@Test
-	public void testToAndFromString() {
+	public void testToAndFromString() throws NumberlineCoverageException {
 		NumberlineCoverage c1 = new NumberlineCoverage(-4, true, 19.5, false);
 		c1.addInterval(100, true, Double.POSITIVE_INFINITY, false);
 		NumberlineCoverage c2 = new NumberlineCoverage(c1.toString());
