@@ -25,6 +25,7 @@ import javax.swing.border.MatteBorder;
 import org.opendatafoundation.data.spss.SPSSFile;
 
 import daxplorelib.DaxploreFile;
+import javax.swing.JTable;
 
 /**
  * Main window handler class. Initialization of application goes here.
@@ -148,6 +149,11 @@ public class GuiMain {
 		CardLayout cl = (CardLayout)(mainPanel.getLayout());
 	    cl.show(mainPanel, label);
 	}
+	
+	public void updateStuff() {
+		buttonPanelView.updateButtonPanel();
+		editPanelView.loadData();
+	}
 
 	/**
 	 * Create the application.
@@ -191,5 +197,7 @@ public class GuiMain {
 		
 		toolsPanelView = new ToolsPanelView(this);
 		mainPanel.add(toolsPanelView, "toolsPanel");
+		
+		mainPanel.setRequestFocusEnabled(true);
 	}
 }

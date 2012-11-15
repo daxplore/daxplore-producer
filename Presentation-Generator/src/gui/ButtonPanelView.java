@@ -137,7 +137,7 @@ public class ButtonPanelView extends JPanel {
 
 	public void updateButtonPanel() {
 		// disable buttons if no file is loaded.
-		if (guiMain.getGuiFile().isSet()) {
+		if (!guiMain.getGuiFile().isSet()) {
 			groupsButton.setEnabled(false);
 			editButton.setEnabled(false);
 			toolsButton.setEnabled(false);

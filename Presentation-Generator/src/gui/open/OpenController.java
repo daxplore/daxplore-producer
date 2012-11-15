@@ -99,7 +99,7 @@ public final class OpenController implements ActionListener {
 				guiMain.getGuiFile().setDaxploreFile(DaxploreFile.createWithNewFile(file));
 				updateTextFields();
 				// activate the button panel.
-				guiMain.getButtonPanelView().updateButtonPanel();
+				guiMain.updateStuff();
 			} catch (DaxploreException e1) {
 				System.out.println("Saving daxplore file failure.");
 				e1.printStackTrace();
@@ -144,7 +144,7 @@ public final class OpenController implements ActionListener {
 				// update text fields so that file information is properly
 				// shown.
 				updateTextFields();
-				guiMain.getButtonPanelView().updateButtonPanel();
+				guiMain.updateStuff();
 
 			} catch (DaxploreException e1) {
 				JOptionPane.showMessageDialog(this.guiMain.getGuiMainFrame(),

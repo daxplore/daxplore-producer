@@ -27,6 +27,7 @@ public class GuiFile {
 
 	public void setDaxploreFile(DaxploreFile daxploreFile) {
 		this.daxploreFile = daxploreFile;
+		
 	}
 
 	public File getSpssFile() {
@@ -49,9 +50,6 @@ public class GuiFile {
 	 * Returns true if a daxplore file is loaded into the system.
 	 */
 	public boolean isSet() {
-		if (daxploreFile == null)
-			return true;
-		else
-			return false;
+		return daxploreFile != null;
 	}
 }
