@@ -28,6 +28,7 @@ public class DaxploreFile {
 	Connection connection;
 	About about;
 	File file = null;
+	MetaData metadata;
 	
 	public static DaxploreFile createFromExistingFile(File file) throws DaxploreException {
 		try {
@@ -147,10 +148,15 @@ public class DaxploreFile {
 	}
 	
 	public MetaData getMetaData() throws DaxploreException {
-		try {
-			return new MetaData(connection);
-		} catch (SQLException e) {
-			throw new DaxploreException("Couldn't get metadata", e);
+		if(metadata != null) {
+			return metadata;
+		} else {
+			try {
+				metadata = new MetaData(connection);
+				return metadata;
+			} catch (SQLException e) {
+				throw new DaxploreException("Couldn't get metadata", e);
+			}
 		}
 	}
 	

@@ -15,8 +15,11 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 
+import tools.SmallMap;
+
 import daxplorelib.DaxploreTable;
 import daxplorelib.SQLTools;
+
 
 public class TextReference implements Comparable<TextReference> {
 	protected static final DaxploreTable table = new DaxploreTable("CREATE TABLE texts (ref TEXT, locale TEXT, text TEXT, UNIQUE ( ref, locale) )", "texts");
@@ -42,29 +45,27 @@ public class TextReference implements Comparable<TextReference> {
 		 */
 		public TextReference get(String refstring) throws SQLException {
 			if(textMap.containsKey(refstring)) {
+				//System.out.print("e");
 				return textMap.get(refstring);
 			} else {
 				boolean newTextReference = true;
 				PreparedStatement stmt = connection.prepareStatement("SELECT * FROM texts where ref = ?");
 				stmt.setString(1, refstring);
 				ResultSet rs = stmt.executeQuery();
-				Map<Locale, String> localeMap = new HashMap<Locale, String>();
+				Map<Locale, String> localeMap = new SmallMap<Locale, String>();
 				while(rs.next()) {
-					localeMap.put(new Locale(rs.getString("locale")), rs.getString("text"));
+					String loc = rs.getString("locale");
+					if(loc != null && !"".equals(loc)) {
+						localeMap.put(new Locale(rs.getString("locale")), rs.getString("text"));						
+					}
 					newTextReference = false;
 				}
 				TextReference tr = new TextReference(refstring, localeMap);
 				tr.modified = newTextReference;
+				//System.out.print(newTextReference ? "n": "o");
 				textMap.put(refstring, tr);
 				return tr;
 			}
-		}
-		
-		public TextReference create(String refstring) {
-			TextReference tr = new TextReference(refstring, new HashMap<Locale, String>());
-			tr.modified = true;
-			textMap.put(refstring, tr);
-			return tr;
 		}
 		
 		public void remove(String refstring) throws SQLException {
@@ -75,7 +76,13 @@ public class TextReference implements Comparable<TextReference> {
 			PreparedStatement insertStmt = connection.prepareStatement("INSERT OR REPLACE INTO texts (ref, locale, text) VALUES (?, ? , ?)");
 			PreparedStatement localesStmt = connection.prepareStatement("SELECT locale FROM texts WHERE ref = ?");
 			PreparedStatement deleteStmt = connection.prepareStatement("DELETE FROM texts WHERE ref = ? AND locale = ?");
-
+			
+			int k = 0;
+			for(TextReference tr: textMap.values()) {
+				if(tr.modified) { k++; }
+			}
+			System.out.println("\nSaving " + k + " textreferences of " + textMap.size());
+			
 			for(TextReference tr: textMap.values()) {
 				if(tr.modified) {
 					//first get existing locales
@@ -94,17 +101,17 @@ public class TextReference implements Comparable<TextReference> {
 							insertStmt.setString(1, tr.reference);
 							insertStmt.setString(2, l.toLanguageTag());
 							insertStmt.setString(3, tr.get(l));
-							insertStmt.addBatch();
+							insertStmt.executeUpdate();
 						}
-						insertStmt.executeBatch();
+						//insertStmt.executeBatch();
 						deleteStmt.setString(1, tr.reference);
 						deleteStmt.setNull(2, Types.VARCHAR);
-						deleteStmt.execute();
+						deleteStmt.executeUpdate();
 					} else {
 						insertStmt.setString(1, tr.reference);
 						insertStmt.setNull(2, Types.VARCHAR);
 						insertStmt.setNull(3, Types.VARCHAR);
-						insertStmt.execute();
+						insertStmt.executeUpdate();
 					}
 						
 					for(Locale l: oldLocs) {

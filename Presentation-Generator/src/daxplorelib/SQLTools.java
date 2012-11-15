@@ -98,10 +98,13 @@ public class SQLTools {
 	}
 	
 	public static int lastId(String tablename, Connection connection) throws SQLException {
-		PreparedStatement stmt = connection.prepareStatement("SELECT seq FROM sqlite_sequence WHERE name = ?");
+		ResultSet rs = connection.createStatement().executeQuery("SELECT last_insert_rowid()");
+		rs.next();
+		return (int) rs.getLong(1);
+		/*PreparedStatement stmt = connection.prepareStatement("SELECT seq FROM sqlite_sequence WHERE name = ?");
 		stmt.setString(1, tablename);
 		ResultSet rs = stmt.executeQuery();
 		rs.next();
-		return rs.getInt("seq");
+		return rs.getInt("seq");*/
 	}
 }

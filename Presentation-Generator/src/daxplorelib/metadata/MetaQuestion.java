@@ -5,6 +5,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.sql.Types;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -18,7 +19,7 @@ import daxplorelib.metadata.TextReference.TextReferenceManager;
 public class MetaQuestion {
 	
 	protected static final DaxploreTable table = new DaxploreTable(
-			"CREATE TABLE metaquestion (id TEXT UNIQUE, FOREIGN KEY(scaleid) REFERENCE metascale(id), fulltextref TEXT, shorttextref TEXT, calculation INTEGER)",
+			"CREATE TABLE metaquestion (id TEXT UNIQUE, scaleid INTEGER, fulltextref TEXT, shorttextref TEXT, calculation INTEGER, FOREIGN KEY(scaleid) REFERENCES metascale(id))",
 			"metaquestion");
 	
 	public static class MetaQuestionManager {
@@ -64,7 +65,11 @@ public class MetaQuestion {
 		public MetaQuestion create(String id, TextReference fullTextRef, TextReference shortTextRef, MetaScale scale, MetaCalculation calculation) throws SQLException {
 			PreparedStatement stmt = connection.prepareStatement("INSERT INTO metaquestion (id, scaleid, fulltextref, shorttextref, calculation) VALUES (?, ?, ?, ? ,?)");
 			stmt.setString(1, id);
-			stmt.setInt(1, scale.getId());
+			if(scale != null) {
+				stmt.setInt(1, scale.getId());
+			} else {
+				stmt.setNull(1, Types.INTEGER);
+			}
 			stmt.setString(2, fullTextRef.getRef());
 			stmt.setString(3, shortTextRef.getRef());
 			stmt.setInt(4, calculation.getID());

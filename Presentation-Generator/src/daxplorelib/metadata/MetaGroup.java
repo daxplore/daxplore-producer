@@ -18,7 +18,7 @@ import daxplorelib.metadata.TextReference.TextReferenceManager;
 
 public class MetaGroup implements Comparable<MetaGroup> {
 	protected static final DaxploreTable table = new DaxploreTable("CREATE TABLE metagroup (id INTEGER PRIMARY KEY, textref TEXT, ind INTEGER, type INTEGER)", "metagroup");
-	protected static final DaxploreTable table2 = new DaxploreTable("CREATE TABLE metagrouprel (FOREIGN KEY(groupid) REFERENCE metagroup(id), FOREIGN KEY(questionid) REFERENCE metaquestion(id))", "metagrouprel");
+	protected static final DaxploreTable table2 = new DaxploreTable("CREATE TABLE metagrouprel (groupid INTEGER, questionid TEXT, FOREIGN KEY(questionid) REFERENCES metaquestion(id), FOREIGN KEY(groupid) REFERENCES metagroup(id))", "metagrouprel");
 	
 	public static class MetaGroupManager {
 		

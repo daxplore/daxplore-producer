@@ -20,6 +20,7 @@ import tools.SortedProperties;
 import daxplorelib.DaxploreException;
 import daxplorelib.DaxploreFile;
 import daxplorelib.DaxploreTable;
+import daxplorelib.SQLTools;
 import daxplorelib.metadata.MetaGroup.MetaGroupManager;
 import daxplorelib.metadata.MetaQuestion.MetaQuestionManager;
 import daxplorelib.metadata.MetaScale.MetaScaleManager;
@@ -30,7 +31,7 @@ import daxplorelib.raw.RawMeta.RawMetaQuestion;
 public class MetaData {
 	
 	Connection connection;
-	
+
 	MetaQuestionManager metaQuestionManager;
 	MetaScaleManager metaScaleManager;
 	TextReferenceManager textsManager;
@@ -53,6 +54,8 @@ public class MetaData {
 		
 		metaGroupManager = new MetaGroupManager(connection, textsManager, metaQuestionManager);
 		metaGroupManager.init();
+		
+		SQLTools.createIfNotExists(MetaCalculation.table, connection);
 	}
 
 	/* 
@@ -74,7 +77,7 @@ public class MetaData {
 		try {
 			RawMeta rawmeta = daxfile.getRawMeta();
 			Iterator<RawMetaQuestion> iter = rawmeta.getQuestionIterator();	
-			
+			System.out.print("\n");
 			while(iter.hasNext()) {
 				System.out.print(".");
 				RawMetaQuestion rmq = iter.next();
@@ -340,9 +343,26 @@ public class MetaData {
 			metaScaleManager.saveAll();
 			metaQuestionManager.saveAll();
 			metaGroupManager.saveAll();
+			connection.commit();
 			connection.setAutoCommit(autocommit);
 		} catch (SQLException e) {
 			throw new DaxploreException("Error while saving data", e);
 		}
+	}
+	
+	public MetaQuestionManager getMetaQuestionManager() {
+		return metaQuestionManager;
+	}
+
+	public MetaScaleManager getMetaScaleManager() {
+		return metaScaleManager;
+	}
+
+	public TextReferenceManager getTextsManager() {
+		return textsManager;
+	}
+
+	public MetaGroupManager getMetaGroupManager() {
+		return metaGroupManager;
 	}
 }

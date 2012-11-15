@@ -22,7 +22,7 @@ public class MetaScale {
 			"CREATE TABLE metascale (id INTEGER PRIMARY KEY, ignore STRING)"
 			, "metascale");
 	protected static final DaxploreTable optiontable = new DaxploreTable(
-			"CREATE TABLE metascaleoption (FOREIGN KEY(scaleid) REFERENCES metascale(id), textref STRING, ord INTEGER, value REAL, transform STRING)"
+			"CREATE TABLE metascaleoption (scaleid INTEGER, textref STRING, ord INTEGER, value REAL, transform STRING, FOREIGN KEY(scaleid) REFERENCES metascale(id))"
 			, "metascaleoption");
 	
 	public static class MetaScaleManager {
@@ -80,9 +80,18 @@ public class MetaScale {
 		public MetaScale create(List<Option> options, NumberlineCoverage ignore) throws SQLException {
 			PreparedStatement createScaleStmt = connection.prepareStatement("INSERT INTO metascale (ignore) VALUES (?)");
 			createScaleStmt.setString(1, ignore.toString());
-			createScaleStmt.execute();
+			createScaleStmt.executeUpdate();
+
+			int id;
+			Statement stmt = connection.createStatement();
+			ResultSet rs =stmt.executeQuery("SELECT last_insert_rowid()");
+			if(rs.next()) {
+				id = (int) rs.getLong(1);
+			} else {
+				throw new Error("Couldn't get generated key");
+			}
 			
-			int id = SQLTools.lastId(maintable.name, connection);
+			//int id = SQLTools.lastId(maintable.name, connection);
 			
 			PreparedStatement addOptionStmt = connection.prepareStatement("INSERT INTO metascaleoption (scaleid, textref, ord, value, transform) VALUES (?, ?, ?, ?, ?)");
 			
