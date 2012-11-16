@@ -1,49 +1,53 @@
 package gui.edit;
 
-import gui.GuiFile;
 import gui.GuiMain;
 
-import javax.swing.JPanel;
-import javax.swing.JLabel;
-import javax.swing.JTextField;
-import javax.swing.JComboBox;
-import javax.swing.JScrollPane;
-import javax.swing.JTable;
 import java.awt.BorderLayout;
 import java.awt.Dimension;
+import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.ComponentEvent;
 import java.awt.event.ComponentListener;
-import java.awt.event.FocusEvent;
-import java.awt.event.FocusListener;
 import java.sql.SQLException;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
 
+import javax.swing.JComboBox;
+import javax.swing.JPanel;
+import javax.swing.JScrollPane;
+import javax.swing.JTable;
+import javax.swing.JTextField;
 import javax.swing.ListSelectionModel;
-import javax.swing.event.AncestorEvent;
-import javax.swing.event.AncestorListener;
+import javax.swing.RowFilter;
+import javax.swing.SwingConstants;
+import javax.swing.event.DocumentEvent;
+import javax.swing.event.DocumentListener;
 import javax.swing.event.TableModelEvent;
 import javax.swing.event.TableModelListener;
-import javax.swing.table.AbstractTableModel;
 import javax.swing.table.DefaultTableModel;
+import javax.swing.table.TableRowSorter;
 
 import daxplorelib.DaxploreException;
 import daxplorelib.metadata.TextReference;
 import daxplorelib.metadata.TextReference.TextReferenceManager;
 
+@SuppressWarnings("serial")
 public class EditPanelView extends JPanel {
 	private JTextField textField;
-	private JTable table;
 
 	GuiMain guiMain;
-	private JComboBox<Locale> comboBox;
-	private JComboBox<Locale> comboBox_1;
+	private JComboBox<LocaleItem> localeCombo1;
+	private JComboBox<LocaleItem> localeCombo2;
 	private JScrollPane scrollPane;
 	
-	private List<TextReference> textsList;
+	private JTable table;
+	private TableRowSorter<TextsTableModel> sorter;
+	private List<TextReference> textsList = new LinkedList<TextReference>();
 	private Locale[] currentLocales = new Locale[2];
+
+	private TextsTableModel model;
 	
 	protected class TextsTableModel extends DefaultTableModel implements TableModelListener {
 		
@@ -92,7 +96,16 @@ public class EditPanelView extends JPanel {
 			// TODO Auto-generated method stub
 			
 		}
-		
+	}
+	
+	protected class LocaleItem {
+		Locale loc;
+		public LocaleItem(Locale loc) {
+			this.loc = loc;
+		}
+		public String toString() {
+			return loc.getDisplayLanguage();
+		}
 	}
 	
 	/**
@@ -106,27 +119,44 @@ public class EditPanelView extends JPanel {
 		
 		JPanel panel = new JPanel();
 		add(panel, BorderLayout.NORTH);
+		panel.setLayout(new GridLayout(0, 3, 0, 0));
 		
 		textField = new JTextField();
+		textField.setHorizontalAlignment(SwingConstants.LEFT);
 		panel.add(textField);
-		textField.setColumns(10);
-		
-		comboBox = new JComboBox<Locale>();
-		panel.add(comboBox);
-		comboBox.addActionListener(new ActionListener() {
+		textField.setColumns(15);
+		textField.getDocument().addDocumentListener(new DocumentListener() {
 			@Override
-			public void actionPerformed(ActionEvent e) {
-				currentLocales[0] = (Locale)comboBox.getSelectedItem();
-				doUpdate();
+			public void removeUpdate(DocumentEvent e) {
+				filter();
+			}
+			@Override
+			public void insertUpdate(DocumentEvent e) {
+				filter();
+			}
+			@Override
+			public void changedUpdate(DocumentEvent e) {
+				filter();
 			}
 		});
 		
-		comboBox_1 = new JComboBox<Locale>();
-		panel.add(comboBox_1);
-		comboBox_1.addActionListener(new ActionListener() {
+		
+		
+		localeCombo1 = new JComboBox<LocaleItem>();
+		panel.add(localeCombo1);
+		localeCombo1.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				currentLocales[1] = (Locale)comboBox_1.getSelectedItem();
+				currentLocales[0] = ((LocaleItem)localeCombo1.getSelectedItem()).loc;
+				doUpdate();
+			}
+		});
+		localeCombo2 = new JComboBox<LocaleItem>();
+		panel.add(localeCombo2);
+		localeCombo2.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				currentLocales[1] = ((LocaleItem)localeCombo2.getSelectedItem()).loc;
 				doUpdate();
 			}
 		});
@@ -153,7 +183,24 @@ public class EditPanelView extends JPanel {
 		
 	}
 	
+	private void filter() {
+        RowFilter<TextsTableModel, Object> rf = null;
+        //If current expression doesn't parse, don't update.
+        try {
+        	String caseInsensitive = "(?i)";
+            rf = RowFilter.regexFilter(caseInsensitive + textField.getText(), 0);
+        } catch (java.util.regex.PatternSyntaxException e) {
+            return;
+        }
+        sorter.setRowFilter(rf);
+	}
+	
 	public void doUpdate() {
+		if(table != null) {
+			int a = scrollPane.getVerticalScrollBar().getValue();
+			loadTable();
+			scrollPane.getVerticalScrollBar().setValue(a);
+		}
 		//table.updateUI();
 	}
 
@@ -166,8 +213,8 @@ public class EditPanelView extends JPanel {
 				List<Locale> localeList = trm.getAllLocales();
 				System.out.print(localeList.size() + " locales");
 				for(Locale l: localeList) {
-					comboBox.addItem(l);
-					comboBox_1.addItem(l);
+					localeCombo1.addItem(new LocaleItem(l));
+					localeCombo2.addItem(new LocaleItem(l));
 				}
 				textsList = trm.getAll();
 			} catch (DaxploreException e) {
@@ -177,13 +224,19 @@ public class EditPanelView extends JPanel {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
-			
-			table = new JTable(new TextsTableModel());
-			table.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-	        table.setPreferredScrollableViewportSize(new Dimension(500, 70));
-	        table.setFillsViewportHeight(true);
-			scrollPane.setViewportView(table);
+			loadTable();
 		}
+	}
+	
+	private void loadTable() {
+		model = new TextsTableModel();
+		sorter = new TableRowSorter<TextsTableModel>(model);
+		table = new JTable(new TextsTableModel());
+		table.setRowSorter(sorter);
+		table.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+        table.setPreferredScrollableViewportSize(new Dimension(500, 70));
+        table.setFillsViewportHeight(true);
+		scrollPane.setViewportView(table);
 	}
 	
 	
