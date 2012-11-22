@@ -1,108 +1,132 @@
 package gui.groups;
 
-import java.awt.FlowLayout;
-
-import javax.swing.JLabel;
-import javax.swing.JPanel;
-
 import gui.GuiMain;
-import gui.GuiFile;
-import javax.swing.JSplitPane;
-import javax.swing.JToolBar;
-import java.awt.BorderLayout;
-import javax.swing.BoxLayout;
-import javax.swing.JTable;
-import javax.swing.JScrollPane;
-import javax.swing.GroupLayout;
-import javax.swing.GroupLayout.Alignment;
-import javax.swing.border.BevelBorder;
-import javax.swing.LayoutStyle.ComponentPlacement;
-import javax.swing.JList;
-import javax.swing.JButton;
-import javax.swing.SwingConstants;
+import gui.QuestionWidget;
 
+import java.awt.BorderLayout;
+import java.awt.Color;
+import java.awt.Component;
+import java.util.LinkedList;
+import java.util.List;
+
+import javax.swing.JList;
+import javax.swing.JPanel;
+import javax.swing.JScrollPane;
+import javax.swing.ListCellRenderer;
+import javax.swing.ListModel;
+import javax.swing.ListSelectionModel;
+import javax.swing.border.BevelBorder;
+import javax.swing.event.ListDataListener;
+import javax.swing.event.ListSelectionListener;
+
+import daxplorelib.DaxploreException;
+import daxplorelib.metadata.MetaQuestion;
+
+@SuppressWarnings("serial")
 public class GroupsPanelView extends JPanel {
 	
-	private JLabel lblGroupsPanel = new JLabel();
-	private JTable questionsTable;
-	private JTable perspectiveTable;
-	private JTable editTable;
+	private GuiMain guiMain;
+	private List<QuestionWidget> questionList = new LinkedList<QuestionWidget>();
+	private JScrollPane questionsScrollPane = new JScrollPane();
+	private JScrollPane groupsScollPane = new JScrollPane();
+	
+	private class QuestionListModel implements ListModel<QuestionWidget> {
+		@Override
+		public int getSize() {
+			return questionList.size();
+		}
+
+		@Override
+		public QuestionWidget getElementAt(int index) {
+			return questionList.get(index);
+		}
+
+		@Override
+		public void addListDataListener(ListDataListener l) {
+			// TODO Auto-generated method stub
+		}
+		@Override
+		public void removeListDataListener(ListDataListener l) {
+			// TODO Auto-generated method stub
+		}
+	}
+	
+	private class QuestionListCellRenderer implements ListCellRenderer<QuestionWidget> {
+
+		@Override
+		public Component getListCellRendererComponent(JList<? extends QuestionWidget> list, QuestionWidget value, int index, boolean isSelected, boolean cellHasFocus) {
+			if(isSelected) {
+				value.setBackground(new Color(255, 255, 200));
+			} else {
+				value.setBackground(new Color(255,255,255));
+			}
+			return value;
+		}
+	}
+	
+	private class GroupListModel implements ListModel<QuestionWidget> {
+
+		@Override
+		public int getSize() {
+			// TODO Auto-generated method stub
+			return 0;
+		}
+
+		@Override
+		public QuestionWidget getElementAt(int index) {
+			// TODO Auto-generated method stub
+			return null;
+		}
+
+		@Override
+		public void addListDataListener(ListDataListener l) {
+			// TODO Auto-generated method stub
+		}
+
+		@Override
+		public void removeListDataListener(ListDataListener l) {
+			// TODO Auto-generated method stub
+		}
+	}
 	
 	public GroupsPanelView(GuiMain guiMain) {
+		this.guiMain = guiMain;
 		
 		JPanel questionsPanel = new JPanel();
 		questionsPanel.setBounds(6, 43, 334, 692);
-		questionsPanel.setBorder(new BevelBorder(BevelBorder.LOWERED, null, null, null, null));
-		
-		JPanel editPanel = new JPanel();
-		editPanel.setBounds(388, 43, 310, 284);
-		editPanel.setBorder(new BevelBorder(BevelBorder.LOWERED, null, null, null, null));
-		
-		JButton saveButton = new JButton("Save");
-		saveButton.setBounds(710, 43, 90, 28);
 		setLayout(null);
-		add(saveButton);
-		
-		JButton editButton = new JButton("Edit");
-		editButton.setBounds(710, 83, 90, 28);
-		add(editButton);
-		
-		JButton languageButton = new JButton("Language");
-		languageButton.setBounds(710, 123, 90, 28);
-		add(languageButton);
-		
-		JButton addPerspectiveButton = new JButton("+");
-		addPerspectiveButton.setBounds(604, 339, 46, 33);
-		add(addPerspectiveButton);
-		
-		JButton removeButton = new JButton("-");
-		removeButton.setBounds(651, 339, 46, 33);
-		add(removeButton);
-		
-		JButton importQuestionButton = new JButton("->");
-		importQuestionButton.setBounds(341, 149, 46, 50);
-		add(importQuestionButton);
-		
-		JLabel editQuestionsLabel = new JLabel("Edit questions");
-		editQuestionsLabel.setHorizontalAlignment(SwingConstants.LEFT);
-		editQuestionsLabel.setBounds(503, 15, 96, 16);
-		add(editQuestionsLabel);
-		
-		JLabel perspectiveLabel = new JLabel("Perspective");
-		perspectiveLabel.setBounds(503, 346, 78, 16);
-		add(perspectiveLabel);
-		
-		JLabel questionsLabel = new JLabel("Questions");
-		questionsLabel.setHorizontalAlignment(SwingConstants.CENTER);
-		questionsLabel.setBounds(138, 15, 72, 16);
-		add(questionsLabel);
 		add(questionsPanel);
 		questionsPanel.setLayout(new BorderLayout(0, 0));
 		
-		JScrollPane questionsScrollPane = new JScrollPane();
 		questionsPanel.add(questionsScrollPane);
 		
-		questionsTable = new JTable();
-		questionsScrollPane.setViewportView(questionsTable);
-		add(editPanel);
-		editPanel.setLayout(new BorderLayout(0, 0));
-		
-		JScrollPane editScrollPane = new JScrollPane();
-		
-		editTable = new JTable();
-		editScrollPane.setViewportView(editTable);
-		editPanel.add(editScrollPane);
-		
-		JPanel perspectivePanel = new JPanel();
-		perspectivePanel.setBounds(388, 376, 310, 359);
-		perspectivePanel.setBorder(new BevelBorder(BevelBorder.LOWERED, null, null, null, null));
-		add(perspectivePanel);
-		perspectivePanel.setLayout(new BorderLayout(0, 0));
-		
-		JScrollPane perspectiveScrollPane = new JScrollPane();
-		perspectivePanel.add(perspectiveScrollPane);
-		
-		perspectiveTable = new JTable();
-		perspectiveScrollPane.setViewportView(perspectiveTable);
+		JPanel groupsPanel = new JPanel();
+		groupsPanel.setBounds(350, 43, 334, 450);
+		add(groupsPanel);
+		groupsPanel.setLayout(new BorderLayout(0,0));
+		groupsPanel.add(groupsScollPane);
+
+	}
+	
+	public void loadData() {
+		if(guiMain.getGuiFile().isSet()) {
+			try {
+				List<MetaQuestion> mqList = guiMain.getGuiFile().getDaxploreFile().getMetaData().getAllQuestions();
+				int i = 0;
+				for(MetaQuestion mq: mqList) {
+					questionList.add(new QuestionWidget(mq));
+					i++;
+				}
+				System.out.println("Added "+ i + " questions");
+				JList<QuestionWidget> list = new JList<QuestionWidget>(new QuestionListModel());
+				list.setCellRenderer(new QuestionListCellRenderer());
+				list.setSelectionMode(ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
+				questionsScrollPane.setViewportView(list);
+			} catch (DaxploreException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			
+		}
 	}
 }

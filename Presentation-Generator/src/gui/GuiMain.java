@@ -152,6 +152,7 @@ public class GuiMain {
 	
 	public void updateStuff() {
 		buttonPanelView.updateButtonPanel();
+		groupsPanelView.loadData();
 		editPanelView.loadData();
 	}
 

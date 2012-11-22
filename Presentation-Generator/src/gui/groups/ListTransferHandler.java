@@ -1,8 +1,15 @@
 package gui.groups;
 
+import gui.QuestionWidget;
+
+import java.awt.Component;
 import java.awt.datatransfer.DataFlavor;
 import java.awt.datatransfer.StringSelection;
 import java.awt.datatransfer.Transferable;
+import java.awt.datatransfer.UnsupportedFlavorException;
+import java.io.IOException;
+import java.util.LinkedList;
+import java.util.List;
 
 import javax.swing.DefaultListModel;
 import javax.swing.JComponent;
@@ -14,13 +21,40 @@ public class ListTransferHandler extends TransferHandler {
     private int[] indices = null;
     private int addIndex = -1; //Location where items were added
     private int addCount = 0;  //Number of items added.
-            
+        
+    private DataFlavor dataFlavor = new DataFlavor(QuestionWidget.class, "QuestionWidget");
+    
+    static class QuestionWidgetsTransferable implements Transferable {
+    	DataFlavor flavor = new DataFlavor(QuestionWidget.class, "QuestionWidget");
+    	List<QuestionWidget> list;
+    	
+    	public QuestionWidgetsTransferable(List<QuestionWidget> componentList) {
+    		list = componentList;
+    	}
+    	
+		@Override
+		public DataFlavor[] getTransferDataFlavors() {
+			DataFlavor[] a = {flavor};
+			return a;
+		}
+
+		@Override
+		public boolean isDataFlavorSupported(DataFlavor flavor) {
+			return flavor.equals(this.flavor);
+		}
+
+		@Override
+		public Object getTransferData(DataFlavor flavor) throws UnsupportedFlavorException, IOException {
+			return list;
+		}
+    	
+    }
     /**
      * We only support importing strings (although widget support is sorely needed).
      */
     public boolean canImport(TransferHandler.TransferSupport info) {
         // Check for String flavor
-        if (!info.isDataFlavorSupported(DataFlavor.stringFlavor)) {
+        if (!info.isDataFlavorSupported(dataFlavor)) {
             return false;
         }
         return true;
@@ -31,28 +65,20 @@ public class ListTransferHandler extends TransferHandler {
      * Each line is separated by a newline.
      */
     protected Transferable createTransferable(JComponent c) {
-        JList list = (JList)c;
+        JList<QuestionWidget> list = (JList<QuestionWidget>)c;
         indices = list.getSelectedIndices();
-        Object[] values = list.getSelectedValues();
-        
-        StringBuffer buff = new StringBuffer();
-
-        for (int i = 0; i < values.length; i++) {
-            Object val = values[i];
-            buff.append(val == null ? "" : val.toString());
-            if (i != values.length - 1) {
-                buff.append("\n");
-            }
+        List<QuestionWidget> widgets = new LinkedList<QuestionWidget>();
+        for(int i: indices) {
+        	widgets.add((QuestionWidget)list.getComponent(i));
         }
-        
-        return new StringSelection(buff.toString());
+        return new QuestionWidgetsTransferable(widgets);
     }
     
     /**
      * We support both copy and move actions.
      */
     public int getSourceActions(JComponent c) {
-        return TransferHandler.COPY_OR_MOVE;
+        return TransferHandler.COPY;
     }
     
     /**

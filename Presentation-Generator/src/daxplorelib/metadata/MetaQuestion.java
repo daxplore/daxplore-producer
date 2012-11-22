@@ -50,15 +50,17 @@ public class MetaQuestion {
 				PreparedStatement stmt = connection.prepareStatement("SELECT * FROM metaquestion WHERE id = ?");
 				stmt.setString(1, id);
 				ResultSet rs = stmt.executeQuery();
-				rs.next();
-				TextReference fullTextRef = textsManager.get(rs.getString("fulltextref"));
-				TextReference shortTextRef = textsManager.get(rs.getString("shorttextref"));
-				MetaScale scale = metascaleManager.get(rs.getInt("scaleid"));
-				MetaCalculation calculation = new MetaCalculation(rs.getInt("calculation"), connection);
-				
-				MetaQuestion mq = new MetaQuestion(id, shortTextRef, fullTextRef, scale, calculation);
-				questionMap.put(id, mq);
-				return mq;				
+				if(rs.next()) {
+					TextReference fullTextRef = textsManager.get(rs.getString("fulltextref"));
+					TextReference shortTextRef = textsManager.get(rs.getString("shorttextref"));
+					MetaScale scale = metascaleManager.get(rs.getInt("scaleid"));
+					MetaCalculation calculation = new MetaCalculation(rs.getInt("calculation"), connection);
+					MetaQuestion mq = new MetaQuestion(id, shortTextRef, fullTextRef, scale, calculation);
+					questionMap.put(id, mq);
+					return mq;				
+				} else {
+					throw new AssertionError("QuestionID does not exist?");
+				}
 			}
 		}
 		
@@ -66,13 +68,13 @@ public class MetaQuestion {
 			PreparedStatement stmt = connection.prepareStatement("INSERT INTO metaquestion (id, scaleid, fulltextref, shorttextref, calculation) VALUES (?, ?, ?, ? ,?)");
 			stmt.setString(1, id);
 			if(scale != null) {
-				stmt.setInt(1, scale.getId());
+				stmt.setInt(2, scale.getId());
 			} else {
-				stmt.setNull(1, Types.INTEGER);
+				stmt.setNull(2, Types.INTEGER);
 			}
-			stmt.setString(2, fullTextRef.getRef());
-			stmt.setString(3, shortTextRef.getRef());
-			stmt.setInt(4, calculation.getID());
+			stmt.setString(3, fullTextRef.getRef());
+			stmt.setString(4, shortTextRef.getRef());
+			stmt.setInt(5, calculation.getID());
 			stmt.executeUpdate();
 			
 			MetaQuestion mq = new MetaQuestion(id, shortTextRef, fullTextRef, scale, calculation);

@@ -77,12 +77,8 @@ public class NumberlineCoverage {
 	
 	List<Interval> intervals = new LinkedList<Interval>();
 	
-	public static void main(String[] args){
-
-		
-	}
-	
 	public NumberlineCoverage(String intervalString) {
+		if(intervalString.length() == 0) { return; }
 		String[] interStrings = intervalString.split("U");
 		for(String inter: interStrings) {
 			intervals.add(new Interval(inter));

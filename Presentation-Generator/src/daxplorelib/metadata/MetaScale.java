@@ -55,10 +55,14 @@ public class MetaScale {
 				PreparedStatement stmt = connection.prepareStatement("SELECT * FROM metascale WHERE id = ?");
 				stmt.setInt(1, id);
 				ResultSet rs = stmt.executeQuery();
-				rs.next();
-				NumberlineCoverage ignore = new NumberlineCoverage(rs.getString("ignore"));
+				NumberlineCoverage ignore;
+				if(rs.next()) {
+					ignore = new NumberlineCoverage(rs.getString("ignore"));
+				} else {
+					ignore = new NumberlineCoverage();
+				}
 				
-				stmt = connection.prepareStatement("SELECT * FROM metascaleoption WHERE id = ? ORDER BY ord");
+				stmt = connection.prepareStatement("SELECT * FROM metascaleoption WHERE scaleid = ? ORDER BY ord");
 				stmt.setInt(1, id);
 				rs = stmt.executeQuery();
 				

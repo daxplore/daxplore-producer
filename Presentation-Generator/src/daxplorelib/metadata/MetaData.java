@@ -101,7 +101,7 @@ public class MetaData {
 					break;
 				}
 				
-				TextReference shorttext = textsManager.get(rmq.column + "shorttext");
+				TextReference shorttext = textsManager.get(rmq.column + "_shorttext");
 				
 				metaQuestionManager.create(rmq.column, fulltext,shorttext, scale, calc);
 			}
@@ -294,7 +294,7 @@ public class MetaData {
 		try {
 			return metaQuestionManager.getAll();
 		} catch (SQLException e) {
-			throw new DaxploreException("SQLExpection while trying to get groups", e);
+			throw new DaxploreException("SQLExpection while trying to get questions", e);
 		}
 	}
 	
@@ -302,7 +302,7 @@ public class MetaData {
 		try {
 			return metaScaleManager.getAll();
 		} catch (SQLException e) {
-			throw new DaxploreException("SQLExpection while trying to get groups", e);
+			throw new DaxploreException("SQLExpection while trying to get scales", e);
 		}
 	}
 	
@@ -310,7 +310,7 @@ public class MetaData {
 		try {
 			return textsManager.getAll();
 		} catch (SQLException e) {
-			throw new DaxploreException("SQLExpection while trying to get groups", e);
+			throw new DaxploreException("SQLExpection while trying to get textreferences", e);
 		}
 	}
 	
