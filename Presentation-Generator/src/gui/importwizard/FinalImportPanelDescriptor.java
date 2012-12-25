@@ -1,19 +1,13 @@
 package gui.importwizard;
 
-import java.awt.Cursor;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
-import java.nio.charset.Charset;
 import java.util.StringTokenizer;
 
-import javax.swing.JOptionPane;
-import javax.swing.JTable;
-import javax.swing.event.TableModelListener;
 import javax.swing.table.DefaultTableModel;
-import javax.swing.table.TableColumn;
 import javax.swing.table.TableModel;
 
 import org.opendatafoundation.data.FileFormatInfo;
@@ -22,8 +16,6 @@ import org.opendatafoundation.data.FileFormatInfo.Compatibility;
 import org.opendatafoundation.data.spss.SPSSFile;
 import org.opendatafoundation.data.spss.SPSSFileException;
 import org.opendatafoundation.data.spss.SPSSVariable;
-
-import daxplorelib.DaxploreException;
 
 
 public class FinalImportPanelDescriptor extends ImportWizardDescriptor {

@@ -9,23 +9,15 @@ import java.awt.BorderLayout;
 import java.awt.CardLayout;
 import java.awt.Color;
 import java.awt.EventQueue;
-import java.awt.FlowLayout;
 import java.awt.Toolkit;
 
 import javax.swing.JFrame;
-import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
-import javax.swing.JTextPane;
 import javax.swing.UIManager;
 import javax.swing.UIManager.LookAndFeelInfo;
 import javax.swing.UnsupportedLookAndFeelException;
 import javax.swing.border.MatteBorder;
-
-import org.opendatafoundation.data.spss.SPSSFile;
-
-import daxplorelib.DaxploreFile;
-import javax.swing.JTable;
 
 /**
  * Main window handler class. Initialization of application goes here.

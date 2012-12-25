@@ -15,9 +15,7 @@ import javax.swing.JScrollPane;
 import javax.swing.ListCellRenderer;
 import javax.swing.ListModel;
 import javax.swing.ListSelectionModel;
-import javax.swing.border.BevelBorder;
 import javax.swing.event.ListDataListener;
-import javax.swing.event.ListSelectionListener;
 
 import daxplorelib.DaxploreException;
 import daxplorelib.metadata.MetaQuestion;

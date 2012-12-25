@@ -17,7 +17,6 @@ import org.opendatafoundation.data.spss.SPSSFile;
 import org.opendatafoundation.data.spss.SPSSFileException;
 
 import tools.MyTools;
-
 import daxplorelib.metadata.MetaData;
 import daxplorelib.raw.RawImport;
 import daxplorelib.raw.RawMeta;

@@ -1,7 +1,8 @@
 package gui.importwizard;
 
-import java.awt.*;
-import javax.swing.*;
+import java.awt.Component;
+
+import javax.swing.JPanel;
 
 
 

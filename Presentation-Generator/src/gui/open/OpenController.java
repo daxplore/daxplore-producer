@@ -1,6 +1,5 @@
 package gui.open;
 
-import gui.GuiFile;
 import gui.GuiMain;
 
 import java.awt.event.ActionEvent;

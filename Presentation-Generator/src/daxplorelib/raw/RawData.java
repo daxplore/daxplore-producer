@@ -13,11 +13,10 @@ import java.util.Map;
 
 import org.opendatafoundation.data.spss.SPSSFile;
 
+import tools.MyTools;
 import daxplorelib.DaxploreException;
 import daxplorelib.DaxploreTable;
 import daxplorelib.SQLTools;
-
-import tools.MyTools;
 
 
 public class RawData {
