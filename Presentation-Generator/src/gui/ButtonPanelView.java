@@ -18,6 +18,7 @@ import javax.swing.border.TitledBorder;
  * @author jorgenrosen
  *
  */
+@SuppressWarnings("serial")
 public class ButtonPanelView extends JPanel {
 	
 	// data fields.
