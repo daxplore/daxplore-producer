@@ -16,7 +16,6 @@ import java.util.Map;
 import java.util.Set;
 
 import tools.SmallMap;
-
 import daxplorelib.DaxploreTable;
 import daxplorelib.SQLTools;
 

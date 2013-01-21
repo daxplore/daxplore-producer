@@ -1,19 +1,16 @@
 package gui.importwizard;
 
 import java.awt.BorderLayout;
-import java.awt.Container;
 import java.awt.event.ActionListener;
+import java.nio.charset.Charset;
+import java.util.SortedMap;
 
+import javax.swing.BoxLayout;
 import javax.swing.JComboBox;
 import javax.swing.JLabel;
 import javax.swing.JList;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
-import javax.swing.border.EmptyBorder;
-
-import java.nio.charset.Charset;
-import java.util.SortedMap;
-import javax.swing.BoxLayout;
 
 public class CharsetPanel extends JPanel {
 

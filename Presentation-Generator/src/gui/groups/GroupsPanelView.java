@@ -7,34 +7,23 @@ import gui.widget.QuestionWidget;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Component;
+import java.awt.GridLayout;
 import java.util.LinkedList;
 import java.util.List;
 
 import javax.swing.Box;
+import javax.swing.BoxLayout;
+import javax.swing.JButton;
 import javax.swing.JList;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.ListCellRenderer;
 import javax.swing.ListModel;
 import javax.swing.ListSelectionModel;
-import javax.swing.border.BevelBorder;
 import javax.swing.event.ListDataListener;
-import javax.swing.event.ListSelectionListener;
 
 import daxplorelib.DaxploreException;
 import daxplorelib.metadata.MetaQuestion;
-import java.awt.GridLayout;
-import javax.swing.JButton;
-import javax.swing.BoxLayout;
-import java.awt.FlowLayout;
-import java.awt.event.ActionListener;
-import java.awt.event.ActionEvent;
-import javax.swing.SwingConstants;
-import java.awt.GridBagLayout;
-import java.awt.GridBagConstraints;
-import java.awt.Insets;
-import java.awt.Dimension;
-import java.awt.Rectangle;
 
 @SuppressWarnings("serial")
 public class GroupsPanelView extends JPanel {
@@ -88,7 +77,7 @@ public class GroupsPanelView extends JPanel {
 		}
 
 		@Override
-		public QuestionWidget getElementAt(int index) {
+		public OurListWidget getElementAt(int index) {
 			// TODO Auto-generated method stub
 			return null;
 		}

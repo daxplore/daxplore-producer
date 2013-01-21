@@ -1,6 +1,5 @@
 package gui.open;
 
-import gui.GuiFile;
 import gui.GuiMain;
 import gui.importwizard.CharsetPanelDescriptor;
 import gui.importwizard.FinalImportPanelDescriptor;
@@ -12,7 +11,6 @@ import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.text.SimpleDateFormat;
 
 import javax.swing.GroupLayout;
 import javax.swing.GroupLayout.Alignment;
@@ -115,8 +113,8 @@ public class OpenPanelView extends JPanel {
 		getLastImportFileNameField().setBounds(166, 168, 240, 27);
 		getLastImportFileNameField().setColumns(10);
 		
-		JPanel daxploreFilePanel = new JPanel();
-		daxploreFilePanel.setBorder(new TitledBorder(null, "Daxplore file information", TitledBorder.LEADING, TitledBorder.TOP, null, null));
+		JPanel guiFilePanel = new JPanel();
+		guiFilePanel.setBorder(new TitledBorder(null, "Daxplore file information", TitledBorder.LEADING, TitledBorder.TOP, null, null));
 		
 		JPanel importSPSSPanel = new JPanel();
 		importSPSSPanel.setBorder(new TitledBorder(null, "Import SPSS File", TitledBorder.LEADING, TitledBorder.TOP, null, null));
@@ -129,14 +127,14 @@ public class OpenPanelView extends JPanel {
 					.addContainerGap()
 					.addGroup(gl_openPanel.createParallelGroup(Alignment.TRAILING)
 						.addComponent(importSPSSPanel, Alignment.LEADING, GroupLayout.DEFAULT_SIZE, 784, Short.MAX_VALUE)
-						.addComponent(daxploreFilePanel, Alignment.LEADING, GroupLayout.DEFAULT_SIZE, 784, Short.MAX_VALUE))
+						.addComponent(guiFilePanel, Alignment.LEADING, GroupLayout.DEFAULT_SIZE, 784, Short.MAX_VALUE))
 					.addContainerGap())
 		);
 		gl_openPanel.setVerticalGroup(
 			gl_openPanel.createParallelGroup(Alignment.LEADING)
 				.addGroup(gl_openPanel.createSequentialGroup()
 					.addContainerGap()
-					.addComponent(daxploreFilePanel, GroupLayout.PREFERRED_SIZE, 379, GroupLayout.PREFERRED_SIZE)
+					.addComponent(guiFilePanel, GroupLayout.PREFERRED_SIZE, 379, GroupLayout.PREFERRED_SIZE)
 					.addPreferredGap(ComponentPlacement.RELATED)
 					.addComponent(importSPSSPanel, GroupLayout.PREFERRED_SIZE, 343, GroupLayout.PREFERRED_SIZE)
 					.addContainerGap(25, Short.MAX_VALUE))
@@ -195,29 +193,29 @@ public class OpenPanelView extends JPanel {
 		JLabel lastImportedFileLabel = new JLabel("Last import filename:");
 		lastImportedFileLabel.setBounds(19, 174, 135, 15);
 		
-		daxploreFilePanel.setLayout(null);
+		guiFilePanel.setLayout(null);
 		
 		openFileButton = new JButton("Open file...");
 		openFileButton.setBounds(19, 35, 135, 27);
 		openFileButton.setActionCommand(OPEN_BUTTON_ACTION_COMMAND);
-		daxploreFilePanel.add(openFileButton);
+		guiFilePanel.add(openFileButton);
 		openFileButton.setToolTipText("Opens a daxplore file");
 		openFileButton.addActionListener(openController);
 		
 		createNewFileButton = new JButton("Create new file...");
 		createNewFileButton.setBounds(168, 35, 135, 27);
 		createNewFileButton.setActionCommand(CREATE_BUTTON_ACTION_COMMAND);
-		daxploreFilePanel.add(createNewFileButton);
+		guiFilePanel.add(createNewFileButton);
 		createNewFileButton.addActionListener(openController);
 		createNewFileButton.setToolTipText("Creates a new daxplore project file");
-		daxploreFilePanel.add(fileNameLabel);
-		daxploreFilePanel.add(getFileNameField());
-		daxploreFilePanel.add(importDateLabel);
-		daxploreFilePanel.add(getImportDateField());
-		daxploreFilePanel.add(creationDateLabel);
-		daxploreFilePanel.add(getCreationDateField());
-		daxploreFilePanel.add(lastImportedFileLabel);
-		daxploreFilePanel.add(getLastImportFileNameField());
+		guiFilePanel.add(fileNameLabel);
+		guiFilePanel.add(getFileNameField());
+		guiFilePanel.add(importDateLabel);
+		guiFilePanel.add(getImportDateField());
+		guiFilePanel.add(creationDateLabel);
+		guiFilePanel.add(getCreationDateField());
+		guiFilePanel.add(lastImportedFileLabel);
+		guiFilePanel.add(getLastImportFileNameField());
 		
 		setLayout(gl_openPanel);
 	}

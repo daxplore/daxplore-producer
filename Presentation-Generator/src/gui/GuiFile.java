@@ -1,11 +1,6 @@
 package gui;
 
 import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-
-import org.opendatafoundation.data.spss.SPSSFile;
-import org.opendatafoundation.data.spss.SPSSFileException;
 
 import daxplorelib.DaxploreFile;
 

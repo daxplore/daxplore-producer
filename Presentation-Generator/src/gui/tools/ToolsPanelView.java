@@ -1,16 +1,15 @@
 package gui.tools;
 
+import gui.GuiMain;
+
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.Locale;
 
-import gui.GuiMain;
-
-import javax.swing.JPanel;
-import javax.swing.JTextField;
 import javax.swing.JButton;
 import javax.swing.JLabel;
-import javax.swing.text.JTextComponent;
+import javax.swing.JPanel;
+import javax.swing.JTextField;
 
 import daxplorelib.DaxploreException;
 
