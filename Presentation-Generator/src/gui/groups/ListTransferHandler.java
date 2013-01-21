@@ -1,6 +1,6 @@
 package gui.groups;
 
-import gui.QuestionWidget;
+import gui.widget.QuestionWidget;
 
 import java.awt.Component;
 import java.awt.datatransfer.DataFlavor;
