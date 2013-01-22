@@ -9,6 +9,8 @@ import java.util.Vector;
 
 import javax.swing.JLabel;
 import javax.swing.JPanel;
+import javax.swing.event.EventListenerList;
+import javax.swing.event.TreeModelEvent;
 import javax.swing.event.TreeModelListener;
 import javax.swing.tree.TreeModel;
 import javax.swing.tree.TreePath;
@@ -24,7 +26,8 @@ class GroupTreeModel implements TreeModel {
 	JPanel root = new JPanel();
 	List<GroupWidget> groups = new LinkedList<GroupWidget>();
 	
-	private Vector<TreeModelListener> listeners = new Vector<TreeModelListener>(); // Declare the listeners vector
+	private EventListenerList listeners = new EventListenerList();
+	//private Vector<TreeModelListener> listeners = new Vector<TreeModelListener>(); // Declare the listeners vector
 	
 	public GroupTreeModel(MetaData md) throws DaxploreException {
 		root.add(new JLabel("root object"));
@@ -67,6 +70,7 @@ class GroupTreeModel implements TreeModel {
 			GroupWidget gw = new GroupWidget(mg);
 			groups.add(atIndex, gw);
 			mg.setIndex(atIndex);
+			fireTreeNodesInserted(new TreeModelEvent(this, new Object[]{root}));
 			return;
 		}
 		throw new Exception("Not allowed to place this at that");
@@ -87,6 +91,7 @@ class GroupTreeModel implements TreeModel {
 				qList.add(qw.metaQuestion);
 			}
 			parent.metaGroup.setQuestions(qList);
+			fireTreeNodesInserted(new TreeModelEvent(this, new Object[]{root,parent}));
 			return;
 		}
 		throw new Exception("Not allowed to place this at that");
@@ -101,6 +106,7 @@ class GroupTreeModel implements TreeModel {
 			for(int index = 0; index < groups.size(); index++) {
 				groups.get(index).metaGroup.setIndex(index);
 			}
+			fireTreeNodesChanged(new TreeModelEvent(this, new Object[]{root}));
 			return;
 		} else if(child instanceof QuestionWidget && toParent instanceof GroupWidget && groups.contains(toParent)) {
 			for(GroupWidget gw: groups) {
@@ -114,6 +120,7 @@ class GroupTreeModel implements TreeModel {
 							qList.add(qw.metaQuestion);
 						}
 						gw.metaGroup.setQuestions(qList);
+						fireTreeNodesChanged(new TreeModelEvent(this, new Object[]{root, gw}));
 						return;
 					} else if(atIndex >= 0 && atIndex <= gw.questions.size()){
 						gw.questions.remove(child);
@@ -131,6 +138,7 @@ class GroupTreeModel implements TreeModel {
 							qList.add(qw.metaQuestion);
 						}
 						parent.metaGroup.setQuestions(qList);
+						fireTreeNodesChanged(new TreeModelEvent(this, new Object[]{root}));
 						return;
 					}
 				}
@@ -142,6 +150,7 @@ class GroupTreeModel implements TreeModel {
 	public void removeChild(Object child) throws Exception { //TODO: specialize exception
 		if(child instanceof GroupWidget && groups.contains(child)) {
 			groups.remove(child);
+			fireTreeNodesRemoved(new TreeModelEvent(this, new Object[]{root}));
 			return;
 		} else if(child instanceof QuestionWidget) {
 			for(GroupWidget gw: groups) {
@@ -153,6 +162,7 @@ class GroupTreeModel implements TreeModel {
 						qList.add(qw.metaQuestion);
 					}
 					gw.metaGroup.setQuestions(qList);
+					fireTreeNodesRemoved(new TreeModelEvent(this, new Object[]{root, gw}));
 					return;
 				}
 			}
@@ -206,15 +216,43 @@ class GroupTreeModel implements TreeModel {
 	@Override
 	public void addTreeModelListener(TreeModelListener l) {
 		if(l != null) {
-			listeners.add(l);
+			listeners.add(TreeModelListener.class, l);
 		}
 	}
 
 	@Override
 	public void removeTreeModelListener(TreeModelListener l) {
 		if (l != null) {
-	    	listeners.removeElement(l);
+	    	listeners.remove(TreeModelListener.class, l);
 	    }
+	}
+	
+	private void fireTreeNodesChanged(TreeModelEvent e) {
+		/*for(TreeModelListener tml: listeners.getListeners(TreeModelListener.class)) {
+			tml.treeNodesChanged(e);
+		}*/
+		fireTreeStructureChanged(e);
+	}
+	
+	private void fireTreeNodesInserted(TreeModelEvent e) {
+		/*for(TreeModelListener tml: listeners.getListeners(TreeModelListener.class)) {
+			tml.treeNodesInserted(e);
+		}*/
+		fireTreeStructureChanged(e);
+	}
+	
+	private void fireTreeNodesRemoved(TreeModelEvent e) {
+		/*for(TreeModelListener tml: listeners.getListeners(TreeModelListener.class)) {
+			tml.treeNodesRemoved(e);
+		}*/
+		fireTreeStructureChanged(e);
+	}
+	
+	private void fireTreeStructureChanged(TreeModelEvent e) {
+		TreeModelEvent e2 = new TreeModelEvent(this, new Object[]{root});
+		for(TreeModelListener tml: listeners.getListeners(TreeModelListener.class)) {
+			tml.treeStructureChanged(e2);
+		}
 	}
 	
 }

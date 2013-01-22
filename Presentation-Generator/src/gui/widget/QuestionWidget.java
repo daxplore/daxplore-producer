@@ -11,7 +11,7 @@ public class QuestionWidget extends JPanel {
 	public MetaQuestion metaQuestion;
 	
 	public QuestionWidget(MetaQuestion metaQuestion) {
-		metaQuestion = metaQuestion;
+		this.metaQuestion = metaQuestion;
 		add(new JLabel(metaQuestion.getId()));
 	}
 }
