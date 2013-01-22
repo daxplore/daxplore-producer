@@ -8,7 +8,6 @@ import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.GridLayout;
-import java.util.LinkedList;
 import java.util.List;
 
 import javax.swing.Box;
@@ -17,43 +16,22 @@ import javax.swing.JButton;
 import javax.swing.JList;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
+import javax.swing.JTree;
 import javax.swing.ListCellRenderer;
-import javax.swing.ListModel;
 import javax.swing.ListSelectionModel;
-import javax.swing.event.ListDataListener;
+import javax.swing.tree.TreeCellRenderer;
 
 import daxplorelib.DaxploreException;
-import daxplorelib.metadata.MetaQuestion;
+import daxplorelib.metadata.MetaData;
+import daxplorelib.metadata.MetaGroup;
 
 @SuppressWarnings("serial")
 public class GroupsPanelView extends JPanel {
 	
 	private GuiMain guiMain;
-	private List<QuestionWidget> questionList = new LinkedList<QuestionWidget>();
 	private JScrollPane questionsScrollPane = new JScrollPane();
 	private JScrollPane groupsScollPane = new JScrollPane();
 	private JScrollPane perspectiveScrollPane = new JScrollPane();
-	
-	private class QuestionListModel implements ListModel<QuestionWidget> {
-		@Override
-		public int getSize() {
-			return questionList.size();
-		}
-
-		@Override
-		public QuestionWidget getElementAt(int index) {
-			return questionList.get(index);
-		}
-
-		@Override
-		public void addListDataListener(ListDataListener l) {
-			// do nothing
-		}
-		@Override
-		public void removeListDataListener(ListDataListener l) {
-			// do nothing
-		}
-	}
 	
 	private class QuestionListCellRenderer implements ListCellRenderer<QuestionWidget> {
 
@@ -68,42 +46,14 @@ public class GroupsPanelView extends JPanel {
 		}
 	}
 	
-	private class GroupListModel implements ListModel<OurListWidget> {
+	private class GroupTreeCellRenderer implements TreeCellRenderer {
 
 		@Override
-		public int getSize() {
-			// TODO Auto-generated method stub
-			return 0;
-		}
-
-		@Override
-		public OurListWidget getElementAt(int index) {
+		public Component getTreeCellRendererComponent(JTree tree, Object value, boolean selected, boolean expanded, boolean leaf, int row, boolean hasFocus) {
 			// TODO Auto-generated method stub
 			return null;
 		}
-
-		@Override
-		public void addListDataListener(ListDataListener l) {
-			// TODO Auto-generated method stub
-		}
-
-		@Override
-		public void removeListDataListener(ListDataListener l) {
-			// TODO Auto-generated method stub
-		}
-	}
-	
-	private class GroupListCellRenderer implements ListCellRenderer<OurListWidget> {
-
-		@Override
-		public Component getListCellRendererComponent(JList<? extends OurListWidget> list, OurListWidget value, int index, boolean isSelected, boolean cellHasFocus) {
-			if(isSelected) {
-				value.setBackground(new Color(255, 255, 200));
-			} else {
-				value.setBackground(new Color(255,255,255));
-			}
-			return value;
-		}
+		
 	}
 	
 	public GroupsPanelView(GuiMain guiMain) {
@@ -180,17 +130,23 @@ public class GroupsPanelView extends JPanel {
 	public void loadData() {
 		if(guiMain.getGuiFile().isSet()) {
 			try {
-				List<MetaQuestion> mqList = guiMain.getGuiFile().getDaxploreFile().getMetaData().getAllQuestions();
-				int i = 0;
-				for(MetaQuestion mq: mqList) {
-					questionList.add(new QuestionWidget(mq));
-					i++;
-				}
-				System.out.println("Added "+ i + " questions");
-				JList<QuestionWidget> list = new JList<QuestionWidget>(new QuestionListModel());
+				MetaData md = guiMain.getGuiFile().getDaxploreFile().getMetaData();
+				//get metaquestions
+				QuestionListModel qlm = new QuestionListModel(md);
+				JList<QuestionWidget> list = new JList<QuestionWidget>(qlm);
 				list.setCellRenderer(new QuestionListCellRenderer());
 				list.setSelectionMode(ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
 				questionsScrollPane.setViewportView(list);
+				
+				//get groups and perspectives
+				List<MetaGroup> mgList = md.getAllGroups();
+				GroupTreeModel gtm = new GroupTreeModel(md);
+				JTree tree = new JTree(gtm);
+				tree.setRootVisible(false);
+				groupsScollPane.setViewportView(tree);
+				
+				
+				
 			} catch (DaxploreException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();

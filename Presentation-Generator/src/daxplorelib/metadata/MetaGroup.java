@@ -17,8 +17,8 @@ import daxplorelib.metadata.MetaQuestion.MetaQuestionManager;
 import daxplorelib.metadata.TextReference.TextReferenceManager;
 
 public class MetaGroup implements Comparable<MetaGroup> {
-	protected static final DaxploreTable table = new DaxploreTable("CREATE TABLE metagroup (id INTEGER PRIMARY KEY, textref TEXT, ind INTEGER, type INTEGER)", "metagroup");
-	protected static final DaxploreTable table2 = new DaxploreTable("CREATE TABLE metagrouprel (groupid INTEGER, questionid TEXT, FOREIGN KEY(questionid) REFERENCES metaquestion(id), FOREIGN KEY(groupid) REFERENCES metagroup(id))", "metagrouprel");
+	protected static final DaxploreTable table = new DaxploreTable("CREATE TABLE metagroup (id INTEGER PRIMARY KEY, textref TEXT, idx INTEGER, type INTEGER)", "metagroup");
+	protected static final DaxploreTable table2 = new DaxploreTable("CREATE TABLE metagrouprel (groupid INTEGER, questionid TEXT, idx INTEGER, FOREIGN KEY(questionid) REFERENCES metaquestion(id), FOREIGN KEY(groupid) REFERENCES metagroup(id))", "metagrouprel");
 	
 	public static class MetaGroupManager {
 		
@@ -49,12 +49,12 @@ public class MetaGroup implements Comparable<MetaGroup> {
 			rs.next();
 			
 			TextReference tr = textsManager.get(rs.getString("textref"));
-			int index = rs.getInt("ind");
+			int index = rs.getInt("idx");
 			GroupType type = GroupType.fromInt(rs.getInt("type"));
 			rs.close();
 			
 			List<MetaQuestion> qList = new LinkedList<MetaQuestion>();
-			PreparedStatement qstmt = connection.prepareStatement("SELECT questionid FROM metagrouprel WHERE groupid = ?");
+			PreparedStatement qstmt = connection.prepareStatement("SELECT questionid FROM metagrouprel WHERE groupid = ? ORDER BY idx ASC");
 			qstmt.setInt(1, id);
 			rs = qstmt.executeQuery();
 			while(rs.next()) {
@@ -67,7 +67,7 @@ public class MetaGroup implements Comparable<MetaGroup> {
 		}
 		
 		public MetaGroup create(TextReference textref, int index, GroupType type, List<MetaQuestion> qList) throws SQLException {
-			PreparedStatement stmt = connection.prepareStatement("INSERT INTO metagroup (textref, ind, type) VALUES (?, ?, ?)");
+			PreparedStatement stmt = connection.prepareStatement("INSERT INTO metagroup (textref, idx, type) VALUES (?, ?, ?)");
 			stmt.setString(1, textref.getRef());
 			stmt.setInt(2, index);
 			stmt.setInt(3, type.asInt());
@@ -75,10 +75,11 @@ public class MetaGroup implements Comparable<MetaGroup> {
 			
 			int id = SQLTools.lastId(table.name, connection);
 			
-			stmt = connection.prepareStatement("INSERT INTO metagrouprel (groupid, questionid) VALUES (?, ?)");
-			for(MetaQuestion mq: qList) {
+			stmt = connection.prepareStatement("INSERT INTO metagrouprel (groupid, questionid, idx) VALUES (?, ?, ?)");
+			for(int idx = 0; idx < qList.size(); idx++) {
 				stmt.setInt(1, id);
-				stmt.setString(2, mq.getId());
+				stmt.setString(2, qList.get(idx).getId());
+				stmt.setInt(3, idx);
 				stmt.addBatch();
 			}
 			stmt.executeBatch();
@@ -95,9 +96,9 @@ public class MetaGroup implements Comparable<MetaGroup> {
 		}
 		
 		public void saveAll() throws SQLException {
-			PreparedStatement updateStmt = connection.prepareStatement("UPDATE metagroup SET textref = ?, ind = ?, type = ? WHERE id = ?");
+			PreparedStatement updateStmt = connection.prepareStatement("UPDATE metagroup SET textref = ?, idx = ?, type = ? WHERE id = ?");
 			PreparedStatement deleteStmt = connection.prepareStatement("DELETE FROM metagrouprel WHERE groupid = ?");
-			PreparedStatement insertStmt = connection.prepareStatement("INSERT INTO metagrouprel (groupid, questionid) VALUES (?, ?)");
+			PreparedStatement insertStmt = connection.prepareStatement("INSERT INTO metagrouprel (groupid, questionid, idx) VALUES (?, ?, ?)");
 			for(MetaGroup mg: groupMap.values()) {
 				if(mg.modified) {
 					updateStmt.setString(1, mg.textref.getRef());
@@ -109,9 +110,10 @@ public class MetaGroup implements Comparable<MetaGroup> {
 					deleteStmt.setInt(1, mg.id);
 					deleteStmt.executeUpdate();
 					
-					for(MetaQuestion mq: mg.qList) {
+					for(int idx = 0; idx < mg.qList.size(); idx++) {
 						insertStmt.setInt(1, mg.id);
-						insertStmt.setString(2, mq.getId());
+						insertStmt.setString(2, mg.qList.get(idx).getId());
+						insertStmt.setInt(3, idx);
 						insertStmt.addBatch();
 					}
 					insertStmt.executeBatch();
@@ -206,7 +208,7 @@ public class MetaGroup implements Comparable<MetaGroup> {
 		this.modified = true;
 	}
 	
-	public GroupType getType() throws SQLException {
+	public GroupType getType() {
 		return type;
 	}
 	
