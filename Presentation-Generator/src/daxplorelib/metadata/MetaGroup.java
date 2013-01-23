@@ -149,7 +149,10 @@ public class MetaGroup implements Comparable<MetaGroup> {
 		}
 		
 		public int getHighestId() throws SQLException {
-			if(SQLTools.tableExists("sqlite_sequence", connection)) {
+			ResultSet rs = connection.createStatement().executeQuery("SELECT max(id) FROM metagroup");
+			rs.next();
+			return rs.getInt(1);
+			/*if(SQLTools.tableExists("sqlite_sequence", connection)) {
 				PreparedStatement stmt = connection.prepareStatement("SELECT seq FROM sqlite_sequence WHERE name = ?");
 				stmt.setString(1, "metagroup");
 				ResultSet rs = stmt.executeQuery();
@@ -158,7 +161,7 @@ public class MetaGroup implements Comparable<MetaGroup> {
 				} else {
 					return 0;
 				}
-			} else return 0;
+			} else return 0;*/
 		}
 		
 	}

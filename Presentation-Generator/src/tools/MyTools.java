@@ -250,4 +250,25 @@ public class MyTools {
 		}
 		System.err.println("------ End of SQLException -------");
 	}
+	
+	/**
+	 * Creates an array with the numbers from to to. Inclusive.
+	 * @param from
+	 * @param to
+	 * @return an int[]
+	 */
+	public static int[] range(int from, int to) {
+		int size = to - from;
+		int step = 1;
+		if(size < 0) {
+			size = -size;
+			step = -1;
+		}
+		int[] array = new int[size+1];
+		for(int i = 0; i < size; i++) {
+			array[i] = from;
+			from += step;
+		}
+		return array;
+	}
 }

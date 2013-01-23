@@ -2,6 +2,7 @@ package gui;
 
 import gui.edit.EditPanelView;
 import gui.groups.GroupsView;
+import gui.navigation.NavigationPanelView;
 import gui.open.OpenPanelView;
 import gui.tools.ToolsPanelView;
 
@@ -91,6 +92,9 @@ public class GuiMain {
 	private EditPanelView editPanelView;
 	private ButtonPanelView buttonPanelView;
 	private ToolsPanelView toolsPanelView;
+	private NavigationPanelView navigationPanelView;
+
+	private JPanel panel;
 	
 	// getters and setters.
 	public ButtonPanelView getButtonPanelView() {
@@ -136,6 +140,10 @@ public class GuiMain {
 	public void setEditPanelView(EditPanelView editPanelView) {
 		this.editPanelView = editPanelView;
 	}
+	
+	public NavigationPanelView getNavigationPanelView() {
+		return navigationPanelView;
+	}
 
 	public void switchTo(String label) {
 		CardLayout cl = (CardLayout)(mainPanel.getLayout());
@@ -170,14 +178,18 @@ public class GuiMain {
 		// file handler init.
 		guiFile = new GuiFile();
 		
-		// create main panel window.
-		mainPanel.setBorder(new MatteBorder(0, 1, 0, 0, (Color) Color.GRAY));
-		mainPanel.setLayout(new CardLayout(0, 0));
-		guiMainFrame.getContentPane().add(mainPanel, BorderLayout.CENTER);
-		
 		// panel views. TODO: Remake the controller interface.
 		buttonPanelView = new ButtonPanelView(this);
 		guiMainFrame.getContentPane().add(buttonPanelView, BorderLayout.WEST);
+		
+		panel = new JPanel();
+		guiMainFrame.getContentPane().add(panel, BorderLayout.CENTER);
+		panel.setLayout(new BorderLayout(0, 0));
+		panel.add(mainPanel, BorderLayout.CENTER);
+		
+		// create main panel window.
+		mainPanel.setBorder(new MatteBorder(0, 1, 0, 0, (Color) Color.GRAY));
+		mainPanel.setLayout(new CardLayout(0, 0));
 		
 		openPanelView = new OpenPanelView(this);
 		mainPanel.add(openPanelView, "openPanel");
@@ -192,5 +204,8 @@ public class GuiMain {
 		mainPanel.add(toolsPanelView, "toolsPanel");
 		
 		mainPanel.setRequestFocusEnabled(true);
+		
+		navigationPanelView = new NavigationPanelView(this);
+		panel.add(navigationPanelView, BorderLayout.SOUTH);
 	}
 }

@@ -1,44 +1,23 @@
 package gui.groups;
 
-import gui.GuiFile;
 import gui.GuiMain;
 import gui.widget.GroupWidget;
-import gui.widget.OurListWidget;
 import gui.widget.QuestionWidget;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.GridLayout;
-import java.sql.SQLException;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Locale;
 
 import javax.swing.Box;
 import javax.swing.BoxLayout;
 import javax.swing.JButton;
 import javax.swing.JList;
-import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTree;
 import javax.swing.ListCellRenderer;
-import javax.swing.ListSelectionModel;
 import javax.swing.tree.TreeCellRenderer;
-import javax.swing.tree.TreePath;
-
-import daxplorelib.DaxploreException;
-import daxplorelib.metadata.MetaData;
-import daxplorelib.metadata.MetaGroup;
-import daxplorelib.metadata.MetaGroup.GroupType;
-import daxplorelib.metadata.MetaGroup.MetaGroupManager;
-import daxplorelib.metadata.MetaQuestion;
-import daxplorelib.metadata.TextReference;
-import daxplorelib.metadata.TextReference.TextReferenceManager;
-
-import java.awt.event.ActionListener;
-import java.awt.event.ActionEvent;
 
 @SuppressWarnings("serial")
 public class GroupsView extends JPanel {
