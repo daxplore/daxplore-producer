@@ -13,58 +13,60 @@ import javax.swing.filechooser.FileNameExtensionFilter;
 import org.opendatafoundation.data.spss.SPSSFile;
 import org.opendatafoundation.data.spss.SPSSFileException;
 
+public class OpenFilePanelDescriptor extends ImportWizardDescriptor implements
+		ActionListener {
 
-public class OpenFilePanelDescriptor extends ImportWizardDescriptor implements ActionListener {
-	
 	public static final String OPEN_SPSS_FILE_BUTTON_COMMAND = "OPEN_SPSS_FILE";
 	public static final String IDENTIFIER = "FILE_IMPORT_PANEL";
-	
+
 	OpenFilePanel openFilePanel;
-    
-    public OpenFilePanelDescriptor() {
-    	super(IDENTIFIER, new OpenFilePanel());
-    	openFilePanel = (OpenFilePanel) super.getPanelComponent();
-    	openFilePanel.addOpenFileButtonActionListener(this);
-    	openFilePanel.openFileButton.setActionCommand(OPEN_SPSS_FILE_BUTTON_COMMAND);
-    }
-    
-    @Override
-    public Object getNextPanelDescriptor() {
-    	return CharsetPanelDescriptor.IDENTIFIER;
-    }
-    
-    @Override
-    public Object getBackPanelDescriptor() {
-        return null;
-    }
+
+	public OpenFilePanelDescriptor() {
+		super(IDENTIFIER, new OpenFilePanel());
+		openFilePanel = (OpenFilePanel) super.getPanelComponent();
+		openFilePanel.addOpenFileButtonActionListener(this);
+		openFilePanel.openFileButton
+				.setActionCommand(OPEN_SPSS_FILE_BUTTON_COMMAND);
+	}
+
+	@Override
+	public Object getNextPanelDescriptor() {
+		return CharsetPanelDescriptor.IDENTIFIER;
+	}
+
+	@Override
+	public Object getBackPanelDescriptor() {
+		return null;
+	}
 
 	@Override
 	public void actionPerformed(ActionEvent e) {
-		if (e.getActionCommand().equals(OpenFilePanelDescriptor.OPEN_SPSS_FILE_BUTTON_COMMAND))
-            openSpssFileAction();
-		
+		if (e.getActionCommand().equals(
+				OpenFilePanelDescriptor.OPEN_SPSS_FILE_BUTTON_COMMAND))
+			openSpssFileAction();
+
 		setNextButtonAccordingToFile();
-		
+
 	}
-	
+
 	@Override
 	public void aboutToDisplayPanel() {
 		if (getWizard().getGuiMain().getGuiFile().getSpssFile() == null)
-            getWizard().setNextFinishButtonEnabled(false);
+			getWizard().setNextFinishButtonEnabled(false);
 	}
-	
-    private void setNextButtonAccordingToFile() {
-    	// keep next button disabled until a file has been loaded into memory.
-         if (getWizard().getGuiMain().getGuiFile().getSpssFile() == null)
-            getWizard().setNextFinishButtonEnabled(false);
-         else
-            getWizard().setNextFinishButtonEnabled(true);           
-    }
+
+	private void setNextButtonAccordingToFile() {
+		// keep next button disabled until a file has been loaded into memory.
+		if (getWizard().getGuiMain().getGuiFile().getSpssFile() == null)
+			getWizard().setNextFinishButtonEnabled(false);
+		else
+			getWizard().setNextFinishButtonEnabled(true);
+	}
 
 	/**
 	 * Opens up a file dialogue with options to open SPSS files.
 	 */
-    public void openSpssFileAction() {
+	public void openSpssFileAction() {
 		JFileChooser fc = new JFileChooser();
 		FileNameExtensionFilter filter = new FileNameExtensionFilter(
 				"SPSS Files", "sav");
@@ -83,12 +85,14 @@ public class OpenFilePanelDescriptor extends ImportWizardDescriptor implements A
 				spssFile.logFlag = false;
 				spssFile.loadMetadata();
 				spssFile.close();
-				
+
 				getWizard().getGuiMain().getGuiFile().setSpssFile(file);
-				String text = "File selected: " + getWizard().getGuiMain().getGuiFile().getSpssFile().getName();
+				String text = "File selected: "
+						+ getWizard().getGuiMain().getGuiFile().getSpssFile()
+								.getName();
 				openFilePanel.fileOpenLabel.setText(text);
 				System.out.println(text);
-				
+
 			} catch (FileNotFoundException e1) {
 				System.out.println("SPSS file open failed.");
 				JOptionPane.showMessageDialog(this.getWizard(),

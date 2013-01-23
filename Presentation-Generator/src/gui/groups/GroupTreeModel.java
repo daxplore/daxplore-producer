@@ -27,24 +27,26 @@ class GroupTreeModel implements TreeModel {
 
 	JPanel root = new JPanel();
 	List<GroupWidget> groups = new LinkedList<GroupWidget>();
-	
+
 	private EventListenerList listeners = new EventListenerList();
-	//private Vector<TreeModelListener> listeners = new Vector<TreeModelListener>(); // Declare the listeners vector
-	
+
+	// private Vector<TreeModelListener> listeners = new
+	// Vector<TreeModelListener>(); // Declare the listeners vector
+
 	public GroupTreeModel(MetaData md) throws DaxploreException {
 		root.add(new JLabel("root object"));
 		List<MetaGroup> allGroups = md.getAllGroups();
-		for(MetaGroup mg: allGroups) {
-			if(mg.getType() == GroupType.QUESTIONS) {
+		for (MetaGroup mg : allGroups) {
+			if (mg.getType() == GroupType.QUESTIONS) {
 				GroupWidget gw = new GroupWidget(mg);
-				for(MetaQuestion mq: mg.getQuestions()) {
+				for (MetaQuestion mq : mg.getQuestions()) {
 					gw.questions.add(new QuestionWidget(mq));
 				}
 				groups.add(gw);
 			}
 		}
 	}
-	
+
 	@Override
 	public Object getRoot() {
 		return root;
@@ -52,131 +54,149 @@ class GroupTreeModel implements TreeModel {
 
 	@Override
 	public Object getChild(Object parent, int index) {
-		if(parent == root) {
-			if(index < groups.size()) {
+		if (parent == root) {
+			if (index < groups.size()) {
 				return groups.get(index);
-			} else return null;
-		} else if(parent instanceof GroupWidget) {
-			GroupWidget p = (GroupWidget)parent;
-			if(index < p.questions.size()) {
+			} else
+				return null;
+		} else if (parent instanceof GroupWidget) {
+			GroupWidget p = (GroupWidget) parent;
+			if (index < p.questions.size()) {
 				return p.questions.get(index);
-			} else return null;
+			} else
+				return null;
 		} else if (parent instanceof QuestionWidget) {
 			return null;
 		}
 		return null;
 	}
+
 	/**
 	 * Add a new group to the tree
-	 * @param The MetaGroup to add
-	 * @param The index at witch to insert the new group
+	 * 
+	 * @param The
+	 *            MetaGroup to add
+	 * @param The
+	 *            index at witch to insert the new group
 	 * @return The TreePath to the new group
 	 * @throws Exception
 	 */
-	public TreePath addGroup(MetaGroup mg, int atIndex) throws Exception { //TODO: specialize exception
-		if(atIndex >= 0 && atIndex <= groups.size()) {
+	public TreePath addGroup(MetaGroup mg, int atIndex) throws Exception { // TODO:
+																			// specialize
+																			// exception
+		if (atIndex >= 0 && atIndex <= groups.size()) {
 			GroupWidget gw = new GroupWidget(mg);
 			groups.add(atIndex, gw);
 			mg.setIndex(atIndex);
-			fireTreeNodesInserted(new TreeModelEvent(this, 
-					new Object[]{root},
-					MyTools.range(0, groups.size() -1),
+			fireTreeNodesInserted(new TreeModelEvent(this,
+					new Object[] { root }, MyTools.range(0, groups.size() - 1),
 					groups.toArray()));
-			return new TreePath(new Object[]{root, gw});
+			return new TreePath(new Object[] { root, gw });
 		}
 		throw new Exception("Not allowed to place this at that");
 	}
+
 	/**
 	 * Add a new question to the tree
-	 * @param The MetaQuestion to add
-	 * @param The group to which the question will be added
-	 * @param The index at which the question will be added
+	 * 
+	 * @param The
+	 *            MetaQuestion to add
+	 * @param The
+	 *            group to which the question will be added
+	 * @param The
+	 *            index at which the question will be added
 	 * @return The TreePath to the added question
 	 * @throws Exception
 	 */
-	public TreePath addQuestion(MetaQuestion mq, GroupWidget parent, int atIndex) throws Exception { //TODO: specialize exception
-		for(GroupWidget gw: groups) {
-			for(QuestionWidget qw: gw.questions) {
-				if(qw.metaQuestion.getId() == mq.getId()) {
+	public TreePath addQuestion(MetaQuestion mq, GroupWidget parent, int atIndex)
+			throws Exception { // TODO: specialize exception
+		for (GroupWidget gw : groups) {
+			for (QuestionWidget qw : gw.questions) {
+				if (qw.metaQuestion.getId() == mq.getId()) {
 					throw new Exception("Can't have duplicate of that");
 				}
 			}
 		}
-		if(groups.contains(parent) && atIndex >= 0 && atIndex <= getChildCount(parent)) {
+		if (groups.contains(parent) && atIndex >= 0
+				&& atIndex <= getChildCount(parent)) {
 			QuestionWidget newQuestionWidget = new QuestionWidget(mq);
 			parent.questions.add(atIndex, newQuestionWidget);
 			List<MetaQuestion> qList = new LinkedList<MetaQuestion>();
-			for(QuestionWidget qw: parent.questions) {
+			for (QuestionWidget qw : parent.questions) {
 				qList.add(qw.metaQuestion);
 			}
 			parent.metaGroup.setQuestions(qList);
-			fireTreeNodesInserted(new TreeModelEvent(this, 
-					new Object[]{root,parent},
-					new int[]{atIndex},
-					new Object[]{newQuestionWidget}));
-			return new TreePath(new Object[]{root, parent, newQuestionWidget});
+			fireTreeNodesInserted(new TreeModelEvent(this, new Object[] { root,
+					parent }, new int[] { atIndex },
+					new Object[] { newQuestionWidget }));
+			return new TreePath(
+					new Object[] { root, parent, newQuestionWidget });
 		}
 		throw new Exception("Not allowed to place this at that");
 	}
-	
-	public void moveChild(Object child, Object toParent, int atIndex) throws Exception { //TODO: specialize exception
-		if(child instanceof GroupWidget && toParent == root && groups.contains(child)
-				&& atIndex >= 0 && atIndex <= groups.size()) {
-			int delta = groups.indexOf(child) < atIndex ? -1: 0;
+
+	public void moveChild(Object child, Object toParent, int atIndex)
+			throws Exception { // TODO: specialize exception
+		if (child instanceof GroupWidget && toParent == root
+				&& groups.contains(child) && atIndex >= 0
+				&& atIndex <= groups.size()) {
+			int delta = groups.indexOf(child) < atIndex ? -1 : 0;
 			groups.remove(child);
-			groups.add(atIndex + delta, (GroupWidget)child);
-			for(int index = 0; index < groups.size(); index++) {
+			groups.add(atIndex + delta, (GroupWidget) child);
+			for (int index = 0; index < groups.size(); index++) {
 				groups.get(index).metaGroup.setIndex(index);
 			}
-			for(int i = 0; i < groups.size(); i++) {
+			for (int i = 0; i < groups.size(); i++) {
 				groups.get(i).metaGroup.setIndex(i);
 			}
-			fireTreeNodesChanged(new TreeModelEvent(this, new Object[]{root}));
+			fireTreeNodesChanged(new TreeModelEvent(this, new Object[] { root }));
 			return;
-		} else if(child instanceof QuestionWidget && toParent instanceof GroupWidget && groups.contains(toParent)) {
-			for(GroupWidget gw: groups) {
-				if(gw.questions.contains(child)) {
-					if(gw == toParent && atIndex >= 0 && atIndex <= gw.questions.size()) {
-						int delta = gw.questions.indexOf(child) < atIndex ? -1: 0;
+		} else if (child instanceof QuestionWidget
+				&& toParent instanceof GroupWidget && groups.contains(toParent)) {
+			for (GroupWidget gw : groups) {
+				if (gw.questions.contains(child)) {
+					if (gw == toParent && atIndex >= 0
+							&& atIndex <= gw.questions.size()) {
+						int delta = gw.questions.indexOf(child) < atIndex ? -1
+								: 0;
 						int oldIndex = gw.questions.indexOf(child);
 						gw.questions.remove(child);
-						gw.questions.add(atIndex, (QuestionWidget)child);
+						gw.questions.add(atIndex, (QuestionWidget) child);
 						List<MetaQuestion> qList = new LinkedList<MetaQuestion>();
-						for(QuestionWidget qw: gw.questions) {
+						for (QuestionWidget qw : gw.questions) {
 							qList.add(qw.metaQuestion);
 						}
 						gw.metaGroup.setQuestions(qList);
-						
-						fireTreeNodesChanged(
-								new TreeModelEvent(this, 
-										new Object[]{root, gw}, 
-										MyTools.range(0, gw.questions.size()-1),
-										gw.questions.toArray()));
+
+						fireTreeNodesChanged(new TreeModelEvent(this,
+								new Object[] { root, gw }, MyTools.range(0,
+										gw.questions.size() - 1),
+								gw.questions.toArray()));
 						return;
-					} else if(atIndex >= 0 && atIndex <= gw.questions.size()){
+					} else if (atIndex >= 0 && atIndex <= gw.questions.size()) {
 						gw.questions.remove(child);
-						GroupWidget parent = (GroupWidget)toParent;
-						if(atIndex == gw.questions.size()) {
-							parent.questions.add((QuestionWidget)child);
+						GroupWidget parent = (GroupWidget) toParent;
+						if (atIndex == gw.questions.size()) {
+							parent.questions.add((QuestionWidget) child);
 						} else {
-							parent.questions.add(atIndex, (QuestionWidget)child);
+							parent.questions.add(atIndex,
+									(QuestionWidget) child);
 						}
 						List<MetaQuestion> qList = new LinkedList<MetaQuestion>();
-						for(QuestionWidget qw: gw.questions) {
+						for (QuestionWidget qw : gw.questions) {
 							qList.add(qw.metaQuestion);
 						}
 						gw.metaGroup.setQuestions(qList);
-						
+
 						qList = new LinkedList<MetaQuestion>();
-						for(QuestionWidget qw: parent.questions) {
+						for (QuestionWidget qw : parent.questions) {
 							qList.add(qw.metaQuestion);
 						}
 						parent.metaGroup.setQuestions(qList);
-						
-						fireTreeNodesChanged(new TreeModelEvent(this, 
-								new Object[]{root}, 
-								MyTools.range(0, groups.size()-1), 
-								groups.toArray()));
+
+						fireTreeNodesChanged(new TreeModelEvent(this,
+								new Object[] { root }, MyTools.range(0,
+										groups.size() - 1), groups.toArray()));
 						return;
 					}
 				}
@@ -184,28 +204,28 @@ class GroupTreeModel implements TreeModel {
 		}
 		throw new Exception("Couldn't move this to that");
 	}
-	
-	public void removeChild(Object child) throws Exception { //TODO: specialize exception
-		if(child instanceof GroupWidget && groups.contains(child)) {
+
+	public void removeChild(Object child) throws Exception { // TODO: specialize
+																// exception
+		if (child instanceof GroupWidget && groups.contains(child)) {
 			groups.remove(child);
-			fireTreeNodesRemoved(new TreeModelEvent(this, new Object[]{root}));
+			fireTreeNodesRemoved(new TreeModelEvent(this, new Object[] { root }));
 			return;
-		} else if(child instanceof QuestionWidget) {
-			for(GroupWidget gw: groups) {
-				if(gw.questions.contains(child)) {
+		} else if (child instanceof QuestionWidget) {
+			for (GroupWidget gw : groups) {
+				if (gw.questions.contains(child)) {
 					int index = gw.questions.indexOf(child);
 					gw.questions.remove(child);
-					
+
 					List<MetaQuestion> qList = new LinkedList<MetaQuestion>();
-					for(QuestionWidget qw: gw.questions) {
+					for (QuestionWidget qw : gw.questions) {
 						qList.add(qw.metaQuestion);
 					}
 					gw.metaGroup.setQuestions(qList);
-					
-					fireTreeNodesRemoved(new TreeModelEvent(this, 
-							new Object[]{root, gw},
-							new int[]{index},
-							new Object[]{child}));
+
+					fireTreeNodesRemoved(new TreeModelEvent(this, new Object[] {
+							root, gw }, new int[] { index },
+							new Object[] { child }));
 					return;
 				}
 			}
@@ -215,10 +235,10 @@ class GroupTreeModel implements TreeModel {
 
 	@Override
 	public int getChildCount(Object parent) {
-		if(parent == root) {
+		if (parent == root) {
 			return groups.size();
-		} else if(parent instanceof GroupWidget) {
-			GroupWidget p = (GroupWidget)parent;
+		} else if (parent instanceof GroupWidget) {
+			GroupWidget p = (GroupWidget) parent;
 			return p.questions.size();
 		} else if (parent instanceof QuestionWidget) {
 			return 0;
@@ -228,9 +248,9 @@ class GroupTreeModel implements TreeModel {
 
 	@Override
 	public boolean isLeaf(Object node) {
-		if(node == root || node instanceof GroupWidget) {
+		if (node == root || node instanceof GroupWidget) {
 			return false;
-		} else if(node instanceof QuestionWidget) {
+		} else if (node instanceof QuestionWidget) {
 			return true;
 		}
 		return true;
@@ -243,13 +263,14 @@ class GroupTreeModel implements TreeModel {
 
 	@Override
 	public int getIndexOfChild(Object parent, Object child) {
-		if(parent == root) {
+		if (parent == root) {
 			return groups.indexOf(child);
-		} else if(parent instanceof GroupWidget) {
-			GroupWidget p = (GroupWidget)parent;
-			if(groups.contains(p)) {
-				return p.questions.indexOf(child);				
-			} else return -1;
+		} else if (parent instanceof GroupWidget) {
+			GroupWidget p = (GroupWidget) parent;
+			if (groups.contains(p)) {
+				return p.questions.indexOf(child);
+			} else
+				return -1;
 		} else if (parent instanceof QuestionWidget) {
 			return -1;
 		}
@@ -258,7 +279,7 @@ class GroupTreeModel implements TreeModel {
 
 	@Override
 	public void addTreeModelListener(TreeModelListener l) {
-		if(l != null) {
+		if (l != null) {
 			listeners.add(TreeModelListener.class, l);
 		}
 	}
@@ -266,35 +287,39 @@ class GroupTreeModel implements TreeModel {
 	@Override
 	public void removeTreeModelListener(TreeModelListener l) {
 		if (l != null) {
-	    	listeners.remove(TreeModelListener.class, l);
-	    }
+			listeners.remove(TreeModelListener.class, l);
+		}
 	}
-	
+
 	private void fireTreeNodesChanged(TreeModelEvent e) {
-		for(TreeModelListener tml: listeners.getListeners(TreeModelListener.class)) {
+		for (TreeModelListener tml : listeners
+				.getListeners(TreeModelListener.class)) {
 			tml.treeNodesChanged(e);
 		}
-		//fireTreeStructureChanged(e);
+		// fireTreeStructureChanged(e);
 	}
-	
+
 	private void fireTreeNodesInserted(TreeModelEvent e) {
-		for(TreeModelListener tml: listeners.getListeners(TreeModelListener.class)) {
+		for (TreeModelListener tml : listeners
+				.getListeners(TreeModelListener.class)) {
 			tml.treeNodesInserted(e);
 		}
 	}
-	
+
 	private void fireTreeNodesRemoved(TreeModelEvent e) {
-		for(TreeModelListener tml: listeners.getListeners(TreeModelListener.class)) {
+		for (TreeModelListener tml : listeners
+				.getListeners(TreeModelListener.class)) {
 			tml.treeNodesRemoved(e);
 		}
 	}
-	
+
 	@SuppressWarnings("unused")
 	private void fireTreeStructureChanged(TreeModelEvent e) {
-		TreeModelEvent e2 = new TreeModelEvent(this, new Object[]{root});
-		for(TreeModelListener tml: listeners.getListeners(TreeModelListener.class)) {
+		TreeModelEvent e2 = new TreeModelEvent(this, new Object[] { root });
+		for (TreeModelListener tml : listeners
+				.getListeners(TreeModelListener.class)) {
 			tml.treeStructureChanged(e2);
 		}
 	}
-	
+
 }

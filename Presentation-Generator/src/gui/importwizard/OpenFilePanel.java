@@ -10,19 +10,19 @@ public class OpenFilePanel extends JPanel {
 
 	protected JButton openFileButton;
 	protected JLabel fileOpenLabel;
-	
+
 	/**
 	 * Constructor.
 	 */
 	public OpenFilePanel() {
-		
+
 		openFileButton = new JButton("Open SPSS File");
 		add(openFileButton);
-		
+
 		fileOpenLabel = new JLabel("No file selected");
-		add(fileOpenLabel);	
+		add(fileOpenLabel);
 	}
-	
+
 	public void addOpenFileButtonActionListener(ActionListener l) {
 		openFileButton.addActionListener(l);
 	}

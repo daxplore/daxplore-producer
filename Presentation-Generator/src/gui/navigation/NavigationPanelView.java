@@ -22,17 +22,17 @@ import javax.swing.border.MatteBorder;
 
 @SuppressWarnings("serial")
 public class NavigationPanelView extends JPanel {
-	
+
 	GuiMain guiMain;
-	
+
 	public NavigationPanelView(final GuiMain guiMain) {
 		this.guiMain = guiMain;
 		setLayout(new BorderLayout(0, 0));
 		setBorder(new MatteBorder(0, 1, 0, 0, (Color) Color.GRAY));
-		
+
 		JButton backButton = new JButton("Back");
 		add(backButton, BorderLayout.WEST);
-		
+
 		JButton saveButton = new JButton("Save");
 		saveButton.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
@@ -45,19 +45,19 @@ public class NavigationPanelView extends JPanel {
 			}
 		});
 		add(saveButton, BorderLayout.EAST);
-		
+
 		JPanel centerPanel = new JPanel();
 		add(centerPanel, BorderLayout.CENTER);
 		centerPanel.setLayout(new BorderLayout(0, 0));
-		
+
 		JSeparator westSeperator = new JSeparator();
 		westSeperator.setOrientation(SwingConstants.VERTICAL);
 		centerPanel.add(westSeperator, BorderLayout.WEST);
-		
+
 		JSeparator eastSeperator = new JSeparator();
 		eastSeperator.setOrientation(SwingConstants.VERTICAL);
 		centerPanel.add(eastSeperator, BorderLayout.EAST);
-		
+
 		JPanel toolbarPanel = new JPanel();
 		centerPanel.add(toolbarPanel, BorderLayout.CENTER);
 	}

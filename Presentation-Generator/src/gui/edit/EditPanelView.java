@@ -41,18 +41,19 @@ public class EditPanelView extends JPanel {
 	private JComboBox<LocaleItem> localeCombo1;
 	private JComboBox<LocaleItem> localeCombo2;
 	private JScrollPane scrollPane;
-	
+
 	private JTable table;
 	private TableRowSorter<TextsTableModel> sorter;
 	private List<TextReference> textsList = new LinkedList<TextReference>();
 	private Locale[] currentLocales = new Locale[2];
 
 	private TextsTableModel model;
-	
-	protected class TextsTableModel extends DefaultTableModel implements TableModelListener {
-		
+
+	protected class TextsTableModel extends DefaultTableModel implements
+			TableModelListener {
+
 		public String getColumnName(int col) {
-			switch(col) {
+			switch (col) {
 			case 0:
 				return "Reference";
 			case 1:
@@ -88,39 +89,42 @@ public class EditPanelView extends JPanel {
 		}
 
 		public void setValueAt(Object value, int row, int col) {
-			textsList.get(row).put(value.toString(), currentLocales[col-1]);
+			textsList.get(row).put(value.toString(), currentLocales[col - 1]);
 		}
 
 		@Override
 		public void tableChanged(TableModelEvent e) {
 			// TODO Auto-generated method stub
-			
+
 		}
 	}
-	
+
 	protected class LocaleItem {
 		Locale loc;
+
 		public LocaleItem(Locale loc) {
 			this.loc = loc;
 		}
+
 		public String toString() {
 			return loc.getDisplayLanguage();
 		}
 	}
-	
+
 	/**
 	 * Create the panel.
-	 * @param guiFile 
-	 * @param guiMain 
+	 * 
+	 * @param guiFile
+	 * @param guiMain
 	 */
 	public EditPanelView(GuiMain guiMain) {
 		this.guiMain = guiMain;
 		setLayout(new BorderLayout(0, 0));
-		
+
 		JPanel panel = new JPanel();
 		add(panel, BorderLayout.NORTH);
 		panel.setLayout(new GridLayout(0, 3, 0, 0));
-		
+
 		textField = new JTextField();
 		textField.setHorizontalAlignment(SwingConstants.LEFT);
 		panel.add(textField);
@@ -130,24 +134,25 @@ public class EditPanelView extends JPanel {
 			public void removeUpdate(DocumentEvent e) {
 				filter();
 			}
+
 			@Override
 			public void insertUpdate(DocumentEvent e) {
 				filter();
 			}
+
 			@Override
 			public void changedUpdate(DocumentEvent e) {
 				filter();
 			}
 		});
-		
-		
-		
+
 		localeCombo1 = new JComboBox<LocaleItem>();
 		panel.add(localeCombo1);
 		localeCombo1.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				currentLocales[0] = ((LocaleItem)localeCombo1.getSelectedItem()).loc;
+				currentLocales[0] = ((LocaleItem) localeCombo1
+						.getSelectedItem()).loc;
 				doUpdate();
 			}
 		});
@@ -156,63 +161,70 @@ public class EditPanelView extends JPanel {
 		localeCombo2.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				currentLocales[1] = ((LocaleItem)localeCombo2.getSelectedItem()).loc;
+				currentLocales[1] = ((LocaleItem) localeCombo2
+						.getSelectedItem()).loc;
 				doUpdate();
 			}
 		});
-		
+
 		scrollPane = new JScrollPane();
 		add(scrollPane, BorderLayout.CENTER);
-		
-		
+
 		addComponentListener(new ComponentListener() {
-			
+
 			@Override
 			public void componentShown(ComponentEvent e) {
 				System.out.println("edit got shown");
 				doUpdate();
 			}
-			
+
 			@Override
-			public void componentResized(ComponentEvent e) {}
+			public void componentResized(ComponentEvent e) {
+			}
+
 			@Override
-			public void componentMoved(ComponentEvent e) {}
+			public void componentMoved(ComponentEvent e) {
+			}
+
 			@Override
-			public void componentHidden(ComponentEvent e) {}
+			public void componentHidden(ComponentEvent e) {
+			}
 		});
-		
+
 	}
-	
+
 	private void filter() {
-        RowFilter<TextsTableModel, Object> rf = null;
-        //If current expression doesn't parse, don't update.
-        try {
-        	String caseInsensitive = "(?i)";
-            rf = RowFilter.regexFilter(caseInsensitive + textField.getText(), 0);
-        } catch (java.util.regex.PatternSyntaxException e) {
-            return;
-        }
-        sorter.setRowFilter(rf);
+		RowFilter<TextsTableModel, Object> rf = null;
+		// If current expression doesn't parse, don't update.
+		try {
+			String caseInsensitive = "(?i)";
+			rf = RowFilter
+					.regexFilter(caseInsensitive + textField.getText(), 0);
+		} catch (java.util.regex.PatternSyntaxException e) {
+			return;
+		}
+		sorter.setRowFilter(rf);
 	}
-	
+
 	public void doUpdate() {
-		if(table != null) {
+		if (table != null) {
 			int a = scrollPane.getVerticalScrollBar().getValue();
 			loadTable();
 			scrollPane.getVerticalScrollBar().setValue(a);
 		}
-		//table.updateUI();
+		// table.updateUI();
 	}
 
 	public void loadData() {
 		System.out.println("EditPanelView.updateStuff()");
-		if(guiMain.getGuiFile().isSet()) {
+		if (guiMain.getGuiFile().isSet()) {
 			System.out.print("adding locales... ");
 			try {
-				TextReferenceManager trm = guiMain.getGuiFile().getDaxploreFile().getMetaData().getTextsManager();
+				TextReferenceManager trm = guiMain.getGuiFile()
+						.getDaxploreFile().getMetaData().getTextsManager();
 				List<Locale> localeList = trm.getAllLocales();
 				System.out.print(localeList.size() + " locales");
-				for(Locale l: localeList) {
+				for (Locale l : localeList) {
 					localeCombo1.addItem(new LocaleItem(l));
 					localeCombo2.addItem(new LocaleItem(l));
 				}
@@ -227,17 +239,16 @@ public class EditPanelView extends JPanel {
 			loadTable();
 		}
 	}
-	
+
 	private void loadTable() {
 		model = new TextsTableModel();
 		sorter = new TableRowSorter<TextsTableModel>(model);
 		table = new JTable(new TextsTableModel());
 		table.setRowSorter(sorter);
 		table.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-        table.setPreferredScrollableViewportSize(new Dimension(500, 70));
-        table.setFillsViewportHeight(true);
+		table.setPreferredScrollableViewportSize(new Dimension(500, 70));
+		table.setFillsViewportHeight(true);
 		scrollPane.setViewportView(table);
 	}
-	
-	
+
 }

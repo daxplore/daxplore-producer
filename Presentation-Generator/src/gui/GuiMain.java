@@ -31,29 +31,28 @@ public class GuiMain {
 	 * break windowbuilder parsing.
 	 */
 	public static void main(String[] args) {
-		
+
 		// do a java version check, if target system doesn't have java 7, exit.
 		if (GuiTools.javaVersionCheck() != true) {
 			JOptionPane.showMessageDialog(null,
 					"This program only supports Java 7 or higher.",
-					"Daxplore warning",
-					JOptionPane.ERROR_MESSAGE);
+					"Daxplore warning", JOptionPane.ERROR_MESSAGE);
 			return;
 		}
-			
-		
+
 		// set the look and feel here, currently we use nimbus.
 		// only available from java 6 and up though.
 		try {
-		    for (LookAndFeelInfo info : UIManager.getInstalledLookAndFeels()) {
-		        if ("Nimbus".equals(info.getName())) {
-		            UIManager.setLookAndFeel(info.getClassName());
-		            break;
-		        }
-		    }
+			for (LookAndFeelInfo info : UIManager.getInstalledLookAndFeels()) {
+				if ("Nimbus".equals(info.getName())) {
+					UIManager.setLookAndFeel(info.getClassName());
+					break;
+				}
+			}
 		} catch (Exception e) {
 			try {
-				UIManager.setLookAndFeel("javax.swing.plaf.nimbus.NimbusLookAndFeel");
+				UIManager
+						.setLookAndFeel("javax.swing.plaf.nimbus.NimbusLookAndFeel");
 			} catch (ClassNotFoundException e1) {
 				// TODO Auto-generated catch block
 				e1.printStackTrace();
@@ -68,7 +67,7 @@ public class GuiMain {
 				e1.printStackTrace();
 			}
 		}
-		
+
 		// thread handler for main window.
 		EventQueue.invokeLater(new Runnable() {
 			public void run() {
@@ -81,12 +80,12 @@ public class GuiMain {
 			}
 		});
 	}
-	
+
 	// data fields for main class.
 	private JFrame guiMainFrame;
 	private GuiFile guiFile;
 	final JPanel mainPanel = new JPanel();
-	
+
 	private OpenPanelView openPanelView;
 	private GroupsView groupsPanelView;
 	private EditPanelView editPanelView;
@@ -95,7 +94,7 @@ public class GuiMain {
 	private NavigationPanelView navigationPanelView;
 
 	private JPanel panel;
-	
+
 	// getters and setters.
 	public ButtonPanelView getButtonPanelView() {
 		return buttonPanelView;
@@ -140,16 +139,16 @@ public class GuiMain {
 	public void setEditPanelView(EditPanelView editPanelView) {
 		this.editPanelView = editPanelView;
 	}
-	
+
 	public NavigationPanelView getNavigationPanelView() {
 		return navigationPanelView;
 	}
 
 	public void switchTo(String label) {
-		CardLayout cl = (CardLayout)(mainPanel.getLayout());
-	    cl.show(mainPanel, label);
+		CardLayout cl = (CardLayout) (mainPanel.getLayout());
+		cl.show(mainPanel, label);
 	}
-	
+
 	public void updateStuff() {
 		buttonPanelView.updateButtonPanel();
 		groupsPanelView.getController().loadData();
@@ -167,44 +166,49 @@ public class GuiMain {
 	 * Initialize the contents of the frame.
 	 */
 	private void initGUI() {
-		
+
 		guiMainFrame = new JFrame();
-		guiMainFrame.setIconImage(Toolkit.getDefaultToolkit().getImage(GuiMain.class.getResource("/gui/resources/Colorful_Chart_Icon_vol2.png")));
+		guiMainFrame
+				.setIconImage(Toolkit
+						.getDefaultToolkit()
+						.getImage(
+								GuiMain.class
+										.getResource("/gui/resources/Colorful_Chart_Icon_vol2.png")));
 		guiMainFrame.setTitle("Daxplore Producer Developer Version");
 		guiMainFrame.setBounds(100, 100, 900, 787);
 		guiMainFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		guiMainFrame.getContentPane().setLayout(new BorderLayout(0, 0));
-		
+
 		// file handler init.
 		guiFile = new GuiFile();
-		
+
 		// panel views. TODO: Remake the controller interface.
 		buttonPanelView = new ButtonPanelView(this);
 		guiMainFrame.getContentPane().add(buttonPanelView, BorderLayout.WEST);
-		
+
 		panel = new JPanel();
 		guiMainFrame.getContentPane().add(panel, BorderLayout.CENTER);
 		panel.setLayout(new BorderLayout(0, 0));
 		panel.add(mainPanel, BorderLayout.CENTER);
-		
+
 		// create main panel window.
 		mainPanel.setBorder(new MatteBorder(0, 1, 0, 0, (Color) Color.GRAY));
 		mainPanel.setLayout(new CardLayout(0, 0));
-		
+
 		openPanelView = new OpenPanelView(this);
 		mainPanel.add(openPanelView, "openPanel");
-		
+
 		groupsPanelView = new GroupsView(this);
 		mainPanel.add(groupsPanelView, "groupsPanel");
-		
+
 		editPanelView = new EditPanelView(this);
 		mainPanel.add(editPanelView, "editPanel");
-		
+
 		toolsPanelView = new ToolsPanelView(this);
 		mainPanel.add(toolsPanelView, "toolsPanel");
-		
+
 		mainPanel.setRequestFocusEnabled(true);
-		
+
 		navigationPanelView = new NavigationPanelView(this);
 		panel.add(navigationPanelView, BorderLayout.SOUTH);
 	}
