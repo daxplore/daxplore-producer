@@ -1,7 +1,7 @@
 package gui;
 
 import gui.edit.EditPanelView;
-import gui.groups.GroupsPanelView;
+import gui.groups.GroupsView;
 import gui.open.OpenPanelView;
 import gui.tools.ToolsPanelView;
 
@@ -87,7 +87,7 @@ public class GuiMain {
 	final JPanel mainPanel = new JPanel();
 	
 	private OpenPanelView openPanelView;
-	private GroupsPanelView groupsPanelView;
+	private GroupsView groupsPanelView;
 	private EditPanelView editPanelView;
 	private ButtonPanelView buttonPanelView;
 	private ToolsPanelView toolsPanelView;
@@ -121,11 +121,11 @@ public class GuiMain {
 		this.openPanelView = openPanelView;
 	}
 
-	public GroupsPanelView getGroupsPanelView() {
+	public GroupsView getGroupsPanelView() {
 		return groupsPanelView;
 	}
 
-	public void setGroupsPanelView(GroupsPanelView groupsPanelView) {
+	public void setGroupsPanelView(GroupsView groupsPanelView) {
 		this.groupsPanelView = groupsPanelView;
 	}
 
@@ -144,7 +144,7 @@ public class GuiMain {
 	
 	public void updateStuff() {
 		buttonPanelView.updateButtonPanel();
-		groupsPanelView.loadData();
+		groupsPanelView.getController().loadData();
 		editPanelView.loadData();
 	}
 
@@ -182,7 +182,7 @@ public class GuiMain {
 		openPanelView = new OpenPanelView(this);
 		mainPanel.add(openPanelView, "openPanel");
 		
-		groupsPanelView = new GroupsPanelView(this);
+		groupsPanelView = new GroupsView(this);
 		mainPanel.add(groupsPanelView, "groupsPanel");
 		
 		editPanelView = new EditPanelView(this);
