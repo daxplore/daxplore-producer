@@ -17,46 +17,43 @@ import org.opendatafoundation.data.spss.SPSSFile;
 import org.opendatafoundation.data.spss.SPSSFileException;
 import org.opendatafoundation.data.spss.SPSSVariable;
 
+
 public class FinalImportPanelDescriptor extends ImportWizardDescriptor {
 
 	public static final String IDENTIFIER = "FINAL_IMPORT_PANEL";
 	FinalImportPanel finalImportPanel;
-
+	
 	public FinalImportPanelDescriptor() {
-		super(IDENTIFIER, new FinalImportPanel());
-		finalImportPanel = (FinalImportPanel) super.getPanelComponent();
-	}
-
-	public Object getNextPanelDescriptor() {
-		return FINISH;
-	}
-
-	public Object getBackPanelDescriptor() {
-		return CharsetPanelDescriptor.IDENTIFIER;
-	}
-
-	@Override
-	public void aboutToDisplayPanel() {
-
-		// this shouldn't happen, but in case there is no file loaded, just
-		// exit.
-		if (getWizard().getGuiMain().getGuiFile().getSpssFile() == null)
-			return;
-
-		TableModel model = spssTable(getWizard().getGuiMain().getGuiFile()
-				.getSpssFile());
-		finalImportPanel.showTable(model);
-	}
-
-	@Override
-	public void aboutToHidePanel() {
-		// not implemented.
-	}
-
+        super(IDENTIFIER, new FinalImportPanel());
+        finalImportPanel = (FinalImportPanel) super.getPanelComponent();
+    }
+    
+    public Object getNextPanelDescriptor() {
+        return FINISH;
+    }
+    
+    public Object getBackPanelDescriptor() {
+        return CharsetPanelDescriptor.IDENTIFIER;
+    }
+    
+    @Override
+    public void aboutToDisplayPanel() {
+    	
+    	// this shouldn't happen, but in case there is no file loaded, just exit.
+    	if (getWizard().getGuiMain().getGuiFile().getSpssFile() == null)
+    		return;
+    	
+    	TableModel model = spssTable(getWizard().getGuiMain().getGuiFile().getSpssFile());
+    	finalImportPanel.showTable(model);
+    }
+    
+    @Override
+    public void aboutToHidePanel() {
+    	// not implemented.
+    }
+    
 	/**
-	 * Creates a temporary file on disc and imports SPSS file information as
-	 * well as outputs it to a table display.
-	 * 
+	 * Creates a temporary file on disc and imports SPSS file information as well as outputs it to a table display.
 	 * @param sf
 	 * @return TableColumn
 	 */
@@ -67,7 +64,7 @@ public class FinalImportPanelDescriptor extends ImportWizardDescriptor {
 		ffi.asciiFormat = ASCIIFormat.CSV;
 		ffi.compatibility = Compatibility.GENERIC;
 		BufferedReader br = null;
-
+		
 		SPSSFile sf = null;
 		try {
 			sf = new SPSSFile(file, "r");
@@ -76,7 +73,7 @@ public class FinalImportPanelDescriptor extends ImportWizardDescriptor {
 			e1.printStackTrace();
 			return null;
 		}
-
+		
 		try {
 			sf.logFlag = false;
 			sf.loadMetadata();
@@ -90,10 +87,10 @@ public class FinalImportPanelDescriptor extends ImportWizardDescriptor {
 			e.printStackTrace();
 			return null;
 		}
-
+		
 		String[] columns = new String[sf.getVariableCount()];
 		Object[][] data = new Object[sf.getRecordCount()][sf.getVariableCount()];
-		for (int i = 0; i < sf.getVariableCount(); i++) {
+		for(int i = 0; i < sf.getVariableCount(); i++){
 			SPSSVariable var = sf.getVariable(i);
 			columns[i] = var.getShortName();
 			// just for testing output so we can see data is being processed.
@@ -104,10 +101,10 @@ public class FinalImportPanelDescriptor extends ImportWizardDescriptor {
 			br = new BufferedReader(new FileReader(temp));
 			String line;
 			int l = 0;
-			while ((line = br.readLine()) != null) {
+			while((line = br.readLine()) != null){
 				StringTokenizer st = new StringTokenizer(line, ",");
 				int c = 0;
-				while (st.hasMoreTokens()) {
+				while(st.hasMoreTokens()){
 					data[l][c] = st.nextToken();
 					c++;
 				}
@@ -116,15 +113,15 @@ public class FinalImportPanelDescriptor extends ImportWizardDescriptor {
 		} catch (FileNotFoundException e) {
 			System.out.println("FileNotFoundException");
 			e.printStackTrace();
-
+			
 		} catch (IOException e) {
 			System.out.println("IOException");
 			System.out.print(e.toString());
 			e.printStackTrace();
 		}
-
+	
 		TableModel model = new DefaultTableModel(data, columns);
-
+		
 		return model;
 	}
 }

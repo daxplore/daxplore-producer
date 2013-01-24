@@ -6,9 +6,8 @@ import daxplorelib.DaxploreFile;
 
 /**
  * Main file handler for GUI. Contains instances of DaxploreFile and File.
- * 
  * @author jorgenrosen
- * 
+ *
  */
 public class GuiFile {
 	private DaxploreFile daxploreFile = null;
@@ -23,7 +22,7 @@ public class GuiFile {
 
 	public void setDaxploreFile(DaxploreFile daxploreFile) {
 		this.daxploreFile = daxploreFile;
-
+		
 	}
 
 	public File getSpssFile() {
@@ -33,15 +32,15 @@ public class GuiFile {
 	public void setSpssFile(File spssFile) {
 		this.spssFile = spssFile;
 	}
-
+	
 	public void resetDaxploreFile() {
 		daxploreFile = null;
 	}
-
+	
 	public void resetSpssFile() {
 		spssFile = null;
 	}
-
+	
 	/**
 	 * Returns true if a daxplore file is loaded into the system.
 	 */

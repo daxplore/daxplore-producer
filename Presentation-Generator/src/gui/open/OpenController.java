@@ -15,11 +15,9 @@ import daxplorelib.DaxploreException;
 import daxplorelib.DaxploreFile;
 
 /**
- * Daxplore file creation controller. Controls all action logic in the open
- * panel view.
- * 
+ * Daxplore file creation controller. Controls all action logic in the open panel view.
  * @author hkfs89
- * 
+ *
  */
 public final class OpenController implements ActionListener {
 
@@ -30,49 +28,46 @@ public final class OpenController implements ActionListener {
 		this.guiMain = guiMain;
 		this.openPanelView = openPanelView;
 	}
-
+	
 	@Override
 	public void actionPerformed(ActionEvent e) {
-		if (e.getActionCommand().equals(
-				OpenPanelView.CREATE_BUTTON_ACTION_COMMAND))
-			createButtonPressed();
-		else if (e.getActionCommand().equals(
-				OpenPanelView.OPEN_BUTTON_ACTION_COMMAND))
-			openButtonPressed();
+		if (e.getActionCommand().equals(OpenPanelView.CREATE_BUTTON_ACTION_COMMAND))
+            createButtonPressed();
+        else if (e.getActionCommand().equals(OpenPanelView.OPEN_BUTTON_ACTION_COMMAND))
+            openButtonPressed();
 	}
 
 	/**
-	 * Method triggers when create button is pressed. Loads a create file panel
-	 * and controls creation of daxplore files.
+	 * Method triggers when create button is pressed. Loads a create file panel and controls
+	 * creation of daxplore files.
 	 */
 	public void createButtonPressed() {
-
+		
 		final JFileChooser fc = new JFileChooser() {
 
-			private static final long serialVersionUID = 7919427933588163126L;
-
-			// override default operation of approveSelection() so it can handle
-			// overwriting files.
-			public void approveSelection() {
-				File f = getSelectedFile();
-				if (f.exists() && getDialogType() == SAVE_DIALOG) {
-					int result = JOptionPane.showConfirmDialog(this,
-							"The file exists, overwrite?", "Existing file",
-							JOptionPane.YES_NO_CANCEL_OPTION);
-					switch (result) {
-					case JOptionPane.YES_OPTION:
-						super.approveSelection();
-						return;
-					case JOptionPane.CANCEL_OPTION:
-						cancelSelection();
-						return;
-					default:
-						return;
-					}
-				}
-				super.approveSelection();
-			}
-		};
+	        private static final long serialVersionUID = 7919427933588163126L;
+	        
+	        // override default operation of approveSelection() so it can handle overwriting files.
+	        public void approveSelection() {
+	            File f = getSelectedFile();
+	            if (f.exists() && getDialogType() == SAVE_DIALOG) {
+	                int result = JOptionPane.showConfirmDialog(this,
+	                        "The file exists, overwrite?", "Existing file",
+	                        JOptionPane.YES_NO_CANCEL_OPTION);
+	                switch (result) {
+	                case JOptionPane.YES_OPTION:
+	                    super.approveSelection();
+	                    return;
+	                case JOptionPane.CANCEL_OPTION:
+	                    cancelSelection();
+	                    return;
+	                default:
+	                    return;
+	                }
+	            }
+	            super.approveSelection();
+	        }
+	    };
 
 		FileNameExtensionFilter filter = new FileNameExtensionFilter(
 				"Daxplore Files", "daxplore");
@@ -100,8 +95,7 @@ public final class OpenController implements ActionListener {
 			}
 
 			try {
-				guiMain.getGuiFile().setDaxploreFile(
-						DaxploreFile.createWithNewFile(file));
+				guiMain.getGuiFile().setDaxploreFile(DaxploreFile.createWithNewFile(file));
 				updateTextFields();
 				// activate the button panel.
 				guiMain.updateStuff();
@@ -114,11 +108,10 @@ public final class OpenController implements ActionListener {
 	}
 
 	/**
-	 * Method triggers when open button is pressed and executes an open file
-	 * dialog panel.
+	 * Method triggers when open button is pressed and executes an open file dialog panel.
 	 */
 	public void openButtonPressed() {
-
+		
 		JFileChooser fc = new JFileChooser();
 		FileNameExtensionFilter filter = new FileNameExtensionFilter(
 				"Daxplore Files", "daxplore");
@@ -139,8 +132,8 @@ public final class OpenController implements ActionListener {
 			File file = fc.getSelectedFile();
 			System.out.println("Opening: " + file.getName() + ".");
 			try {
-				guiMain.getGuiFile().setDaxploreFile(
-						DaxploreFile.createFromExistingFile(file));
+				guiMain.getGuiFile().setDaxploreFile(DaxploreFile
+						.createFromExistingFile(file));
 
 				// print the contents of daxplore file about section, just for
 				// testing.
@@ -162,56 +155,40 @@ public final class OpenController implements ActionListener {
 			System.out.println("Open command cancelled by user.");
 		}
 	}
-
+	
 	/**
-	 * Updates text field for the SPSS file information in the open panel
-	 * dialog.
-	 * 
+	 * Updates text field for the SPSS file information in the open panel dialog.
 	 * @param guiMain
 	 */
 	public void updateSpssFileInfoText() {
 		if (guiMain.getGuiFile().getSpssFile() != null) {
-			openPanelView.spssFileInfoText
-					.setText("SPSS file successfully imported!\n"
-							+ guiMain.getGuiFile().getSpssFile().getName()
-							+ "\n"
-							+ guiMain.getGuiFile().getSpssFile()
-									.getAbsolutePath());
+			openPanelView.spssFileInfoText.setText(
+					"SPSS file successfully imported!\n" +
+						guiMain.getGuiFile().getSpssFile().getName() + "\n" +
+						guiMain.getGuiFile().getSpssFile().getAbsolutePath());
 		}
 	}
 
 	/**
-	 * Updates text fields in the open panel dialog to display daxplore file
-	 * information.
-	 * 
+	 * Updates text fields in the open panel dialog to display daxplore file information.
 	 * @param guiMain
 	 */
 	public void updateTextFields() {
-
+		
 		SimpleDateFormat formatter = new SimpleDateFormat("dd/MM/yyyy");
-
+		
 		// set the text fields if we have a daxplore file loaded.
 		if (guiMain.getGuiFile().getDaxploreFile() != null) {
 			// update text fields with appropriate data.
-			openPanelView.getFileNameField().setText(
-					guiMain.getGuiFile().getDaxploreFile().getFile().getName());
-
-			// check if it's a newly created file, if so, it doesn't contain
-			// certain fields.
-			String importFilename = guiMain.getGuiFile().getDaxploreFile()
-					.getAbout().getImportFilename();
+			openPanelView.getFileNameField().setText(guiMain.getGuiFile().getDaxploreFile().getFile().getName());
+			
+			// check if it's a newly created file, if so, it doesn't contain certain fields.
+			String importFilename = guiMain.getGuiFile().getDaxploreFile().getAbout().getImportFilename();
 			if (importFilename != null && !"".equals(importFilename)) {
-				openPanelView.getLastImportFileNameField().setText(
-						guiMain.getGuiFile().getDaxploreFile().getAbout()
-								.getImportFilename());
-				// date must first be converted to the appropriate format before
-				// returned as string.
-				if (guiMain.getGuiFile().getDaxploreFile().getAbout()
-						.getImportDate() != null) {
-					openPanelView.getImportDateField().setText(
-							formatter.format(guiMain.getGuiFile()
-									.getDaxploreFile().getAbout()
-									.getImportDate()));
+				openPanelView.getLastImportFileNameField().setText(guiMain.getGuiFile().getDaxploreFile().getAbout().getImportFilename());
+				// date must first be converted to the appropriate format before returned as string.
+				if (guiMain.getGuiFile().getDaxploreFile().getAbout().getImportDate() != null) {
+				openPanelView.getImportDateField().setText(formatter.format(guiMain.getGuiFile().getDaxploreFile().getAbout().getImportDate()));
 				} else {
 					openPanelView.getImportDateField().setText("");
 				}
@@ -219,10 +196,9 @@ public final class OpenController implements ActionListener {
 				openPanelView.getLastImportFileNameField().setText("");
 				openPanelView.getImportDateField().setText("");
 			}
-
+			
 			openPanelView.getCreationDateField().setText(
-					formatter.format(guiMain.getGuiFile().getDaxploreFile()
-							.getAbout().getCreationDate()));
+			formatter.format(guiMain.getGuiFile().getDaxploreFile().getAbout().getCreationDate()));
 		}
 	}
 }

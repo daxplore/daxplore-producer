@@ -13,17 +13,17 @@ public class FinalImportPanel extends JPanel {
 	private JScrollPane scrollPane = new JScrollPane();
 
 	public FinalImportPanel() {
-		setLayout(new BorderLayout());
+		setLayout(new BorderLayout());		
 	}
-
+	
 	public void showTable(TableModel model) {
-
+			
 		table = new JTable(model) {
 			public boolean isCellEditable(int rowIndex, int colIndex) {
-				return false; // Disallow the editing of any cell
+				return false; //Disallow the editing of any cell
 			}
 		};
-
+				
 		TableColumn column = new TableColumn();
 		table.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
 		table.setFillsViewportHeight(true);
@@ -31,9 +31,9 @@ public class FinalImportPanel extends JPanel {
 			column = table.getColumnModel().getColumn(i);
 			column.setPreferredWidth(50);
 		}
-
+		
 		JScrollPane scrollPane = new JScrollPane(table);
 		add(scrollPane, BorderLayout.CENTER);
-
+		
 	}
 }

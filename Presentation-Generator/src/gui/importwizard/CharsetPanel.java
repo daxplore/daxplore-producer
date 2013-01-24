@@ -19,34 +19,35 @@ public class CharsetPanel extends JPanel {
 	protected JComboBox encodingComboBox;
 	protected JScrollPane encodingListPanel;
 	protected JPanel contentPanel;
+	
 
 	/**
 	 * Constructor.
 	 */
 	public CharsetPanel() {
-
+		
 		setLayout(new BoxLayout(this, BoxLayout.X_AXIS));
-
+		
 		contentPanel = new JPanel();
 		add(contentPanel);
 		contentPanel.setLayout(new BorderLayout(0, 0));
-
-		JPanel specifyEncodingPanel = new JPanel();
-		contentPanel.add(specifyEncodingPanel, BorderLayout.NORTH);
-
-		JLabel lblNewLabel = new JLabel("Specify encoding:");
-		specifyEncodingPanel.add(lblNewLabel);
-
+		
+				JPanel specifyEncodingPanel = new JPanel();
+				contentPanel.add(specifyEncodingPanel, BorderLayout.NORTH);
+				
+						JLabel lblNewLabel = new JLabel("Specify encoding:");
+						specifyEncodingPanel.add(lblNewLabel);
+						
 		encodingComboBox = new JComboBox();
 		specifyEncodingPanel.add(encodingComboBox);
-
+		
 		encodingListPanel = new JScrollPane();
 		contentPanel.add(encodingListPanel, BorderLayout.CENTER);
 		encodingListPanel.setBounds(0, 0, 0, -36);
-
+		
 		JPanel tablePanel = new JPanel();
 		encodingListPanel.setViewportView(tablePanel);
-
+		
 		SortedMap<String, Charset> cset = Charset.availableCharsets();
 
 		// populate the combobox with available charsets.
@@ -55,11 +56,11 @@ public class CharsetPanel extends JPanel {
 			encodingComboBox.addItem(charname);
 		}
 	}
-
+	
 	public void addEncodingComboBoxAction(ActionListener l) {
 		encodingComboBox.addActionListener(l);
 	}
-
+	
 	public void setEncodingList(JList list) {
 		encodingListPanel.getViewport().setView(list);
 		encodingListPanel.validate();
