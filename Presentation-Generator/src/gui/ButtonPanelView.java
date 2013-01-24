@@ -150,4 +150,21 @@ public class ButtonPanelView extends JPanel {
 			toolsButton.setEnabled(true);
 		}
 	}
+	
+	public void setActiveButton(Views view) {
+		switch(view) {
+		case OPENFILEVIEW:
+			openButton.setSelected(true);
+			break;
+		case GROUPSVIEW:
+			groupsButton.setSelected(true);
+			break;
+		case EDITTEXTVIEW:
+			editButton.setSelected(true);
+			break;
+		case TOOLSVIEW:
+			toolsButton.setSelected(true);
+			break;
+		}
+	}
 }

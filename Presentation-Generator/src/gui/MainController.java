@@ -64,6 +64,7 @@ public class MainController {
 		case TOOLSVIEW:
 			break;
 		}
+		buttonPanelView.setActiveButton(view);
 		mainView.showInMain(view);
 	}
 	

@@ -48,6 +48,8 @@ public class GroupsController implements ActionListener {
 	private QuestionListModel questionListModel;
 	private JList<QuestionWidget> questionJList;
 	private JTree groupJTree;
+	private QuestionList questionJTable;
+	private QuestionTableModel questionTableModel;
 	
 	public GroupsController(GroupsView groupView, MainController mainController) {
 		this.mainController = mainController;
@@ -199,11 +201,15 @@ public class GroupsController implements ActionListener {
 		if(mainController.fileIsSet()) {
 			try {
 				MetaData md = mainController.getDaxploreFile().getMetaData();
-				questionListModel = new QuestionListModel(md);
-				questionJList = new MouseOverList(questionListModel);
-				//questionJList.setCellRenderer(groupsView.new QuestionListCellRenderer());
-				questionJList.setSelectionMode(ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
-				groupsView.getQuestionsScrollPane().setViewportView(questionJList);
+				
+				questionTableModel = new QuestionTableModel(md);
+				questionJTable = new QuestionList(questionTableModel);
+				groupsView.getQuestionsScrollPane().setViewportView(questionJTable);
+				//questionListModel = new QuestionListModel(md);
+				//questionJList = new MouseOverList(questionListModel);
+				////questionJList.setCellRenderer(groupsView.new QuestionListCellRenderer());
+				//questionJList.setSelectionMode(ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
+				//groupsView.getQuestionsScrollPane().setViewportView(questionJList);
 				
 				//get groups and perspectives
 				groupTreeModel = new GroupTreeModel(md);
