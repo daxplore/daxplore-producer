@@ -22,18 +22,18 @@ import daxplorelib.DaxploreFile;
 public final class OpenController implements ActionListener {
 
 	private final MainController mainController;
-	private final OpenPanelView openPanelView;
+	private final OpenFileView openFileView;
 
-	public OpenController(MainController mainController, OpenPanelView openPanelView) {
+	public OpenController(MainController mainController, OpenFileView openFileView) {
 		this.mainController = mainController;
-		this.openPanelView = openPanelView;
+		this.openFileView = openFileView;
 	}
 	
 	@Override
 	public void actionPerformed(ActionEvent e) {
-		if (e.getActionCommand().equals(OpenPanelView.CREATE_BUTTON_ACTION_COMMAND))
+		if (e.getActionCommand().equals(OpenFileView.CREATE_BUTTON_ACTION_COMMAND))
             createButtonPressed();
-        else if (e.getActionCommand().equals(OpenPanelView.OPEN_BUTTON_ACTION_COMMAND))
+        else if (e.getActionCommand().equals(OpenFileView.OPEN_BUTTON_ACTION_COMMAND))
             openButtonPressed();
 	}
 
@@ -162,7 +162,7 @@ public final class OpenController implements ActionListener {
 	 */
 	public void updateSpssFileInfoText() {
 		if (mainController.getSpssFile() != null) {
-			openPanelView.spssFileInfoText.setText(
+			openFileView.spssFileInfoText.setText(
 					"SPSS file successfully imported!\n" +
 						mainController.getSpssFile().getName() + "\n" +
 						mainController.getSpssFile().getAbsolutePath());
@@ -180,24 +180,24 @@ public final class OpenController implements ActionListener {
 		// set the text fields if we have a daxplore file loaded.
 		if (mainController.getDaxploreFile() != null) {
 			// update text fields with appropriate data.
-			openPanelView.getFileNameField().setText(mainController.getDaxploreFile().getFile().getName());
+			openFileView.getFileNameField().setText(mainController.getDaxploreFile().getFile().getName());
 			
 			// check if it's a newly created file, if so, it doesn't contain certain fields.
 			String importFilename = mainController.getDaxploreFile().getAbout().getImportFilename();
 			if (importFilename != null && !"".equals(importFilename)) {
-				openPanelView.getLastImportFileNameField().setText(mainController.getDaxploreFile().getAbout().getImportFilename());
+				openFileView.getLastImportFileNameField().setText(mainController.getDaxploreFile().getAbout().getImportFilename());
 				// date must first be converted to the appropriate format before returned as string.
 				if (mainController.getDaxploreFile().getAbout().getImportDate() != null) {
-				openPanelView.getImportDateField().setText(formatter.format(mainController.getDaxploreFile().getAbout().getImportDate()));
+				openFileView.getImportDateField().setText(formatter.format(mainController.getDaxploreFile().getAbout().getImportDate()));
 				} else {
-					openPanelView.getImportDateField().setText("");
+					openFileView.getImportDateField().setText("");
 				}
 			} else {
-				openPanelView.getLastImportFileNameField().setText("");
-				openPanelView.getImportDateField().setText("");
+				openFileView.getLastImportFileNameField().setText("");
+				openFileView.getImportDateField().setText("");
 			}
 			
-			openPanelView.getCreationDateField().setText(
+			openFileView.getCreationDateField().setText(
 			formatter.format(mainController.getDaxploreFile().getAbout().getCreationDate()));
 		}
 	}

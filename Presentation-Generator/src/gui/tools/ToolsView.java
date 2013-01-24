@@ -13,13 +13,13 @@ import javax.swing.JTextField;
 
 import daxplorelib.DaxploreException;
 
-public class ToolsPanelView extends JPanel {
+public class ToolsView extends JPanel {
 	
 	private JTextField textField;
 	
 	public static final String IMPORT_RAW_BUTTON_ACTION_COMMAND = "importRawButtonActionCommand";
 	
-	public ToolsPanelView(final MainController mainController) {
+	public ToolsView(final MainController mainController) {
 		
 		JButton btnImportfromraw = new JButton("ImportFromRaw");
 		btnImportfromraw.setBounds(12, 67, 145, 25);

@@ -31,7 +31,7 @@ import javax.swing.border.TitledBorder;
  * @author hkfs89
  *
  */
-public class OpenPanelView extends JPanel {
+public class OpenFileView extends JPanel {
 	
 	private static final long serialVersionUID = 1L;
 	private JTextField fileNameField = new JTextField();
@@ -94,7 +94,7 @@ public class OpenPanelView extends JPanel {
 	 * OpenPanelView constructor.
 	 * @param mainController
 	 */
-	public OpenPanelView(final MainController mainController) {
+	public OpenFileView(final MainController mainController) {
 		
 		openController = new OpenController(mainController, this);
 		getFileNameField().setEditable(false);

@@ -21,11 +21,11 @@ import javax.swing.SwingConstants;
 import javax.swing.border.MatteBorder;
 
 @SuppressWarnings("serial")
-public class NavigationPanelView extends JPanel {
+public class NavigationView extends JPanel {
 	
 	MainController mainController;
 	
-	public NavigationPanelView(final MainController mainController) {
+	public NavigationView(final MainController mainController) {
 		this.mainController = mainController;
 		setLayout(new BorderLayout(0, 0));
 		setBorder(new MatteBorder(0, 1, 0, 0, (Color) Color.GRAY));

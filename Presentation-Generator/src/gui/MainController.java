@@ -1,10 +1,10 @@
 package gui;
 
-import gui.edit.EditPanelView;
+import gui.edit.EditTextView;
 import gui.groups.GroupsView;
-import gui.navigation.NavigationPanelView;
-import gui.open.OpenPanelView;
-import gui.tools.ToolsPanelView;
+import gui.navigation.NavigationView;
+import gui.open.OpenFileView;
+import gui.tools.ToolsView;
 
 import java.awt.BorderLayout;
 import java.awt.CardLayout;
@@ -30,12 +30,12 @@ public class MainController {
 	// data fields for main class.
 	
 	private JFrame mainFrame;
-	private OpenPanelView openPanelView;
-	private GroupsView groupsPanelView;
-	private EditPanelView editPanelView;
+	private OpenFileView openFileView;
+	private GroupsView groupsView;
+	private EditTextView editTextView;
 	private ButtonPanelView buttonPanelView;
-	private ToolsPanelView toolsPanelView;
-	private NavigationPanelView navigationPanelView;
+	private ToolsView toolsView;
+	private NavigationView navigationView;
 
 	private MainView mainView;
 	
@@ -71,36 +71,36 @@ public class MainController {
 		this.mainFrame = panel;
 	}
 
-	public OpenPanelView getOpenPanelView() {
-		return openPanelView;
+	public OpenFileView getOpenFileView() {
+		return openFileView;
 	}
 
-	public void setOpenPanelView(OpenPanelView openPanelView) {
-		this.openPanelView = openPanelView;
+	public void setOpenFileView(OpenFileView openFileView) {
+		this.openFileView = openFileView;
 	}
 
-	public GroupsView getGroupsPanelView() {
-		return groupsPanelView;
+	public GroupsView getGroupsView() {
+		return groupsView;
 	}
 
-	public void setGroupsPanelView(GroupsView groupsPanelView) {
-		this.groupsPanelView = groupsPanelView;
+	public void setGroupsView(GroupsView groupsPanelView) {
+		this.groupsView = groupsPanelView;
 	}
 
-	public EditPanelView getEditPanelView() {
-		return editPanelView;
+	public EditTextView getEditTextView() {
+		return editTextView;
 	}
 
-	public void setEditPanelView(EditPanelView editPanelView) {
-		this.editPanelView = editPanelView;
+	public void setEditTextView(EditTextView editTextView) {
+		this.editTextView = editTextView;
 	}
 	
-	public NavigationPanelView getNavigationPanelView() {
-		return navigationPanelView;
+	public NavigationView getNavigationView() {
+		return navigationView;
 	}
 	
-	public void setNavigationPanelView(NavigationPanelView navigationPanelView){
-		this.navigationPanelView = navigationPanelView;
+	public void setNavigationView(NavigationView navigationView){
+		this.navigationView = navigationView;
 	}
 
 	public void switchTo(Views view) {
@@ -109,16 +109,16 @@ public class MainController {
 	
 	public void updateStuff() {
 		buttonPanelView.updateButtonPanel();
-		groupsPanelView.getController().loadData();
-		editPanelView.loadData();
+		groupsView.getController().loadData();
+		editTextView.loadData();
 	}
 
-	public ToolsPanelView getToolsPanelView() {
-		return toolsPanelView;
+	public ToolsView getToolsView() {
+		return toolsView;
 	}
 
-	public void setToolsPanelView(ToolsPanelView toolsPanelView) {
-		this.toolsPanelView = toolsPanelView;
+	public void setToolsView(ToolsView toolsView) {
+		this.toolsView = toolsView;
 	}
 
 	public DaxploreFile getDaxploreFile() {

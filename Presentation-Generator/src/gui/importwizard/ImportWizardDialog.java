@@ -217,8 +217,8 @@ public class ImportWizardDialog extends JDialog implements PropertyChangeListene
         // finish the import if the import button is pressed.
         if (returnCode == FINISH_RETURN_CODE) {
         	importWizardController.importSpssFileAction();
-        	getmainController().getOpenPanelView().getOpenController().updateSpssFileInfoText();
-        	getmainController().getOpenPanelView().getOpenController().updateTextFields();
+        	getmainController().getOpenFileView().getOpenController().updateSpssFileInfoText();
+        	getmainController().getOpenFileView().getOpenController().updateTextFields();
         }
         
         importWizardDialog.dispose();

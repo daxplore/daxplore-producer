@@ -34,7 +34,7 @@ import daxplorelib.metadata.TextReference;
 import daxplorelib.metadata.TextReference.TextReferenceManager;
 
 @SuppressWarnings("serial")
-public class EditPanelView extends JPanel {
+public class EditTextView extends JPanel {
 	private JTextField textField;
 
 	MainController mainController;
@@ -113,7 +113,7 @@ public class EditPanelView extends JPanel {
 	 * @param guiFile 
 	 * @param mainController 
 	 */
-	public EditPanelView(MainController mainController) {
+	public EditTextView(MainController mainController) {
 		this.mainController = mainController;
 		setLayout(new BorderLayout(0, 0));
 		

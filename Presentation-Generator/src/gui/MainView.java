@@ -1,11 +1,11 @@
 package gui;
 
 import gui.MainController.Views;
-import gui.edit.EditPanelView;
+import gui.edit.EditTextView;
 import gui.groups.GroupsView;
-import gui.navigation.NavigationPanelView;
-import gui.open.OpenPanelView;
-import gui.tools.ToolsPanelView;
+import gui.navigation.NavigationView;
+import gui.open.OpenFileView;
+import gui.tools.ToolsView;
 
 import java.awt.BorderLayout;
 import java.awt.CardLayout;
@@ -118,22 +118,22 @@ public class MainView {
 		mainLayout = new CardLayout(0,0);
 		mainPanel.setLayout(mainLayout);
 		
-		mainController.setOpenPanelView(new OpenPanelView(mainController));
-		mainPanel.add(mainController.getOpenPanelView(), Views.OPENPANEL.toString());
+		mainController.setOpenFileView(new OpenFileView(mainController));
+		mainPanel.add(mainController.getOpenFileView(), Views.OPENPANEL.toString());
 		
-		mainController.setGroupsPanelView(new GroupsView(mainController));
-		mainPanel.add(mainController.getGroupsPanelView(), Views.GROUPSVIEW.toString());
+		mainController.setGroupsView(new GroupsView(mainController));
+		mainPanel.add(mainController.getGroupsView(), Views.GROUPSVIEW.toString());
 		
-		mainController.setEditPanelView(new EditPanelView(mainController));
-		mainPanel.add(mainController.getEditPanelView(), Views.EDITVIEW.toString());
+		mainController.setEditTextView(new EditTextView(mainController));
+		mainPanel.add(mainController.getEditTextView(), Views.EDITVIEW.toString());
 		
-		mainController.setToolsPanelView(new ToolsPanelView(mainController));
-		mainPanel.add(mainController.getToolsPanelView(), Views.TOOLSVIEW.toString());
+		mainController.setToolsView(new ToolsView(mainController));
+		mainPanel.add(mainController.getToolsView(), Views.TOOLSVIEW.toString());
 		
 		mainPanel.setRequestFocusEnabled(true);
 		
-		mainController.setNavigationPanelView(new NavigationPanelView(mainController));
-		panel.add(mainController.getNavigationPanelView(), BorderLayout.SOUTH);
+		mainController.setNavigationView(new NavigationView(mainController));
+		panel.add(mainController.getNavigationView(), BorderLayout.SOUTH);
 	}
 	
 	public void showInMain(Views view) {
