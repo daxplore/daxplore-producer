@@ -19,7 +19,7 @@ public class ToolsPanelView extends JPanel {
 	
 	public static final String IMPORT_RAW_BUTTON_ACTION_COMMAND = "importRawButtonActionCommand";
 	
-	public ToolsPanelView(final MainController guiMain) {
+	public ToolsPanelView(final MainController mainController) {
 		
 		JButton btnImportfromraw = new JButton("ImportFromRaw");
 		btnImportfromraw.setBounds(12, 67, 145, 25);
@@ -32,7 +32,7 @@ public class ToolsPanelView extends JPanel {
 					Locale loc = new Locale(localeText);
 					if(!"und".equals(loc.toLanguageTag())){
 						try {
-							guiMain.getGuiFile().getDaxploreFile().getMetaData().importFromRaw(guiMain.getGuiFile().getDaxploreFile(), loc);
+							mainController.getDaxploreFile().getMetaData().importFromRaw(mainController.getDaxploreFile(), loc);
 						} catch (DaxploreException e1) {
 							// TODO Auto-generated catch block
 							e1.printStackTrace();
@@ -48,7 +48,7 @@ public class ToolsPanelView extends JPanel {
 		btnSave.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				try {
-					guiMain.getGuiFile().getDaxploreFile().getMetaData().save();
+					mainController.getDaxploreFile().getMetaData().save();
 				} catch (DaxploreException e1) {
 					// TODO Auto-generated catch block
 					e1.printStackTrace();

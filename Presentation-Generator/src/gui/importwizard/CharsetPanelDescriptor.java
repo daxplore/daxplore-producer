@@ -75,12 +75,12 @@ public class CharsetPanelDescriptor extends ImportWizardDescriptor implements Ac
 			return;
 		
 		if(charsetType != null && !charsetType.equals("") && 
-				getWizard().getGuiMain().getGuiFile().getSpssFile() != null) {
+				getWizard().getmainController().getSpssFile() != null) {
 			Charset charset = Charset.forName(charsetType);
 			DefaultComboBoxModel stringList = new DefaultComboBoxModel();
 			try {
 				Set<String> encodedStrings = SPSSTools.getNonAsciiStrings(
-						getWizard().getGuiMain().getGuiFile().getSpssFile(), charset);
+						getWizard().getmainController().getSpssFile(), charset);
 				
 				for (String es: encodedStrings) {
 					stringList.addElement(es);

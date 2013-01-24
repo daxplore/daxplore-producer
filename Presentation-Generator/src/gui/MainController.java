@@ -11,6 +11,7 @@ import java.awt.CardLayout;
 import java.awt.Color;
 import java.awt.EventQueue;
 import java.awt.Toolkit;
+import java.io.File;
 
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
@@ -20,12 +21,13 @@ import javax.swing.UIManager.LookAndFeelInfo;
 import javax.swing.UnsupportedLookAndFeelException;
 import javax.swing.border.MatteBorder;
 
+import daxplorelib.DaxploreFile;
+
 /**
  * Main window handler class. Initialization of application goes here.
  */
 public class MainController {
 	// data fields for main class.
-	private GuiFile guiFile;
 	
 	private JFrame mainFrame;
 	private OpenPanelView openPanelView;
@@ -37,6 +39,9 @@ public class MainController {
 
 	private MainView mainView;
 	
+	private DaxploreFile daxploreFile = null;
+	private File spssFile = null;
+
 	public enum Views {
 		OPENPANEL,
 		EDITVIEW,
@@ -47,8 +52,6 @@ public class MainController {
 	
 	public MainController(MainView mainView) {
 		this.mainView = mainView;
-		// file handler init.
-		guiFile = new GuiFile();
 	}
 	
 	// getters and setters.
@@ -58,14 +61,6 @@ public class MainController {
 
 	public void setButtonPanelView(ButtonPanelView buttonPanelView) {
 		this.buttonPanelView = buttonPanelView;
-	}
-
-	public GuiFile getGuiFile() {
-		return guiFile;
-	}
-
-	public void setGuiFile(GuiFile guiFile) {
-		this.guiFile = guiFile;
 	}
 
 	public JFrame getMainFrame() {
@@ -126,5 +121,36 @@ public class MainController {
 		this.toolsPanelView = toolsPanelView;
 	}
 
+	public DaxploreFile getDaxploreFile() {
+		return daxploreFile;
+	}
+
+	public void setDaxploreFile(DaxploreFile daxploreFile) {
+		this.daxploreFile = daxploreFile;
+		
+	}
+
+	public File getSpssFile() {
+		return spssFile;
+	}
+
+	public void setSpssFile(File spssFile) {
+		this.spssFile = spssFile;
+	}
+	
+	public void resetDaxploreFile() {
+		daxploreFile = null;
+	}
+	
+	public void resetSpssFile() {
+		spssFile = null;
+	}
+	
+	/**
+	 * Returns true if a daxplore file is loaded into the system.
+	 */
+	public boolean isSet() {
+		return daxploreFile != null;
+	}
 
 }

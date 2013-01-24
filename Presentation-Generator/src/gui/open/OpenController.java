@@ -21,11 +21,11 @@ import daxplorelib.DaxploreFile;
  */
 public final class OpenController implements ActionListener {
 
-	private final MainController guiMain;
+	private final MainController mainController;
 	private final OpenPanelView openPanelView;
 
-	public OpenController(MainController guiMain, OpenPanelView openPanelView) {
-		this.guiMain = guiMain;
+	public OpenController(MainController mainController, OpenPanelView openPanelView) {
+		this.mainController = mainController;
 		this.openPanelView = openPanelView;
 	}
 	
@@ -73,12 +73,12 @@ public final class OpenController implements ActionListener {
 				"Daxplore Files", "daxplore");
 		fc.setFileFilter(filter);
 
-		int returnVal = fc.showSaveDialog(this.guiMain.getMainFrame());
+		int returnVal = fc.showSaveDialog(this.mainController.getMainFrame());
 
 		if (returnVal == JFileChooser.APPROVE_OPTION) {
 			try {
-				if (guiMain.getGuiFile().getDaxploreFile() != null) {
-					guiMain.getGuiFile().getDaxploreFile().close();
+				if (mainController.getDaxploreFile() != null) {
+					mainController.getDaxploreFile().close();
 				}
 			} catch (DaxploreException e2) {
 				System.out.println("Couldn't close file");
@@ -95,10 +95,10 @@ public final class OpenController implements ActionListener {
 			}
 
 			try {
-				guiMain.getGuiFile().setDaxploreFile(DaxploreFile.createWithNewFile(file));
+				mainController.setDaxploreFile(DaxploreFile.createWithNewFile(file));
 				updateTextFields();
 				// activate the button panel.
-				guiMain.updateStuff();
+				mainController.updateStuff();
 			} catch (DaxploreException e1) {
 				System.out.println("Saving daxplore file failure.");
 				e1.printStackTrace();
@@ -117,12 +117,12 @@ public final class OpenController implements ActionListener {
 				"Daxplore Files", "daxplore");
 		fc.setFileFilter(filter);
 
-		int returnVal = fc.showOpenDialog(this.guiMain.getMainFrame());
+		int returnVal = fc.showOpenDialog(this.mainController.getMainFrame());
 
 		if (returnVal == JFileChooser.APPROVE_OPTION) {
 			try {
-				if (guiMain.getGuiFile().getDaxploreFile() != null) {
-					guiMain.getGuiFile().getDaxploreFile().close();
+				if (mainController.getDaxploreFile() != null) {
+					mainController.getDaxploreFile().close();
 				}
 			} catch (DaxploreException e2) {
 				System.out.println("Couldn't close file");
@@ -132,21 +132,21 @@ public final class OpenController implements ActionListener {
 			File file = fc.getSelectedFile();
 			System.out.println("Opening: " + file.getName() + ".");
 			try {
-				guiMain.getGuiFile().setDaxploreFile(DaxploreFile
+				mainController.setDaxploreFile(DaxploreFile
 						.createFromExistingFile(file));
 
 				// print the contents of daxplore file about section, just for
 				// testing.
 				System.out.println("Daxplore file content: "
-						+ guiMain.getGuiFile().getDaxploreFile().getAbout());
+						+ mainController.getDaxploreFile().getAbout());
 
 				// update text fields so that file information is properly
 				// shown.
 				updateTextFields();
-				guiMain.updateStuff();
+				mainController.updateStuff();
 
 			} catch (DaxploreException e1) {
-				JOptionPane.showMessageDialog(this.guiMain.getMainFrame(),
+				JOptionPane.showMessageDialog(this.mainController.getMainFrame(),
 						"You must select a valid daxplore file.",
 						"Daxplore file warning", JOptionPane.ERROR_MESSAGE);
 				e1.printStackTrace();
@@ -158,37 +158,37 @@ public final class OpenController implements ActionListener {
 	
 	/**
 	 * Updates text field for the SPSS file information in the open panel dialog.
-	 * @param guiMain
+	 * @param mainController
 	 */
 	public void updateSpssFileInfoText() {
-		if (guiMain.getGuiFile().getSpssFile() != null) {
+		if (mainController.getSpssFile() != null) {
 			openPanelView.spssFileInfoText.setText(
 					"SPSS file successfully imported!\n" +
-						guiMain.getGuiFile().getSpssFile().getName() + "\n" +
-						guiMain.getGuiFile().getSpssFile().getAbsolutePath());
+						mainController.getSpssFile().getName() + "\n" +
+						mainController.getSpssFile().getAbsolutePath());
 		}
 	}
 
 	/**
 	 * Updates text fields in the open panel dialog to display daxplore file information.
-	 * @param guiMain
+	 * @param mainController
 	 */
 	public void updateTextFields() {
 		
 		SimpleDateFormat formatter = new SimpleDateFormat("dd/MM/yyyy");
 		
 		// set the text fields if we have a daxplore file loaded.
-		if (guiMain.getGuiFile().getDaxploreFile() != null) {
+		if (mainController.getDaxploreFile() != null) {
 			// update text fields with appropriate data.
-			openPanelView.getFileNameField().setText(guiMain.getGuiFile().getDaxploreFile().getFile().getName());
+			openPanelView.getFileNameField().setText(mainController.getDaxploreFile().getFile().getName());
 			
 			// check if it's a newly created file, if so, it doesn't contain certain fields.
-			String importFilename = guiMain.getGuiFile().getDaxploreFile().getAbout().getImportFilename();
+			String importFilename = mainController.getDaxploreFile().getAbout().getImportFilename();
 			if (importFilename != null && !"".equals(importFilename)) {
-				openPanelView.getLastImportFileNameField().setText(guiMain.getGuiFile().getDaxploreFile().getAbout().getImportFilename());
+				openPanelView.getLastImportFileNameField().setText(mainController.getDaxploreFile().getAbout().getImportFilename());
 				// date must first be converted to the appropriate format before returned as string.
-				if (guiMain.getGuiFile().getDaxploreFile().getAbout().getImportDate() != null) {
-				openPanelView.getImportDateField().setText(formatter.format(guiMain.getGuiFile().getDaxploreFile().getAbout().getImportDate()));
+				if (mainController.getDaxploreFile().getAbout().getImportDate() != null) {
+				openPanelView.getImportDateField().setText(formatter.format(mainController.getDaxploreFile().getAbout().getImportDate()));
 				} else {
 					openPanelView.getImportDateField().setText("");
 				}
@@ -198,7 +198,7 @@ public final class OpenController implements ActionListener {
 			}
 			
 			openPanelView.getCreationDateField().setText(
-			formatter.format(guiMain.getGuiFile().getDaxploreFile().getAbout().getCreationDate()));
+			formatter.format(mainController.getDaxploreFile().getAbout().getCreationDate()));
 		}
 	}
 }

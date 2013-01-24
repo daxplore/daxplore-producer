@@ -23,10 +23,10 @@ import javax.swing.border.MatteBorder;
 @SuppressWarnings("serial")
 public class NavigationPanelView extends JPanel {
 	
-	MainController guiMain;
+	MainController mainController;
 	
-	public NavigationPanelView(final MainController guiMain) {
-		this.guiMain = guiMain;
+	public NavigationPanelView(final MainController mainController) {
+		this.mainController = mainController;
 		setLayout(new BorderLayout(0, 0));
 		setBorder(new MatteBorder(0, 1, 0, 0, (Color) Color.GRAY));
 		
@@ -37,7 +37,7 @@ public class NavigationPanelView extends JPanel {
 		saveButton.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				try {
-					guiMain.getGuiFile().getDaxploreFile().getMetaData().save();
+					mainController.getDaxploreFile().getMetaData().save();
 				} catch (DaxploreException e1) {
 					// TODO Auto-generated catch block
 					e1.printStackTrace();

@@ -23,7 +23,7 @@ import javax.swing.border.MatteBorder;
 
 public class MainView {
 
-	private JFrame guiMainFrame;
+	private JFrame mainControllerFrame;
 	final JPanel mainPanel = new JPanel();
 	private JPanel panel;
 	
@@ -79,7 +79,7 @@ public class MainView {
 			public void run() {
 				try {
 					MainView window = new MainView();
-					window.guiMainFrame.setVisible(true);
+					window.mainControllerFrame.setVisible(true);
 				} catch (Exception e) {
 					e.printStackTrace();
 				}
@@ -94,22 +94,22 @@ public class MainView {
 	public MainView() {
 		mainController = new MainController(this);
 		
-		guiMainFrame = new JFrame();
-		mainController.setMainFrame(guiMainFrame);
-		guiMainFrame.setIconImage(Toolkit.getDefaultToolkit().getImage(MainController.class.getResource("/gui/resources/Colorful_Chart_Icon_vol2.png")));
-		guiMainFrame.setTitle("Daxplore Producer Developer Version");
-		guiMainFrame.setBounds(100, 100, 900, 787);
-		guiMainFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		guiMainFrame.getContentPane().setLayout(new BorderLayout(0, 0));
+		mainControllerFrame = new JFrame();
+		mainController.setMainFrame(mainControllerFrame);
+		mainControllerFrame.setIconImage(Toolkit.getDefaultToolkit().getImage(MainController.class.getResource("/gui/resources/Colorful_Chart_Icon_vol2.png")));
+		mainControllerFrame.setTitle("Daxplore Producer Developer Version");
+		mainControllerFrame.setBounds(100, 100, 900, 787);
+		mainControllerFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		mainControllerFrame.getContentPane().setLayout(new BorderLayout(0, 0));
 		
 
 		
 		// panel views. TODO: Remake the controller interface.
 		mainController.setButtonPanelView(new ButtonPanelView(mainController));
-		guiMainFrame.getContentPane().add(mainController.getButtonPanelView(), BorderLayout.WEST);
+		mainControllerFrame.getContentPane().add(mainController.getButtonPanelView(), BorderLayout.WEST);
 		
 		panel = new JPanel();
-		guiMainFrame.getContentPane().add(panel, BorderLayout.CENTER);
+		mainControllerFrame.getContentPane().add(panel, BorderLayout.CENTER);
 		panel.setLayout(new BorderLayout(0, 0));
 		panel.add(mainPanel, BorderLayout.CENTER);
 		

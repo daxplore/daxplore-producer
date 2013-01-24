@@ -53,7 +53,7 @@ public class ImportWizardController implements ActionListener {
     	
     	// clear the spss file save just in case, when the dialog opens again we don't
     	// want an old file saved in the system.
-        hostPanel.getGuiMain().getGuiFile().resetSpssFile();
+        hostPanel.getmainController().resetSpssFile();
         
         hostPanel.close(ImportWizardDialog.CANCEL_RETURN_CODE);
     }
@@ -141,18 +141,18 @@ public class ImportWizardController implements ActionListener {
 	public void importSpssFileAction() {
 
 		// this should never happen the way the dialog is designed. But we keep this for safety.
-		if (hostPanel.getGuiMain().getGuiFile().getSpssFile() == null) {
-			JOptionPane.showMessageDialog(this.hostPanel.getGuiMain().getMainFrame(),
+		if (hostPanel.getmainController().getSpssFile() == null) {
+			JOptionPane.showMessageDialog(this.hostPanel.getmainController().getMainFrame(),
 					"You must open an SPSS file before you can import it.",
 					"Daxplore file warning", JOptionPane.ERROR_MESSAGE);
 			return;
 
 		}
 
-		if (hostPanel.getGuiMain().getGuiFile().getDaxploreFile() == null) {
+		if (hostPanel.getmainController().getDaxploreFile() == null) {
 			JOptionPane
 					.showMessageDialog(
-							this.hostPanel.getGuiMain().getMainFrame(),
+							this.hostPanel.getmainController().getMainFrame(),
 							"Create or open a daxplore project file before you import an SPSS file.",
 							"Daxplore file warning", JOptionPane.ERROR_MESSAGE);
 			return;
@@ -163,36 +163,36 @@ public class ImportWizardController implements ActionListener {
 		try {
 			charset = Charset.forName(hostPanel.getModel().getCharsetName());
 		} catch (Exception e1) {
-			JOptionPane.showMessageDialog(this.hostPanel.getGuiMain().getMainFrame(),
+			JOptionPane.showMessageDialog(this.hostPanel.getmainController().getMainFrame(),
 					"Unable to create charset, aborting import.",
 					"Daxplore file warning", JOptionPane.ERROR_MESSAGE);
 			return;
 		}
 
-		File importFile = hostPanel.getGuiMain().getGuiFile().getSpssFile();
+		File importFile = hostPanel.getmainController().getSpssFile();
 
 		try {
 			
 			// show the wait cursor in case the import takes a long time.
 			hostPanel.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
-			hostPanel.getGuiMain().getGuiFile().getDaxploreFile().importSPSS(importFile, charset);
+			hostPanel.getmainController().getDaxploreFile().importSPSS(importFile, charset);
 
 			// NOTE: Information on successful file import is updated elsewhere.
 
 		} catch (FileNotFoundException e2) {
-			JOptionPane.showMessageDialog(this.hostPanel.getGuiMain().getMainFrame(),
+			JOptionPane.showMessageDialog(this.hostPanel.getmainController().getMainFrame(),
 					"Unable to find the SPSS file.", "Daxplore file warning",
 					JOptionPane.ERROR_MESSAGE);
 			e2.printStackTrace();
 			return;
 		} catch (IOException e2) {
-			JOptionPane.showMessageDialog(this.hostPanel.getGuiMain().getMainFrame(),
+			JOptionPane.showMessageDialog(this.hostPanel.getmainController().getMainFrame(),
 					"File import error.", "Daxplore file warning",
 					JOptionPane.ERROR_MESSAGE);
 			e2.printStackTrace();
 			return;
 		} catch (DaxploreException e2) {
-			JOptionPane.showMessageDialog(this.hostPanel.getGuiMain().getMainFrame(),
+			JOptionPane.showMessageDialog(this.hostPanel.getmainController().getMainFrame(),
 					"Unable to import file, aborting operation.",
 					"Daxplore file warning", JOptionPane.ERROR_MESSAGE);
 			e2.printStackTrace();

@@ -40,10 +40,10 @@ public class FinalImportPanelDescriptor extends ImportWizardDescriptor {
     public void aboutToDisplayPanel() {
     	
     	// this shouldn't happen, but in case there is no file loaded, just exit.
-    	if (getWizard().getGuiMain().getGuiFile().getSpssFile() == null)
+    	if (getWizard().getmainController().getSpssFile() == null)
     		return;
     	
-    	TableModel model = spssTable(getWizard().getGuiMain().getGuiFile().getSpssFile());
+    	TableModel model = spssTable(getWizard().getmainController().getSpssFile());
     	finalImportPanel.showTable(model);
     }
     

@@ -41,7 +41,7 @@ public class GroupsController implements ActionListener {
 	public static final String ADD_TO_GROUP_ACTION_COMMAND = "AddToGroupActionCommand";
 	public static final String ADD_TO_PERSPECTIVES_ACTION_COMMAND = "AddToPerspectivesActionCommand";
 	
-	private MainController guiMain;
+	private MainController mainController;
 	private GroupsView groupsView;
 	
 	private GroupTreeModel groupTreeModel;
@@ -49,8 +49,8 @@ public class GroupsController implements ActionListener {
 	private JList<QuestionWidget> questionJList;
 	private JTree groupJTree;
 	
-	public GroupsController(GroupsView groupView, MainController guiMain) {
-		this.guiMain = guiMain;
+	public GroupsController(GroupsView groupView, MainController mainController) {
+		this.mainController = mainController;
 		this.groupsView = groupView;
 	}
 	
@@ -59,26 +59,26 @@ public class GroupsController implements ActionListener {
 		Object[] path;
 		switch(e.getActionCommand()) {
 		case GROUPS_ADD_ACTION_COMMAND:
-			String groupName = (String)JOptionPane.showInputDialog(guiMain.getMainFrame(), "Name:", "Create new group", JOptionPane.PLAIN_MESSAGE, null, null, "");
+			String groupName = (String)JOptionPane.showInputDialog(mainController.getMainFrame(), "Name:", "Create new group", JOptionPane.PLAIN_MESSAGE, null, null, "");
 			if(groupName != null && !groupName.equals("")) {
 				try {
-					MetaGroupManager metaGroupManager = guiMain.getGuiFile().getDaxploreFile().getMetaData().getMetaGroupManager();
+					MetaGroupManager metaGroupManager = mainController.getDaxploreFile().getMetaData().getMetaGroupManager();
 					int nextid = metaGroupManager.getHighestId() +1;
-					TextReferenceManager textReferenceManager = guiMain.getGuiFile().getDaxploreFile().getMetaData().getTextsManager();
+					TextReferenceManager textReferenceManager = mainController.getDaxploreFile().getMetaData().getTextsManager();
 					TextReference tr = textReferenceManager.get("Group" + nextid);
 					tr.put(groupName, new Locale("sv")); //TODO: fix global locale
 					MetaGroup mg = metaGroupManager.create(tr, Integer.MAX_VALUE, GroupType.QUESTIONS, new LinkedList<MetaQuestion>());
 					TreePath treepath = groupTreeModel.addGroup(mg, groupTreeModel.getChildCount(groupTreeModel.getRoot()));
 					groupJTree.setSelectionPath(treepath);
 				} catch (Exception e1) { //TODO: fix proper exception handling
-					JOptionPane.showMessageDialog(guiMain.getMainFrame(),
+					JOptionPane.showMessageDialog(mainController.getMainFrame(),
 						    "Something went wrong while creating new group",
 						    "Group creation error",
 						    JOptionPane.ERROR_MESSAGE);
 					e1.printStackTrace();
 				}
 			} else {
-				JOptionPane.showMessageDialog(guiMain.getMainFrame(),
+				JOptionPane.showMessageDialog(mainController.getMainFrame(),
 					    "Group has to have a name",
 					    "Group creation error",
 					    JOptionPane.ERROR_MESSAGE);
@@ -196,9 +196,9 @@ public class GroupsController implements ActionListener {
 	}
 
 	public void loadData() {
-		if(guiMain.getGuiFile().isSet()) {
+		if(mainController.isSet()) {
 			try {
-				MetaData md = guiMain.getGuiFile().getDaxploreFile().getMetaData();
+				MetaData md = mainController.getDaxploreFile().getMetaData();
 				questionListModel = new QuestionListModel(md);
 				questionJList = new MouseOverList(questionListModel);
 				//questionJList.setCellRenderer(groupsView.new QuestionListCellRenderer());

@@ -22,7 +22,7 @@ import javax.swing.tree.TreeCellRenderer;
 @SuppressWarnings("serial")
 public class GroupsView extends JPanel {
 	
-	private MainController guiMain;
+	private MainController mainController;
 
 	private JScrollPane questionsScrollPane = new JScrollPane();
 	private JScrollPane groupsScollPane = new JScrollPane();
@@ -64,9 +64,9 @@ public class GroupsView extends JPanel {
 		
 	}
 	
-	public GroupsView(final MainController guiMain) {
-		this.guiMain = guiMain;
-		groupsController = new GroupsController(this, this.guiMain);
+	public GroupsView(final MainController mainController) {
+		this.mainController = mainController;
+		groupsController = new GroupsController(this, this.mainController);
 		setLayout(new GridLayout(0, 2, 0, 0));
 		
 		JPanel questionsPanel = new JPanel();

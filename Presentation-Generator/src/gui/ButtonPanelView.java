@@ -24,7 +24,7 @@ import javax.swing.border.TitledBorder;
 public class ButtonPanelView extends JPanel {
 	
 	// data fields.
-	private MainController guiMain;
+	private MainController mainController;
 	private JRadioButton openButton;
 	private JRadioButton groupsButton;
 	private JRadioButton editButton;
@@ -64,10 +64,10 @@ public class ButtonPanelView extends JPanel {
 		this.toolsButton = toolsButton;
 	}
 
-	public ButtonPanelView(final MainController guiMain) {
+	public ButtonPanelView(final MainController mainController) {
 		
 		ButtonGroup buttonGroup = new ButtonGroup();
-		this.guiMain = guiMain;
+		this.mainController = mainController;
 		
 		// create the button panel
 		setBorder(new MatteBorder(0, 0, 0, 1, (Color) Color.LIGHT_GRAY));
@@ -78,7 +78,7 @@ public class ButtonPanelView extends JPanel {
 		openButton.setToolTipText("Manage file(s)");
 		openButton.addItemListener(new ItemListener() {
 			public void itemStateChanged(ItemEvent e) {
-				guiMain.switchTo(Views.OPENPANEL);
+				mainController.switchTo(Views.OPENPANEL);
 			}
 		});
 
@@ -93,7 +93,7 @@ public class ButtonPanelView extends JPanel {
 		groupsButton.setToolTipText("Edit groups and questions");
 		groupsButton.addItemListener(new ItemListener() {
 			public void itemStateChanged(ItemEvent e) {
-				guiMain.switchTo(Views.GROUPSVIEW);
+				mainController.switchTo(Views.GROUPSVIEW);
 			}
 		});
 		
@@ -108,7 +108,7 @@ public class ButtonPanelView extends JPanel {
 		editButton.setToolTipText("Edit questions");
 		editButton.addItemListener(new ItemListener() {
 			public void itemStateChanged(ItemEvent e) {
-				guiMain.switchTo(Views.EDITVIEW);
+				mainController.switchTo(Views.EDITVIEW);
 			}
 		});
 		
@@ -123,7 +123,7 @@ public class ButtonPanelView extends JPanel {
 		toolsButton.setToolTipText("Tools section");
 		toolsButton.addItemListener(new ItemListener() {
 			public void itemStateChanged(ItemEvent e) {
-						guiMain.switchTo(Views.TOOLSVIEW);
+						mainController.switchTo(Views.TOOLSVIEW);
 			}
 		});
 				
@@ -139,7 +139,7 @@ public class ButtonPanelView extends JPanel {
 
 	public void updateButtonPanel() {
 		// disable buttons if no file is loaded.
-		if (!guiMain.getGuiFile().isSet()) {
+		if (!mainController.isSet()) {
 			groupsButton.setEnabled(false);
 			editButton.setEnabled(false);
 			toolsButton.setEnabled(false);

@@ -92,11 +92,11 @@ public class OpenPanelView extends JPanel {
 	
 	/**
 	 * OpenPanelView constructor.
-	 * @param guiMain
+	 * @param mainController
 	 */
-	public OpenPanelView(final MainController guiMain) {
+	public OpenPanelView(final MainController mainController) {
 		
-		openController = new OpenController(guiMain, this);
+		openController = new OpenController(mainController, this);
 		getFileNameField().setEditable(false);
 		getFileNameField().setBounds(166, 75, 240, 27);
 		getFileNameField().setColumns(10);
@@ -155,16 +155,16 @@ public class OpenPanelView extends JPanel {
 			@Override
 			public void actionPerformed(ActionEvent e) {
 
-				if (guiMain.getGuiFile().getDaxploreFile() == null) {
+				if (mainController.getDaxploreFile() == null) {
 					JOptionPane
 							.showMessageDialog(
-									guiMain.getMainFrame(),
+									mainController.getMainFrame(),
 									"Create or open a daxplore project file before you import an SPSS file.",
 									"Daxplore file warning", JOptionPane.ERROR_MESSAGE);
 					return;
 				}
 				
-				ImportWizardDialog importWizardDialog = new ImportWizardDialog(guiMain);
+				ImportWizardDialog importWizardDialog = new ImportWizardDialog(mainController);
 				
 				ImportWizardDescriptor openFilePanelDescriptor = new OpenFilePanelDescriptor();
 		        importWizardDialog.registerWizardPanel(OpenFilePanelDescriptor.IDENTIFIER, openFilePanelDescriptor);

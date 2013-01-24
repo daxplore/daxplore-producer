@@ -49,13 +49,13 @@ public class OpenFilePanelDescriptor extends ImportWizardDescriptor implements A
 	
 	@Override
 	public void aboutToDisplayPanel() {
-		if (getWizard().getGuiMain().getGuiFile().getSpssFile() == null)
+		if (getWizard().getmainController().getSpssFile() == null)
             getWizard().setNextFinishButtonEnabled(false);
 	}
 	
     private void setNextButtonAccordingToFile() {
     	// keep next button disabled until a file has been loaded into memory.
-         if (getWizard().getGuiMain().getGuiFile().getSpssFile() == null)
+         if (getWizard().getmainController().getSpssFile() == null)
             getWizard().setNextFinishButtonEnabled(false);
          else
             getWizard().setNextFinishButtonEnabled(true);           
@@ -84,8 +84,8 @@ public class OpenFilePanelDescriptor extends ImportWizardDescriptor implements A
 				spssFile.loadMetadata();
 				spssFile.close();
 				
-				getWizard().getGuiMain().getGuiFile().setSpssFile(file);
-				String text = "File selected: " + getWizard().getGuiMain().getGuiFile().getSpssFile().getName();
+				getWizard().getmainController().setSpssFile(file);
+				String text = "File selected: " + getWizard().getmainController().getSpssFile().getName();
 				openFilePanel.fileOpenLabel.setText(text);
 				System.out.println(text);
 				

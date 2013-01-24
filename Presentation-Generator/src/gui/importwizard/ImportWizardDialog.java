@@ -33,7 +33,7 @@ public class ImportWizardDialog extends JDialog implements PropertyChangeListene
 	private static final long serialVersionUID = 1L;
 	
 	// store instances of classes that will be used.
-	private MainController guiMain;
+	private MainController mainController;
 	private JDialog importWizardDialog;
 	private ImportWizardModel importWizardModel;
 	private ImportWizardController importWizardController;
@@ -66,25 +66,25 @@ public class ImportWizardDialog extends JDialog implements PropertyChangeListene
 	/**
 	 * Constructor.
 	 * 
-	 * @param guiMain
+	 * @param mainController
 	 */
-	public ImportWizardDialog(final MainController guiMain) {
+	public ImportWizardDialog(final MainController mainController) {
 		setModal(true);
 		
 		importWizardController = new ImportWizardController(this);
 		importWizardModel = new ImportWizardModel();
 		importWizardDialog = this;
-		this.guiMain = guiMain;
+		this.mainController = mainController;
 		initcomponents();	// create the dialogue.
 	}
 	
 	// getters and setters be here.
-	public MainController getGuiMain() {
-		return guiMain;
+	public MainController getmainController() {
+		return mainController;
 	}
 
-	public void setGuiMain(MainController guiMain) {
-		this.guiMain = guiMain;
+	public void setmainController(MainController mainController) {
+		this.mainController = mainController;
 	}
 
 	public JDialog getDialog() {
@@ -217,8 +217,8 @@ public class ImportWizardDialog extends JDialog implements PropertyChangeListene
         // finish the import if the import button is pressed.
         if (returnCode == FINISH_RETURN_CODE) {
         	importWizardController.importSpssFileAction();
-        	getGuiMain().getOpenPanelView().getOpenController().updateSpssFileInfoText();
-        	getGuiMain().getOpenPanelView().getOpenController().updateTextFields();
+        	getmainController().getOpenPanelView().getOpenController().updateSpssFileInfoText();
+        	getmainController().getOpenPanelView().getOpenController().updateTextFields();
         }
         
         importWizardDialog.dispose();
@@ -242,7 +242,7 @@ public class ImportWizardDialog extends JDialog implements PropertyChangeListene
 		setTitle("SPSS File Wizard");
 		setBounds(100, 100, 762, 622);
 		getContentPane().setLayout(new BorderLayout());
-		contentPanel.setLayout(guiMain.getMainFrame().getLayout());
+		contentPanel.setLayout(mainController.getMainFrame().getLayout());
 		contentPanel.setBorder(new EmptyBorder(5, 5, 5, 5));
 		getContentPane().add(contentPanel, BorderLayout.CENTER);
 		contentPanel.setLayout(cardLayout);

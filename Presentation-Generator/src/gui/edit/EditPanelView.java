@@ -37,7 +37,7 @@ import daxplorelib.metadata.TextReference.TextReferenceManager;
 public class EditPanelView extends JPanel {
 	private JTextField textField;
 
-	MainController guiMain;
+	MainController mainController;
 	private JComboBox<LocaleItem> localeCombo1;
 	private JComboBox<LocaleItem> localeCombo2;
 	private JScrollPane scrollPane;
@@ -111,10 +111,10 @@ public class EditPanelView extends JPanel {
 	/**
 	 * Create the panel.
 	 * @param guiFile 
-	 * @param guiMain 
+	 * @param mainController 
 	 */
-	public EditPanelView(MainController guiMain) {
-		this.guiMain = guiMain;
+	public EditPanelView(MainController mainController) {
+		this.mainController = mainController;
 		setLayout(new BorderLayout(0, 0));
 		
 		JPanel panel = new JPanel();
@@ -206,10 +206,10 @@ public class EditPanelView extends JPanel {
 
 	public void loadData() {
 		System.out.println("EditPanelView.updateStuff()");
-		if(guiMain.getGuiFile().isSet()) {
+		if(mainController.isSet()) {
 			System.out.print("adding locales... ");
 			try {
-				TextReferenceManager trm = guiMain.getGuiFile().getDaxploreFile().getMetaData().getTextsManager();
+				TextReferenceManager trm = mainController.getDaxploreFile().getMetaData().getTextsManager();
 				List<Locale> localeList = trm.getAllLocales();
 				System.out.print(localeList.size() + " locales");
 				for(Locale l: localeList) {
