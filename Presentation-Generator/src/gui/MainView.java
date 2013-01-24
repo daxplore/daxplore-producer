@@ -119,13 +119,13 @@ public class MainView {
 		mainPanel.setLayout(mainLayout);
 		
 		mainController.setOpenFileView(new OpenFileView(mainController));
-		mainPanel.add(mainController.getOpenFileView(), Views.OPENPANEL.toString());
+		mainPanel.add(mainController.getOpenFileView(), Views.OPENFILEVIEW.toString());
 		
 		mainController.setGroupsView(new GroupsView(mainController));
 		mainPanel.add(mainController.getGroupsView(), Views.GROUPSVIEW.toString());
 		
 		mainController.setEditTextView(new EditTextView(mainController));
-		mainPanel.add(mainController.getEditTextView(), Views.EDITVIEW.toString());
+		mainPanel.add(mainController.getEditTextView(), Views.EDITTEXTVIEW.toString());
 		
 		mainController.setToolsView(new ToolsView(mainController));
 		mainPanel.add(mainController.getToolsView(), Views.TOOLSVIEW.toString());

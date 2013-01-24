@@ -6,20 +6,9 @@ import gui.navigation.NavigationView;
 import gui.open.OpenFileView;
 import gui.tools.ToolsView;
 
-import java.awt.BorderLayout;
-import java.awt.CardLayout;
-import java.awt.Color;
-import java.awt.EventQueue;
-import java.awt.Toolkit;
 import java.io.File;
 
 import javax.swing.JFrame;
-import javax.swing.JOptionPane;
-import javax.swing.JPanel;
-import javax.swing.UIManager;
-import javax.swing.UIManager.LookAndFeelInfo;
-import javax.swing.UnsupportedLookAndFeelException;
-import javax.swing.border.MatteBorder;
 
 import daxplorelib.DaxploreFile;
 
@@ -43,8 +32,8 @@ public class MainController {
 	private File spssFile = null;
 
 	public enum Views {
-		OPENPANEL,
-		EDITVIEW,
+		OPENFILEVIEW,
+		EDITTEXTVIEW,
 		GROUPSVIEW,
 		TOOLSVIEW;
 	}
@@ -149,7 +138,7 @@ public class MainController {
 	/**
 	 * Returns true if a daxplore file is loaded into the system.
 	 */
-	public boolean isSet() {
+	public boolean fileIsSet() {
 		return daxploreFile != null;
 	}
 

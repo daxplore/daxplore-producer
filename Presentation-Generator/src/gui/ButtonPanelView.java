@@ -78,7 +78,7 @@ public class ButtonPanelView extends JPanel {
 		openButton.setToolTipText("Manage file(s)");
 		openButton.addItemListener(new ItemListener() {
 			public void itemStateChanged(ItemEvent e) {
-				mainController.switchTo(Views.OPENPANEL);
+				mainController.switchTo(Views.OPENFILEVIEW);
 			}
 		});
 
@@ -108,7 +108,7 @@ public class ButtonPanelView extends JPanel {
 		editButton.setToolTipText("Edit questions");
 		editButton.addItemListener(new ItemListener() {
 			public void itemStateChanged(ItemEvent e) {
-				mainController.switchTo(Views.EDITVIEW);
+				mainController.switchTo(Views.EDITTEXTVIEW);
 			}
 		});
 		
@@ -139,7 +139,7 @@ public class ButtonPanelView extends JPanel {
 
 	public void updateButtonPanel() {
 		// disable buttons if no file is loaded.
-		if (!mainController.isSet()) {
+		if (!mainController.fileIsSet()) {
 			groupsButton.setEnabled(false);
 			editButton.setEnabled(false);
 			toolsButton.setEnabled(false);

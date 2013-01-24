@@ -206,7 +206,7 @@ public class EditTextView extends JPanel {
 
 	public void loadData() {
 		System.out.println("EditPanelView.updateStuff()");
-		if(mainController.isSet()) {
+		if(mainController.fileIsSet()) {
 			System.out.print("adding locales... ");
 			try {
 				TextReferenceManager trm = mainController.getDaxploreFile().getMetaData().getTextsManager();

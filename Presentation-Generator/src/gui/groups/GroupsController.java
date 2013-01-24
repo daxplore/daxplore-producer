@@ -196,7 +196,7 @@ public class GroupsController implements ActionListener {
 	}
 
 	public void loadData() {
-		if(mainController.isSet()) {
+		if(mainController.fileIsSet()) {
 			try {
 				MetaData md = mainController.getDaxploreFile().getMetaData();
 				questionListModel = new QuestionListModel(md);
