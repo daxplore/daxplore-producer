@@ -5,12 +5,14 @@ import gui.groups.GroupsView;
 import gui.navigation.NavigationView;
 import gui.open.OpenFileView;
 import gui.tools.ToolsView;
+import gui.widget.QuestionWidget;
 
 import java.io.File;
 
 import javax.swing.JFrame;
 
 import daxplorelib.DaxploreFile;
+import daxplorelib.metadata.TextReference;
 
 /**
  * Main window handler class. Initialization of application goes here.
@@ -41,23 +43,52 @@ public class MainController {
 	
 	public MainController(MainView mainView) {
 		this.mainView = mainView;
+		QuestionWidget.mainController = this;
 	}
 	
+	public void switchTo(Views view) {
+		mainView.showInMain(view);
+	}
+	
+	public void switchTo(Views view, Object command) {
+		switch(view) {
+		case OPENFILEVIEW:
+			break;
+		case EDITTEXTVIEW:
+			if(command instanceof TextReference) {
+				editTextView.getController().jumpToTextReference((TextReference)command);
+			}
+			break;
+		case GROUPSVIEW:
+			break;
+		case TOOLSVIEW:
+			break;
+		}
+		mainView.showInMain(view);
+	}
+	
+	public void updateStuff() {
+		buttonPanelView.updateButtonPanel();
+		groupsView.getController().loadData();
+		editTextView.getController().loadData();
+	}
+
+	
 	// getters and setters.
-	public ButtonPanelView getButtonPanelView() {
-		return buttonPanelView;
-	}
-
-	public void setButtonPanelView(ButtonPanelView buttonPanelView) {
-		this.buttonPanelView = buttonPanelView;
-	}
-
 	public JFrame getMainFrame() {
 		return mainFrame;
 	}
 	
 	public void setMainFrame(JFrame panel) {
 		this.mainFrame = panel;
+	}
+	
+	public ButtonPanelView getButtonPanelView() {
+		return buttonPanelView;
+	}
+
+	public void setButtonPanelView(ButtonPanelView buttonPanelView) {
+		this.buttonPanelView = buttonPanelView;
 	}
 
 	public OpenFileView getOpenFileView() {
@@ -92,16 +123,6 @@ public class MainController {
 		this.navigationView = navigationView;
 	}
 
-	public void switchTo(Views view) {
-		mainView.showInMain(view);
-	}
-	
-	public void updateStuff() {
-		buttonPanelView.updateButtonPanel();
-		groupsView.getController().loadData();
-		editTextView.loadData();
-	}
-
 	public ToolsView getToolsView() {
 		return toolsView;
 	}
@@ -110,13 +131,14 @@ public class MainController {
 		this.toolsView = toolsView;
 	}
 
+	/* Files and stuff */
+	
 	public DaxploreFile getDaxploreFile() {
 		return daxploreFile;
 	}
 
 	public void setDaxploreFile(DaxploreFile daxploreFile) {
 		this.daxploreFile = daxploreFile;
-		
 	}
 
 	public File getSpssFile() {

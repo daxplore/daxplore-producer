@@ -3,14 +3,12 @@ package gui.edit;
 import gui.MainController;
 
 import java.awt.BorderLayout;
-import java.awt.Dimension;
 import java.awt.GridLayout;
+import java.awt.Rectangle;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.ComponentEvent;
 import java.awt.event.ComponentListener;
-import java.sql.SQLException;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
 
@@ -19,19 +17,9 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.JTextField;
-import javax.swing.ListSelectionModel;
-import javax.swing.RowFilter;
 import javax.swing.SwingConstants;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
-import javax.swing.event.TableModelEvent;
-import javax.swing.event.TableModelListener;
-import javax.swing.table.DefaultTableModel;
-import javax.swing.table.TableRowSorter;
-
-import daxplorelib.DaxploreException;
-import daxplorelib.metadata.TextReference;
-import daxplorelib.metadata.TextReference.TextReferenceManager;
 
 @SuppressWarnings("serial")
 public class EditTextView extends JPanel {
@@ -41,62 +29,8 @@ public class EditTextView extends JPanel {
 	private JComboBox<LocaleItem> localeCombo1;
 	private JComboBox<LocaleItem> localeCombo2;
 	private JScrollPane scrollPane;
-	
 	private JTable table;
-	private TableRowSorter<TextsTableModel> sorter;
-	private List<TextReference> textsList = new LinkedList<TextReference>();
-	private Locale[] currentLocales = new Locale[2];
-
-	private TextsTableModel model;
-	
-	protected class TextsTableModel extends DefaultTableModel implements TableModelListener {
-		
-		public String getColumnName(int col) {
-			switch(col) {
-			case 0:
-				return "Reference";
-			case 1:
-				return currentLocales[0].getDisplayLanguage();
-			case 2:
-				return currentLocales[1].getDisplayLanguage();
-			}
-			throw new AssertionError();
-		}
-
-		public int getRowCount() {
-			return textsList.size();
-		}
-
-		public int getColumnCount() {
-			return 3;
-		}
-
-		public Object getValueAt(int row, int col) {
-			switch (col) {
-			case 0:
-				return textsList.get(row).getRef();
-			case 1:
-				return textsList.get(row).get(currentLocales[0]);
-			case 2:
-				return textsList.get(row).get(currentLocales[1]);
-			}
-			throw new AssertionError();
-		}
-
-		public boolean isCellEditable(int row, int col) {
-			return col > 0;
-		}
-
-		public void setValueAt(Object value, int row, int col) {
-			textsList.get(row).put(value.toString(), currentLocales[col-1]);
-		}
-
-		@Override
-		public void tableChanged(TableModelEvent e) {
-			// TODO Auto-generated method stub
-			
-		}
-	}
+	private EditTextController editTextController;
 	
 	protected class LocaleItem {
 		Locale loc;
@@ -115,6 +49,7 @@ public class EditTextView extends JPanel {
 	 */
 	public EditTextView(MainController mainController) {
 		this.mainController = mainController;
+		this.editTextController = new EditTextController(mainController, this);
 		setLayout(new BorderLayout(0, 0));
 		
 		JPanel panel = new JPanel();
@@ -128,15 +63,15 @@ public class EditTextView extends JPanel {
 		textField.getDocument().addDocumentListener(new DocumentListener() {
 			@Override
 			public void removeUpdate(DocumentEvent e) {
-				filter();
+				editTextController.filter(textField.getText());
 			}
 			@Override
 			public void insertUpdate(DocumentEvent e) {
-				filter();
+				editTextController.filter(textField.getText());
 			}
 			@Override
 			public void changedUpdate(DocumentEvent e) {
-				filter();
+				editTextController.filter(textField.getText());
 			}
 		});
 		
@@ -147,7 +82,8 @@ public class EditTextView extends JPanel {
 		localeCombo1.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				currentLocales[0] = ((LocaleItem)localeCombo1.getSelectedItem()).loc;
+				LocaleItem locale = (LocaleItem)localeCombo1.getSelectedItem();
+				editTextController.setCurrentLocale(locale.loc, 0);
 				doUpdate();
 			}
 		});
@@ -156,7 +92,8 @@ public class EditTextView extends JPanel {
 		localeCombo2.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				currentLocales[1] = ((LocaleItem)localeCombo2.getSelectedItem()).loc;
+				LocaleItem locale = (LocaleItem)localeCombo2.getSelectedItem();
+				editTextController.setCurrentLocale(locale.loc, 1);
 				doUpdate();
 			}
 		});
@@ -169,7 +106,6 @@ public class EditTextView extends JPanel {
 			
 			@Override
 			public void componentShown(ComponentEvent e) {
-				System.out.println("edit got shown");
 				doUpdate();
 			}
 			
@@ -183,61 +119,32 @@ public class EditTextView extends JPanel {
 		
 	}
 	
-	private void filter() {
-        RowFilter<TextsTableModel, Object> rf = null;
-        //If current expression doesn't parse, don't update.
-        try {
-        	String caseInsensitive = "(?i)";
-            rf = RowFilter.regexFilter(caseInsensitive + textField.getText(), 0);
-        } catch (java.util.regex.PatternSyntaxException e) {
-            return;
-        }
-        sorter.setRowFilter(rf);
+	public EditTextController getController() {
+		return editTextController;
 	}
 	
+	public void setTable(JTable table) {
+		this.table = table;
+		scrollPane.setViewportView(table);
+	}
+	
+	public void setLocales(List<Locale> localeList) {
+		for(Locale l: localeList) {
+			localeCombo1.addItem(new LocaleItem(l));
+			localeCombo2.addItem(new LocaleItem(l));
+		}
+	}
+
 	public void doUpdate() {
 		if(table != null) {
 			int a = scrollPane.getVerticalScrollBar().getValue();
-			loadTable();
+			editTextController.loadTable();
 			scrollPane.getVerticalScrollBar().setValue(a);
 		}
 		//table.updateUI();
 	}
-
-	public void loadData() {
-		System.out.println("EditPanelView.updateStuff()");
-		if(mainController.fileIsSet()) {
-			System.out.print("adding locales... ");
-			try {
-				TextReferenceManager trm = mainController.getDaxploreFile().getMetaData().getTextsManager();
-				List<Locale> localeList = trm.getAllLocales();
-				System.out.print(localeList.size() + " locales");
-				for(Locale l: localeList) {
-					localeCombo1.addItem(new LocaleItem(l));
-					localeCombo2.addItem(new LocaleItem(l));
-				}
-				textsList = trm.getAll();
-			} catch (DaxploreException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			} catch (SQLException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-			loadTable();
-		}
+	
+	void ensureVisible(Rectangle r) {
+		scrollPane.scrollRectToVisible(r);
 	}
-	
-	private void loadTable() {
-		model = new TextsTableModel();
-		sorter = new TableRowSorter<TextsTableModel>(model);
-		table = new JTable(new TextsTableModel());
-		table.setRowSorter(sorter);
-		table.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-        table.setPreferredScrollableViewportSize(new Dimension(500, 70));
-        table.setFillsViewportHeight(true);
-		scrollPane.setViewportView(table);
-	}
-	
-	
 }
