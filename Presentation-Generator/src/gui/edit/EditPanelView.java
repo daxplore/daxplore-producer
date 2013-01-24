@@ -1,6 +1,6 @@
 package gui.edit;
 
-import gui.GuiMain;
+import gui.MainController;
 
 import java.awt.BorderLayout;
 import java.awt.Dimension;
@@ -37,7 +37,7 @@ import daxplorelib.metadata.TextReference.TextReferenceManager;
 public class EditPanelView extends JPanel {
 	private JTextField textField;
 
-	GuiMain guiMain;
+	MainController guiMain;
 	private JComboBox<LocaleItem> localeCombo1;
 	private JComboBox<LocaleItem> localeCombo2;
 	private JScrollPane scrollPane;
@@ -113,7 +113,7 @@ public class EditPanelView extends JPanel {
 	 * @param guiFile 
 	 * @param guiMain 
 	 */
-	public EditPanelView(GuiMain guiMain) {
+	public EditPanelView(MainController guiMain) {
 		this.guiMain = guiMain;
 		setLayout(new BorderLayout(0, 0));
 		

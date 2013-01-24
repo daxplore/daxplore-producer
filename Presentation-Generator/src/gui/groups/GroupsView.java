@@ -1,6 +1,6 @@
 package gui.groups;
 
-import gui.GuiMain;
+import gui.MainController;
 import gui.widget.GroupWidget;
 import gui.widget.QuestionWidget;
 
@@ -22,7 +22,7 @@ import javax.swing.tree.TreeCellRenderer;
 @SuppressWarnings("serial")
 public class GroupsView extends JPanel {
 	
-	private GuiMain guiMain;
+	private MainController guiMain;
 
 	private JScrollPane questionsScrollPane = new JScrollPane();
 	private JScrollPane groupsScollPane = new JScrollPane();
@@ -64,7 +64,7 @@ public class GroupsView extends JPanel {
 		
 	}
 	
-	public GroupsView(final GuiMain guiMain) {
+	public GroupsView(final MainController guiMain) {
 		this.guiMain = guiMain;
 		groupsController = new GroupsController(this, this.guiMain);
 		setLayout(new GridLayout(0, 2, 0, 0));

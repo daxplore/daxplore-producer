@@ -1,6 +1,6 @@
 package gui.open;
 
-import gui.GuiMain;
+import gui.MainController;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -21,10 +21,10 @@ import daxplorelib.DaxploreFile;
  */
 public final class OpenController implements ActionListener {
 
-	private final GuiMain guiMain;
+	private final MainController guiMain;
 	private final OpenPanelView openPanelView;
 
-	public OpenController(GuiMain guiMain, OpenPanelView openPanelView) {
+	public OpenController(MainController guiMain, OpenPanelView openPanelView) {
 		this.guiMain = guiMain;
 		this.openPanelView = openPanelView;
 	}
@@ -73,7 +73,7 @@ public final class OpenController implements ActionListener {
 				"Daxplore Files", "daxplore");
 		fc.setFileFilter(filter);
 
-		int returnVal = fc.showSaveDialog(this.guiMain.getGuiMainFrame());
+		int returnVal = fc.showSaveDialog(this.guiMain.getMainFrame());
 
 		if (returnVal == JFileChooser.APPROVE_OPTION) {
 			try {
@@ -117,7 +117,7 @@ public final class OpenController implements ActionListener {
 				"Daxplore Files", "daxplore");
 		fc.setFileFilter(filter);
 
-		int returnVal = fc.showOpenDialog(this.guiMain.getGuiMainFrame());
+		int returnVal = fc.showOpenDialog(this.guiMain.getMainFrame());
 
 		if (returnVal == JFileChooser.APPROVE_OPTION) {
 			try {
@@ -146,7 +146,7 @@ public final class OpenController implements ActionListener {
 				guiMain.updateStuff();
 
 			} catch (DaxploreException e1) {
-				JOptionPane.showMessageDialog(this.guiMain.getGuiMainFrame(),
+				JOptionPane.showMessageDialog(this.guiMain.getMainFrame(),
 						"You must select a valid daxplore file.",
 						"Daxplore file warning", JOptionPane.ERROR_MESSAGE);
 				e1.printStackTrace();

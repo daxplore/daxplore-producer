@@ -1,6 +1,6 @@
 package gui.groups;
 
-import gui.GuiMain;
+import gui.MainController;
 import gui.widget.GroupWidget;
 import gui.widget.QuestionWidget;
 
@@ -41,7 +41,7 @@ public class GroupsController implements ActionListener {
 	public static final String ADD_TO_GROUP_ACTION_COMMAND = "AddToGroupActionCommand";
 	public static final String ADD_TO_PERSPECTIVES_ACTION_COMMAND = "AddToPerspectivesActionCommand";
 	
-	private GuiMain guiMain;
+	private MainController guiMain;
 	private GroupsView groupsView;
 	
 	private GroupTreeModel groupTreeModel;
@@ -49,7 +49,7 @@ public class GroupsController implements ActionListener {
 	private JList<QuestionWidget> questionJList;
 	private JTree groupJTree;
 	
-	public GroupsController(GroupsView groupView, GuiMain guiMain) {
+	public GroupsController(GroupsView groupView, MainController guiMain) {
 		this.guiMain = guiMain;
 		this.groupsView = groupView;
 	}
@@ -59,7 +59,7 @@ public class GroupsController implements ActionListener {
 		Object[] path;
 		switch(e.getActionCommand()) {
 		case GROUPS_ADD_ACTION_COMMAND:
-			String groupName = (String)JOptionPane.showInputDialog(guiMain.getGuiMainFrame(), "Name:", "Create new group", JOptionPane.PLAIN_MESSAGE, null, null, "");
+			String groupName = (String)JOptionPane.showInputDialog(guiMain.getMainFrame(), "Name:", "Create new group", JOptionPane.PLAIN_MESSAGE, null, null, "");
 			if(groupName != null && !groupName.equals("")) {
 				try {
 					MetaGroupManager metaGroupManager = guiMain.getGuiFile().getDaxploreFile().getMetaData().getMetaGroupManager();
@@ -71,14 +71,14 @@ public class GroupsController implements ActionListener {
 					TreePath treepath = groupTreeModel.addGroup(mg, groupTreeModel.getChildCount(groupTreeModel.getRoot()));
 					groupJTree.setSelectionPath(treepath);
 				} catch (Exception e1) { //TODO: fix proper exception handling
-					JOptionPane.showMessageDialog(guiMain.getGuiMainFrame(),
+					JOptionPane.showMessageDialog(guiMain.getMainFrame(),
 						    "Something went wrong while creating new group",
 						    "Group creation error",
 						    JOptionPane.ERROR_MESSAGE);
 					e1.printStackTrace();
 				}
 			} else {
-				JOptionPane.showMessageDialog(guiMain.getGuiMainFrame(),
+				JOptionPane.showMessageDialog(guiMain.getMainFrame(),
 					    "Group has to have a name",
 					    "Group creation error",
 					    JOptionPane.ERROR_MESSAGE);

@@ -1,6 +1,6 @@
 package gui.navigation;
 
-import gui.GuiMain;
+import gui.MainController;
 
 import javax.swing.JPanel;
 import java.awt.GridBagLayout;
@@ -23,9 +23,9 @@ import javax.swing.border.MatteBorder;
 @SuppressWarnings("serial")
 public class NavigationPanelView extends JPanel {
 	
-	GuiMain guiMain;
+	MainController guiMain;
 	
-	public NavigationPanelView(final GuiMain guiMain) {
+	public NavigationPanelView(final MainController guiMain) {
 		this.guiMain = guiMain;
 		setLayout(new BorderLayout(0, 0));
 		setBorder(new MatteBorder(0, 1, 0, 0, (Color) Color.GRAY));

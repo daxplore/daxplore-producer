@@ -1,6 +1,6 @@
 package gui.importwizard;
 
-import gui.GuiMain;
+import gui.MainController;
 
 import java.awt.BorderLayout;
 import java.awt.CardLayout;
@@ -33,7 +33,7 @@ public class ImportWizardDialog extends JDialog implements PropertyChangeListene
 	private static final long serialVersionUID = 1L;
 	
 	// store instances of classes that will be used.
-	private GuiMain guiMain;
+	private MainController guiMain;
 	private JDialog importWizardDialog;
 	private ImportWizardModel importWizardModel;
 	private ImportWizardController importWizardController;
@@ -68,7 +68,7 @@ public class ImportWizardDialog extends JDialog implements PropertyChangeListene
 	 * 
 	 * @param guiMain
 	 */
-	public ImportWizardDialog(final GuiMain guiMain) {
+	public ImportWizardDialog(final MainController guiMain) {
 		setModal(true);
 		
 		importWizardController = new ImportWizardController(this);
@@ -79,11 +79,11 @@ public class ImportWizardDialog extends JDialog implements PropertyChangeListene
 	}
 	
 	// getters and setters be here.
-	public GuiMain getGuiMain() {
+	public MainController getGuiMain() {
 		return guiMain;
 	}
 
-	public void setGuiMain(GuiMain guiMain) {
+	public void setGuiMain(MainController guiMain) {
 		this.guiMain = guiMain;
 	}
 
@@ -242,7 +242,7 @@ public class ImportWizardDialog extends JDialog implements PropertyChangeListene
 		setTitle("SPSS File Wizard");
 		setBounds(100, 100, 762, 622);
 		getContentPane().setLayout(new BorderLayout());
-		contentPanel.setLayout(guiMain.getGuiMainFrame().getLayout());
+		contentPanel.setLayout(guiMain.getMainFrame().getLayout());
 		contentPanel.setBorder(new EmptyBorder(5, 5, 5, 5));
 		getContentPane().add(contentPanel, BorderLayout.CENTER);
 		contentPanel.setLayout(cardLayout);

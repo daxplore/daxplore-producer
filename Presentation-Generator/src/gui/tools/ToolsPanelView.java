@@ -1,6 +1,6 @@
 package gui.tools;
 
-import gui.GuiMain;
+import gui.MainController;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -19,7 +19,7 @@ public class ToolsPanelView extends JPanel {
 	
 	public static final String IMPORT_RAW_BUTTON_ACTION_COMMAND = "importRawButtonActionCommand";
 	
-	public ToolsPanelView(final GuiMain guiMain) {
+	public ToolsPanelView(final MainController guiMain) {
 		
 		JButton btnImportfromraw = new JButton("ImportFromRaw");
 		btnImportfromraw.setBounds(12, 67, 145, 25);

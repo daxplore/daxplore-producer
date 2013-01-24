@@ -1,6 +1,6 @@
 package gui.open;
 
-import gui.GuiMain;
+import gui.MainController;
 import gui.importwizard.CharsetPanelDescriptor;
 import gui.importwizard.FinalImportPanelDescriptor;
 import gui.importwizard.ImportWizardDescriptor;
@@ -94,7 +94,7 @@ public class OpenPanelView extends JPanel {
 	 * OpenPanelView constructor.
 	 * @param guiMain
 	 */
-	public OpenPanelView(final GuiMain guiMain) {
+	public OpenPanelView(final MainController guiMain) {
 		
 		openController = new OpenController(guiMain, this);
 		getFileNameField().setEditable(false);
@@ -158,7 +158,7 @@ public class OpenPanelView extends JPanel {
 				if (guiMain.getGuiFile().getDaxploreFile() == null) {
 					JOptionPane
 							.showMessageDialog(
-									guiMain.getGuiMainFrame(),
+									guiMain.getMainFrame(),
 									"Create or open a daxplore project file before you import an SPSS file.",
 									"Daxplore file warning", JOptionPane.ERROR_MESSAGE);
 					return;
