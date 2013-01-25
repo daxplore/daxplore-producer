@@ -45,8 +45,6 @@ public class GroupsController implements ActionListener {
 	private GroupsView groupsView;
 	
 	private GroupTreeModel groupTreeModel;
-	private QuestionListModel questionListModel;
-	private JList<QuestionWidget> questionJList;
 	private JTree groupJTree;
 	private QuestionList questionJTable;
 	private QuestionTableModel questionTableModel;
