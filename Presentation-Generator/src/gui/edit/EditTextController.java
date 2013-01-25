@@ -93,9 +93,10 @@ public class EditTextController {
 	}
 	
 	public void jumpToTextReference(TextReference textref) {
+		editTextView.setSearchField("");
 		int line = model.find(textref);
-		table.setRowSelectionInterval(line, line);
 		Rectangle r = table.getCellRect(line, 0, true);
-		editTextView.ensureVisible(r);
+		table.scrollRectToVisible(r);
+		table.setRowSelectionInterval(line, line);
 	}
 }

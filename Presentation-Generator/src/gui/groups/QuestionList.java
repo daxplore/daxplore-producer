@@ -148,7 +148,7 @@ public class QuestionList extends JTable {
 	    
 	    @Override
 	    public boolean shouldSelectCell(EventObject anEvent) {
-	        return false;
+	        return true;
 	    }
 	}
 }

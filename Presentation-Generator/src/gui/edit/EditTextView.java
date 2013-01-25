@@ -106,7 +106,7 @@ public class EditTextView extends JPanel {
 			
 			@Override
 			public void componentShown(ComponentEvent e) {
-				doUpdate();
+				//doUpdate();
 			}
 			
 			@Override
@@ -144,7 +144,7 @@ public class EditTextView extends JPanel {
 		//table.updateUI();
 	}
 	
-	void ensureVisible(Rectangle r) {
-		scrollPane.scrollRectToVisible(r);
+	public void setSearchField(String text) {
+		textField.setText(text);
 	}
 }
