@@ -2,20 +2,11 @@ package gui.navigation;
 
 import gui.MainController;
 
-import javax.swing.JPanel;
-import java.awt.GridBagLayout;
-import javax.swing.JButton;
-
-import daxplorelib.DaxploreException;
-
-import java.awt.Color;
-import java.awt.GridBagConstraints;
-import java.awt.Insets;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.awt.Component;
-import javax.swing.Box;
 import java.awt.BorderLayout;
+import java.awt.Color;
+
+import javax.swing.JButton;
+import javax.swing.JPanel;
 import javax.swing.JSeparator;
 import javax.swing.SwingConstants;
 import javax.swing.border.MatteBorder;
@@ -24,26 +15,25 @@ import javax.swing.border.MatteBorder;
 public class NavigationView extends JPanel {
 	
 	MainController mainController;
+	NavigationController navigationController;
+
+	private JButton backButton;
 	
 	public NavigationView(final MainController mainController) {
 		this.mainController = mainController;
+		navigationController = new NavigationController(this, mainController);
 		setLayout(new BorderLayout(0, 0));
 		setBorder(new MatteBorder(0, 1, 0, 0, (Color) Color.GRAY));
 		
-		JButton backButton = new JButton("Back");
+		backButton = new JButton("Back");
+		backButton.setActionCommand("BACK");
+		backButton.addActionListener(navigationController);
+		backButton.setEnabled(false);
 		add(backButton, BorderLayout.WEST);
 		
 		JButton saveButton = new JButton("Save");
-		saveButton.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				try {
-					mainController.getDaxploreFile().getMetaData().save();
-				} catch (DaxploreException e1) {
-					// TODO Auto-generated catch block
-					e1.printStackTrace();
-				}
-			}
-		});
+		saveButton.setActionCommand("SAVE");
+		saveButton.addActionListener(navigationController);
 		add(saveButton, BorderLayout.EAST);
 		
 		JPanel centerPanel = new JPanel();
@@ -61,5 +51,14 @@ public class NavigationView extends JPanel {
 		JPanel toolbarPanel = new JPanel();
 		centerPanel.add(toolbarPanel, BorderLayout.CENTER);
 	}
+	
+	void setHistoryAvailble(boolean availible) {
+		backButton.setEnabled(availible);
+	}
+
+	public NavigationController getController() {
+		return navigationController;
+	}
+
 
 }

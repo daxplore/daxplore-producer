@@ -76,11 +76,8 @@ public class ButtonPanelView extends JPanel {
 		openButton = new JRadioButton("");
 		openButton.setSelected(true);
 		openButton.setToolTipText("Manage file(s)");
-		openButton.addItemListener(new ItemListener() {
-			public void itemStateChanged(ItemEvent e) {
-				mainController.switchTo(Views.OPENFILEVIEW);
-			}
-		});
+		openButton.setActionCommand(Views.OPENFILEVIEW.toString());
+		openButton.addActionListener(mainController);
 
 		openButton.setRolloverEnabled(false);
 		openButton.setSelectedIcon(new ImageIcon(MainController.class.getResource("/gui/resources/8_selected.png")));
@@ -91,11 +88,8 @@ public class ButtonPanelView extends JPanel {
 
 		groupsButton = new JRadioButton("");
 		groupsButton.setToolTipText("Edit groups and questions");
-		groupsButton.addItemListener(new ItemListener() {
-			public void itemStateChanged(ItemEvent e) {
-				mainController.switchTo(Views.GROUPSVIEW);
-			}
-		});
+		groupsButton.setActionCommand(Views.GROUPSVIEW.toString());
+		groupsButton.addActionListener(mainController);
 		
 		groupsButton.setSelectedIcon(new ImageIcon(ButtonPanelView.class.getResource("/gui/resources/29_selected.png")));
 		groupsButton.setRolloverEnabled(false);
@@ -106,11 +100,8 @@ public class ButtonPanelView extends JPanel {
 	
 		editButton = new JRadioButton("");
 		editButton.setToolTipText("Edit questions");
-		editButton.addItemListener(new ItemListener() {
-			public void itemStateChanged(ItemEvent e) {
-				mainController.switchTo(Views.EDITTEXTVIEW);
-			}
-		});
+		editButton.setActionCommand(Views.EDITTEXTVIEW.toString());
+		editButton.addActionListener(mainController);
 		
 		editButton.setSelectedIcon(new ImageIcon(MainController.class.getResource("/gui/resources/21_selected.png")));
 		editButton.setRolloverEnabled(false);
@@ -121,11 +112,8 @@ public class ButtonPanelView extends JPanel {
 		
 		toolsButton = new JRadioButton("");
 		toolsButton.setToolTipText("Tools section");
-		toolsButton.addItemListener(new ItemListener() {
-			public void itemStateChanged(ItemEvent e) {
-						mainController.switchTo(Views.TOOLSVIEW);
-			}
-		});
+		toolsButton.setActionCommand(Views.TOOLSVIEW.toString());
+		toolsButton.addActionListener(mainController);
 				
 		toolsButton.setSelectedIcon(new ImageIcon(ButtonPanelView.class.getResource("/gui/resources/24_selected.png")));
 		toolsButton.setRolloverEnabled(false);

@@ -7,7 +7,10 @@ import gui.open.OpenFileView;
 import gui.tools.ToolsView;
 import gui.widget.QuestionWidget;
 
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.io.File;
+import java.util.Stack;
 
 import javax.swing.JFrame;
 
@@ -17,7 +20,7 @@ import daxplorelib.metadata.TextReference;
 /**
  * Main window handler class. Initialization of application goes here.
  */
-public class MainController {
+public class MainController implements ActionListener {
 	// data fields for main class.
 	
 	private JFrame mainFrame;
@@ -27,8 +30,10 @@ public class MainController {
 	private ButtonPanelView buttonPanelView;
 	private ToolsView toolsView;
 	private NavigationView navigationView;
-
 	private MainView mainView;
+	
+	private Stack<HistoryItem> history = new Stack<HistoryItem>();
+	private HistoryItem currentCommand;
 	
 	private DaxploreFile daxploreFile = null;
 	private File spssFile = null;
@@ -40,6 +45,16 @@ public class MainController {
 		TOOLSVIEW;
 	}
 	
+	private class HistoryItem {
+		public Views view;
+		public Object command;
+		public HistoryItem(Views view, Object command) {
+			super();
+			this.view = view;
+			this.command = command;
+		}
+	}
+	
 	
 	public MainController(MainView mainView) {
 		this.mainView = mainView;
@@ -48,24 +63,59 @@ public class MainController {
 	
 	public void switchTo(Views view) {
 		mainView.showInMain(view);
+		history.clear();
+		currentCommand = new HistoryItem(view, null);
 	}
 	
 	public void switchTo(Views view, Object command) {
-		switch(view) {
-		case OPENFILEVIEW:
-			break;
-		case EDITTEXTVIEW:
-			if(command instanceof TextReference) {
-				editTextView.getController().jumpToTextReference((TextReference)command);
+		HistoryItem hi = new HistoryItem(view, command);
+		history.push(currentCommand);
+		currentCommand = hi;
+		doCommand(hi);
+		navigationView.getController().setHistoryAvailible(true);
+	}
+	
+	private void doCommand(HistoryItem hi) {
+		if(hi.command != null) {
+			switch(hi.view) {
+			case OPENFILEVIEW:
+				break;
+			case EDITTEXTVIEW:
+				if(hi.command instanceof TextReference) {
+					editTextView.getController().jumpToTextReference((TextReference)hi.command);
+				}
+				break;
+			case GROUPSVIEW:
+				break;
+			case TOOLSVIEW:
+				break;
 			}
-			break;
-		case GROUPSVIEW:
-			break;
-		case TOOLSVIEW:
-			break;
 		}
-		buttonPanelView.setActiveButton(view);
-		mainView.showInMain(view);
+		buttonPanelView.setActiveButton(hi.view);
+		mainView.showInMain(hi.view);
+	}
+	
+	public void historyBack(){
+		HistoryItem hi = history.pop();
+		doCommand(hi);
+		currentCommand = hi;
+		if(history.empty()) {
+			navigationView.getController().setHistoryAvailible(false);
+		}
+	}
+	
+	public boolean hasHistory() {
+		return history.empty();
+	}
+
+	@Override
+	public void actionPerformed(ActionEvent e) {
+		try { //from buttonPanelView
+			Views view = Views.valueOf(Views.class, e.getActionCommand());
+			switchTo(view);
+		} catch (IllegalArgumentException e2) {
+			//place for other types of buttons
+		}
 	}
 	
 	public void updateStuff() {
@@ -164,5 +214,6 @@ public class MainController {
 	public boolean fileIsSet() {
 		return daxploreFile != null;
 	}
+
 
 }
