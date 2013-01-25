@@ -180,15 +180,15 @@ public class GroupsController implements ActionListener {
 				atIndex = groupTreeModel.getIndexOfChild(parent, path[2]) + 1;
 			} else {return;}
 			
-			for(QuestionWidget qw: questionJList.getSelectedValuesList()) {
-				try {
-					TreePath treepath = groupTreeModel.addQuestion(qw.metaQuestion, parent, atIndex);
+			try {
+				for(int i : questionJTable.getSelectedRows()) {
+					MetaQuestion mq = (MetaQuestion)questionJTable.getValueAt(i, 0);
+					TreePath treepath = groupTreeModel.addQuestion(mq, parent, atIndex);
 					atIndex++;
 					groupJTree.setSelectionPath(treepath);
-				} catch (Exception e1) {
-					// TODO Auto-generated catch block
-					e1.printStackTrace();
 				}
+			}catch (Exception e2) {
+				// TODO: handle exception
 			}
 			break;
 		case ADD_TO_PERSPECTIVES_ACTION_COMMAND:
@@ -205,11 +205,6 @@ public class GroupsController implements ActionListener {
 				questionTableModel = new QuestionTableModel(md);
 				questionJTable = new QuestionList(questionTableModel);
 				groupsView.getQuestionsScrollPane().setViewportView(questionJTable);
-				//questionListModel = new QuestionListModel(md);
-				//questionJList = new MouseOverList(questionListModel);
-				////questionJList.setCellRenderer(groupsView.new QuestionListCellRenderer());
-				//questionJList.setSelectionMode(ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
-				//groupsView.getQuestionsScrollPane().setViewportView(questionJList);
 				
 				//get groups and perspectives
 				groupTreeModel = new GroupTreeModel(md);
