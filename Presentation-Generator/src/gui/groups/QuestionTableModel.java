@@ -2,6 +2,8 @@ package gui.groups;
 
 import gui.widget.QuestionWidget;
 
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 
 import javax.swing.table.DefaultTableModel;
@@ -17,6 +19,12 @@ class QuestionTableModel extends DefaultTableModel {
 	
 	public QuestionTableModel(MetaData md) throws DaxploreException {
 		questionList = md.getAllQuestions();
+		Collections.sort(questionList, new Comparator<MetaQuestion>() {
+			@Override
+			public int compare(MetaQuestion o1, MetaQuestion o2) {
+				return o1.getId().compareTo(o2.getId());
+			}
+		});
 	}
 	
 	@Override
