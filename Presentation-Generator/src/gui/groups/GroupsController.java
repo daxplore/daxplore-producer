@@ -45,8 +45,8 @@ public class GroupsController implements ActionListener {
 	private GroupsView groupsView;
 	
 	private GroupTreeModel groupTreeModel;
-	private JTree groupJTree;
-	private QuestionList questionJTable;
+	private GroupTree groupTree;
+	private QuestionTable questionJTable;
 	private QuestionTableModel questionTableModel;
 	
 	public GroupsController(GroupsView groupView, MainController mainController) {
@@ -69,7 +69,7 @@ public class GroupsController implements ActionListener {
 					tr.put(groupName, new Locale("sv")); //TODO: fix global locale
 					MetaGroup mg = metaGroupManager.create(tr, Integer.MAX_VALUE, GroupType.QUESTIONS, new LinkedList<MetaQuestion>());
 					TreePath treepath = groupTreeModel.addGroup(mg, groupTreeModel.getChildCount(groupTreeModel.getRoot()));
-					groupJTree.setSelectionPath(treepath);
+					groupTree.setSelectionPath(treepath);
 				} catch (Exception e1) { //TODO: fix proper exception handling
 					JOptionPane.showMessageDialog(mainController.getMainFrame(),
 						    "Something went wrong while creating new group",
@@ -86,25 +86,25 @@ public class GroupsController implements ActionListener {
 			break;
 		case GROUPS_UP_ACTION_COMMAND:
 			System.out.println("GROUPS_UP_ACTION_COMMAND");
-			path = groupJTree.getSelectionPath().getPath();
+			path = groupTree.getSelectionPath().getPath();
 			try {
 				if(path.length == 2) {
 					int currentIndex = groupTreeModel.getIndexOfChild(path[0], path[1]);
 					if(currentIndex > 0) {
 						groupTreeModel.moveChild(path[1], path[0], currentIndex-1);
-						groupJTree.setSelectionPath(new TreePath(path));
+						groupTree.setSelectionPath(new TreePath(path));
 					}
 				} else if(path.length == 3) {
 					int currentIndex = groupTreeModel.getIndexOfChild(path[1], path[2]);
 					if(currentIndex > 0) {
 						groupTreeModel.moveChild(path[2], path[1], currentIndex-1);
-						groupJTree.setSelectionPath(new TreePath(path));
+						groupTree.setSelectionPath(new TreePath(path));
 					} else {
 						int groupIndex = groupTreeModel.getIndexOfChild(path[0], path[1]);
 						if(groupIndex > 0) {
 							Object newGroup = groupTreeModel.getChild(path[0], groupIndex-1);
 							groupTreeModel.moveChild(path[2], newGroup, groupTreeModel.getChildCount(newGroup));
-							groupJTree.setSelectionPath(new TreePath(new Object[]{path[0], newGroup, path[2]}));
+							groupTree.setSelectionPath(new TreePath(new Object[]{path[0], newGroup, path[2]}));
 						}
 					}
 				}
@@ -112,14 +112,14 @@ public class GroupsController implements ActionListener {
 			break;
 		case GROUPS_DOWN_ACTION_COMMAND:
 			System.out.println("GROUPS_DOWN_ACTION_COMMAND");
-			path = groupJTree.getSelectionPath().getPath();
+			path = groupTree.getSelectionPath().getPath();
 			try {
 				if(path.length == 2) {
 					int currentIndex = groupTreeModel.getIndexOfChild(path[0], path[1]);
 					int siblingCount = groupTreeModel.getChildCount(path[0]);
 					if(currentIndex < siblingCount-1) {
 						groupTreeModel.moveChild(path[1], path[0], currentIndex+1);
-						groupJTree.setSelectionPath(new TreePath(path));
+						groupTree.setSelectionPath(new TreePath(path));
 					}
 				} else if(path.length == 3) {
 					System.out.println("move question down");
@@ -127,13 +127,13 @@ public class GroupsController implements ActionListener {
 					int siblingCount = groupTreeModel.getChildCount(path[1]);
 					if(currentIndex < siblingCount-1){
 						groupTreeModel.moveChild(path[2], path[1], currentIndex+1);
-						groupJTree.setSelectionPath(new TreePath(path));
+						groupTree.setSelectionPath(new TreePath(path));
 					} else {
 						int groupIndex = groupTreeModel.getIndexOfChild(path[0], path[1]);
 						if(groupIndex < groupTreeModel.getChildCount(path[0])-1) {
 							Object newGroup = groupTreeModel.getChild(path[0], groupIndex+1);
 							groupTreeModel.moveChild(path[2], newGroup, 0);
-							groupJTree.setSelectionPath(new TreePath(new Object[]{path[0], newGroup, path[2]}));
+							groupTree.setSelectionPath(new TreePath(new Object[]{path[0], newGroup, path[2]}));
 						}
 					}
 				}
@@ -141,7 +141,7 @@ public class GroupsController implements ActionListener {
 			break;
 		case GROUPS_REMOVE_ACTION_COMMAND:
 			try {
-				path = groupJTree.getSelectionPath().getPath();
+				path = groupTree.getSelectionPath().getPath();
 				Object parent = path[path.length-2];
 				Object child = path[path.length-1];
 				int index = groupTreeModel.getIndexOfChild(parent, child);
@@ -153,7 +153,7 @@ public class GroupsController implements ActionListener {
 				} else if(siblingCount > 0) {
 					newPath.add(groupTreeModel.getChild(parent, index-1));
 				}
-				groupJTree.setSelectionPath(new TreePath(newPath.toArray()));
+				groupTree.setSelectionPath(new TreePath(newPath.toArray()));
 			} catch (Exception e2) {
 				e2.printStackTrace();
 			}
@@ -165,16 +165,16 @@ public class GroupsController implements ActionListener {
 		case PERSPECTIVES_REMOVE_ACTION_COMMAND:
 			break;
 		case ADD_TO_GROUP_ACTION_COMMAND:
-			path = groupJTree.getSelectionPath().getPath();
-			GroupWidget parent;
+			path = groupTree.getSelectionPath().getPath();
+			MetaGroup parent;
 			int atIndex = 0;
 			if(path.length == 1) { 
 				return; 
 			} else if(path.length == 2) {
-				parent = (GroupWidget)path[1];
+				parent = (MetaGroup)path[1];
 				atIndex = parent.getQuestionCount();
 			} else if(path.length == 3) {
-				parent = (GroupWidget)path[1];
+				parent = (MetaGroup)path[1];
 				atIndex = groupTreeModel.getIndexOfChild(parent, path[2]) + 1;
 			} else {return;}
 			
@@ -183,7 +183,7 @@ public class GroupsController implements ActionListener {
 					MetaQuestion mq = (MetaQuestion)questionJTable.getValueAt(i, 0);
 					TreePath treepath = groupTreeModel.addQuestion(mq, parent, atIndex);
 					atIndex++;
-					groupJTree.setSelectionPath(treepath);
+					groupTree.setSelectionPath(treepath);
 				}
 			}catch (Exception e2) {
 				// TODO: handle exception
@@ -201,16 +201,13 @@ public class GroupsController implements ActionListener {
 				MetaData md = mainController.getDaxploreFile().getMetaData();
 				
 				questionTableModel = new QuestionTableModel(md);
-				questionJTable = new QuestionList(questionTableModel);
+				questionJTable = new QuestionTable(questionTableModel);
 				groupsView.getQuestionsScrollPane().setViewportView(questionJTable);
 				
 				//get groups and perspectives
 				groupTreeModel = new GroupTreeModel(md);
-				groupJTree = new JTree(groupTreeModel);
-				groupJTree.setRootVisible(false);
-				groupJTree.setCellRenderer(groupsView.new GroupTreeCellRenderer());
-				//tree.getPr
-				groupsView.getGroupsScollPane().setViewportView(groupJTree);
+				groupTree = new GroupTree(groupTreeModel);
+				groupsView.getGroupsScollPane().setViewportView(groupTree);
 				
 			} catch (DaxploreException e) {
 				// TODO Auto-generated catch block

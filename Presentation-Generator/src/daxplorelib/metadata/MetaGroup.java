@@ -205,6 +205,15 @@ public class MetaGroup implements Comparable<MetaGroup> {
 		this.textref = textref;
 	}
 	
+	public MetaQuestion getQuestion(int index) {
+		return qList.get(index);
+	}
+	
+	public void addQuestion(MetaQuestion mq, int atIndex) {
+		qList.add(atIndex, mq);
+		modified = true;
+	}
+	
 	public void addQuestion(MetaQuestion mq) {
 		qList.add(mq);
 		modified = true;
@@ -254,5 +263,9 @@ public class MetaGroup implements Comparable<MetaGroup> {
 	@Override
 	public int compareTo(MetaGroup o) {
 		return index < o.index ? 1: -1;
+	}
+
+	public int getQuestionCount() {
+		return qList.size();
 	}
 }

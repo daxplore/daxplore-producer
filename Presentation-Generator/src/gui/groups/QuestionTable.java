@@ -24,7 +24,7 @@ import daxplorelib.metadata.MetaData;
 import daxplorelib.metadata.MetaQuestion;
 
 @SuppressWarnings("serial")
-public class QuestionList extends JTable {
+public class QuestionTable extends JTable {
 	
 	protected int mouseOver;
 	
@@ -35,7 +35,7 @@ public class QuestionList extends JTable {
         listSelectionBackground = new Color(200, 200, 255);
     }
 	
-	public QuestionList(QuestionTableModel model) throws DaxploreException {
+	public QuestionTable(QuestionTableModel model) throws DaxploreException {
 		super(model);
 		this.setTableHeader(null);
 		
