@@ -102,6 +102,7 @@ public final class OpenController implements ActionListener {
 			} catch (DaxploreException e1) {
 				System.out.println("Saving daxplore file failure.");
 				e1.printStackTrace();
+				return;
 			}
 			System.out.println("Saving: " + file.getName());
 		}
