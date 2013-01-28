@@ -27,12 +27,20 @@ public class RawImport {
 		this.connection = sqliteDatabase;
 
 		this.rawmeta = new RawMeta(connection);
-		this.rawdata = new RawData(this.rawmeta, connection);
+		this.rawdata = new RawData(connection);
 	}
 	
 	public void importSPSS(SPSSFile spssFile, Charset charset) throws SQLException, DaxploreException{	
 		rawmeta.importSPSS(spssFile, charset);
-		rawdata.importSPSS(spssFile, charset, rawmeta);
+		rawdata.importSPSS(spssFile);
+	}
+	
+	public void importSPSSData(SPSSFile spssFile) throws SQLException, DaxploreException {
+		rawdata.importSPSS(spssFile);
+	}
+	
+	public void importSPSSMeta(SPSSFile spssFile, Charset charset) throws SQLException {
+		rawmeta.importSPSS(spssFile, charset);
 	}
 	
 	/**

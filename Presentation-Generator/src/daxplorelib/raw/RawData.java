@@ -8,10 +8,14 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.Collection;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.Map;
 
 import org.opendatafoundation.data.spss.SPSSFile;
+import org.opendatafoundation.data.spss.SPSSNumericVariable;
+import org.opendatafoundation.data.spss.SPSSStringVariable;
+import org.opendatafoundation.data.spss.SPSSVariable;
 
 import tools.MyTools;
 import daxplorelib.DaxploreException;
@@ -23,11 +27,9 @@ public class RawData {
 	protected final DaxploreTable table = new DaxploreTable(null, "rawdata");
 	static final String tablename = "rawdata";
 	Connection connection;
-	RawMeta metadata;
 	
-	public RawData(RawMeta metadata, Connection connection) throws SQLException{
+	public RawData(Connection connection) throws SQLException{
 		this.connection = connection;
-		this.metadata = metadata;
 		if(SQLTools.tableExists(table.name, connection)){
 			PreparedStatement stmt = connection.prepareStatement("SELECT sql FROM sqlite_master WHERE name=?");
 			stmt.setString(1, table.name);
@@ -38,8 +40,7 @@ public class RawData {
 		}
 	}
 	
-	public void importSPSS(SPSSFile spssFile, Charset charset, RawMeta metadata) throws SQLException, DaxploreException {
-		this.metadata = metadata;
+	public void importSPSS(SPSSFile spssFile) throws SQLException, DaxploreException {
 		
 		if(SQLTools.tableExists("rawdata", connection)) {
 			Statement stmt = connection.createStatement();
@@ -47,7 +48,19 @@ public class RawData {
 			stmt.close();
 		}
 		
-		Map<String, VariableType> columns = metadata.getColumnMap();
+		Map<String, VariableType> columns = new LinkedHashMap<String, VariableType>();//metadata.getColumnMap();
+		
+		for(int i = 0; i < spssFile.getVariableCount(); i++){
+			SPSSVariable var = spssFile.getVariable(i);
+			VariableType qtype;
+			if(var instanceof SPSSNumericVariable){
+				qtype = VariableType.NUMERIC;
+				columns.put(var.getShortName(), qtype);
+			} else if (var instanceof SPSSStringVariable){
+				qtype = VariableType.TEXT;
+				columns.put(var.getShortName(), qtype);
+			} else throw new Error("shuoldn't happen");
+		}
 		
 		Statement stmt = connection.createStatement();
 		String createString = createRawDataTableString(columns, connection);

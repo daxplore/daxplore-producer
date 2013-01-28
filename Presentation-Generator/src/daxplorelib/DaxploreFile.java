@@ -3,6 +3,7 @@ package daxplorelib;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.RandomAccessFile;
 import java.nio.charset.Charset;
 import java.sql.Connection;
 import java.sql.DriverManager;
@@ -28,6 +29,7 @@ public class DaxploreFile {
 	About about;
 	File file = null;
 	MetaData metadata;
+	SPSSFile sf = null;
 	
 	public static DaxploreFile createFromExistingFile(File file) throws DaxploreException {
 		try {
@@ -86,6 +88,84 @@ public class DaxploreFile {
 	
 	public DaxploreMemoryFile getInMemoryFile() throws DaxploreException {
 		return DaxploreMemoryFile.createCopy(this);
+	}
+	
+	public void openSPSS(File spssFile, Charset charset) throws FileNotFoundException, IOException, DaxploreException {
+		FileFormatInfo ffi = new FileFormatInfo();
+		ffi.namesOnFirstLine = false;
+		ffi.asciiFormat = ASCIIFormat.CSV;
+		ffi.compatibility = Compatibility.GENERIC;
+		try {
+			sf = new SPSSFile(spssFile,charset);
+			sf.logFlag = false;
+			sf.loadMetadata();
+		} catch (SPSSFileException e2) {
+			throw new DaxploreException("SPSSFileException", e2);
+		}
+	}
+	
+	public void importDataFromSPSS() throws DaxploreException {
+		if(sf == null) {
+			throw new DaxploreException("No SPSSfile loaded");
+		}
+		boolean autocommit = true;
+		try {
+			autocommit = connection.getAutoCommit();
+			connection.setAutoCommit(false);
+			int isolation = connection.getTransactionIsolation();
+			connection.setTransactionIsolation(Connection.TRANSACTION_READ_UNCOMMITTED);
+			
+			RawImport rawImport = new RawImport(connection);
+
+			rawImport.importSPSSData(sf);
+
+				
+			about.setImport(sf.file.getName());
+			
+			connection.commit();
+			connection.setTransactionIsolation(isolation);
+			connection.setAutoCommit(autocommit);
+		} catch (SQLException e) {
+			MyTools.printSQLExeption(e);
+			try {
+				connection.rollback();
+			} catch (SQLException e1) {
+				throw new DaxploreException("Import error. Could not rollback.", e);
+			}
+			throw new DaxploreException("Import error.", e);
+		}
+	}
+	
+	public void importMetaDataFromSPSS(Charset charset) throws DaxploreException {
+		if(sf == null) {
+			throw new DaxploreException("No SPSSfile loaded");
+		}
+		boolean autocommit = true;
+		try {
+			autocommit = connection.getAutoCommit();
+			connection.setAutoCommit(false);
+			int isolation = connection.getTransactionIsolation();
+			connection.setTransactionIsolation(Connection.TRANSACTION_READ_UNCOMMITTED);
+			
+			RawImport rawImport = new RawImport(connection);
+
+			rawImport.importSPSSMeta(sf, charset);
+
+				
+			about.setImport(sf.file.getName());
+			
+			connection.commit();
+			connection.setTransactionIsolation(isolation);
+			connection.setAutoCommit(autocommit);
+		} catch (SQLException e) {
+			MyTools.printSQLExeption(e);
+			try {
+				connection.rollback();
+			} catch (SQLException e1) {
+				throw new DaxploreException("Import error. Could not rollback.", e);
+			}
+			throw new DaxploreException("Import error.", e);
+		}
 	}
 	
 	public void importSPSS(File spssFile, Charset charset) throws FileNotFoundException, IOException, DaxploreException{
