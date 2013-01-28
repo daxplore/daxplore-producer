@@ -2,6 +2,7 @@ package gui.importwizard;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.ItemListener;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -26,6 +27,9 @@ public class OpenFilePanelDescriptor extends ImportWizardDescriptor implements A
     	openFilePanel = (OpenFilePanel) super.getPanelComponent();
     	openFilePanel.addOpenFileButtonActionListener(this);
     	openFilePanel.openFileButton.setActionCommand(OPEN_SPSS_FILE_BUTTON_COMMAND);
+    	openFilePanel.addCheckBoxImportMetaDataActionListener(this);
+    	openFilePanel.addCheckBoxImportRawActionListener(this);
+    	
     }
     
     @Override
@@ -54,11 +58,13 @@ public class OpenFilePanelDescriptor extends ImportWizardDescriptor implements A
 	}
 	
     private void setNextButtonAccordingToFile() {
-    	// keep next button disabled until a file has been loaded into memory.
-         if (getWizard().getmainController().getSpssFile() == null)
-            getWizard().setNextFinishButtonEnabled(false);
-         else
-            getWizard().setNextFinishButtonEnabled(true);           
+    	// keep next button disabled until a file has been loaded into memory. And, check the boxes.
+        if ((getWizard().getmainController().getSpssFile() != null) &&
+        	 (openFilePanel.checkBoxImportRaw.isSelected() == true || openFilePanel.checkBoxImportMetaData.isSelected() == true))
+        	getWizard().setNextFinishButtonEnabled(true);
+        else
+        	// in ANY other case, just keep it disabled, we don't want any bypass code.
+        	getWizard().setNextFinishButtonEnabled(false);           
     }
 
 	/**
