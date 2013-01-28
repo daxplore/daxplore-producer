@@ -4,8 +4,10 @@ import gui.edit.EditTextView;
 import gui.groups.GroupsView;
 import gui.navigation.NavigationView;
 import gui.open.OpenFileView;
+import gui.question.QuestionView;
 import gui.tools.ToolsView;
 import gui.widget.QuestionWidget;
+import gui.widget.TextWidget;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -15,6 +17,7 @@ import java.util.Stack;
 import javax.swing.JFrame;
 
 import daxplorelib.DaxploreFile;
+import daxplorelib.metadata.MetaQuestion;
 import daxplorelib.metadata.TextReference;
 
 /**
@@ -30,6 +33,7 @@ public class MainController implements ActionListener {
 	private ButtonPanelView buttonPanelView;
 	private ToolsView toolsView;
 	private NavigationView navigationView;
+	private QuestionView questionView;
 	private MainView mainView;
 	
 	private Stack<HistoryItem> history = new Stack<HistoryItem>();
@@ -42,7 +46,8 @@ public class MainController implements ActionListener {
 		OPENFILEVIEW,
 		EDITTEXTVIEW,
 		GROUPSVIEW,
-		TOOLSVIEW;
+		TOOLSVIEW,
+		QUESTIONVIEW;
 	}
 	
 	private class HistoryItem {
@@ -59,6 +64,7 @@ public class MainController implements ActionListener {
 	public MainController(MainView mainView) {
 		this.mainView = mainView;
 		QuestionWidget.mainController = this;
+		TextWidget.mainController = this;
 	}
 	
 	public void switchTo(Views view) {
@@ -88,6 +94,11 @@ public class MainController implements ActionListener {
 			case GROUPSVIEW:
 				break;
 			case TOOLSVIEW:
+				break;
+			case QUESTIONVIEW:
+				if(hi.command instanceof MetaQuestion) {
+					questionView.getController().openMetaQuestion((MetaQuestion)hi.command);
+				}
 				break;
 			}
 		}
@@ -172,6 +183,14 @@ public class MainController implements ActionListener {
 	
 	public void setNavigationView(NavigationView navigationView){
 		this.navigationView = navigationView;
+	}
+
+	public QuestionView getQuestionView() {
+		return questionView;
+	}
+
+	public void setQuestionView(QuestionView questionView) {
+		this.questionView = questionView;
 	}
 
 	public ToolsView getToolsView() {

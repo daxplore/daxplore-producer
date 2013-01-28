@@ -29,6 +29,7 @@ public class ButtonPanelView extends JPanel {
 	private JRadioButton groupsButton;
 	private JRadioButton editButton;
 	private JRadioButton toolsButton;
+	private ButtonGroup buttonGroup;
 	
 	
 	// getters and setters.
@@ -66,7 +67,7 @@ public class ButtonPanelView extends JPanel {
 
 	public ButtonPanelView(final MainController mainController) {
 		
-		ButtonGroup buttonGroup = new ButtonGroup();
+		buttonGroup = new ButtonGroup();
 		this.mainController = mainController;
 		
 		// create the button panel
@@ -153,6 +154,8 @@ public class ButtonPanelView extends JPanel {
 		case TOOLSVIEW:
 			toolsButton.setSelected(true);
 			break;
+		default:
+			buttonGroup.clearSelection();
 		}
 	}
 }

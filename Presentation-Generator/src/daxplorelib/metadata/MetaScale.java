@@ -179,6 +179,18 @@ public class MetaScale {
 		public Option(TextReference textRef, double value, NumberlineCoverage transformation) {
 			this.textRef = textRef; this.value = value; this.transformation = transformation;
 		}
+
+		public TextReference getTextRef() {
+			return textRef;
+		}
+
+		public double getValue() {
+			return value;
+		}
+
+		public NumberlineCoverage getTransformation() {
+			return transformation;
+		}
 	}
 	
 	

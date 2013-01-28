@@ -1,40 +1,35 @@
 package gui.widget;
 
-import gui.MainController;
-import gui.MainController.Views;
-
 import java.awt.BorderLayout;
+import java.awt.Color;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+
+import gui.MainController;
+import gui.MainController.Views;
 
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JLabel;
-import javax.swing.JPanel;
 import javax.swing.SwingConstants;
+import javax.swing.border.LineBorder;
 
-import daxplorelib.metadata.MetaQuestion;
+import daxplorelib.metadata.TextReference;
 
 @SuppressWarnings("serial")
-public class QuestionWidget extends JPanel {
+public class TextWidget extends OurListWidget {
+
+	private TextReference textRef;
 	
-	public MetaQuestion metaQuestion;
-	
-	private JPanel labelHolder = new JPanel();
-	private JLabel label;
+	private JLabel label = new JLabel();
 
 	private JButton gotoButton;
 	
 	public static MainController mainController; //TODO: fulhack
-	
-	public QuestionWidget(MetaQuestion metaQuestion) {
-		this();
-		setMetaQuestion(metaQuestion);
-	}
  	
-	public QuestionWidget() {
+	public TextWidget() {
 		setLayout(new BorderLayout(0, 0));
-		add(labelHolder, BorderLayout.WEST);
+		add(label, BorderLayout.WEST);
 		gotoButton = new JButton("");
 		gotoButton.setHideActionText(true);
 		gotoButton.setIcon(new ImageIcon(QuestionWidget.class.getResource("/gui/resources/edit_go_32.png")));
@@ -46,26 +41,33 @@ public class QuestionWidget extends JPanel {
 		gotoButton.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				//mainController.switchTo(Views.EDITTEXTVIEW, metaQuestion.getFullTextRef());
-				mainController.switchTo(Views.QUESTIONVIEW, metaQuestion);
+				mainController.switchTo(Views.EDITTEXTVIEW, textRef);
 			}
 		});
 		add(gotoButton, BorderLayout.EAST);
 	}
 	
-	public void setMetaQuestion(MetaQuestion mq) {
-		this.metaQuestion = mq;
-		label = new JLabel(mq.getId());
+	public void setTextReference(TextReference tr) {
+		this.textRef = tr;
+		label.setText(tr.getRef());
 		label.setHorizontalAlignment(SwingConstants.LEFT);
-		labelHolder.removeAll();
-		labelHolder.add(label);
 	}
-	
-	public MetaQuestion getMetaQuestion() {
-		return metaQuestion;
+
+	public TextReference getTextReference() {
+		return textRef;
 	}
 	
 	public void showEdit(boolean show) {
 		gotoButton.setVisible(show);
 		gotoButton.setEnabled(show);
+	}
+	
+	public void setIndependetView(boolean indie) {
+		if(indie) {
+			setBorder(new LineBorder(new Color(0,0,0), 1));
+			setBackground(new Color(255,255,255));
+		} else {
+			setBorder(null);
+		}
 	}
 }

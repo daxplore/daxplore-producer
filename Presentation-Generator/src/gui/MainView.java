@@ -5,6 +5,7 @@ import gui.edit.EditTextView;
 import gui.groups.GroupsView;
 import gui.navigation.NavigationView;
 import gui.open.OpenFileView;
+import gui.question.QuestionView;
 import gui.tools.ToolsView;
 
 import java.awt.BorderLayout;
@@ -129,6 +130,9 @@ public class MainView {
 		
 		mainController.setToolsView(new ToolsView(mainController));
 		mainPanel.add(mainController.getToolsView(), Views.TOOLSVIEW.toString());
+		
+		mainController.setQuestionView(new QuestionView(mainController));
+		mainPanel.add(mainController.getQuestionView(), Views.QUESTIONVIEW.toString());
 		
 		mainPanel.setRequestFocusEnabled(true);
 		
