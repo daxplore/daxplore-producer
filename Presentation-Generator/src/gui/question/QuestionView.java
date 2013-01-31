@@ -11,6 +11,7 @@ import javax.swing.GroupLayout;
 import javax.swing.GroupLayout.Alignment;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
+import javax.swing.JScrollPane;
 import javax.swing.LayoutStyle.ComponentPlacement;
 import javax.swing.ListCellRenderer;
 import javax.swing.border.LineBorder;
@@ -25,6 +26,7 @@ import java.awt.GridBagLayout;
 import java.awt.GridBagConstraints;
 import java.awt.Insets;
 import javax.swing.JList;
+import java.awt.FlowLayout;
 
 @SuppressWarnings("serial")
 public class QuestionView extends JPanel {
@@ -38,6 +40,7 @@ public class QuestionView extends JPanel {
 	private TextWidget shortText = new TextWidget();
 	private JPanel panel_1;
 	private JList<MetaScale.Option> list;
+	private JScrollPane scaleScrollPane;
 	
 	class OptionListRenderer implements ListCellRenderer<MetaScale.Option> {
 
@@ -51,20 +54,10 @@ public class QuestionView extends JPanel {
 	public QuestionView(MainController mainController) {
 		this.mainController = mainController;
 		this.controller = new QuestionController(this.mainController, this);
-		GridBagLayout gridBagLayout = new GridBagLayout();
-		gridBagLayout.columnWidths = new int[]{440, 10, 0};
-		gridBagLayout.rowHeights = new int[]{300, 0};
-		gridBagLayout.columnWeights = new double[]{0.0, 0.0, Double.MIN_VALUE};
-		gridBagLayout.rowWeights = new double[]{0.0, Double.MIN_VALUE};
-		setLayout(gridBagLayout);
+		setLayout(new BorderLayout(0, 0));
 		
 		JPanel panel = new JPanel();
-		GridBagConstraints gbc_panel = new GridBagConstraints();
-		gbc_panel.fill = GridBagConstraints.BOTH;
-		gbc_panel.insets = new Insets(0, 0, 0, 5);
-		gbc_panel.gridx = 0;
-		gbc_panel.gridy = 0;
-		add(panel, gbc_panel);
+		add(panel, BorderLayout.WEST);
 		
 		questionID = new JLabel();
 		
@@ -107,15 +100,11 @@ public class QuestionView extends JPanel {
 		panel.setLayout(gl_panel);
 		
 		panel_1 = new JPanel();
-		GridBagConstraints gbc_panel_1 = new GridBagConstraints();
-		gbc_panel_1.anchor = GridBagConstraints.WEST;
-		gbc_panel_1.fill = GridBagConstraints.VERTICAL;
-		gbc_panel_1.gridx = 1;
-		gbc_panel_1.gridy = 0;
-		add(panel_1, gbc_panel_1);
+		add(panel_1, BorderLayout.CENTER);
 		
-		list = new JList<Option>();
-		panel_1.add(list);
+		
+		scaleScrollPane = new JScrollPane();
+		panel_1.add(scaleScrollPane);
 	}
 
 	public QuestionController getController() {
@@ -126,7 +115,9 @@ public class QuestionView extends JPanel {
 		questionID.setText(mq.getId());
 		fullText.setTextReference(mq.getFullTextRef());
 		shortText.setTextReference(mq.getShortTextRef());
-		list.setModel(dlm);
+		ScaleTableModel scaleTableModel = new ScaleTableModel(mq.getScale());
+		ScaleTable scaleTable = new ScaleTable(scaleTableModel);
+		scaleScrollPane.setViewportView(scaleTable);
 	    this.validate();
 	    this.repaint();
 	}
