@@ -12,6 +12,7 @@ import java.util.Locale;
 import java.util.Map;
 
 import tools.NumberlineCoverage;
+import tools.NumberlineCoverage.NumberlineCoverageException;
 import daxplorelib.DaxploreTable;
 import daxplorelib.SQLTools;
 import daxplorelib.metadata.TextReference.TextReferenceManager;
@@ -57,7 +58,11 @@ public class MetaScale {
 				ResultSet rs = stmt.executeQuery();
 				NumberlineCoverage ignore;
 				if(rs.next()) {
-					ignore = new NumberlineCoverage(rs.getString("ignore"));
+					try {
+						ignore = new NumberlineCoverage(rs.getString("ignore"));
+					} catch (NumberlineCoverageException e) {
+						ignore = new NumberlineCoverage(); //TODO: do something if corrupt data is stored in database?
+					}
 				} else {
 					ignore = new NumberlineCoverage();
 				}
@@ -69,11 +74,18 @@ public class MetaScale {
 				List<Option> options = new LinkedList<Option>();
 				
 				while(rs.next()) {
+					NumberlineCoverage numberlineCoverage;
+					try {
+						numberlineCoverage = new NumberlineCoverage(rs.getString("transform"));
+					} catch (NumberlineCoverageException e) {
+						numberlineCoverage = new NumberlineCoverage(); //TODO: do something if corrupt data is stored in database?
+					}
+					
 					options.add(
 							new Option(
 									textsManager.get(rs.getString("textref")), 
 									rs.getDouble("value"), 
-									new NumberlineCoverage(rs.getString("transform"))));
+									numberlineCoverage));
 				}
 				MetaScale ms = new MetaScale(id, options, ignore);
 				scaleMap.put(id, ms);

@@ -1,19 +1,18 @@
 package gui.groups;
 
-import gui.widget.GroupWidget;
-import gui.widget.OurListWidget;
+import gui.widget.AbstractWidgetEditor;
+import gui.widget.AbstractWidgetEditor.InvalidContentException;
+import gui.widget.GroupEditor;
+import gui.widget.GroupRenderer;
 import gui.widget.QuestionWidget;
 
 import java.awt.Color;
 import java.awt.Component;
 import java.util.EventObject;
+import java.util.Locale;
 
 import javax.swing.AbstractCellEditor;
-import javax.swing.JPanel;
 import javax.swing.JTree;
-import javax.swing.UIDefaults;
-import javax.swing.UIManager;
-import javax.swing.event.CellEditorListener;
 import javax.swing.tree.TreeCellEditor;
 import javax.swing.tree.TreeCellRenderer;
 
@@ -25,13 +24,14 @@ public class GroupTree extends JTree {
 	
     static Color listBackground, listSelectionBackground;
     static {
-        UIDefaults uid = UIManager.getLookAndFeel().getDefaults();
         listBackground = new Color(255,255,255);
         listSelectionBackground = new Color(200, 200, 255);
     }
     
     public GroupTree(GroupTreeModel groupTreeModel) {
     	super(groupTreeModel);
+    	System.out.println("Pretty print group tree");
+    	System.out.println(groupTreeModel.prettyPrint(new Locale("sv")));
     	setRootVisible(false);
     	GroupTreeCellRendererEditor groupTreeCellRendererEditor = new GroupTreeCellRendererEditor();
     	setCellRenderer(groupTreeCellRendererEditor);
@@ -42,21 +42,21 @@ public class GroupTree extends JTree {
 	class GroupTreeCellRendererEditor extends AbstractCellEditor implements TreeCellRenderer, TreeCellEditor {
 		
 		private QuestionWidget questionRenderer = new QuestionWidget();
-		private GroupWidget groupRenderer = new GroupWidget();
-		private JPanel editor;
+		private GroupRenderer groupRenderer = new GroupRenderer();
+		private AbstractWidgetEditor<?> editor;
 		
 		@Override
 		public Component getTreeCellRendererComponent(JTree tree, Object value, boolean selected, boolean expanded, boolean leaf, int row, boolean hasFocus) {
 			Component comp;
 			if(value instanceof MetaQuestion) {
 				MetaQuestion mq = (MetaQuestion)value;
-				questionRenderer.setMetaQuestion(mq);
+				questionRenderer.setContent(mq);
 				comp = questionRenderer;
 			} else if(value instanceof MetaGroup) {
 				MetaGroup mg = (MetaGroup)value;
-				groupRenderer.setMetaGroup(mg);
+				groupRenderer.setContent(mg);
 				comp = groupRenderer;
-			} else return new Component() {};
+			} else throw new AssertionError();
 			
 			int mouseOver = -1;
 			Color bgColor = null;
@@ -83,23 +83,22 @@ public class GroupTree extends JTree {
 				QuestionWidget qEdit = new QuestionWidget((MetaQuestion)value);
 				editor = qEdit;
 			} else if(value instanceof MetaGroup) {
-				GroupWidget gEdit = new GroupWidget();
-				gEdit.setMetaGroup((MetaGroup)value, true);
+				GroupEditor gEdit = new GroupEditor();
+				gEdit.setContent((MetaGroup)value);
 				editor = gEdit;
 			} else {
-				editor = null;
+				throw new AssertionError(); 
 			}
 			return editor;
 		}
 		
 		@Override
 		public Object getCellEditorValue() {
-			if(editor instanceof QuestionWidget) {
-				return ((QuestionWidget)editor).getMetaQuestion();
-			} else if(editor instanceof GroupWidget) {
-				return ((GroupWidget)editor).getMetaGroup();
+			try {
+				return editor.getContent();
+			} catch (InvalidContentException e) {
+				return null;
 			}
-			return null;
 		}
 
 	    @Override

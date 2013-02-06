@@ -1,7 +1,7 @@
 package gui.groups;
 
 import gui.MainController;
-import gui.widget.GroupWidget;
+import gui.widget.GroupRenderer;
 import gui.widget.QuestionWidget;
 
 import java.awt.event.ActionEvent;

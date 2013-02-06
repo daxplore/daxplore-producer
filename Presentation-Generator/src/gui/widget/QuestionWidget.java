@@ -16,7 +16,7 @@ import javax.swing.SwingConstants;
 import daxplorelib.metadata.MetaQuestion;
 
 @SuppressWarnings("serial")
-public class QuestionWidget extends JPanel {
+public class QuestionWidget extends AbstractWidgetEditor<MetaQuestion> {
 	
 	public MetaQuestion metaQuestion;
 	
@@ -29,7 +29,7 @@ public class QuestionWidget extends JPanel {
 	
 	public QuestionWidget(MetaQuestion metaQuestion) {
 		this();
-		setMetaQuestion(metaQuestion);
+		setContent(metaQuestion);
 	}
  	
 	public QuestionWidget() {
@@ -52,20 +52,22 @@ public class QuestionWidget extends JPanel {
 		add(gotoButton, BorderLayout.EAST);
 	}
 	
-	public void setMetaQuestion(MetaQuestion mq) {
-		this.metaQuestion = mq;
-		label = new JLabel(mq.getId());
+	public void showEdit(boolean show) {
+		gotoButton.setVisible(show);
+		gotoButton.setEnabled(show);
+	}
+
+	@Override
+	public void setContent(MetaQuestion value) {
+		this.metaQuestion = value;
+		label = new JLabel(metaQuestion.getId());
 		label.setHorizontalAlignment(SwingConstants.LEFT);
 		labelHolder.removeAll();
 		labelHolder.add(label);
 	}
-	
-	public MetaQuestion getMetaQuestion() {
+
+	@Override
+	public MetaQuestion getContent() throws gui.widget.AbstractWidgetEditor.InvalidContentException {
 		return metaQuestion;
-	}
-	
-	public void showEdit(boolean show) {
-		gotoButton.setVisible(show);
-		gotoButton.setEnabled(show);
 	}
 }

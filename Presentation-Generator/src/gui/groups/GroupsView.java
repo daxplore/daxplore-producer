@@ -1,7 +1,7 @@
 package gui.groups;
 
 import gui.MainController;
-import gui.widget.GroupWidget;
+import gui.widget.GroupRenderer;
 import gui.widget.QuestionWidget;
 
 import java.awt.BorderLayout;
@@ -49,14 +49,14 @@ public class GroupsView extends JPanel {
 			if(selected) {
 				if(value instanceof QuestionWidget) {
 					((QuestionWidget)value).setBackground(new Color(255, 255, 200));
-				} else if (value instanceof GroupWidget) {
-					((GroupWidget)value).setBackground(new Color(200, 200, 255));
+				} else if (value instanceof GroupRenderer) {
+					((GroupRenderer)value).setBackground(new Color(200, 200, 255));
 				}
 			} else {
 				if(value instanceof QuestionWidget) {
 					((QuestionWidget)value).setBackground(new Color(255, 255, 255));
-				} else if (value instanceof GroupWidget) {
-					((GroupWidget)value).setBackground(new Color(255, 255, 255));
+				} else if (value instanceof GroupRenderer) {
+					((GroupRenderer)value).setBackground(new Color(255, 255, 255));
 				}
 			}
 			return (Component)value;

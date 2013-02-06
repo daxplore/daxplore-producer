@@ -2,6 +2,7 @@ package gui.groups;
 
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Locale;
 
 import javax.swing.JLabel;
 import javax.swing.JPanel;
@@ -261,4 +262,14 @@ class GroupTreeModel implements TreeModel {
 		}
 	}
 	
+	public String prettyPrint(Locale locale) {
+		StringBuilder sb = new StringBuilder();
+		for(MetaGroup mg: groups) {
+			sb.append(mg.getTextRef().get(locale) + "\n");
+			for(MetaQuestion mq: mg.getQuestions()) {
+				sb.append("\t " + mq.getFullTextRef().get(locale) + "\n");
+			}
+		}
+		return sb.toString();
+	}
 }

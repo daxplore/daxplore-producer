@@ -17,7 +17,7 @@ import javax.swing.border.LineBorder;
 import daxplorelib.metadata.TextReference;
 
 @SuppressWarnings("serial")
-public class TextWidget extends OurListWidget {
+public class TextWidget extends AbstractWidgetEditor<TextReference>{
 
 	private TextReference textRef;
 	
@@ -46,17 +46,7 @@ public class TextWidget extends OurListWidget {
 		});
 		add(gotoButton, BorderLayout.EAST);
 	}
-	
-	public void setTextReference(TextReference tr) {
-		this.textRef = tr;
-		label.setText(tr.getRef());
-		label.setHorizontalAlignment(SwingConstants.LEFT);
-	}
 
-	public TextReference getTextReference() {
-		return textRef;
-	}
-	
 	public void showEdit(boolean show) {
 		gotoButton.setVisible(show);
 		gotoButton.setEnabled(show);
@@ -69,5 +59,17 @@ public class TextWidget extends OurListWidget {
 		} else {
 			setBorder(null);
 		}
+	}
+
+	@Override
+	public TextReference getContent() throws gui.widget.AbstractWidgetEditor.InvalidContentException {
+		return textRef;
+	}
+
+	@Override
+	public void setContent(TextReference value) {
+		this.textRef = value;
+		label.setText(textRef.getRef());
+		label.setHorizontalAlignment(SwingConstants.LEFT);
 	}
 }

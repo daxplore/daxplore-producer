@@ -1,5 +1,6 @@
 package gui.groups;
 
+import gui.widget.AbstractWidgetEditor.InvalidContentException;
 import gui.widget.QuestionWidget;
 
 import java.awt.Color;
@@ -14,13 +15,10 @@ import java.util.EventObject;
 import javax.swing.AbstractCellEditor;
 import javax.swing.JTable;
 import javax.swing.ListSelectionModel;
-import javax.swing.UIDefaults;
-import javax.swing.UIManager;
 import javax.swing.table.TableCellEditor;
 import javax.swing.table.TableCellRenderer;
 
 import daxplorelib.DaxploreException;
-import daxplorelib.metadata.MetaData;
 import daxplorelib.metadata.MetaQuestion;
 
 @SuppressWarnings("serial")
@@ -30,7 +28,6 @@ public class QuestionTable extends JTable {
 	
     static Color listBackground, listSelectionBackground;
     static {
-        UIDefaults uid = UIManager.getLookAndFeel().getDefaults();
         listBackground = new Color(255,255,255);
         listSelectionBackground = new Color(200, 200, 255);
     }
@@ -70,7 +67,7 @@ public class QuestionTable extends JTable {
 	    @Override
 	    public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
 		    if(value instanceof MetaQuestion) {
-		    	qwRenderer.setMetaQuestion((MetaQuestion)value);
+		    	qwRenderer.setContent((MetaQuestion)value);
 		    	Color bgColor = null;
 			    if (row == mouseOver) {
 			        qwRenderer.showEdit(true);
@@ -104,7 +101,7 @@ public class QuestionTable extends JTable {
 		@Override
 		public Component getTableCellEditorComponent(JTable table, Object value, boolean isSelected, int row, int column) {
 		    if(value instanceof MetaQuestion) {
-		    	qwEditor.setMetaQuestion((MetaQuestion)value);
+		    	qwEditor.setContent((MetaQuestion)value);
 		    	Color bgColor = null;
 			    if (row == mouseOver) {
 			    	qwEditor.showEdit(true);
@@ -138,7 +135,11 @@ public class QuestionTable extends JTable {
 
 		@Override
 		public Object getCellEditorValue() {
-			return qwEditor.getMetaQuestion();
+			try {
+				return qwEditor.getContent();
+			} catch (InvalidContentException e) {
+				return null;
+			}
 		}
 
 	    @Override

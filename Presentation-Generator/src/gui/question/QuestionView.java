@@ -5,11 +5,13 @@ import gui.widget.TextWidget;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
+import java.awt.Component;
 
 import javax.swing.DefaultListModel;
 import javax.swing.GroupLayout;
 import javax.swing.GroupLayout.Alignment;
 import javax.swing.JLabel;
+import javax.swing.JList;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.LayoutStyle.ComponentPlacement;
@@ -20,13 +22,6 @@ import javax.swing.border.TitledBorder;
 import daxplorelib.metadata.MetaQuestion;
 import daxplorelib.metadata.MetaScale;
 import daxplorelib.metadata.MetaScale.Option;
-
-import java.awt.Component;
-import java.awt.GridBagLayout;
-import java.awt.GridBagConstraints;
-import java.awt.Insets;
-import javax.swing.JList;
-import java.awt.FlowLayout;
 
 @SuppressWarnings("serial")
 public class QuestionView extends JPanel {
@@ -39,7 +34,6 @@ public class QuestionView extends JPanel {
 	private TextWidget fullText = new TextWidget();
 	private TextWidget shortText = new TextWidget();
 	private JPanel panel_1;
-	private JList<MetaScale.Option> list;
 	private JScrollPane scaleScrollPane;
 	
 	class OptionListRenderer implements ListCellRenderer<MetaScale.Option> {
@@ -113,8 +107,8 @@ public class QuestionView extends JPanel {
 	
 	void setMetaQuestion(MetaQuestion mq, DefaultListModel<MetaScale.Option> dlm) {
 		questionID.setText(mq.getId());
-		fullText.setTextReference(mq.getFullTextRef());
-		shortText.setTextReference(mq.getShortTextRef());
+		fullText.setContent(mq.getFullTextRef());
+		shortText.setContent(mq.getShortTextRef());
 		ScaleTableModel scaleTableModel = new ScaleTableModel(mq.getScale());
 		ScaleTable scaleTable = new ScaleTable(scaleTableModel);
 		scaleScrollPane.setViewportView(scaleTable);

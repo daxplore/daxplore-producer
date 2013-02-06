@@ -23,18 +23,49 @@ public class NumberlineCoverage {
 			}
 		}
 		
-		public Interval(String inter) {
+		public Interval(String inter) throws NumberlineCoverageException {
 			try { // really an if-statement: if(inter is double)
 				Double value = Double.valueOf(inter);
 				low = value;high = value; 
 				lowInclusive = true; highInclusive = true;
 			} catch (NumberFormatException e) {
-				lowInclusive = inter.charAt(0) == '[';
-				highInclusive = inter.charAt(inter.length() -1) == ']';
+				if(inter == null || inter.length() < 5) {
+					throw new NumberlineCoverageException("Malformed interval string: " + inter);
+				}
+				switch(inter.charAt(0)) {
+				case '[':
+					lowInclusive = true;
+					break;
+				case '(':
+					lowInclusive = false;
+					break;
+				default:
+					throw new NumberlineCoverageException("Malformed interval string: " + inter);
+				}
+				
+				switch(inter.charAt(inter.length()-1)) {
+				case ']':
+					highInclusive = true;
+					break;
+				case '[':
+					highInclusive = false;
+					break;
+				default:
+					throw new NumberlineCoverageException("Malformed interval string: " + inter);
+				}
+				
 				inter = inter.substring(1, inter.length()-1);
 				String[] numbers = inter.split(",");
-				low = Double.parseDouble(numbers[0]);
-				high = Double.parseDouble(numbers[1]);
+				if(numbers.length != 2) {
+					throw new NumberlineCoverageException("Malformed interval string: " + inter);
+				}
+				
+				try {
+					low = Double.parseDouble(numbers[0]);
+					high = Double.parseDouble(numbers[1]);
+				} catch (NumberFormatException e2) {
+					throw new NumberlineCoverageException("Malformed interval string: " + inter);
+				}
 			}
 		}
 		
@@ -77,7 +108,7 @@ public class NumberlineCoverage {
 	
 	List<Interval> intervals = new LinkedList<Interval>();
 	
-	public NumberlineCoverage(String intervalString) {
+	public NumberlineCoverage(String intervalString) throws NumberlineCoverageException {
 		if(intervalString.length() == 0) { return; }
 		String[] interStrings = intervalString.split("U");
 		for(String inter: interStrings) {
