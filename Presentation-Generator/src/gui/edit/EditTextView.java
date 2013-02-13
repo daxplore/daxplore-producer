@@ -32,7 +32,7 @@ public class EditTextView extends JPanel {
 	private JTable table;
 	private EditTextController editTextController;
 	
-	protected class LocaleItem {
+	protected static class LocaleItem {
 		Locale loc;
 		public LocaleItem(Locale loc) {
 			this.loc = loc;

@@ -69,6 +69,7 @@ public class MainController implements ActionListener {
 	
 	public void switchTo(Views view) {
 		mainView.showInMain(view);
+		setToolbar(view);
 		history.clear();
 		currentCommand = new HistoryItem(view, null);
 	}
@@ -78,7 +79,27 @@ public class MainController implements ActionListener {
 		history.push(currentCommand);
 		currentCommand = hi;
 		doCommand(hi);
+		buttonPanelView.setActiveButton(hi.view);
+		mainView.showInMain(hi.view);
+		setToolbar(hi.view);
 		navigationView.getController().setHistoryAvailible(true);
+	}
+
+	
+	public void historyBack(){
+		HistoryItem hi = history.pop();
+		doCommand(hi);
+		buttonPanelView.setActiveButton(hi.view);
+		mainView.showInMain(hi.view);
+		setToolbar(hi.view);
+		currentCommand = hi;
+		if(history.empty()) {
+			navigationView.getController().setHistoryAvailible(false);
+		}
+	}
+	
+	public boolean hasHistory() {
+		return history.empty();
 	}
 	
 	private void doCommand(HistoryItem hi) {
@@ -102,23 +123,19 @@ public class MainController implements ActionListener {
 				break;
 			}
 		}
-		buttonPanelView.setActiveButton(hi.view);
-		mainView.showInMain(hi.view);
 	}
 	
-	public void historyBack(){
-		HistoryItem hi = history.pop();
-		doCommand(hi);
-		currentCommand = hi;
-		if(history.empty()) {
-			navigationView.getController().setHistoryAvailible(false);
+	private void setToolbar(Views view) {
+		switch(view) {
+		case EDITTEXTVIEW:
+			navigationView.setToolbar(editTextView.getController().getToolbar());
+			return;
+		default:
+			navigationView.setToolbar(null);
+			break;
 		}
 	}
 	
-	public boolean hasHistory() {
-		return history.empty();
-	}
-
 	@Override
 	public void actionPerformed(ActionEvent e) {
 		try { //from buttonPanelView

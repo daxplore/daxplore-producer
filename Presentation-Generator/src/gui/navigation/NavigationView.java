@@ -4,6 +4,7 @@ import gui.MainController;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
+import java.awt.Component;
 
 import javax.swing.JButton;
 import javax.swing.JPanel;
@@ -18,6 +19,7 @@ public class NavigationView extends JPanel {
 	NavigationController navigationController;
 
 	private JButton backButton;
+	private JPanel toolbarPanel;
 	
 	public NavigationView(final MainController mainController) {
 		this.mainController = mainController;
@@ -48,7 +50,7 @@ public class NavigationView extends JPanel {
 		eastSeperator.setOrientation(SwingConstants.VERTICAL);
 		centerPanel.add(eastSeperator, BorderLayout.EAST);
 		
-		JPanel toolbarPanel = new JPanel();
+		toolbarPanel = new JPanel();
 		centerPanel.add(toolbarPanel, BorderLayout.CENTER);
 	}
 	
@@ -58,6 +60,11 @@ public class NavigationView extends JPanel {
 
 	public NavigationController getController() {
 		return navigationController;
+	}
+	
+	public void setToolbar(Component comp) {
+		toolbarPanel.removeAll();
+		if(comp != null) toolbarPanel.add(comp);
 	}
 
 

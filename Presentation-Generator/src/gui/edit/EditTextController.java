@@ -4,6 +4,14 @@ import gui.MainController;
 
 import java.awt.Dimension;
 import java.awt.Rectangle;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
 import java.sql.SQLException;
 import java.util.List;
 import java.util.Locale;
@@ -17,7 +25,7 @@ import daxplorelib.DaxploreException;
 import daxplorelib.metadata.TextReference;
 import daxplorelib.metadata.TextReference.TextReferenceManager;
 
-public class EditTextController {
+public class EditTextController implements ActionListener {
 
 	private Locale[] currentLocales = new Locale[2];
 	private MainController mainController;
@@ -26,10 +34,12 @@ public class EditTextController {
 	private List<TextReference> textsList;
 	private TextsTableModel model;
 	private JTable table;
+	private EditToolbarView editToolbar;
 	
 	public EditTextController(MainController mainController, EditTextView editTextView) {
 		this.mainController = mainController;
 		this.editTextView = editTextView;
+		editToolbar = new EditToolbarView(this);
 	}
 	
 	/**
@@ -98,5 +108,33 @@ public class EditTextController {
 		Rectangle r = table.getCellRect(line, 0, true);
 		table.scrollRectToVisible(r);
 		table.setRowSelectionInterval(line, line);
+	}
+
+	@Override
+	public void actionPerformed(ActionEvent e) {
+		switch(e.getActionCommand()) {
+		case "import":
+			File file = editToolbar.showImportDialog();
+			if(file != null && file.exists() && file.canRead()) {
+				Locale locale = editToolbar.getSelectedLocale();
+				try {
+					mainController.getDaxploreFile().getMetaData().importL10n(
+							new InputStreamReader(new FileInputStream(file), "UTF-8"), locale);
+				} catch (FileNotFoundException e1) {
+					throw new AssertionError("File exists but is not found");
+				} catch (IOException e1) {
+					e1.printStackTrace();
+				} catch (DaxploreException e1) {
+					e1.printStackTrace();
+				}
+			}
+			break;
+		case "export":
+			break;
+		}
+	}
+	
+	public EditToolbarView getToolbar() {
+		return editToolbar;
 	}
 }
