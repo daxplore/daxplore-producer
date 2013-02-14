@@ -5,6 +5,7 @@ import gui.edit.EditTextView.LocaleItem;
 import java.awt.GridLayout;
 import java.awt.event.ActionListener;
 import java.io.File;
+import java.util.List;
 import java.util.Locale;
 
 import javax.swing.JButton;
@@ -31,8 +32,8 @@ public class EditToolbarView extends JPanel {
 		add(exportButton);
 	}
 	
-	public File showImportDialog() {
-		ImportFileChooser ifc = new ImportFileChooser();
+	public File showImportDialog(List<Locale> localeList) {
+		LocaleListFileChooser ifc = new LocaleListFileChooser(localeList);
 		int returnVal = ifc.showOpenDialog(this);
 		switch(returnVal) {
 		case JFileChooser.APPROVE_OPTION:
@@ -42,20 +43,31 @@ public class EditToolbarView extends JPanel {
 		}
 	}
 	
+	public File showExportDialog(List<Locale> localeList) {
+		LocaleListFileChooser efc = new LocaleListFileChooser(localeList);
+		int returnVal = efc.showSaveDialog(this);
+		switch(returnVal) {
+		case JFileChooser.APPROVE_OPTION:
+			return efc.getSelectedFile();
+		default:
+			return null;
+		}
+	}
+	
 	public Locale getSelectedLocale() {
 		return selectedLocale;
 	}
 	
-	private class ImportFileChooser extends JFileChooser {
+	private class LocaleListFileChooser extends JFileChooser {
 		
 		private JComboBox<LocaleItem> localeBox;
-
-		public ImportFileChooser() {
+		
+		public LocaleListFileChooser(List<Locale> localeList) {
 			localeBox = new JComboBox<LocaleItem>();
 			localeBox.addItem(null);
-			localeBox.addItem(new LocaleItem(new Locale("sv")));
-			localeBox.addItem(new LocaleItem(new Locale("en"))); //TODO
-			//localeBox.addActionListener(this);
+			for(Locale loc: localeList) {
+				localeBox.addItem(new LocaleItem(loc));
+			}
 			setAccessory(localeBox);
 		}
 		
@@ -68,6 +80,5 @@ public class EditToolbarView extends JPanel {
 				System.out.println("No locale selected during import");
 			}
 		}
-		
 	}
 }

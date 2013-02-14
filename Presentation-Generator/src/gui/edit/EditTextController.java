@@ -6,13 +6,21 @@ import java.awt.Dimension;
 import java.awt.Rectangle;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.io.OutputStreamWriter;
+import java.io.UnsupportedEncodingException;
+import java.nio.charset.Charset;
+import java.nio.file.Files;
+import java.nio.file.StandardOpenOption;
 import java.sql.SQLException;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
 
@@ -112,14 +120,19 @@ public class EditTextController implements ActionListener {
 
 	@Override
 	public void actionPerformed(ActionEvent e) {
+		List<Locale> localeList;
+		File file;
 		switch(e.getActionCommand()) {
 		case "import":
-			File file = editToolbar.showImportDialog();
+			localeList = new LinkedList<Locale>();
+			localeList.add(new Locale("sv"));
+			localeList.add(new Locale("en")); //TODO
+			file = editToolbar.showImportDialog(localeList);
 			if(file != null && file.exists() && file.canRead()) {
 				Locale locale = editToolbar.getSelectedLocale();
 				try {
 					mainController.getDaxploreFile().getMetaData().importL10n(
-							new InputStreamReader(new FileInputStream(file), "UTF-8"), locale);
+							Files.newBufferedReader(file.toPath(), Charset.forName("UTF-8")), locale);
 				} catch (FileNotFoundException e1) {
 					throw new AssertionError("File exists but is not found");
 				} catch (IOException e1) {
@@ -130,6 +143,41 @@ public class EditTextController implements ActionListener {
 			}
 			break;
 		case "export":
+			try {
+				
+				localeList = mainController.getDaxploreFile().getMetaData().getAllLocales();
+				file = editToolbar.showExportDialog(localeList);
+				
+				BufferedWriter writer;
+				Charset cs = Charset.forName("UTF-8");
+				if(file == null) {
+					System.out.println("File is null");
+					return;
+				} else if(file.exists() && file.canWrite()) {
+					writer = Files.newBufferedWriter(file.toPath(), cs, StandardOpenOption.WRITE, StandardOpenOption.TRUNCATE_EXISTING);
+				} else if (!file.exists()) {
+					writer = Files.newBufferedWriter(file.toPath(), cs, StandardOpenOption.CREATE_NEW, StandardOpenOption.WRITE);
+				} else {
+					System.out.println("Files is write protected");
+					return;
+				}
+				Locale locale = editToolbar.getSelectedLocale();
+				mainController.getDaxploreFile().getMetaData().exportL10n(writer, locale);
+
+			} catch (DaxploreException e1) {
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
+			} catch (UnsupportedEncodingException e1) {
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
+			} catch (FileNotFoundException e1) {
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
+			} catch (IOException e1) {
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
+			}
+			
 			break;
 		}
 	}
