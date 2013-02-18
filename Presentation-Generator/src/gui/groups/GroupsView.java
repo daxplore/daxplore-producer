@@ -18,6 +18,7 @@ import javax.swing.JScrollPane;
 import javax.swing.JTree;
 import javax.swing.ListCellRenderer;
 import javax.swing.tree.TreeCellRenderer;
+import javax.swing.JSplitPane;
 
 @SuppressWarnings("serial")
 public class GroupsView extends JPanel {
@@ -75,12 +76,13 @@ public class GroupsView extends JPanel {
 		
 		questionsPanel.add(questionsScrollPane);
 		
-		JPanel groupsAndPerspectivesPanel = new JPanel();
-		add(groupsAndPerspectivesPanel);
-		groupsAndPerspectivesPanel.setLayout(new GridLayout(2, 1, 0, 0));
+		JSplitPane splitPane = new JSplitPane();
+		splitPane.setResizeWeight(0.6);
+		splitPane.setOrientation(JSplitPane.VERTICAL_SPLIT);
+		add(splitPane);
 		
 		JPanel groupsPanel = new JPanel();
-		groupsAndPerspectivesPanel.add(groupsPanel);
+		splitPane.setLeftComponent(groupsPanel);
 		groupsPanel.setLayout(new BorderLayout(0,0));
 		groupsPanel.add(groupsScollPane);
 		
@@ -119,7 +121,7 @@ public class GroupsView extends JPanel {
 		addToGroupsPanel.add(Box.createVerticalGlue());
 		
 		JPanel perspectivePanel = new JPanel();
-		groupsAndPerspectivesPanel.add(perspectivePanel);
+		splitPane.setRightComponent(perspectivePanel);
 		perspectivePanel.setLayout(new BorderLayout(0, 0));
 		perspectivePanel.add(perspectiveScrollPane);
 		
@@ -151,7 +153,7 @@ public class GroupsView extends JPanel {
 		addToPerspectivesPanel.add(Box.createVerticalGlue());
 		addToPerspectivesPanel.add(addToPerspectivesButton);
 		addToPerspectivesPanel.add(Box.createVerticalGlue());
-		
+		splitPane.setDividerLocation(0.6);
 	}
 	
 	public GroupsController getController() {

@@ -130,6 +130,9 @@ public class MainController implements ActionListener {
 		case EDITTEXTVIEW:
 			navigationView.setToolbar(editTextView.getController().getToolbar());
 			return;
+		case GROUPSVIEW:
+			navigationView.setToolbar(groupsView.getController().getToolbar());
+			return;
 		default:
 			navigationView.setToolbar(null);
 			break;

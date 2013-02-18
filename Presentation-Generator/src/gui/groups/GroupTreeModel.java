@@ -126,13 +126,27 @@ class GroupTreeModel implements TreeModel {
 					if(gw == toParent && atIndex >= 0 && atIndex <= gw.getQuestionCount()) {
 						int delta = gw.getQuestions().indexOf(mq) < atIndex ? -1: 0;
 						int oldIndex = gw.getQuestions().indexOf(mq);
+						int indexLow = oldIndex < atIndex? oldIndex: atIndex;
+						int indexHigh = oldIndex > atIndex? oldIndex: atIndex;
+						
+						fireTreeNodesRemoved(
+								new TreeModelEvent(this,
+										new Object[]{root, gw},
+										new int[]{oldIndex},
+										new Object[]{mq}));
 						gw.removeQuestion(mq);
+
+						fireTreeNodesInserted(new TreeModelEvent(this,
+								new Object[]{root, gw},
+								new int[]{atIndex},
+								new Object[]{mq}));
 						gw.addQuestion(mq, atIndex);
-						fireTreeNodesChanged(
+
+						/*fireTreeNodesChanged(
 								new TreeModelEvent(this, 
 										new Object[]{root, gw}, 
-										MyTools.range(0, gw.getQuestionCount()-1),
-										gw.getQuestions().toArray()));
+										MyTools.range(indexLow, indexHigh),
+										gw.getQuestions().subList(indexLow, indexHigh).toArray()));*/
 						return;
 					} else if(atIndex >= 0 && atIndex <= gw.getQuestionCount()){
 						gw.removeQuestion(mq);
@@ -223,6 +237,7 @@ class GroupTreeModel implements TreeModel {
 
 	@Override
 	public void addTreeModelListener(TreeModelListener l) {
+		System.out.println("TreeModelListener added");
 		if(l != null) {
 			listeners.add(TreeModelListener.class, l);
 		}

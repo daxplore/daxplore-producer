@@ -41,8 +41,12 @@ public class GroupsController implements ActionListener {
 	public static final String ADD_TO_GROUP_ACTION_COMMAND = "AddToGroupActionCommand";
 	public static final String ADD_TO_PERSPECTIVES_ACTION_COMMAND = "AddToPerspectivesActionCommand";
 	
+	//debug thingy
+	public static final String RELOADDATA = "reload";
+	
 	private MainController mainController;
 	private GroupsView groupsView;
+	private GroupsToolbar toolbar;
 	
 	private GroupTreeModel groupTreeModel;
 	private GroupTree groupTree;
@@ -52,6 +56,11 @@ public class GroupsController implements ActionListener {
 	public GroupsController(GroupsView groupView, MainController mainController) {
 		this.mainController = mainController;
 		this.groupsView = groupView;
+		this.toolbar = new GroupsToolbar(this);
+	}
+	
+	public GroupsToolbar getToolbar() {
+		return toolbar;
 	}
 	
 	@Override
@@ -190,6 +199,9 @@ public class GroupsController implements ActionListener {
 			}
 			break;
 		case ADD_TO_PERSPECTIVES_ACTION_COMMAND:
+			break;
+		case RELOADDATA:
+			loadData();
 			break;
 		}
 		
