@@ -126,9 +126,22 @@ public class EditTextController implements ActionListener {
 			file = editToolbar.showImportDialog(localeList);
 			if(file != null && file.exists() && file.canRead()) {
 				Locale locale = editToolbar.getSelectedLocale();
+				
+				L10nFormat format;
+				String filename = file.toPath().getFileName().toString().toLowerCase();
+				//TODO allow different suffixes and user selection of type?
+				if(filename.endsWith(".csv")) {
+					format = L10nFormat.CSV;
+				} else if(filename.endsWith(".properties")) {
+					format = L10nFormat.PROPERTIES;
+				} else {
+					System.out.println("Unsupported file suffix: " + filename); //TODO communicate error properly
+					return;
+				}
+				
 				try {
 					mainController.getDaxploreFile().getMetaData().importL10n(
-							Files.newBufferedReader(file.toPath(), Charset.forName("UTF-8")), L10nFormat.PROPERTIES, locale);
+							Files.newBufferedReader(file.toPath(), Charset.forName("UTF-8")), format, locale);
 				} catch (FileNotFoundException e1) {
 					throw new AssertionError("File exists but is not found");
 				} catch (IOException e1) {
@@ -157,8 +170,20 @@ public class EditTextController implements ActionListener {
 					System.out.println("Files is write protected");
 					return;
 				}
+				
+				L10nFormat format;
+				String filename = file.toPath().getFileName().toString().toLowerCase();
+				//TODO allow different suffixes and user selection of type?
+				if(filename.endsWith(".csv")) {
+					format = L10nFormat.CSV;
+				} else if(filename.endsWith(".properties")) {
+					format = L10nFormat.PROPERTIES;
+				} else {
+					System.out.println("Unsupported file suffix: " + filename); //TODO communicate error properly
+					return;
+				}
 				Locale locale = editToolbar.getSelectedLocale();
-				mainController.getDaxploreFile().getMetaData().exportL10n(writer, L10nFormat.PROPERTIES, locale);
+				mainController.getDaxploreFile().getMetaData().exportL10n(writer, format, locale);
 
 			} catch (DaxploreException e1) {
 				// TODO Auto-generated catch block

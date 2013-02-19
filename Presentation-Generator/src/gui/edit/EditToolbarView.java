@@ -33,7 +33,7 @@ public class EditToolbarView extends JPanel {
 	}
 	
 	public File showImportDialog(List<Locale> localeList) {
-		LocaleListFileChooser ifc = new LocaleListFileChooser(localeList);
+		LocalizationFileChooser ifc = new LocalizationFileChooser(localeList);
 		int returnVal = ifc.showOpenDialog(this);
 		switch(returnVal) {
 		case JFileChooser.APPROVE_OPTION:
@@ -44,7 +44,7 @@ public class EditToolbarView extends JPanel {
 	}
 	
 	public File showExportDialog(List<Locale> localeList) {
-		LocaleListFileChooser efc = new LocaleListFileChooser(localeList);
+		LocalizationFileChooser efc = new LocalizationFileChooser(localeList);
 		int returnVal = efc.showSaveDialog(this);
 		switch(returnVal) {
 		case JFileChooser.APPROVE_OPTION:
@@ -58,11 +58,11 @@ public class EditToolbarView extends JPanel {
 		return selectedLocale;
 	}
 	
-	private class LocaleListFileChooser extends JFileChooser {
+	private class LocalizationFileChooser extends JFileChooser {
 		
 		private JComboBox<LocaleItem> localeBox;
 		
-		public LocaleListFileChooser(List<Locale> localeList) {
+		public LocalizationFileChooser(List<Locale> localeList) {
 			localeBox = new JComboBox<LocaleItem>();
 			localeBox.addItem(null);
 			for(Locale loc: localeList) {
