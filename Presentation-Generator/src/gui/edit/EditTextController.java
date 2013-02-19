@@ -8,13 +8,8 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.BufferedWriter;
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.FileReader;
 import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.OutputStreamWriter;
 import java.io.UnsupportedEncodingException;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
@@ -30,6 +25,7 @@ import javax.swing.RowFilter;
 import javax.swing.table.TableRowSorter;
 
 import daxplorelib.DaxploreException;
+import daxplorelib.metadata.MetaData.L10nFormat;
 import daxplorelib.metadata.TextReference;
 import daxplorelib.metadata.TextReference.TextReferenceManager;
 
@@ -132,7 +128,7 @@ public class EditTextController implements ActionListener {
 				Locale locale = editToolbar.getSelectedLocale();
 				try {
 					mainController.getDaxploreFile().getMetaData().importL10n(
-							Files.newBufferedReader(file.toPath(), Charset.forName("UTF-8")), locale);
+							Files.newBufferedReader(file.toPath(), Charset.forName("UTF-8")), L10nFormat.PROPERTIES, locale);
 				} catch (FileNotFoundException e1) {
 					throw new AssertionError("File exists but is not found");
 				} catch (IOException e1) {
@@ -162,7 +158,7 @@ public class EditTextController implements ActionListener {
 					return;
 				}
 				Locale locale = editToolbar.getSelectedLocale();
-				mainController.getDaxploreFile().getMetaData().exportL10n(writer, locale);
+				mainController.getDaxploreFile().getMetaData().exportL10n(writer, L10nFormat.PROPERTIES, locale);
 
 			} catch (DaxploreException e1) {
 				// TODO Auto-generated catch block

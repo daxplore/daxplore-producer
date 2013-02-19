@@ -11,6 +11,7 @@ import daxplorelib.DaxploreException;
 import daxplorelib.DaxploreFile;
 import daxplorelib.DaxploreMemoryFile;
 import daxplorelib.metadata.MetaData;
+import daxplorelib.metadata.MetaData.L10nFormat;
 
 @Parameters
 public class TestCommand {
@@ -48,7 +49,7 @@ public class TestCommand {
 			metadata.consolidateScales(new Locale("sv"));
 			System.out.println("Scales consolidated");
 			
-			metadata.exportL10n(new OutputStreamWriter(System.out), new Locale("sv"));
+			metadata.exportL10n(new OutputStreamWriter(System.out), L10nFormat.PROPERTIES, new Locale("sv"));
 			
 		} catch (DaxploreException e) {
 			System.out.println("Could not get metadata");

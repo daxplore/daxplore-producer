@@ -20,6 +20,7 @@ import com.beust.jcommander.converters.FileConverter;
 import daxplorelib.DaxploreException;
 import daxplorelib.DaxploreFile;
 import daxplorelib.metadata.MetaData;
+import daxplorelib.metadata.MetaData.L10nFormat;
 
 @Parameters(commandDescription = "Import data into project")
 public class ImportCommand {
@@ -185,7 +186,7 @@ public class ImportCommand {
 			}
 			
 			try {
-				metadata.importL10n(r, locale);
+				metadata.importL10n(r, L10nFormat.PROPERTIES, locale);
 			} catch (DaxploreException e) {
 				System.out.println("Error exporting texts");
 				e.printStackTrace();
