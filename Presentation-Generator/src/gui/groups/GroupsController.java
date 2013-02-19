@@ -100,18 +100,21 @@ public class GroupsController implements ActionListener {
 				if(path.length == 2) {
 					int currentIndex = groupTreeModel.getIndexOfChild(path[0], path[1]);
 					if(currentIndex > 0) {
+						groupTree.setSelectionPath(null);
 						groupTreeModel.moveChild(path[1], path[0], currentIndex-1);
 						groupTree.setSelectionPath(new TreePath(path));
 					}
 				} else if(path.length == 3) {
 					int currentIndex = groupTreeModel.getIndexOfChild(path[1], path[2]);
 					if(currentIndex > 0) {
+						groupTree.setSelectionPath(null);
 						groupTreeModel.moveChild(path[2], path[1], currentIndex-1);
 						groupTree.setSelectionPath(new TreePath(path));
 					} else {
 						int groupIndex = groupTreeModel.getIndexOfChild(path[0], path[1]);
 						if(groupIndex > 0) {
 							Object newGroup = groupTreeModel.getChild(path[0], groupIndex-1);
+							groupTree.setSelectionPath(null);
 							groupTreeModel.moveChild(path[2], newGroup, groupTreeModel.getChildCount(newGroup));
 							groupTree.setSelectionPath(new TreePath(new Object[]{path[0], newGroup, path[2]}));
 						}
@@ -127,6 +130,7 @@ public class GroupsController implements ActionListener {
 					int currentIndex = groupTreeModel.getIndexOfChild(path[0], path[1]);
 					int siblingCount = groupTreeModel.getChildCount(path[0]);
 					if(currentIndex < siblingCount-1) {
+						groupTree.setSelectionPath(null);
 						groupTreeModel.moveChild(path[1], path[0], currentIndex+1);
 						groupTree.setSelectionPath(new TreePath(path));
 					}
@@ -135,12 +139,14 @@ public class GroupsController implements ActionListener {
 					int currentIndex = groupTreeModel.getIndexOfChild(path[1], path[2]);
 					int siblingCount = groupTreeModel.getChildCount(path[1]);
 					if(currentIndex < siblingCount-1){
+						groupTree.setSelectionPath(null);
 						groupTreeModel.moveChild(path[2], path[1], currentIndex+1);
 						groupTree.setSelectionPath(new TreePath(path));
 					} else {
 						int groupIndex = groupTreeModel.getIndexOfChild(path[0], path[1]);
 						if(groupIndex < groupTreeModel.getChildCount(path[0])-1) {
 							Object newGroup = groupTreeModel.getChild(path[0], groupIndex+1);
+							groupTree.setSelectionPath(null);
 							groupTreeModel.moveChild(path[2], newGroup, 0);
 							groupTree.setSelectionPath(new TreePath(new Object[]{path[0], newGroup, path[2]}));
 						}
