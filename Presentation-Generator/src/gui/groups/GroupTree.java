@@ -9,7 +9,6 @@ import gui.widget.QuestionWidget;
 import java.awt.Color;
 import java.awt.Component;
 import java.util.EventObject;
-import java.util.Locale;
 
 import javax.swing.AbstractCellEditor;
 import javax.swing.JTree;
@@ -30,8 +29,8 @@ public class GroupTree extends JTree {
     
     public GroupTree(GroupTreeModel groupTreeModel) {
     	super(groupTreeModel);
-    	System.out.println("Pretty print group tree");
-    	System.out.println(groupTreeModel.prettyPrint(new Locale("sv")));
+    	//System.out.println("Pretty print group tree");
+    	//System.out.println(groupTreeModel.prettyPrint(new Locale("sv")));
     	setRootVisible(false);
     	GroupTreeCellRendererEditor groupTreeCellRendererEditor = new GroupTreeCellRendererEditor();
     	setCellRenderer(groupTreeCellRendererEditor);

@@ -6,6 +6,7 @@ import gui.widget.QuestionWidget;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.LinkedList;
@@ -52,6 +53,8 @@ public class GroupsController implements ActionListener {
 	private GroupTree groupTree;
 	private QuestionTable questionJTable;
 	private QuestionTableModel questionTableModel;
+	private PerspectivesTableModel perspectivesTableModel;
+	private QuestionTable perspectivesTable;
 	
 	public GroupsController(GroupsView groupView, MainController mainController) {
 		this.mainController = mainController;
@@ -227,7 +230,28 @@ public class GroupsController implements ActionListener {
 				groupTree = new GroupTree(groupTreeModel);
 				groupsView.getGroupsScollPane().setViewportView(groupTree);
 				
-			} catch (DaxploreException e) {
+				MetaGroup perspectives = null;
+				for(MetaGroup mg : md.getMetaGroupManager().getAll()) {
+					if(mg.getType() == GroupType.PERSPECTIVE) {
+						perspectives = mg;
+						break;
+					}
+				}
+				if(perspectives == null) {
+					System.out.println("Create perspectives group");
+					TextReference textref = md.getTextsManager().get("PERSPECTIVESGROUP");
+					perspectives = md.getMetaGroupManager().create(textref, 999, GroupType.PERSPECTIVE, new LinkedList<MetaQuestion>());
+				}
+				
+				perspectivesTableModel = new PerspectivesTableModel(perspectives);
+				perspectivesTable = new QuestionTable(perspectivesTableModel);
+				groupsView.getPerspectiveScrollPane().setViewportView(perspectivesTable);
+				
+				
+			} catch (DaxploreException | SQLException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} catch (Exception e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
