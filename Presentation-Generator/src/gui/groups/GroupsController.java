@@ -69,6 +69,7 @@ public class GroupsController implements ActionListener {
 	@Override
 	public void actionPerformed(ActionEvent e) {
 		Object[] path;
+		int[] selectedRows;
 		switch(e.getActionCommand()) {
 		case GROUPS_ADD_ACTION_COMMAND:
 			String groupName = (String)JOptionPane.showInputDialog(mainController.getMainFrame(), "Name:", "Create new group", JOptionPane.PLAIN_MESSAGE, null, null, "");
@@ -177,10 +178,33 @@ public class GroupsController implements ActionListener {
 			}
 			break;
 		case PERSPECTIVES_UP_ACTION_COMMAND:
+			selectedRows = perspectivesTable.getSelectedRows();
+			if(selectedRows.length < 1 || selectedRows[0] == 0) break;
+			perspectivesTable.clearSelection();
+			perspectivesTable.removeEditor();
+			for(int i = 0; i < selectedRows.length; i++) {
+				perspectivesTableModel.moveRow(selectedRows[i], selectedRows[i], selectedRows[i]-1);
+				perspectivesTable.getSelectionModel().addSelectionInterval(selectedRows[i]-1, selectedRows[i]-1);
+			}
 			break;
 		case PERSPECTIVES_DOWN_ACTION_COMMAND:
+			selectedRows = perspectivesTable.getSelectedRows();
+			if(selectedRows.length < 1 || selectedRows[selectedRows.length-1] == perspectivesTableModel.getRowCount() -1) break;
+			perspectivesTable.clearSelection();
+			perspectivesTable.removeEditor();
+			for(int i = selectedRows.length-1; i >= 0; i--) {
+				//perspectivesTable.changeSelection(selectedRows[i], 1, true, true);
+				perspectivesTableModel.moveRow(selectedRows[i], selectedRows[i], selectedRows[i]+1);
+				perspectivesTable.getSelectionModel().addSelectionInterval(selectedRows[i]+1, selectedRows[i]+1);
+			}
 			break;
 		case PERSPECTIVES_REMOVE_ACTION_COMMAND:
+			selectedRows = perspectivesTable.getSelectedRows();
+			int delta = 0;
+			for(int row: selectedRows) {
+				perspectivesTableModel.removeRow(row - delta);
+				delta++;
+			}
 			break;
 		case ADD_TO_GROUP_ACTION_COMMAND:
 			path = groupTree.getSelectionPath().getPath();
@@ -208,6 +232,12 @@ public class GroupsController implements ActionListener {
 			}
 			break;
 		case ADD_TO_PERSPECTIVES_ACTION_COMMAND:
+			int index = perspectivesTable.getSelectedRow() != -1? perspectivesTable.getSelectedRow(): perspectivesTable.getRowCount();
+			for(int i : questionJTable.getSelectedRows()) {
+				MetaQuestion mq = (MetaQuestion)questionJTable.getValueAt(i, 0);
+				perspectivesTableModel.insertRow(index, new Object[]{mq});
+				index++;
+			}
 			break;
 		case RELOADDATA:
 			loadData();

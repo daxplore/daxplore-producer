@@ -15,5 +15,6 @@
 	</classpathentry>
 	<classpathentry kind="con" path="org.eclipse.jdt.junit.JUNIT_CONTAINER/4"/>
 	<classpathentry kind="lib" path="miglayout15-swing.jar" sourcepath="miglayout-src.zip"/>
+	<classpathentry kind="lib" path="/daxplore-presenter/war/WEB-INF/lib/opencsv-2.3.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
