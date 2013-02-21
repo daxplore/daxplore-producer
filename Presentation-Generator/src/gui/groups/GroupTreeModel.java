@@ -12,8 +12,6 @@ import javax.swing.event.TreeModelListener;
 import javax.swing.tree.TreeModel;
 import javax.swing.tree.TreePath;
 
-import org.junit.internal.matchers.IsCollectionContaining;
-
 import tools.MyTools;
 import daxplorelib.DaxploreException;
 import daxplorelib.metadata.MetaData;
@@ -230,7 +228,6 @@ class GroupTreeModel implements TreeModel {
 		}
 	}
 	
-	@SuppressWarnings("unused")
 	private void fireTreeStructureChanged(TreeModelEvent e) {
 		TreeModelEvent e2 = new TreeModelEvent(this, new Object[]{root});
 		for(TreeModelListener tml: listeners.getListeners(TreeModelListener.class)) {

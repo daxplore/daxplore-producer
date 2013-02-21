@@ -1,6 +1,6 @@
 package gui.widget;
 
-import java.util.Locale;
+import gui.Settings;
 
 import javax.swing.JTextField;
 import javax.swing.event.DocumentEvent;
@@ -27,21 +27,21 @@ public class GroupEditor extends AbstractWidgetEditor<MetaGroup> {
 	@Override
 	public void setContent(MetaGroup value) {
 		this.metaGroup = value;
-		textField.setText(metaGroup.getTextRef().get(new Locale("sv")));
+		textField.setText(metaGroup.getTextRef().get(Settings.getDefaultLocale()));
 		textField.getDocument().addDocumentListener(new DocumentListener() {
 			@Override
 			public void removeUpdate(DocumentEvent e) {
 				if(!textField.getText().equals("")) {
-					metaGroup.getTextRef().put(textField.getText(), new Locale("sv"));
+					metaGroup.getTextRef().put(textField.getText(), Settings.getDefaultLocale());
 				}
 			}
 			@Override
 			public void insertUpdate(DocumentEvent e) {
-				metaGroup.getTextRef().put(textField.getText(), new Locale("sv"));
+				metaGroup.getTextRef().put(textField.getText(), Settings.getDefaultLocale());
 			}
 			@Override
 			public void changedUpdate(DocumentEvent e) {
-				metaGroup.getTextRef().put(textField.getText(), new Locale("sv"));
+				metaGroup.getTextRef().put(textField.getText(), Settings.getDefaultLocale());
 			}
 		});
 		

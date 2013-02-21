@@ -1,22 +1,16 @@
 package gui.groups;
 
 import gui.MainController;
-import gui.widget.GroupRenderer;
-import gui.widget.QuestionWidget;
+import gui.Settings;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.sql.SQLException;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Locale;
 
-import javax.swing.JList;
 import javax.swing.JOptionPane;
-import javax.swing.JTree;
-import javax.swing.ListSelectionModel;
 import javax.swing.tree.TreePath;
 
 import daxplorelib.DaxploreException;
@@ -79,7 +73,7 @@ public class GroupsController implements ActionListener {
 					int nextid = metaGroupManager.getHighestId() +1;
 					TextReferenceManager textReferenceManager = mainController.getDaxploreFile().getMetaData().getTextsManager();
 					TextReference tr = textReferenceManager.get("Group" + nextid);
-					tr.put(groupName, new Locale("sv")); //TODO: fix global locale
+					tr.put(groupName, Settings.getDefaultLocale());
 					MetaGroup mg = metaGroupManager.create(tr, Integer.MAX_VALUE, GroupType.QUESTIONS, new LinkedList<MetaQuestion>());
 					TreePath treepath = groupTreeModel.addGroup(mg, groupTreeModel.getChildCount(groupTreeModel.getRoot()));
 					groupTree.setSelectionPath(treepath);

@@ -1,6 +1,6 @@
 package gui.widget;
 
-import java.util.Locale;
+import gui.Settings;
 
 import javax.swing.JLabel;
 import javax.swing.SwingConstants;
@@ -29,7 +29,7 @@ public class GroupRenderer extends AbstractWidget<MetaGroup> {
 	@Override
 	public void setContent(MetaGroup value) {
 		this.metaGroup = value;
-		label.setText(metaGroup.getTextRef().get(new Locale("sv")));
+		label.setText(metaGroup.getTextRef().get(Settings.getDefaultLocale()));
 	}
 	
 }

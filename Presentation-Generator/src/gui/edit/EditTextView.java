@@ -4,7 +4,6 @@ import gui.MainController;
 
 import java.awt.BorderLayout;
 import java.awt.GridLayout;
-import java.awt.Rectangle;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.ComponentEvent;
@@ -129,6 +128,8 @@ public class EditTextView extends JPanel {
 	}
 	
 	public void setLocales(List<Locale> localeList) {
+		localeCombo1.removeAllItems();
+		localeCombo2.removeAllItems();
 		for(Locale l: localeList) {
 			localeCombo1.addItem(new LocaleItem(l));
 			localeCombo2.addItem(new LocaleItem(l));

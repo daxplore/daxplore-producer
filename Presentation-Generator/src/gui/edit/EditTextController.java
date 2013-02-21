@@ -1,6 +1,7 @@
 package gui.edit;
 
 import gui.MainController;
+import gui.Settings;
 
 import java.awt.Dimension;
 import java.awt.Rectangle;
@@ -15,7 +16,6 @@ import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.StandardOpenOption;
 import java.sql.SQLException;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
 
@@ -120,9 +120,7 @@ public class EditTextController implements ActionListener {
 		File file;
 		switch(e.getActionCommand()) {
 		case "import":
-			localeList = new LinkedList<Locale>();
-			localeList.add(new Locale("sv"));
-			localeList.add(new Locale("en")); //TODO
+			localeList = Settings.availableLocales();
 			file = editToolbar.showImportDialog(localeList);
 			if(file != null && file.exists() && file.canRead()) {
 				Locale locale = editToolbar.getSelectedLocale();

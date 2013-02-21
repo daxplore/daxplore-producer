@@ -1,7 +1,5 @@
 package gui.groups;
 
-import gui.widget.QuestionWidget;
-
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;

@@ -1,14 +1,11 @@
 package gui.edit;
 
 import java.util.Collections;
-import java.util.LinkedList;
 import java.util.List;
 
 import javax.swing.event.TableModelEvent;
 import javax.swing.event.TableModelListener;
 import javax.swing.table.DefaultTableModel;
-
-import com.beust.jcommander.internal.Lists;
 
 import daxplorelib.metadata.TextReference;
 
