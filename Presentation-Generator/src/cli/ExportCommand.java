@@ -16,6 +16,7 @@ import com.beust.jcommander.converters.FileConverter;
 import daxplorelib.DaxploreException;
 import daxplorelib.DaxploreFile;
 import daxplorelib.metadata.MetaData;
+import daxplorelib.metadata.MetaData.L10nFormat;
 
 public class ExportCommand {
 	
@@ -163,7 +164,7 @@ public class ExportCommand {
 			}
 			
 			try {
-				metadata.exportL10n(w, locale);
+				metadata.exportL10n(w, L10nFormat.PROPERTIES, locale);
 			} catch (DaxploreException e) {
 				System.out.println("Error exporting texts");
 				e.printStackTrace();

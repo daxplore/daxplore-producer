@@ -13,6 +13,9 @@ import java.util.Locale;
 import java.util.Map.Entry;
 import java.util.Properties;
 
+import au.com.bytecode.opencsv.CSVReader;
+import au.com.bytecode.opencsv.CSVWriter;
+
 import tools.MyTools;
 import tools.NumberlineCoverage;
 import tools.Pair;
@@ -39,6 +42,10 @@ public class MetaData {
 	
 	public enum Formats {
 		DATABASE,RESOURCE,JSON,RAW
+	}
+	
+	public enum L10nFormat {
+		PROPERTIES, CSV
 	}
 	
 	public MetaData(Connection connection) throws SQLException{
@@ -135,7 +142,7 @@ public class MetaData {
 	 * @throws IOException
 	 * @throws DaxploreException 
 	 */
-	public void importL10n(Reader reader, Locale locale) throws IOException, DaxploreException {
+	public void importL10n(Reader reader, L10nFormat format, Locale locale) throws IOException, DaxploreException {
 		boolean autocommit = true;
 		try {
 			//save = sqliteDatabase.setSavepoint();
@@ -147,19 +154,46 @@ public class MetaData {
 			throw new DaxploreException("Failed to disable autocommit", e);
 		}
 		
-		Properties properties = new Properties();
-		properties.load(reader);
-		
-		Iterator<Entry<Object, Object>> allTexts = properties.entrySet().iterator();
-		try {
-		while(allTexts.hasNext()) {
-			Entry<Object, Object> s = allTexts.next();
-			TextReference tr = textsManager.get((String)s.getKey());
-			tr.put((String)s.getValue(), locale);
-		}
-		} catch (SQLException e) {
-			MyTools.printSQLExeption(e);
-			throw new DaxploreException("Error on Text import", e);
+		switch(format) {
+		case PROPERTIES:
+			Properties properties = new Properties();
+			properties.load(reader);
+			
+			Iterator<Entry<Object, Object>> allTexts = properties.entrySet().iterator();
+			try {
+				while(allTexts.hasNext()) {
+					Entry<Object, Object> s = allTexts.next();
+					TextReference tr = textsManager.get((String)s.getKey());
+					tr.put((String)s.getValue(), locale);
+				}
+			}catch (SQLException e) {
+				MyTools.printSQLExeption(e);
+				throw new DaxploreException("Error on Text import", e);
+			}
+			break;
+		case CSV:
+			CSVReader csvReader = new CSVReader(reader);
+			try {
+				for (String[] row : csvReader.readAll()) {
+					if(row.length==0) {
+						continue;
+					} else if(row.length==2) {
+						TextReference tr;
+						tr = textsManager.get(row[0]);
+						tr.put(row[1], locale);
+					} else {
+						throw new DaxploreException("Invalid csv row:" + MyTools.join(row, ", "));
+					}
+				}
+			} catch (SQLException e) {
+				MyTools.printSQLExeption(e);
+				throw new DaxploreException("Error on Text import", e);
+			} finally {
+				csvReader.close();
+			}
+			break;
+		default:
+			throw new AssertionError("Unsupported format: " + format);	
 		}
 		
 		try {
@@ -178,19 +212,38 @@ public class MetaData {
 	 * @throws IOException
 	 * @throws DaxploreException 
 	 */
-	public void exportL10n(Writer writer, Locale locale) throws IOException, DaxploreException {
-		Properties properties = new SortedProperties();
-		
-		List<TextReference> allTexts = getAllTextReferences();
-		for(TextReference tr: allTexts) {
-			if(tr.has(locale)) {
-				properties.setProperty(tr.getRef(), tr.get(locale));
-			} else {
-				properties.setProperty(tr.getRef(), "");
+	public void exportL10n(Writer writer, L10nFormat format, Locale locale) throws IOException, DaxploreException {
+		switch(format) {
+		case PROPERTIES:
+			Properties properties = new SortedProperties();
+			
+			List<TextReference> allTexts = getAllTextReferences();
+			for(TextReference tr: allTexts) {
+				if(tr.has(locale)) {
+					properties.setProperty(tr.getRef(), tr.get(locale));
+				} else {
+					properties.setProperty(tr.getRef(), "");
+				}
 			}
+			
+			properties.store(writer, null); //Comment can be null Some documentation comment placed on the first row of the file
+
+			break;
+		case CSV:
+			CSVWriter csvWriter = new CSVWriter(writer);
+			allTexts = getAllTextReferences();
+			for(TextReference tr: allTexts) {
+				if(tr.has(locale)) {
+					csvWriter.writeNext(new String[]{tr.getRef(), tr.get(locale)});
+				} else {
+					csvWriter.writeNext(new String[]{tr.getRef(), ""});
+				}
+			}
+			csvWriter.close();
+			break;
+		default:
+			throw new AssertionError("Unsupported format: " + format);	
 		}
-		
-		properties.store(writer, null); //Comment can be null Some documentation comment placed on the first row of the file
 	}
 	
 	public void importConfig(Reader r){

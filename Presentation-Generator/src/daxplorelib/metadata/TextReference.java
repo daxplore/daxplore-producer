@@ -54,7 +54,7 @@ public class TextReference implements Comparable<TextReference> {
 				Map<Locale, String> localeMap = new SmallMap<Locale, String>();
 				while(rs.next()) {
 					String loc = rs.getString("locale");
-					if(loc != null && !"".equals(loc)) {
+					if(loc != null && !"".equals(loc)) { //TODO verify that we want to create it?
 						localeMap.put(new Locale(rs.getString("locale")), rs.getString("text"));						
 					}
 					newTextReference = false;

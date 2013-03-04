@@ -12,8 +12,6 @@ import javax.swing.event.TreeModelListener;
 import javax.swing.tree.TreeModel;
 import javax.swing.tree.TreePath;
 
-import org.junit.internal.matchers.IsCollectionContaining;
-
 import tools.MyTools;
 import daxplorelib.DaxploreException;
 import daxplorelib.metadata.MetaData;
@@ -107,64 +105,24 @@ class GroupTreeModel implements TreeModel {
 	
 	public void moveChild(Object child, Object toParent, int atIndex) throws Exception { //TODO: specialize exception
 		if(child instanceof MetaGroup && toParent == root && groups.contains(child)
-				&& atIndex >= 0 && atIndex <= groups.size()) {
-			int delta = groups.indexOf(child) < atIndex ? -1: 0;
+				&& atIndex >= 0 && atIndex < groups.size()) {
 			groups.remove(child);
-			groups.add(atIndex + delta, (MetaGroup)child);
+			groups.add(atIndex, (MetaGroup)child);
 			for(int index = 0; index < groups.size(); index++) {
 				groups.get(index).setIndex(index);
 			}
 			for(int i = 0; i < groups.size(); i++) {
 				groups.get(i).setIndex(i);
 			}
-			fireTreeNodesChanged(new TreeModelEvent(this, new Object[]{root}));
+			fireTreeStructureChanged(null);
 			return;
 		} else if(child instanceof MetaQuestion && toParent instanceof MetaGroup && groups.contains(toParent)) {
 			MetaQuestion mq = (MetaQuestion)child;
-			for(MetaGroup gw: groups) {
-				if(gw.getQuestions().contains(mq)) {
-					if(gw == toParent && atIndex >= 0 && atIndex <= gw.getQuestionCount()) {
-						int delta = gw.getQuestions().indexOf(mq) < atIndex ? -1: 0;
-						int oldIndex = gw.getQuestions().indexOf(mq);
-						int indexLow = oldIndex < atIndex? oldIndex: atIndex;
-						int indexHigh = oldIndex > atIndex? oldIndex: atIndex;
-						
-						fireTreeNodesRemoved(
-								new TreeModelEvent(this,
-										new Object[]{root, gw},
-										new int[]{oldIndex},
-										new Object[]{mq}));
-						gw.removeQuestion(mq);
 
-						fireTreeNodesInserted(new TreeModelEvent(this,
-								new Object[]{root, gw},
-								new int[]{atIndex},
-								new Object[]{mq}));
-						gw.addQuestion(mq, atIndex);
+			removeChild(mq);
+			addQuestion(mq, (MetaGroup)toParent, atIndex);
+			return;
 
-						/*fireTreeNodesChanged(
-								new TreeModelEvent(this, 
-										new Object[]{root, gw}, 
-										MyTools.range(indexLow, indexHigh),
-										gw.getQuestions().subList(indexLow, indexHigh).toArray()));*/
-						return;
-					} else if(atIndex >= 0 && atIndex <= gw.getQuestionCount()){
-						gw.removeQuestion(mq);
-						MetaGroup parent = (MetaGroup)toParent;
-						if(atIndex == gw.getQuestionCount()) {
-							parent.addQuestion(mq);
-						} else {
-							parent.addQuestion(mq, atIndex);
-						}
-						
-						fireTreeNodesChanged(new TreeModelEvent(this, 
-								new Object[]{root}, 
-								MyTools.range(0, groups.size()-1), 
-								groups.toArray()));
-						return;
-					}
-				}
-			}
 		}
 		throw new Exception("Couldn't move this to that");
 	}
@@ -250,6 +208,7 @@ class GroupTreeModel implements TreeModel {
 	    }
 	}
 	
+	@SuppressWarnings("unused")
 	private void fireTreeNodesChanged(TreeModelEvent e) {
 		for(TreeModelListener tml: listeners.getListeners(TreeModelListener.class)) {
 			tml.treeNodesChanged(e);
@@ -269,7 +228,6 @@ class GroupTreeModel implements TreeModel {
 		}
 	}
 	
-	@SuppressWarnings("unused")
 	private void fireTreeStructureChanged(TreeModelEvent e) {
 		TreeModelEvent e2 = new TreeModelEvent(this, new Object[]{root});
 		for(TreeModelListener tml: listeners.getListeners(TreeModelListener.class)) {

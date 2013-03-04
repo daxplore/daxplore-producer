@@ -17,6 +17,7 @@ import javax.swing.JTable;
 import javax.swing.ListSelectionModel;
 import javax.swing.table.TableCellEditor;
 import javax.swing.table.TableCellRenderer;
+import javax.swing.table.TableModel;
 
 import daxplorelib.DaxploreException;
 import daxplorelib.metadata.MetaQuestion;
@@ -32,7 +33,7 @@ public class QuestionTable extends JTable {
         listSelectionBackground = new Color(200, 200, 255);
     }
 	
-	public QuestionTable(QuestionTableModel model) throws DaxploreException {
+	public QuestionTable(TableModel model) throws DaxploreException {
 		super(model);
 		this.setTableHeader(null);
 		

@@ -5,8 +5,6 @@ import gui.MainController.Views;
 
 import java.awt.Color;
 import java.awt.GridLayout;
-import java.awt.event.ItemEvent;
-import java.awt.event.ItemListener;
 
 import javax.swing.ButtonGroup;
 import javax.swing.ImageIcon;

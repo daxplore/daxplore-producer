@@ -1,6 +1,7 @@
 package gui.edit;
 
 import gui.MainController;
+import gui.Settings;
 
 import java.awt.Dimension;
 import java.awt.Rectangle;
@@ -8,19 +9,13 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.BufferedWriter;
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.FileReader;
 import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.OutputStreamWriter;
 import java.io.UnsupportedEncodingException;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.StandardOpenOption;
 import java.sql.SQLException;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
 
@@ -30,6 +25,7 @@ import javax.swing.RowFilter;
 import javax.swing.table.TableRowSorter;
 
 import daxplorelib.DaxploreException;
+import daxplorelib.metadata.MetaData.L10nFormat;
 import daxplorelib.metadata.TextReference;
 import daxplorelib.metadata.TextReference.TextReferenceManager;
 
@@ -124,15 +120,26 @@ public class EditTextController implements ActionListener {
 		File file;
 		switch(e.getActionCommand()) {
 		case "import":
-			localeList = new LinkedList<Locale>();
-			localeList.add(new Locale("sv"));
-			localeList.add(new Locale("en")); //TODO
+			localeList = Settings.availableLocales();
 			file = editToolbar.showImportDialog(localeList);
 			if(file != null && file.exists() && file.canRead()) {
 				Locale locale = editToolbar.getSelectedLocale();
+				
+				L10nFormat format;
+				String filename = file.toPath().getFileName().toString().toLowerCase();
+				//TODO allow different suffixes and user selection of type?
+				if(filename.endsWith(".csv")) {
+					format = L10nFormat.CSV;
+				} else if(filename.endsWith(".properties")) {
+					format = L10nFormat.PROPERTIES;
+				} else {
+					System.out.println("Unsupported file suffix: " + filename); //TODO communicate error properly
+					return;
+				}
+				
 				try {
 					mainController.getDaxploreFile().getMetaData().importL10n(
-							Files.newBufferedReader(file.toPath(), Charset.forName("UTF-8")), locale);
+							Files.newBufferedReader(file.toPath(), Charset.forName("UTF-8")), format, locale);
 				} catch (FileNotFoundException e1) {
 					throw new AssertionError("File exists but is not found");
 				} catch (IOException e1) {
@@ -161,8 +168,20 @@ public class EditTextController implements ActionListener {
 					System.out.println("Files is write protected");
 					return;
 				}
+				
+				L10nFormat format;
+				String filename = file.toPath().getFileName().toString().toLowerCase();
+				//TODO allow different suffixes and user selection of type?
+				if(filename.endsWith(".csv")) {
+					format = L10nFormat.CSV;
+				} else if(filename.endsWith(".properties")) {
+					format = L10nFormat.PROPERTIES;
+				} else {
+					System.out.println("Unsupported file suffix: " + filename); //TODO communicate error properly
+					return;
+				}
 				Locale locale = editToolbar.getSelectedLocale();
-				mainController.getDaxploreFile().getMetaData().exportL10n(writer, locale);
+				mainController.getDaxploreFile().getMetaData().exportL10n(writer, format, locale);
 
 			} catch (DaxploreException e1) {
 				// TODO Auto-generated catch block
