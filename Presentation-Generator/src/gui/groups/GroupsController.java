@@ -154,15 +154,16 @@ public class GroupsController implements ActionListener {
 				Object parent = path[path.length-2];
 				Object child = path[path.length-1];
 				int index = groupTreeModel.getIndexOfChild(parent, child);
+				groupTree.setSelectionPath(null);
 				groupTreeModel.removeChild(child); //the row that actually does work, rest just what the selection should be...
-				int siblingCount = groupTreeModel.getChildCount(parent);
+				/*int siblingCount = groupTreeModel.getChildCount(parent);
 				List<Object> newPath = Arrays.asList(Arrays.copyOfRange(path, 0, path.length-2));
 				if(siblingCount > 0 && siblingCount >= index) {
 					newPath.add(groupTreeModel.getChild(parent, index));
 				} else if(siblingCount > 0) {
 					newPath.add(groupTreeModel.getChild(parent, index-1));
 				}
-				groupTree.setSelectionPath(new TreePath(newPath.toArray()));
+				groupTree.setSelectionPath(new TreePath(newPath.toArray()));*/
 			} catch (Exception e2) {
 				e2.printStackTrace();
 			}
