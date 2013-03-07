@@ -25,6 +25,7 @@
 	<xsd:complexType name="TimePointLongType">
 		<xsd:sequence>
 			<xsd:element name="name" type="xsd:string" />
+			<xsd:element name="timeindex" type="xsd:integer" />
 		</xsd:sequence>
 		<xsd:attribute name="id" type="xsd:ID" use="required" />
 	</xsd:complexType>
@@ -41,6 +42,7 @@
 	<xsd:complexType name="TimePointShortType">
 		<xsd:sequence>
 			<xsd:element name="name" type="xsd:string" />
+			<xsd:element name="timeindex" type="xsd:integer" />
 			<xsd:element name="value" type="xsd:integer" />
 		</xsd:sequence>
 		<xsd:attribute name="id" type="xsd:ID" use="required" />
