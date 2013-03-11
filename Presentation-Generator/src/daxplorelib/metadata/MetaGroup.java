@@ -74,7 +74,7 @@ public class MetaGroup implements Comparable<MetaGroup> {
 			stmt.executeUpdate();
 			
 			int id = SQLTools.lastId(table.name, connection);
-			
+			//TODO don't create, use toBeAddedList (see MetaTimepointShort implementation)
 			stmt = connection.prepareStatement("INSERT INTO metagrouprel (groupid, questionid, idx) VALUES (?, ?, ?)");
 			for(int idx = 0; idx < qList.size(); idx++) {
 				stmt.setInt(1, id);

@@ -107,4 +107,16 @@ public class SQLTools {
 		rs.next();
 		return rs.getInt("seq");*/
 	}
+	
+	public static int maxId(String tablename, String columnname, Connection connection) throws SQLException {
+		PreparedStatement stmt = connection.prepareStatement("SELECT max(?) as maxid FROM ?");
+		stmt.setString(1, columnname);
+		stmt.setString(2, tablename);
+		ResultSet rs = stmt.executeQuery();
+		if(rs.next()){
+			return rs.getInt("maxid");
+		} else {
+			throw new SQLException("No max value, table empty");
+		}
+	}
 }
