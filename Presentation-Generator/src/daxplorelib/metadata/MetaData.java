@@ -378,8 +378,8 @@ public class MetaData {
 	public List<DaxploreTable> getTables() {
 		List<DaxploreTable> list = new LinkedList<DaxploreTable>();
 		list.add(MetaQuestion.table);
-		list.add(MetaGroup.table);
-		list.add(MetaGroup.table2);
+		list.add(MetaGroup.groupTable);
+		list.add(MetaGroup.groupRelTable);
 		list.add(MetaScale.maintable);
 		list.add(MetaScale.optiontable);
 		list.add(MetaCalculation.table);
