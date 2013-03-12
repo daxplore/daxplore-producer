@@ -110,7 +110,7 @@ public class MetaData {
 				
 				TextReference shorttext = textsManager.get(rmq.column + "_shorttext");
 				
-				metaQuestionManager.create(rmq.column, fulltext,shorttext, scale, calc);
+				metaQuestionManager.create(rmq.column, shorttext, fulltext, scale, calc);
 			}
 		} catch (SQLException e) {
 			throw new DaxploreException("Failed to transfer metadata from raw", e);
