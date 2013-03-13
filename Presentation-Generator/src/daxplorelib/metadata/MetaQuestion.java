@@ -25,9 +25,11 @@ public class MetaQuestion {
 	public static class MetaQuestionManager {
 		
 		private Connection connection;
-		protected MetaScaleManager metascaleManager;
-		protected TextReferenceManager textsManager;
-		protected Map<String, MetaQuestion> questionMap = new HashMap<String, MetaQuestion>();
+		private MetaScaleManager metascaleManager;
+		private TextReferenceManager textsManager;
+		private Map<String, MetaQuestion> questionMap = new HashMap<String, MetaQuestion>();
+		private LinkedList<MetaQuestion> toBeAdded= new LinkedList<MetaQuestion>();
+		
 		protected LinkedList<MetaQuestion> toBeRemoved = new LinkedList<MetaQuestion>();
 		
 		public MetaQuestionManager(Connection connection, TextReferenceManager textsManager, MetaScaleManager metaScaleManager) {
@@ -64,42 +66,48 @@ public class MetaQuestion {
 			}
 		}
 		
-		public MetaQuestion create(String id, TextReference fullTextRef, TextReference shortTextRef, MetaScale scale, MetaCalculation calculation) throws SQLException {
-			PreparedStatement stmt = connection.prepareStatement("INSERT INTO metaquestion (id, scaleid, fulltextref, shorttextref, calculation) VALUES (?, ?, ?, ? ,?)");
-			stmt.setString(1, id);
-			if(scale != null) {
-				stmt.setInt(2, scale.getId());
-			} else {
-				stmt.setNull(2, Types.INTEGER);
-			}
-			stmt.setString(3, fullTextRef.getRef());
-			stmt.setString(4, shortTextRef.getRef());
-			stmt.setInt(5, calculation.getID());
-			stmt.executeUpdate();
-			
+		public MetaQuestion create(String id, TextReference shortTextRef, TextReference fullTextRef, MetaScale scale, MetaCalculation calculation) throws SQLException {
 			MetaQuestion mq = new MetaQuestion(id, shortTextRef, fullTextRef, scale, calculation);
+			toBeAdded.add(mq);
 			questionMap.put(id, mq);
-			
 			return mq;
 		}
 		
 		public void remove(String id) {
-			toBeRemoved.add(questionMap.remove(id));
+			MetaQuestion mq = questionMap.remove(id);
+			toBeAdded.remove(mq);
+			toBeRemoved.add(mq);
 		}
 		
 		public void saveAll() throws SQLException {
-			PreparedStatement stmt = connection.prepareStatement("UPDATE metaquestion SET scaleid = ?, fulltextref = ?, shorttextref = ?, calculation = ? WHERE id = ?");
+			PreparedStatement updateStmt = connection.prepareStatement("UPDATE metaquestion SET scaleid = ?, fulltextref = ?, shorttextref = ?, calculation = ? WHERE id = ?");
 			for(MetaQuestion mq: questionMap.values()) {
 				if(mq.modified) {
-					stmt.setInt(1, mq.scale.getId());
-					stmt.setString(2, mq.fullTextRef.getRef());
-					stmt.setString(3, mq.shortTextRef.getRef());
-					stmt.setInt(4, mq.calculation.getID());
-					stmt.setString(5, mq.id);
-					stmt.executeUpdate();
+					updateStmt.setInt(1, mq.scale.getId());
+					updateStmt.setString(2, mq.fullTextRef.getRef());
+					updateStmt.setString(3, mq.shortTextRef.getRef());
+					updateStmt.setInt(4, mq.calculation.getID());
+					updateStmt.setString(5, mq.id);
+					updateStmt.executeUpdate();
 					mq.modified = false;
 				}
 			}
+			
+			PreparedStatement insertStmt = connection.prepareStatement("INSERT INTO metaquestion (id, scaleid, fulltextref, shorttextref, calculation) VALUES (?, ?, ?, ? ,?)");
+			for(MetaQuestion mq: toBeAdded) {
+				insertStmt.setString(1, mq.id);
+				if(mq.scale != null) {
+					insertStmt.setInt(2, mq.scale.getId());
+				} else {
+					insertStmt.setNull(2, Types.INTEGER);
+				}
+				insertStmt.setString(3, mq.fullTextRef.getRef());
+				insertStmt.setString(4, mq.shortTextRef.getRef());
+				insertStmt.setInt(5, mq.calculation.getID());
+				insertStmt.addBatch();
+			}
+			insertStmt.executeBatch();
+			toBeAdded.clear();
 			
 			PreparedStatement deleteStmt = connection.prepareStatement("DELETE FROM metaquestion WHERE id = ?");
 			for(MetaQuestion mq: toBeRemoved) {

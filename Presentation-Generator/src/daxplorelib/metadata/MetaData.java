@@ -110,7 +110,7 @@ public class MetaData {
 				
 				TextReference shorttext = textsManager.get(rmq.column + "_shorttext");
 				
-				metaQuestionManager.create(rmq.column, fulltext,shorttext, scale, calc);
+				metaQuestionManager.create(rmq.column, shorttext, fulltext, scale, calc);
 			}
 		} catch (SQLException e) {
 			throw new DaxploreException("Failed to transfer metadata from raw", e);
@@ -378,8 +378,8 @@ public class MetaData {
 	public List<DaxploreTable> getTables() {
 		List<DaxploreTable> list = new LinkedList<DaxploreTable>();
 		list.add(MetaQuestion.table);
-		list.add(MetaGroup.table);
-		list.add(MetaGroup.table2);
+		list.add(MetaGroup.groupTable);
+		list.add(MetaGroup.groupRelTable);
 		list.add(MetaScale.maintable);
 		list.add(MetaScale.optiontable);
 		list.add(MetaCalculation.table);

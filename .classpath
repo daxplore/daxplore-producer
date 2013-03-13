@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<classpath>
+	<classpathentry kind="src" path="Presentation-Generator/test"/>
+	<classpathentry kind="src" path="Presentation-Generator/src"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.junit.JUNIT_CONTAINER/4"/>
+	<classpathentry kind="lib" path="Presentation-Generator/lib/appengine-remote-api.jar"/>
+	<classpathentry kind="lib" path="Presentation-Generator/lib/jdo2-api-2.3-eb.jar"/>
+	<classpathentry kind="lib" path="Presentation-Generator/lib/json_simple-1.1.jar"/>
+	<classpathentry kind="lib" path="Presentation-Generator/lib/org.opendatafoundation.data-20111116.jar"/>
+	<classpathentry kind="lib" path="Presentation-Generator/lib/sqlite-jdbc-3.7.2.jar"/>
+	<classpathentry kind="lib" path="Presentation-Generator/lib/jcommander-1.28-SNAPSHOT.jar"/>
+	<classpathentry kind="lib" path="Presentation-Generator/lib/jcommander-1.28-SNAPSHOT-bundle.jar"/>
+	<classpathentry kind="lib" path="Presentation-Generator/lib/jcommander-1.28-SNAPSHOT-javadoc.jar"/>
+	<classpathentry kind="lib" path="Presentation-Generator/lib/jcommander-1.28-SNAPSHOT-sources.jar"/>
+	<classpathentry kind="lib" path="Presentation-Generator/lib/opencsv-2.3.jar"/>
+	<classpathentry kind="output" path="bin"/>
+</classpath>

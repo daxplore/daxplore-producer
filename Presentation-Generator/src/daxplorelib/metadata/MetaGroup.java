@@ -17,16 +17,19 @@ import daxplorelib.metadata.MetaQuestion.MetaQuestionManager;
 import daxplorelib.metadata.TextReference.TextReferenceManager;
 
 public class MetaGroup implements Comparable<MetaGroup> {
-	protected static final DaxploreTable table = new DaxploreTable("CREATE TABLE metagroup (id INTEGER PRIMARY KEY, textref TEXT, idx INTEGER, type INTEGER)", "metagroup");
-	protected static final DaxploreTable table2 = new DaxploreTable("CREATE TABLE metagrouprel (groupid INTEGER, questionid TEXT, idx INTEGER, FOREIGN KEY(questionid) REFERENCES metaquestion(id), FOREIGN KEY(groupid) REFERENCES metagroup(id))", "metagrouprel");
+	static final DaxploreTable groupTable = new DaxploreTable("CREATE TABLE metagroup (id INTEGER PRIMARY KEY, textref TEXT, idx INTEGER, type INTEGER)", "metagroup");
+	static final DaxploreTable groupRelTable = new DaxploreTable("CREATE TABLE metagrouprel (groupid INTEGER, questionid TEXT, idx INTEGER, FOREIGN KEY(questionid) REFERENCES metaquestion(id), FOREIGN KEY(groupid) REFERENCES metagroup(id))", "metagrouprel");
 	
 	public static class MetaGroupManager {
 		
-		protected Map<Integer, MetaGroup> groupMap = new HashMap<Integer, MetaGroup>();
-		protected List<MetaGroup> toBeRemoved = new LinkedList<MetaGroup>();
-		Connection connection;
-		TextReferenceManager textsManager;
-		MetaQuestionManager questionManager;
+		private Map<Integer, MetaGroup> groupMap = new HashMap<Integer, MetaGroup>();
+		private List<MetaGroup> toBeAddedGroup = new LinkedList<MetaGroup>();
+		private int addDeltaGroup = 0;
+		private List<MetaGroupRel> toBeAddedGroupRel = new LinkedList<MetaGroupRel>();
+		private List<MetaGroup> toBeRemoved = new LinkedList<MetaGroup>();
+		private Connection connection;
+		private TextReferenceManager textsManager;
+		private MetaQuestionManager questionManager;
 		
 		public MetaGroupManager(Connection connection, TextReferenceManager textsManager, MetaQuestionManager questionManager) {
 			this.connection = connection;
@@ -35,8 +38,8 @@ public class MetaGroup implements Comparable<MetaGroup> {
 		}
 		
 		public void init() throws SQLException {
-			SQLTools.createIfNotExists(table, connection);
-			SQLTools.createIfNotExists(table2, connection);
+			SQLTools.createIfNotExists(groupTable, connection);
+			SQLTools.createIfNotExists(groupRelTable, connection);
 		}
 		
 		public MetaGroup get(int id) throws SQLException {
@@ -67,71 +70,89 @@ public class MetaGroup implements Comparable<MetaGroup> {
 		}
 		
 		public MetaGroup create(TextReference textref, int index, GroupType type, List<MetaQuestion> qList) throws SQLException {
-			PreparedStatement stmt = connection.prepareStatement("INSERT INTO metagroup (textref, idx, type) VALUES (?, ?, ?)");
-			stmt.setString(1, textref.getRef());
-			stmt.setInt(2, index);
-			stmt.setInt(3, type.asInt());
-			stmt.executeUpdate();
+			addDeltaGroup++;
 			
-			int id = SQLTools.lastId(table.name, connection);
-			
-			stmt = connection.prepareStatement("INSERT INTO metagrouprel (groupid, questionid, idx) VALUES (?, ?, ?)");
-			for(int idx = 0; idx < qList.size(); idx++) {
-				stmt.setInt(1, id);
-				stmt.setString(2, qList.get(idx).getId());
-				stmt.setInt(3, idx);
-				stmt.addBatch();
-			}
-			stmt.executeBatch();
-			
+			int id = SQLTools.maxId(groupTable.name, "id", connection) + addDeltaGroup;
 			MetaGroup mg = new MetaGroup(id, textref, index, type, qList);
-			
+			toBeAddedGroup.add(mg);
 			groupMap.put(id, mg);
+			
+			for(int idx = 0; idx < qList.size(); idx++) {
+				MetaGroupRel groupRel = new MetaGroupRel(id, qList.get(idx).getId(), idx);
+				toBeAddedGroupRel.add(groupRel);
+			}
+			
 			return mg;
 		}
 		
 		public void remove(int id) {
 			MetaGroup tbr = groupMap.remove(id);
+			toBeAddedGroup.remove(tbr);
 			toBeRemoved.add(tbr);
 		}
 		
 		public void saveAll() throws SQLException {
-			PreparedStatement updateStmt = connection.prepareStatement("UPDATE metagroup SET textref = ?, idx = ?, type = ? WHERE id = ?");
-			PreparedStatement deleteStmt = connection.prepareStatement("DELETE FROM metagrouprel WHERE groupid = ?");
-			PreparedStatement insertStmt = connection.prepareStatement("INSERT INTO metagrouprel (groupid, questionid, idx) VALUES (?, ?, ?)");
+			PreparedStatement updateGroupStmt = connection.prepareStatement("UPDATE metagroup SET textref = ?, idx = ?, type = ? WHERE id = ?");
+			PreparedStatement deleteGroupStmt = connection.prepareStatement("DELETE FROM metagroup WHERE id = ?");
+			PreparedStatement insertGroupStmt = connection.prepareStatement("INSERT INTO metagroup (id, textref, idx, type) VALUES (?, ?, ?, ?)");
+			
+			PreparedStatement deleteGroupRelStmt = connection.prepareStatement("DELETE FROM metagrouprel WHERE groupid = ?");
+			PreparedStatement insertGroupRelStmt = connection.prepareStatement("INSERT INTO metagrouprel (groupid, questionid, idx) VALUES (?, ?, ?)");
+			
 			for(MetaGroup mg: groupMap.values()) {
 				if(mg.modified) {
-					updateStmt.setString(1, mg.textref.getRef());
-					updateStmt.setInt(2, mg.index);
-					updateStmt.setInt(3, mg.type.asInt());
-					updateStmt.setInt(4, mg.id);
-					updateStmt.executeUpdate();
+					updateGroupStmt.setString(1, mg.textref.getRef());
+					updateGroupStmt.setInt(2, mg.index);
+					updateGroupStmt.setInt(3, mg.type.asInt());
+					updateGroupStmt.setInt(4, mg.id);
+					updateGroupStmt.executeUpdate();
 					
-					deleteStmt.setInt(1, mg.id);
-					deleteStmt.executeUpdate();
+					deleteGroupRelStmt.setInt(1, mg.id);
+					deleteGroupRelStmt.executeUpdate();
 					
 					for(int idx = 0; idx < mg.qList.size(); idx++) {
-						insertStmt.setInt(1, mg.id);
-						insertStmt.setString(2, mg.qList.get(idx).getId());
-						insertStmt.setInt(3, idx);
-						insertStmt.addBatch();
+						insertGroupRelStmt.setInt(1, mg.id);
+						insertGroupRelStmt.setString(2, mg.qList.get(idx).getId());
+						insertGroupRelStmt.setInt(3, idx);
+						insertGroupRelStmt.addBatch();
 					}
-					insertStmt.executeBatch();
+					insertGroupRelStmt.executeBatch();
 					
 					mg.modified = false;
 				}
 			}
 			
-			PreparedStatement delete2Stmt = connection.prepareStatement("DELETE FROM metagroup WHERE id = ?");
+			
 			for(MetaGroup mg: toBeRemoved) {
-				delete2Stmt.setInt(1, mg.id);
-				delete2Stmt.addBatch();
-				deleteStmt.setInt(1, mg.id);
-				deleteStmt.addBatch();
+				deleteGroupStmt.setInt(1, mg.id);
+				deleteGroupStmt.addBatch();
+				deleteGroupRelStmt.setInt(1, mg.id);
+				deleteGroupRelStmt.addBatch();
 			}
-			deleteStmt.executeBatch();
-			delete2Stmt.executeBatch();
-			toBeRemoved = new LinkedList<MetaGroup>();
+			deleteGroupStmt.executeBatch();
+			deleteGroupRelStmt.executeBatch();
+			toBeRemoved.clear();
+			
+			
+			for(MetaGroup mg: toBeAddedGroup) {
+				insertGroupStmt.setInt(1, mg.id);
+				insertGroupStmt.setString(2, mg.textref.getRef());
+				insertGroupStmt.setInt(3, mg.index);
+				insertGroupStmt.setInt(4, mg.type.asInt());
+				insertGroupStmt.addBatch();
+			}
+			insertGroupStmt.executeBatch();
+			toBeAddedGroup.clear();
+			addDeltaGroup = 0;
+			
+			for(MetaGroupRel mgr: toBeAddedGroupRel) {
+				insertGroupRelStmt.setInt(1, mgr.groupid);
+				insertGroupRelStmt.setString(2, mgr.questionid);
+				insertGroupRelStmt.setInt(3, mgr.idx);
+				insertGroupRelStmt.addBatch();
+			}
+			insertGroupRelStmt.executeBatch();
+			toBeAddedGroupRel.clear();
 		}
 		
 		public List<MetaGroup> getAll() throws SQLException {
@@ -187,6 +208,16 @@ public class MetaGroup implements Comparable<MetaGroup> {
 				return PERSPECTIVE;
 			}
 			return null;
+		}
+	}
+	
+	private static class MetaGroupRel {
+		int groupid, idx;
+		String questionid;
+		public MetaGroupRel(int groupid, String questionid, int idx){
+			this.groupid = groupid;
+			this.questionid = questionid;
+			this.idx = idx;
 		}
 	}
 	

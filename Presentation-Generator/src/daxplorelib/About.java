@@ -17,7 +17,7 @@ public class About {
 			"lastupdate INTEGER, importdate INTEGER, filename TEXT, timeseriestype TEXT)", "about");
 	
 	public enum TimeSeriesType {
-		UNDEFINED, SHORT, LONG
+		NONE, SHORT, LONG
 	}
 	
 	final int filetypeversionmajor;
@@ -53,7 +53,7 @@ public class About {
 			prepared.setLong(4, lastupdate.getTime());
 			prepared.setLong(5, 0);
 			prepared.setString(6, "");
-			prepared.setString(7, TimeSeriesType.UNDEFINED.name());
+			prepared.setString(7, TimeSeriesType.NONE.name());
 			prepared.execute();
 			prepared.close();
 			
