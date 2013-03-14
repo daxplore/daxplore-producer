@@ -81,6 +81,9 @@ public class MetaQuestion {
 		
 		public void saveAll() throws SQLException {
 			PreparedStatement updateStmt = connection.prepareStatement("UPDATE metaquestion SET scaleid = ?, fulltextref = ?, shorttextref = ?, calculation = ? WHERE id = ?");
+			PreparedStatement insertStmt = connection.prepareStatement("INSERT INTO metaquestion (id, scaleid, fulltextref, shorttextref, calculation) VALUES (?, ?, ?, ? ,?)");
+			PreparedStatement deleteStmt = connection.prepareStatement("DELETE FROM metaquestion WHERE id = ?");
+			
 			for(MetaQuestion mq: questionMap.values()) {
 				if(mq.modified) {
 					updateStmt.setInt(1, mq.scale.getId());
@@ -93,7 +96,6 @@ public class MetaQuestion {
 				}
 			}
 			
-			PreparedStatement insertStmt = connection.prepareStatement("INSERT INTO metaquestion (id, scaleid, fulltextref, shorttextref, calculation) VALUES (?, ?, ?, ? ,?)");
 			for(MetaQuestion mq: toBeAdded) {
 				insertStmt.setString(1, mq.id);
 				if(mq.scale != null) {
@@ -109,7 +111,7 @@ public class MetaQuestion {
 			insertStmt.executeBatch();
 			toBeAdded.clear();
 			
-			PreparedStatement deleteStmt = connection.prepareStatement("DELETE FROM metaquestion WHERE id = ?");
+			
 			for(MetaQuestion mq: toBeRemoved) {
 				deleteStmt.setString(1, mq.id);
 				deleteStmt.addBatch();

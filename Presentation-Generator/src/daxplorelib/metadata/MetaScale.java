@@ -122,10 +122,10 @@ public class MetaScale {
 				if(ms.modified) {
 					updateScaleStmt.setInt(2, ms.id);
 					updateScaleStmt.setString(1, ms.ignore.toString());
-					updateScaleStmt.executeUpdate();
+					updateScaleStmt.addBatch();
 					
 					deleteOptionStmt.setInt(1, ms.id);
-					deleteOptionStmt.executeUpdate();
+					deleteOptionStmt.addBatch();
 					
 					int ord = 0;
 					for(Option opt: ms.options) {
@@ -141,6 +141,8 @@ public class MetaScale {
 					ms.modified = false;
 				}
 			}
+			updateScaleStmt.executeBatch();
+			deleteOptionStmt.executeBatch();
 			
 			for(MetaScale ms: toBeRemoved) {
 				deleteStmt.setInt(1, ms.id);

@@ -108,6 +108,18 @@ public class MetaTimepointShort implements Comparable<MetaTimepointShort> {
 			PreparedStatement deleteStmt = connection.prepareStatement("DELETE FROM timepoints WHERE id = ?");
 			PreparedStatement insertStmt = connection.prepareStatement("INSERT INTO timepoints (id, textref, timeindex, value) VALUES (?, ?, ?, ?)");
 			
+			for(MetaTimepointShort timepoint : pointMap.values()) {
+				if(timepoint.modified) {
+					updateStmt.setString(1, timepoint.textref.getRef());
+					updateStmt.setInt(2, timepoint.timeindex);
+					updateStmt.setDouble(3, timepoint.value);
+					updateStmt.setInt(4, timepoint.id);
+					updateStmt.addBatch();
+					timepoint.modified = false;
+				}
+			}
+			updateStmt.executeBatch();
+			
 			for(MetaTimepointShort timepoint : toBeRemoved) {
 				deleteStmt.setInt(1, timepoint.id);
 				deleteStmt.addBatch();
@@ -125,18 +137,6 @@ public class MetaTimepointShort implements Comparable<MetaTimepointShort> {
 			insertStmt.executeBatch();
 			toBeAdded.clear();
 			addDelta = 0;
-			
-			for(MetaTimepointShort timepoint : pointMap.values()) {
-				if(timepoint.modified) {
-					updateStmt.setString(1, timepoint.textref.getRef());
-					updateStmt.setInt(2, timepoint.timeindex);
-					updateStmt.setDouble(3, timepoint.value);
-					updateStmt.setInt(4, timepoint.id);
-					updateStmt.addBatch();
-					timepoint.modified = false;
-				}
-			}
-			updateStmt.executeBatch();
 			
 			if(columnModified) {
 				PreparedStatement columnStmt = connection.prepareStatement("UPDATE timeseries SET column = ?");
