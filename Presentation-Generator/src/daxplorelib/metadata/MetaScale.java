@@ -27,11 +27,13 @@ public class MetaScale {
 			, "metascaleoption");
 	
 	public static class MetaScaleManager {
-		Map<Integer, MetaScale> scaleMap = new HashMap<Integer, MetaScale>();
-		Connection connection;
-		protected TextReferenceManager textsManager;
+		private Map<Integer, MetaScale> scaleMap = new HashMap<Integer, MetaScale>();
+		private Connection connection;
+		private TextReferenceManager textsManager;
 		
-		List<MetaScale> toBeRemoved = new LinkedList<MetaScale>();
+		private List<MetaScale> toBeAdded = new LinkedList<MetaScale>();
+		private int addDelta = 0;
+		private List<MetaScale> toBeRemoved = new LinkedList<MetaScale>();
 		
 		public MetaScaleManager(Connection connection, TextReferenceManager textsManager) {
 			this.connection = connection;
@@ -94,56 +96,36 @@ public class MetaScale {
 		}
 		
 		public MetaScale create(List<Option> options, NumberlineCoverage ignore) throws SQLException {
-			PreparedStatement createScaleStmt = connection.prepareStatement("INSERT INTO metascale (ignore) VALUES (?)");
-			createScaleStmt.setString(1, ignore.toString());
-			createScaleStmt.executeUpdate();
-
-			int id;
-			Statement stmt = connection.createStatement();
-			ResultSet rs =stmt.executeQuery("SELECT last_insert_rowid()");
-			if(rs.next()) {
-				id = (int) rs.getLong(1);
-			} else {
-				throw new Error("Couldn't get generated key");
-			}
-			
-			//int id = SQLTools.lastId(maintable.name, connection);
-			
-			PreparedStatement addOptionStmt = connection.prepareStatement("INSERT INTO metascaleoption (scaleid, textref, ord, value, transform) VALUES (?, ?, ?, ?, ?)");
-			
-			int ord = 0;
-			for(Option opt: options) {
-				ord++;
-				addOptionStmt.setInt(1, id);
-				addOptionStmt.setString(2, opt.textRef.getRef());
-				addOptionStmt.setInt(3, ord);
-				addOptionStmt.setDouble(4, opt.value);
-				addOptionStmt.setString(5, opt.transformation.toString());
-				addOptionStmt.addBatch();
-			}
-			addOptionStmt.executeBatch();
-			
-			MetaScale ms = new MetaScale(id, options, ignore);
-			scaleMap.put(id, ms);
-			return ms;
+			addDelta++;
+			int id = SQLTools.maxId(maintable.name, "id", connection) + addDelta;
+			MetaScale scale = new MetaScale(id, options, ignore);
+			toBeAdded.add(scale);
+			scaleMap.put(id, scale);
+			return scale;
 		}
 		
 		public void remove(int id) {
-			toBeRemoved.add(scaleMap.remove(id));
+			MetaScale scale = scaleMap.remove(id);
+			toBeAdded.remove(scale);
+			toBeRemoved.add(scale);
 		}
 		
 		public void saveAll() throws SQLException {
-			PreparedStatement scaleStmt = connection.prepareStatement("UPDATE metascale SET ignore = ? WHERE id = ? ");
-			PreparedStatement removeOptionStmt = connection.prepareStatement("DELETE FROM metascaleoption WHERE scaleid = ?");
+			PreparedStatement updateScaleStmt = connection.prepareStatement("UPDATE metascale SET ignore = ? WHERE id = ? ");
+			PreparedStatement insertScaleStmt = connection.prepareStatement("INSERT INTO metascale (id, ignore) VALUES (?, ?)");
+			PreparedStatement deleteStmt = connection.prepareStatement("DELETE FROM metascale WHERE id = ?");
+			
 			PreparedStatement addOptionStmt = connection.prepareStatement("INSERT INTO metascaleoption (scaleid, textref, ord, value, transform) VALUES (?, ?, ?, ?, ?)");
+			PreparedStatement deleteOptionStmt = connection.prepareStatement("DELETE FROM metascaleoption WHERE scaleid = ?");
+
 			for(MetaScale ms: scaleMap.values()) {
 				if(ms.modified) {
-					scaleStmt.setInt(2, ms.id);
-					scaleStmt.setString(1, ms.ignore.toString());
-					scaleStmt.executeUpdate();
+					updateScaleStmt.setInt(2, ms.id);
+					updateScaleStmt.setString(1, ms.ignore.toString());
+					updateScaleStmt.executeUpdate();
 					
-					removeOptionStmt.setInt(1, ms.id);
-					removeOptionStmt.executeUpdate();
+					deleteOptionStmt.setInt(1, ms.id);
+					deleteOptionStmt.executeUpdate();
 					
 					int ord = 0;
 					for(Option opt: ms.options) {
@@ -160,18 +142,36 @@ public class MetaScale {
 				}
 			}
 			
-			//remove all to be removed
-			PreparedStatement deleteStmt = connection.prepareStatement("DELETE FROM metascale WHERE id = ?");
 			for(MetaScale ms: toBeRemoved) {
 				deleteStmt.setInt(1, ms.id);
 				deleteStmt.addBatch();
-				removeOptionStmt.setInt(1, ms.id);
-				removeOptionStmt.addBatch();
+				deleteOptionStmt.setInt(1, ms.id);
+				deleteOptionStmt.addBatch();
 			}
 			deleteStmt.executeBatch();
-			removeOptionStmt.executeBatch();
+			deleteOptionStmt.executeBatch();
 			toBeRemoved.clear();
 			
+			for(MetaScale ms: toBeAdded) {
+				insertScaleStmt.setInt(1, ms.id);
+				insertScaleStmt.setString(2, ms.ignore.toString());
+				insertScaleStmt.addBatch();
+				
+				int ord = 0;
+				for(Option opt: ms.options) {
+					ord++;
+					addOptionStmt.setInt(1, ms.id);
+					addOptionStmt.setString(2, opt.textRef.getRef());
+					addOptionStmt.setInt(3, ord);
+					addOptionStmt.setDouble(4, opt.value);
+					addOptionStmt.setString(5, opt.transformation.toString());
+					addOptionStmt.addBatch();
+				}
+			}
+			toBeAdded.clear();
+			insertScaleStmt.executeBatch();
+			addOptionStmt.executeBatch();
+			addDelta = 0;
 		}
 		
 		public List<MetaScale> getAll() throws SQLException {
@@ -241,11 +241,6 @@ public class MetaScale {
 		modified = true;
 	}
 	
-	/**
-	 * 
-	 * @param value
-	 * @throws Exception 
-	 */
 	public double transform(double value) throws Exception {
 		for(Option opt: options) {
 			if(opt.transformation.contains(value)) {
