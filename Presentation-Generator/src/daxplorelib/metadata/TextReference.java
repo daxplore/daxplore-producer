@@ -72,22 +72,16 @@ public class TextReference implements Comparable<TextReference> {
 		}
 		
 		public void saveAll() throws SQLException {
-			PreparedStatement insertStmt = connection.prepareStatement("INSERT OR REPLACE INTO texts (ref, locale, text) VALUES (?, ? , ?)");
-			PreparedStatement localesStmt = connection.prepareStatement("SELECT locale FROM texts WHERE ref = ?");
-			PreparedStatement deleteStmt = connection.prepareStatement("DELETE FROM texts WHERE ref = ? AND locale = ?");
-			
-			int k = 0;
-			for(TextReference tr: textMap.values()) {
-				if(tr.modified) { k++; }
-			}
-			System.out.println("\nSaving " + k + " textreferences of " + textMap.size());
+			PreparedStatement insertTextrefStmt = connection.prepareStatement("INSERT OR REPLACE INTO texts (ref, locale, text) VALUES (?, ? , ?)");
+			PreparedStatement selectLocalesStmt = connection.prepareStatement("SELECT locale FROM texts WHERE ref = ?");
+			PreparedStatement deleteTextrefLocaleStmt = connection.prepareStatement("DELETE FROM texts WHERE ref = ? AND locale = ?");
 			
 			for(TextReference tr: textMap.values()) {
 				if(tr.modified) {
 					//first get existing locales
 					Set<Locale> oldLocs = new HashSet<Locale>();
-					localesStmt.setString(1, tr.reference);
-					ResultSet rs = localesStmt.executeQuery();
+					selectLocalesStmt.setString(1, tr.reference);
+					ResultSet rs = selectLocalesStmt.executeQuery();
 					while(rs.next()) {
 						String loc = rs.getString("locale");
 						if(loc != null && !"".equals(loc)) {
@@ -97,39 +91,41 @@ public class TextReference implements Comparable<TextReference> {
 					if(tr.localeMap.size() > 0) {
 						for(Locale l: tr.localeMap.keySet()) {
 							oldLocs.remove(l);
-							insertStmt.setString(1, tr.reference);
-							insertStmt.setString(2, l.toLanguageTag());
-							insertStmt.setString(3, tr.get(l));
-							insertStmt.executeUpdate();
+							insertTextrefStmt.setString(1, tr.reference);
+							insertTextrefStmt.setString(2, l.toLanguageTag());
+							insertTextrefStmt.setString(3, tr.get(l));
+							insertTextrefStmt.addBatch();
 						}
-						//insertStmt.executeBatch();
-						deleteStmt.setString(1, tr.reference);
-						deleteStmt.setNull(2, Types.VARCHAR);
-						deleteStmt.executeUpdate();
+						insertTextrefStmt.executeBatch();
+						
+						deleteTextrefLocaleStmt.setString(1, tr.reference);
+						deleteTextrefLocaleStmt.setNull(2, Types.VARCHAR);
+						deleteTextrefLocaleStmt.executeUpdate();
 					} else {
-						insertStmt.setString(1, tr.reference);
-						insertStmt.setNull(2, Types.VARCHAR);
-						insertStmt.setNull(3, Types.VARCHAR);
-						insertStmt.executeUpdate();
+						insertTextrefStmt.setString(1, tr.reference);
+						insertTextrefStmt.setNull(2, Types.VARCHAR);
+						insertTextrefStmt.setNull(3, Types.VARCHAR);
+						insertTextrefStmt.executeUpdate();
 					}
 						
 					for(Locale l: oldLocs) {
-						deleteStmt.setString(1, tr.reference);
-						deleteStmt.setString(2, l.toLanguageTag());
-						deleteStmt.addBatch();
+						deleteTextrefLocaleStmt.setString(1, tr.reference);
+						deleteTextrefLocaleStmt.setString(2, l.toLanguageTag());
+						deleteTextrefLocaleStmt.addBatch();
 					}
-					deleteStmt.executeBatch();
+					deleteTextrefLocaleStmt.executeBatch();
 					
 					tr.modified = false;
 				}
 			}
+			
 			//Delete those marked to be removed
-			PreparedStatement delete2stmt = connection.prepareStatement("DELETE FROM texts WHERE ref = ?");
+			PreparedStatement deleteTextrefStmt = connection.prepareStatement("DELETE FROM texts WHERE ref = ?");
 			for(TextReference tr: toBeRemoved) {
-				delete2stmt.setString(1, tr.reference);
-				delete2stmt.addBatch();
+				deleteTextrefStmt.setString(1, tr.reference);
+				deleteTextrefStmt.addBatch();
 			}
-			delete2stmt.executeBatch();
+			deleteTextrefStmt.executeBatch();
 			toBeRemoved.clear();
 		}
 		
