@@ -11,6 +11,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
+import daxplorelib.DaxploreException;
 import daxplorelib.DaxploreTable;
 import daxplorelib.SQLTools;
 import daxplorelib.metadata.MetaQuestion.MetaQuestionManager;
@@ -42,7 +43,7 @@ public class MetaGroup implements Comparable<MetaGroup> {
 			SQLTools.createIfNotExists(groupRelTable, connection);
 		}
 		
-		public MetaGroup get(int id) throws SQLException {
+		public MetaGroup get(int id) throws SQLException, DaxploreException {
 			if(groupMap.containsKey(id)) {
 				return groupMap.get(id);
 			}
@@ -155,7 +156,7 @@ public class MetaGroup implements Comparable<MetaGroup> {
 			toBeAddedGroupRel.clear();
 		}
 		
-		public List<MetaGroup> getAll() throws SQLException {
+		public List<MetaGroup> getAll() throws SQLException, DaxploreException {
 			Statement stmt = connection.createStatement();
 			ResultSet rs = stmt.executeQuery("SELECT id FROM metagroup");
 			while(rs.next()) {

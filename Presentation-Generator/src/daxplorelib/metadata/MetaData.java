@@ -27,6 +27,7 @@ import daxplorelib.SQLTools;
 import daxplorelib.metadata.MetaGroup.MetaGroupManager;
 import daxplorelib.metadata.MetaQuestion.MetaQuestionManager;
 import daxplorelib.metadata.MetaScale.MetaScaleManager;
+import daxplorelib.metadata.MetaTimepointShort.MetaTimepointShortManager;
 import daxplorelib.metadata.TextReference.TextReferenceManager;
 import daxplorelib.raw.RawMeta;
 import daxplorelib.raw.RawMeta.RawMetaQuestion;
@@ -39,6 +40,7 @@ public class MetaData {
 	MetaScaleManager metaScaleManager;
 	TextReferenceManager textsManager;
 	MetaGroupManager metaGroupManager;
+	MetaTimepointShortManager metaTimepointManager;
 	
 	public enum Formats {
 		DATABASE,RESOURCE,JSON,RAW
@@ -56,7 +58,10 @@ public class MetaData {
 		metaScaleManager = new MetaScaleManager(connection, textsManager);
 		metaScaleManager.init();
 		
-		metaQuestionManager = new MetaQuestionManager(connection, textsManager, metaScaleManager);
+		metaTimepointManager = new MetaTimepointShortManager(connection, textsManager);
+		metaTimepointManager.init();
+		
+		metaQuestionManager = new MetaQuestionManager(connection, textsManager, metaScaleManager, metaTimepointManager);
 		metaQuestionManager.init();
 		
 		metaGroupManager = new MetaGroupManager(connection, textsManager, metaQuestionManager);
@@ -109,8 +114,8 @@ public class MetaData {
 				}
 				
 				TextReference shorttext = textsManager.get(rmq.column + "_shorttext");
-				
-				metaQuestionManager.create(rmq.column, shorttext, fulltext, scale, calc);
+				List<MetaTimepointShort> timepoints = new LinkedList<MetaTimepointShort>();
+				metaQuestionManager.create(rmq.column, shorttext, fulltext, scale, calc, timepoints);
 			}
 		} catch (SQLException e) {
 			throw new DaxploreException("Failed to transfer metadata from raw", e);
@@ -124,12 +129,10 @@ public class MetaData {
 		}
 	}
 	
-	@SuppressWarnings({ "rawtypes" })
 	public void importStructure(Reader r) throws IOException {
 		//TODO: XML
 	}
 	
-	@SuppressWarnings("unchecked")
 	public void exportStructure(Writer w) throws DaxploreException, IOException, SQLException{
 		//TODO: XML
 	}
