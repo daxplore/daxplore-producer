@@ -18,12 +18,6 @@ import daxplorelib.metadata.TextReference.TextReferenceManager;
 
 public class MetaTimepointShort implements Comparable<MetaTimepointShort> {
 	/**
-	 * column: the name of the column in the raw data that keeps track of time points
-	 */
-	protected static final DaxploreTable seriesTable = new DaxploreTable(
-			"CREATE TABLE timeseries (column TEXT)", "timeseries");
-	
-	/**
 	 * name: the name of the timepoint, for example 1992 and 2010
 	 * timeindex: the order of the timepoints
 	 * value: the timepoint's value as it is stored in the column (see above) //TODO support TEXT/REAL/INTEGER for value
@@ -38,9 +32,6 @@ public class MetaTimepointShort implements Comparable<MetaTimepointShort> {
 		private int addDelta = 0;
 		private List<MetaTimepointShort> toBeRemoved = new LinkedList<MetaTimepointShort>();
 		
-		private String column;
-		private boolean columnModified = false;
-
 		private Connection connection;
 		private TextReferenceManager textReferenceManager;
 		
@@ -50,19 +41,7 @@ public class MetaTimepointShort implements Comparable<MetaTimepointShort> {
 		}
 		
 		public void init() throws SQLException {
-			SQLTools.createIfNotExists(seriesTable, connection);
 			SQLTools.createIfNotExists(pointTable, connection);
-			
-			PreparedStatement stmt = connection.prepareStatement("SELECT * FROM timeseries");
-			ResultSet rs = stmt.executeQuery();
-			if(rs.next()) {
-				column = rs.getString("column");
-				rs.close();
-			} else {
-				rs.close();
-				connection.createStatement().executeQuery("INSERT INTO timeseries (column) VALUES (\"\")");
-				column = "";
-			}
 		}
 		
 		public MetaTimepointShort get(int id) throws SQLException, DaxploreException {
@@ -137,13 +116,6 @@ public class MetaTimepointShort implements Comparable<MetaTimepointShort> {
 			insertStmt.executeBatch();
 			toBeAdded.clear();
 			addDelta = 0;
-			
-			if(columnModified) {
-				PreparedStatement columnStmt = connection.prepareStatement("UPDATE timeseries SET column = ?");
-				columnStmt.setString(1, column);
-				columnStmt.executeUpdate();
-				columnModified = false;
-			}
 		}
 		
 		public List<MetaTimepointShort> getAll() throws SQLException {
@@ -162,15 +134,6 @@ public class MetaTimepointShort implements Comparable<MetaTimepointShort> {
 			List<MetaTimepointShort> pointList = new LinkedList<MetaTimepointShort>(pointMap.values());
 			Collections.sort(pointList);
 			return pointList;
-		}
-		
-		public String getColumn() {
-			return column;
-		}
-
-		public void setColumn(String column) {
-			this.column = column;
-			columnModified = true;
 		}
 	}
 	
