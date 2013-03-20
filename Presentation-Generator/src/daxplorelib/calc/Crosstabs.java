@@ -49,7 +49,7 @@ public class Crosstabs {
 			PreparedStatement stmt1 = connection.prepareStatement("SELECT ?, ? FROM rawdata WHERE ? = ?");
 			stmt1.setString(1, question.getId());
 			stmt1.setString(2, perspective.getId());
-			stmt1.setString(3, about.getTimeSeriesShortColumn()); //TODO get timepointshortcolumn
+			stmt1.setString(3, about.getTimeSeriesShortColumn());
 			stmt1.setDouble(4, timepoint.getValue());
 			ResultSet rs = stmt1.executeQuery();
 			
