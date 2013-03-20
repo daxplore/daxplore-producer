@@ -225,6 +225,10 @@ public class MetaScale {
 		return id;
 	}
 	
+	public int getOptionCount() {
+		return options.size();
+	}
+	
 	public List<Option> getOptions() {
 		return options;
 	}
