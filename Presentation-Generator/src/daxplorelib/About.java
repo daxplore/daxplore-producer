@@ -10,7 +10,7 @@ import java.util.Date;
 
 /**
  * This class mirrors the 'about' table in the project file
- * It's a one row table with the columns: filetypeversion, creation, lastupdate, activerawdata
+ * It's a one row table with information about the entire save file.
  */
 public class About {
 	protected static final DaxploreTable table = new DaxploreTable(
