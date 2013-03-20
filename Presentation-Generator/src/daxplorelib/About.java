@@ -5,6 +5,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.sql.Types;
 import java.util.Date;
 
 /**
@@ -14,7 +15,7 @@ import java.util.Date;
 public class About {
 	protected static final DaxploreTable table = new DaxploreTable(
 			"CREATE TABLE about (filetypeversionmajor INTEGER, filetypeversionminor INTEGER, creation INTEGER," +
-			"lastupdate INTEGER, importdate INTEGER, filename TEXT, timeseriestype TEXT)", "about");
+			"lastupdate INTEGER, importdate INTEGER, filename TEXT, timeseriestype TEXT, timeshortcolumn TEXT)", "about");
 	
 	public enum TimeSeriesType {
 		NONE, SHORT, LONG
@@ -27,6 +28,12 @@ public class About {
 	Date importdate;
 	String filename;
 	TimeSeriesType timeSeriesType;
+	
+	/**
+	 * If the timeseries type is SHORT, this is the column that keeps track of time points.
+	 * For other timeseries types, this should be set to null.
+	 */
+	String timeSeriesShortColumn;
 	
 	Connection database;
 	
@@ -46,7 +53,7 @@ public class About {
 			stmt = database.createStatement();
 			stmt.executeUpdate(table.sql);
 			stmt.close();
-			PreparedStatement prepared = database.prepareStatement("INSERT INTO about VALUES (?, ?, ?, ?, ?, ?, ?)");
+			PreparedStatement prepared = database.prepareStatement("INSERT INTO about VALUES (?, ?, ?, ?, ?, ?, ?, ?)");
 			prepared.setInt(1, filetypeversionmajor);
 			prepared.setInt(2, filetypeversionminor);
 			prepared.setLong(3, creation.getTime());
@@ -54,6 +61,7 @@ public class About {
 			prepared.setLong(5, 0);
 			prepared.setString(6, "");
 			prepared.setString(7, TimeSeriesType.NONE.name());
+			prepared.setNull(8, Types.VARCHAR);
 			prepared.execute();
 			prepared.close();
 			
@@ -69,6 +77,7 @@ public class About {
 			importdate = rs.getDate("importdate");
 			filename = rs.getString("filename");
 			timeSeriesType = TimeSeriesType.valueOf(rs.getString("timeseriestype"));
+			timeSeriesShortColumn = rs.getString("timeshortcolumn");
 			stmt.close();
 		}
 	}
@@ -121,4 +130,18 @@ public class About {
 	public TimeSeriesType getTimeSeriesType() {
 		return timeSeriesType;
 	}
+	
+	public void setTimeSeriesShortColumn(String column) throws SQLException {
+		PreparedStatement stmt = database.prepareStatement("UPDATE about set timeshortcolumn = ?");
+		stmt.setString(1, column);
+		stmt.executeUpdate();
+		stmt.close();
+		timeSeriesShortColumn = column;
+	}
+	
+	public String getTimeSeriesShortColumn() {
+		return timeSeriesShortColumn;
+	}
+	
+	//TODO only update database when SaveAll is called
 }
