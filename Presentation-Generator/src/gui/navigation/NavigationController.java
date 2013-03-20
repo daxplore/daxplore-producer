@@ -26,7 +26,7 @@ public class NavigationController implements ActionListener {
 			break;
 		case "SAVE":
 			try {
-				mainController.getDaxploreFile().getMetaData().save();
+				mainController.getDaxploreFile().saveAll();
 			} catch (DaxploreException e1) {
 				// TODO Auto-generated catch block
 				e1.printStackTrace();

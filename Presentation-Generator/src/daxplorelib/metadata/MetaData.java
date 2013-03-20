@@ -379,30 +379,31 @@ public class MetaData {
 	
 	public List<DaxploreTable> getTables() {
 		List<DaxploreTable> list = new LinkedList<DaxploreTable>();
-		list.add(MetaQuestion.table);
+		
+		list.add(MetaCalculation.table);
+		
 		list.add(MetaGroup.groupTable);
 		list.add(MetaGroup.groupRelTable);
+		
+		list.add(MetaQuestion.table);
+		list.add(MetaQuestion.timePointTable);
+		
 		list.add(MetaScale.maintable);
 		list.add(MetaScale.optiontable);
-		list.add(MetaCalculation.table);
+		
+		list.add(MetaTimepointShort.pointTable);
+		
 		list.add(TextReference.table);
+
 		return list;
 	}
 	
-	public void save() throws DaxploreException{
-		try {
-			boolean autocommit = connection.getAutoCommit();
-			connection.setAutoCommit(false);
-			connection.setTransactionIsolation(Connection.TRANSACTION_READ_UNCOMMITTED);
-			textsManager.saveAll();
-			metaScaleManager.saveAll();
-			metaQuestionManager.saveAll();
-			metaGroupManager.saveAll();
-			connection.commit();
-			connection.setAutoCommit(autocommit);
-		} catch (SQLException e) {
-			throw new DaxploreException("Error while saving data", e);
-		}
+	public void saveAll() throws DaxploreException, SQLException {
+		textsManager.saveAll();
+		metaScaleManager.saveAll();
+		metaQuestionManager.saveAll();
+		metaGroupManager.saveAll();
+		metaTimepointManager.saveAll();
 	}
 	
 	public MetaQuestionManager getMetaQuestionManager() {

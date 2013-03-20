@@ -23,11 +23,13 @@ public class About {
 	
 	final int filetypeversionmajor;
 	final int filetypeversionminor;
-	Date creation;
-	Date lastupdate;
-	Date importdate;
-	String filename;
-	TimeSeriesType timeSeriesType;
+	private Date creation;
+	private Date lastupdate;
+	private Date importdate;
+	private String filename;
+	private TimeSeriesType timeSeriesType;
+	
+	private boolean modified = false;
 	
 	/**
 	 * If the timeseries type is SHORT, this is the column that keeps track of time points.
@@ -35,14 +37,14 @@ public class About {
 	 */
 	String timeSeriesShortColumn;
 	
-	Connection database;
+	Connection connection;
 	
 	public About(Connection sqliteDatabase) throws SQLException {
 		this(sqliteDatabase, false);
 	}
 	
 	public About(Connection sqliteDatabase, boolean createnew) throws SQLException{
-		this.database = sqliteDatabase;
+		this.connection = sqliteDatabase;
 		Statement stmt;
 		if(createnew){
 			filetypeversionmajor = DaxploreFile.filetypeversionmajor;
@@ -50,10 +52,10 @@ public class About {
 			creation = new Date();
 			lastupdate = (Date) creation.clone();
 			timeSeriesType = TimeSeriesType.SHORT;
-			stmt = database.createStatement();
+			stmt = connection.createStatement();
 			stmt.executeUpdate(table.sql);
 			stmt.close();
-			PreparedStatement prepared = database.prepareStatement("INSERT INTO about VALUES (?, ?, ?, ?, ?, ?, ?, ?)");
+			PreparedStatement prepared = connection.prepareStatement("INSERT INTO about VALUES (?, ?, ?, ?, ?, ?, ?, ?)");
 			prepared.setInt(1, filetypeversionmajor);
 			prepared.setInt(2, filetypeversionminor);
 			prepared.setLong(3, creation.getTime());
@@ -66,7 +68,7 @@ public class About {
 			prepared.close();
 			
 		}else{
-			stmt = database.createStatement();
+			stmt = connection.createStatement();
 			stmt.execute("SELECT * FROM about");
 			ResultSet rs = stmt.getResultSet();
 			rs.next();
@@ -82,6 +84,26 @@ public class About {
 		}
 	}
 	
+	public void saveAll() throws SQLException {
+		if(modified) {
+			PreparedStatement updateStmt = connection.prepareStatement(
+					"UPDATE about SET filetypeversionmajor = ?, filetypeversionminor = ?, creation = ?," +
+					"lastupdate = ?, importdate = ?, filename = ?, timeseriestype = ?, timeshortcolumn = ?");
+			Date now = new Date();
+			updateStmt.setInt(1, filetypeversionmajor);
+			updateStmt.setInt(2, filetypeversionminor);
+			updateStmt.setLong(3, creation.getTime());
+			updateStmt.setLong(4, now.getTime());
+			updateStmt.setLong(4, importdate.getTime());
+			updateStmt.setString(6, filename);
+			updateStmt.setString(7, timeSeriesType.name());
+			updateStmt.setString(8, timeSeriesShortColumn);
+			updateStmt.executeUpdate();
+			updateStmt.close();
+			modified = false;
+		}
+	}
+	
 	public Date getCreationDate() {
 		return creation;
 	}
@@ -90,29 +112,15 @@ public class About {
 		return lastupdate;
 	}
 	
-	public void setUpdate() throws SQLException {
-		Date now = new Date();
-		PreparedStatement stmt = database.prepareStatement("UPDATE about SET lastupdate = ?");
-		stmt.setLong(1, now.getTime());
-		lastupdate = now;
-		stmt.executeUpdate();
-		stmt.close();
-	}
-	
 	public Date getImportDate() {
 		return importdate;
 	}
 	
 	public void setImport(String filename) throws SQLException {
 		Date now = new Date();
-		PreparedStatement stmt = database.prepareStatement("UPDATE about SET importdate = ?, filename = ?");
-		stmt.setLong(1, now.getTime());
-		stmt.setString(2, filename);
 		this.filename = filename;
 		this.importdate = now;
-		stmt.executeUpdate();
-		stmt.close();
-		setUpdate();
+		modified = true;
 	}
 	
 	public String getImportFilename(){
@@ -120,11 +128,8 @@ public class About {
 	}
 	
 	public void setTimeSeriesType(TimeSeriesType timeSeriesType) throws SQLException {
-		PreparedStatement stmt = database.prepareStatement("UPDATE about SET timeseriestype = ?");
-		stmt.setString(1, timeSeriesType.name());
-		stmt.executeUpdate();
-		stmt.close();
-		this.timeSeriesType = timeSeriesType; 
+		this.timeSeriesType = timeSeriesType;
+		modified = true;
 	}
 	
 	public TimeSeriesType getTimeSeriesType() {
@@ -132,16 +137,11 @@ public class About {
 	}
 	
 	public void setTimeSeriesShortColumn(String column) throws SQLException {
-		PreparedStatement stmt = database.prepareStatement("UPDATE about set timeshortcolumn = ?");
-		stmt.setString(1, column);
-		stmt.executeUpdate();
-		stmt.close();
 		timeSeriesShortColumn = column;
+		modified = true;
 	}
 	
 	public String getTimeSeriesShortColumn() {
 		return timeSeriesShortColumn;
 	}
-	
-	//TODO only update database when SaveAll is called
 }

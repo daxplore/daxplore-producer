@@ -13,6 +13,7 @@ import javax.swing.JTextField;
 
 import daxplorelib.DaxploreException;
 
+@SuppressWarnings("serial")
 public class ToolsView extends JPanel {
 	
 	private JTextField textField;
@@ -48,7 +49,7 @@ public class ToolsView extends JPanel {
 		btnSave.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				try {
-					mainController.getDaxploreFile().getMetaData().save();
+					mainController.getDaxploreFile().saveAll();
 				} catch (DaxploreException e1) {
 					// TODO Auto-generated catch block
 					e1.printStackTrace();

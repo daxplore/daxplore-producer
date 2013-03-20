@@ -247,6 +247,22 @@ public class DaxploreFile {
 		}
 	}
 	
+	public void saveAll() throws DaxploreException {
+		try {
+			boolean autocommit = connection.getAutoCommit();
+			connection.setAutoCommit(false);
+			connection.setTransactionIsolation(Connection.TRANSACTION_READ_UNCOMMITTED);
+			
+			metadata.saveAll();
+			about.saveAll();
+			
+			connection.commit();
+			connection.setAutoCommit(autocommit);
+		} catch (SQLException e) {
+			throw new DaxploreException("Error while saving data", e);
+		}
+	}
+	
 	public void close() throws DaxploreException {
 		try {
 			connection.close();
