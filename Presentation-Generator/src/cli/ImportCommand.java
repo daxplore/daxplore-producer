@@ -180,6 +180,13 @@ public class ImportCommand {
 			try {
 				metadata = dax.getMetaData();
 			} catch (DaxploreException e) {
+				try {
+					r.close();
+				} catch (IOException e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+				}
+				//TODO handle exception
 				System.out.println("Could not get metadata");
 				e.printStackTrace();
 				return;
@@ -188,10 +195,12 @@ public class ImportCommand {
 			try {
 				metadata.importL10n(r, L10nFormat.PROPERTIES, locale);
 			} catch (DaxploreException e) {
+				//TODO handle exception
 				System.out.println("Error exporting texts");
 				e.printStackTrace();
 				return;
 			} catch (IOException e) {
+				//TODO handle exception
 				System.out.println("Error exporting texts");
 				e.printStackTrace();
 				return;

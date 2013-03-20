@@ -178,6 +178,7 @@ public class DaxploreFile {
 			sf.logFlag = false;
 			sf.loadMetadata();
 		} catch (SPSSFileException e2) {
+			sf.close();
 			throw new DaxploreException("SPSSFileException", e2);
 		}
 		

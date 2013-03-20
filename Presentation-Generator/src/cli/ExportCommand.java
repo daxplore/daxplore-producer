@@ -84,6 +84,13 @@ public class ExportCommand {
 			try {
 				metadata = dax.getMetaData();
 			} catch (DaxploreException e) {
+				try {
+					w.close();
+				} catch (IOException e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+				}
+				//TODO handle exception
 				System.out.println("Could not get metadata");
 				e.printStackTrace();
 				return;
@@ -92,14 +99,17 @@ public class ExportCommand {
 			try {
 				metadata.exportStructure(w);
 			} catch (DaxploreException e) {
+				//TODO handle exception
 				System.out.println("Error exporting structure");
 				e.printStackTrace();
 				return;
 			} catch (IOException e) {
+				//TODO handle exception
 				System.out.println("Error exporting structure");
 				e.printStackTrace();
 				return;
 			} catch (SQLException e) {
+				//TODO handle exception
 				System.out.println("Error exporting structure");
 				e.printStackTrace();
 				return;
@@ -158,6 +168,13 @@ public class ExportCommand {
 			try {
 				metadata = dax.getMetaData();
 			} catch (DaxploreException e) {
+				//TODO handle exception
+				try {
+					w.close();
+				} catch (IOException e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+				}
 				System.out.println("Could not get metadata");
 				e.printStackTrace();
 				return;
@@ -166,10 +183,12 @@ public class ExportCommand {
 			try {
 				metadata.exportL10n(w, L10nFormat.PROPERTIES, locale);
 			} catch (DaxploreException e) {
+				//TODO handle exception
 				System.out.println("Error exporting texts");
 				e.printStackTrace();
 				return;
 			} catch (IOException e) {
+				//TODO handle exception
 				System.out.println("Error exporting texts");
 				e.printStackTrace();
 				return;
@@ -177,6 +196,7 @@ public class ExportCommand {
 			try {
 				w.flush();
 			} catch (IOException e) {
+				//TODO handle exception
 				System.out.println("Huh!?!");
 				e.printStackTrace();
 			}

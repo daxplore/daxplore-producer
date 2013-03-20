@@ -153,12 +153,13 @@ public class GroupsController implements ActionListener {
 		case GROUPS_REMOVE_ACTION_COMMAND:
 			try {
 				path = groupTree.getSelectionPath().getPath();
-				Object parent = path[path.length-2];
 				Object child = path[path.length-1];
-				int index = groupTreeModel.getIndexOfChild(parent, child);
 				groupTree.setSelectionPath(null);
 				groupTreeModel.removeChild(child); //the row that actually does work, rest just what the selection should be...
-				/*int siblingCount = groupTreeModel.getChildCount(parent);
+				/*
+				Object parent = path[path.length-2];
+				int index = groupTreeModel.getIndexOfChild(parent, child);
+				int siblingCount = groupTreeModel.getChildCount(parent);
 				List<Object> newPath = Arrays.asList(Arrays.copyOfRange(path, 0, path.length-2));
 				if(siblingCount > 0 && siblingCount >= index) {
 					newPath.add(groupTreeModel.getChild(parent, index));
