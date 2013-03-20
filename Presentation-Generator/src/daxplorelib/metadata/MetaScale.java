@@ -252,6 +252,15 @@ public class MetaScale {
 		throw new Exception("Ignore Exception");
 	}
 	
+	public int matchIndex(double value) throws Exception {
+		for(int i = 0; i < options.size(); i++ ) {
+			if(options.get(i).transformation.contains(value)) {
+				return i;
+			}
+		}
+		throw new Exception("Ignore Exception");
+	}
+	
 	public boolean ignored(double value) {
 		return ignore.contains(value);
 	}
