@@ -15,10 +15,10 @@ import javax.swing.JButton;
 import javax.swing.JList;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
+import javax.swing.JSplitPane;
 import javax.swing.JTree;
 import javax.swing.ListCellRenderer;
 import javax.swing.tree.TreeCellRenderer;
-import javax.swing.JSplitPane;
 
 @SuppressWarnings("serial")
 public class GroupsView extends JPanel {

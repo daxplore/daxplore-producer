@@ -23,7 +23,6 @@ import javax.swing.table.TableCellEditor;
 import javax.swing.table.TableCellRenderer;
 
 import tools.NumberlineCoverage;
-import daxplorelib.metadata.MetaScale;
 import daxplorelib.metadata.TextReference;
 
 @SuppressWarnings("serial")

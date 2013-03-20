@@ -6,9 +6,7 @@ import gui.Settings;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.sql.SQLException;
-import java.util.Arrays;
 import java.util.LinkedList;
-import java.util.List;
 
 import javax.swing.JOptionPane;
 import javax.swing.tree.TreePath;

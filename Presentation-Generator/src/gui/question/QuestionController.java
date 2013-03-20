@@ -1,11 +1,12 @@
 package gui.question;
 
+import gui.MainController;
+
 import javax.swing.DefaultListModel;
 
 import daxplorelib.metadata.MetaQuestion;
 import daxplorelib.metadata.MetaScale;
 import daxplorelib.metadata.MetaScale.Option;
-import gui.MainController;
 
 public class QuestionController {
 	

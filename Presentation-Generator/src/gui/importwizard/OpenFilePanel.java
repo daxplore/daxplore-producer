@@ -1,13 +1,12 @@
 package gui.importwizard;
 
+import java.awt.FlowLayout;
 import java.awt.event.ActionListener;
-import java.awt.event.ItemListener;
 
 import javax.swing.JButton;
+import javax.swing.JCheckBox;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
-import javax.swing.JCheckBox;
-import java.awt.FlowLayout;
 
 @SuppressWarnings("serial")
 public class OpenFilePanel extends JPanel {

@@ -13,13 +13,12 @@ import java.util.Locale;
 import java.util.Map.Entry;
 import java.util.Properties;
 
-import au.com.bytecode.opencsv.CSVReader;
-import au.com.bytecode.opencsv.CSVWriter;
-
 import tools.MyTools;
 import tools.NumberlineCoverage;
 import tools.Pair;
 import tools.SortedProperties;
+import au.com.bytecode.opencsv.CSVReader;
+import au.com.bytecode.opencsv.CSVWriter;
 import daxplorelib.DaxploreException;
 import daxplorelib.DaxploreFile;
 import daxplorelib.DaxploreTable;

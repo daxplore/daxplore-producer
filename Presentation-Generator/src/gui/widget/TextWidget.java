@@ -1,12 +1,12 @@
 package gui.widget;
 
+import gui.MainController;
+import gui.MainController.Views;
+
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-
-import gui.MainController;
-import gui.MainController.Views;
 
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
