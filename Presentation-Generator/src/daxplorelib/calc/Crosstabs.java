@@ -53,7 +53,7 @@ public class Crosstabs {
 			stmt1.setDouble(4, timepoint.getValue());
 			ResultSet rs = stmt1.executeQuery();
 			
-			int[][] crosstabsdata = new int[question.getScale().getOptions().size()][perspective.getScale().getOptions().size()];
+			int[][] crosstabsdata = new int[question.getScale().getOptionCount()][perspective.getScale().getOptionCount()];
 			
 			while(rs.next()) {
 				try {
