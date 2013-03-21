@@ -33,6 +33,7 @@ public class SPSSTools {
 			sf.logFlag = false;
 			sf.loadMetadata();
 		} catch (SPSSFileException e) {
+			sf.close();
 			e.printStackTrace();
 			throw new Exception("Couldn't open file");
 		} catch (FileNotFoundException e) {
@@ -49,14 +50,9 @@ public class SPSSTools {
 			sf2 = new SPSSFile(spssFile, charset);
 			sf2.logFlag = false;
 			sf2.loadMetadata();
-		} catch (SPSSFileException e) {
-			e.printStackTrace();
-			throw new Exception("Couldn't open file");
-		} catch (FileNotFoundException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-			throw new Exception("Couldn't open file");
-		} catch (IOException e) {
+		} catch (SPSSFileException | IOException e) {
+			sf.close();
+			sf2.close();
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 			throw new Exception("Couldn't open file");

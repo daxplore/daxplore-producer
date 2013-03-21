@@ -52,5 +52,6 @@ public class SortedPropertiesTest {
 				assertEquals(pair.getKey() + "=" + pair.getValue(), line);
 				i++;
 			}
+			br.close();
 	}
 }

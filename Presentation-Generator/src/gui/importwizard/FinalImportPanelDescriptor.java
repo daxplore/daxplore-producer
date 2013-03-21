@@ -79,10 +79,13 @@ public class FinalImportPanelDescriptor extends ImportWizardDescriptor {
 			sf.loadMetadata();
 			temp = File.createTempFile("spsscsv", ".csv.tmp");
 			sf.exportData(temp, ffi);
-		} catch (IOException e) {
-			e.printStackTrace();
-			return null;
-		} catch (SPSSFileException e) {
+		} catch (SPSSFileException | IOException e) {
+			try {
+				sf.close();
+			} catch (IOException e1) {
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
+			}
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 			return null;
@@ -95,6 +98,15 @@ public class FinalImportPanelDescriptor extends ImportWizardDescriptor {
 			columns[i] = var.getShortName();
 			// just for testing output so we can see data is being processed.
 			System.out.print(sf.getVariable(i).getShortName() + ", ");
+		}
+		
+		if (sf != null) {
+			try {
+				sf.close();
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
 		}
 
 		try {
@@ -110,16 +122,17 @@ public class FinalImportPanelDescriptor extends ImportWizardDescriptor {
 				}
 				l++;
 			}
-		} catch (FileNotFoundException e) {
-			System.out.println("FileNotFoundException");
-			e.printStackTrace();
-			
 		} catch (IOException e) {
-			System.out.println("IOException");
-			System.out.print(e.toString());
+			try {
+				br.close();
+			} catch (IOException e1) {
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
+			}
+			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-	
+		
 		TableModel model = new DefaultTableModel(data, columns);
 		
 		return model;
