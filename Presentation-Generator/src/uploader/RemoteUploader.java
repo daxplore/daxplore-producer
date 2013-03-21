@@ -134,6 +134,7 @@ public class RemoteUploader extends JFrame {
 			}
 
 		} finally {
+			raf.close();
 			installer.uninstall();
 		}
 	}

@@ -32,11 +32,11 @@ public class CharsetPanel extends JPanel {
 		add(contentPanel);
 		contentPanel.setLayout(new BorderLayout(0, 0));
 		
-				JPanel specifyEncodingPanel = new JPanel();
-				contentPanel.add(specifyEncodingPanel, BorderLayout.NORTH);
-				
-						JLabel lblNewLabel = new JLabel("Specify encoding:");
-						specifyEncodingPanel.add(lblNewLabel);
+		JPanel specifyEncodingPanel = new JPanel();
+		contentPanel.add(specifyEncodingPanel, BorderLayout.NORTH);
+		
+		JLabel lblNewLabel = new JLabel("Specify encoding:");
+		specifyEncodingPanel.add(lblNewLabel);
 						
 		encodingComboBox = new JComboBox();
 		specifyEncodingPanel.add(encodingComboBox);
