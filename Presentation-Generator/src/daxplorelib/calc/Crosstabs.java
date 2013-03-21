@@ -24,7 +24,7 @@ public class Crosstabs {
 		this.about = about;
 	}
 	
-	public void Crosstabs2(MetaQuestion question, MetaQuestion perspective) throws SQLException {
+	public BarStats crosstabs2(MetaQuestion question, MetaQuestion perspective) throws SQLException {
 		List<MetaTimepointShort> questionTimes = question.getTimepoints();
 		List<MetaTimepointShort> perspectiveTimes = perspective.getTimepoints();
 		
@@ -36,13 +36,18 @@ public class Crosstabs {
 			}
 		}
 		
+		BarStats stats = new BarStats();
+		
 		for(MetaTimepointShort timepoint: commonTimes) {
-			Crosstabs2(question, perspective, timepoint);
+			int[][] crosstabs = crosstabs2(question, perspective, timepoint);
+			int[] frequencies = frequencies(question, timepoint);
+			stats.addTimePoint(timepoint, crosstabs, frequencies);
 		}
 		
+		return stats;
 	}
 	
-	public void Crosstabs2(MetaQuestion question, MetaQuestion perspective, MetaTimepointShort timepoint) throws SQLException {
+	public int[][] crosstabs2(MetaQuestion question, MetaQuestion perspective, MetaTimepointShort timepoint) throws SQLException {
 		if(question.getScale() != null && perspective.getScale() != null) {
 			//TODO: handle case where scale only has ignore
 			
@@ -53,7 +58,7 @@ public class Crosstabs {
 			stmt1.setDouble(4, timepoint.getValue());
 			ResultSet rs = stmt1.executeQuery();
 			
-			int[][] crosstabsdata = new int[question.getScale().getOptionCount()][perspective.getScale().getOptionCount()];
+			int[][] crosstabsdata = new int[question.getScale().getOptionCount()][perspective.getScale().getOptionCount()]; //TODO: switch indexing??
 			
 			while(rs.next()) {
 				try {
@@ -67,13 +72,37 @@ public class Crosstabs {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
-				
 			}
+			return crosstabsdata;
 		
 		} else {
 			//TODO handle cases where there is no scale
+			return null;
 		}
 		
+	}
+	
+	public int[] frequencies(MetaQuestion question, MetaTimepointShort timepoint) throws SQLException {
+		PreparedStatement stmt = connection.prepareStatement("SELECT ? FROM rawdata WHERE ? = ?");
+		stmt.setString(1, question.getId());
+		stmt.setString(2, about.getTimeSeriesShortColumn());
+		stmt.setDouble(3, timepoint.getValue());
+		ResultSet rs = stmt.executeQuery();
+		
+		int[] frequencies = new int[question.getScale().getOptionCount()];
+		
+		while(rs.next()) {
+			Double value = rs.getDouble(question.getId());
+			if(!question.getScale().getIgnoreOption().contains(value)) {
+				try {
+					frequencies[question.getScale().matchIndex(value)]++;
+				} catch (Exception e) {
+					e.printStackTrace();
+					throw new AssertionError("To be ignored or not to be ignored");
+				}
+			}
+		}
+		return frequencies;
 	}
 	
 }
