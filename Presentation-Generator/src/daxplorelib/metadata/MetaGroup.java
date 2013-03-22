@@ -168,6 +168,10 @@ public class MetaGroup implements Comparable<MetaGroup> {
 			List<MetaGroup> groupList = new LinkedList<MetaGroup>(groupMap.values());
 			Collections.sort(groupList);
 			return groupList;
+		}
+
+		public int getHighestId() throws SQLException {
+			return SQLTools.maxId(groupTable.name, "id", connection);
 		}		
 	}
 	
