@@ -94,9 +94,8 @@ public class TextReference implements Comparable<TextReference> {
 							insertTextrefStmt.setString(1, tr.reference);
 							insertTextrefStmt.setString(2, l.toLanguageTag());
 							insertTextrefStmt.setString(3, tr.get(l));
-							insertTextrefStmt.addBatch();
+							insertTextrefStmt.executeUpdate(); //TODO: figure out why batch dosn't work here.
 						}
-						insertTextrefStmt.executeBatch();
 						
 						deleteTextrefLocaleStmt.setString(1, tr.reference);
 						deleteTextrefLocaleStmt.setNull(2, Types.VARCHAR);

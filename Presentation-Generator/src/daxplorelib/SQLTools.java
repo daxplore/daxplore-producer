@@ -109,12 +109,17 @@ public class SQLTools {
 	}
 	
 	public static int maxId(String tablename, String columnname, Connection connection) throws SQLException {
-		PreparedStatement stmt = connection.prepareStatement("SELECT max(?) as maxid FROM ?");
+/*		PreparedStatement stmt = connection.prepareStatement("SELECT max( ? ) AS maxid FROM ?");
 		stmt.setString(1, columnname);
 		stmt.setString(2, tablename);
-		ResultSet rs = stmt.executeQuery();
+		ResultSet rs = stmt.executeQuery();*/
+		ResultSet rs = connection.createStatement().executeQuery("SELECT max( " + columnname + ") AS maxid FROM " + tablename);
 		if(rs.next()){
-			return rs.getInt("maxid");
+			int res = rs.getInt("maxid");
+			if(rs.wasNull()) {
+				return 0;
+			}
+			return res;
 		} else {
 			throw new SQLException("No max value, table empty");
 		}
