@@ -45,20 +45,6 @@ public class ToolsView extends JPanel {
 		setLayout(null);
 		add(btnImportfromraw);
 		
-		JButton btnSave = new JButton("Save");
-		btnSave.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				try {
-					mainController.getDaxploreFile().saveAll();
-				} catch (DaxploreException e1) {
-					// TODO Auto-generated catch block
-					e1.printStackTrace();
-				}
-			}
-		});
-		btnSave.setBounds(370, 263, 68, 25);
-		add(btnSave);
-		
 		JLabel lblEnterLocale = new JLabel("Enter locale");
 		lblEnterLocale.setBounds(12, 12, 117, 15);
 		add(lblEnterLocale);
