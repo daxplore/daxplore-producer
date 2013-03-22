@@ -253,8 +253,8 @@ public class DaxploreFile {
 			connection.setAutoCommit(false);
 			connection.setTransactionIsolation(Connection.TRANSACTION_READ_UNCOMMITTED);
 			
+			about.save();
 			metadata.saveAll();
-			about.saveAll();
 			
 			connection.commit();
 			connection.setAutoCommit(autocommit);

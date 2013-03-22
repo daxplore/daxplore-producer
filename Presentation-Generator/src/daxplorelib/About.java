@@ -51,22 +51,11 @@ public class About {
 			filetypeversionminor = DaxploreFile.filetypeversionminor;
 			creation = new Date();
 			lastupdate = (Date) creation.clone();
+			importdate = null;
+			filename = null;
 			timeSeriesType = TimeSeriesType.SHORT;
-			stmt = connection.createStatement();
-			stmt.executeUpdate(table.sql);
-			stmt.close();
-			PreparedStatement prepared = connection.prepareStatement("INSERT INTO about VALUES (?, ?, ?, ?, ?, ?, ?, ?)");
-			prepared.setInt(1, filetypeversionmajor);
-			prepared.setInt(2, filetypeversionminor);
-			prepared.setLong(3, creation.getTime());
-			prepared.setLong(4, lastupdate.getTime());
-			prepared.setLong(5, 0);
-			prepared.setString(6, "");
-			prepared.setString(7, TimeSeriesType.NONE.name());
-			prepared.setNull(8, Types.VARCHAR);
-			prepared.execute();
-			prepared.close();
-			
+			timeSeriesShortColumn = null;
+			modified = true;
 		}else{
 			stmt = connection.createStatement();
 			stmt.execute("SELECT * FROM about");
@@ -84,7 +73,7 @@ public class About {
 		}
 	}
 	
-	public void saveAll() throws SQLException {
+	public void save() throws SQLException {
 		if(modified) {
 			PreparedStatement updateStmt = connection.prepareStatement(
 					"UPDATE about SET filetypeversionmajor = ?, filetypeversionminor = ?, creation = ?," +
@@ -94,10 +83,27 @@ public class About {
 			updateStmt.setInt(2, filetypeversionminor);
 			updateStmt.setLong(3, creation.getTime());
 			updateStmt.setLong(4, now.getTime());
-			updateStmt.setLong(4, importdate.getTime());
-			updateStmt.setString(6, filename);
+			
+			if(importdate!=null) {
+				updateStmt.setLong(4, importdate.getTime());
+			} else {
+				updateStmt.setNull(4, Types.INTEGER);
+			}
+			
+			if(filename==null) {
+				updateStmt.setString(6, filename);
+			} else {
+				updateStmt.setNull(6, Types.VARCHAR);
+			}
+			
 			updateStmt.setString(7, timeSeriesType.name());
-			updateStmt.setString(8, timeSeriesShortColumn);
+			
+			if(timeSeriesShortColumn!=null) {
+				updateStmt.setString(8, timeSeriesShortColumn);
+			} else {
+				updateStmt.setNull(8, Types.VARCHAR);
+			}
+			
 			updateStmt.executeUpdate();
 			updateStmt.close();
 			modified = false;
