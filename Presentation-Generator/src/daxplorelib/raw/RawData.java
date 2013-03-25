@@ -17,6 +17,7 @@ import org.opendatafoundation.data.spss.SPSSStringVariable;
 import org.opendatafoundation.data.spss.SPSSVariable;
 
 import tools.MyTools;
+import tools.Pair;
 import daxplorelib.DaxploreException;
 import daxplorelib.DaxploreTable;
 import daxplorelib.SQLTools;
@@ -149,7 +150,7 @@ public class RawData {
 		//don't close statement
 	}
 	
-	int getNumberOfRows() throws SQLException{
+	int getNumberOfRows() throws SQLException {
 		Statement stmt = connection.createStatement();
 		ResultSet rs = stmt.executeQuery("SELECT count(*) FROM " + tablename);
 		rs.next();
@@ -172,6 +173,38 @@ public class RawData {
 		} else {
 			return false;
 		}
+	}
+	
+	public boolean hasColumn(String column) throws SQLException {
+		ResultSet rs = connection.createStatement().executeQuery("PRAGMA table_info(rawdata)");
+		while(rs.next()) {
+			if(rs.getString("name").equalsIgnoreCase(column)) {
+				return true;
+			}
+		}
+		return false;
+	}
+	
+	public LinkedList<Pair<Double, Integer>> getColumnValueCount(String column) throws SQLException {
+		/*PreparedStatement stmt = connection.prepareStatement("SELECT ?, count(*) as cnt from rawdata group by ? order by ?");
+		stmt.setString(1, column);
+		stmt.setString(2, column);
+		stmt.setString(3, column);
+		ResultSet rs = stmt.executeQuery();*/
+		//Prepared statement doesn't work, but hasColumn is always called first so this should be relatively injection-safe
+		ResultSet rs = connection.createStatement().executeQuery("select "+ column + " as val, count(*) as cnt from rawdata group by val order by val");
+		
+		LinkedList<Pair<Double, Integer>> map = new LinkedList<Pair<Double, Integer>>();
+		while(rs.next()) {
+			Double val = rs.getDouble(1);
+			Integer count = rs.getInt("cnt");
+			if(val!=null) {
+				map.add(new Pair<Double, Integer>(val, count));
+			} else {
+				map.add(new Pair<Double, Integer>(null, count));
+			}
+		}
+		return map;
 	}
 }
 

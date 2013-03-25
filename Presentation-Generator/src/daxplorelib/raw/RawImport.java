@@ -76,7 +76,7 @@ public class RawImport {
 		return rawmeta;
 	}
 	
-	RawData getRawData(){
+	public RawData getRawData(){
 		return rawdata;
 	}
 	

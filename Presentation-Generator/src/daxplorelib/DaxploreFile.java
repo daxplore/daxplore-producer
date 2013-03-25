@@ -80,6 +80,8 @@ public class DaxploreFile {
 		this.file = file;
 		try {
 			about = new About(connection, createNew);
+			about.init();
+			about.save();
 		} catch (SQLException e) {
 			throw new DaxploreException("Error creating about", e);
 		}
@@ -255,6 +257,7 @@ public class DaxploreFile {
 			
 			about.save();
 			metadata.saveAll();
+			System.out.println("Save all the stuff"); //TODO remove
 			
 			connection.commit();
 			connection.setAutoCommit(autocommit);

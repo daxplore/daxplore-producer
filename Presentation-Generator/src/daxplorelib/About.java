@@ -29,7 +29,7 @@ public class About {
 	private String filename;
 	private TimeSeriesType timeSeriesType;
 	
-	private boolean modified = false;
+	private boolean firstSave = false, modified = false;
 	
 	/**
 	 * If the timeseries type is SHORT, this is the column that keeps track of time points.
@@ -56,6 +56,7 @@ public class About {
 			timeSeriesType = TimeSeriesType.SHORT;
 			timeSeriesShortColumn = null;
 			modified = true;
+			firstSave = true;
 		}else{
 			stmt = connection.createStatement();
 			stmt.execute("SELECT * FROM about");
@@ -73,11 +74,24 @@ public class About {
 		}
 	}
 	
+	public void init() throws SQLException {
+		SQLTools.createIfNotExists(table, connection);
+	}
+	
 	public void save() throws SQLException {
 		if(modified) {
-			PreparedStatement updateStmt = connection.prepareStatement(
-					"UPDATE about SET filetypeversionmajor = ?, filetypeversionminor = ?, creation = ?," +
-					"lastupdate = ?, importdate = ?, filename = ?, timeseriestype = ?, timeshortcolumn = ?");
+			PreparedStatement updateStmt;
+			if(firstSave) {
+				updateStmt = connection.prepareStatement(
+						"INSERT INTO about (filetypeversionmajor, filetypeversionminor, creation," +
+						"lastupdate, importdate, filename, timeseriestype, timeshortcolumn) " +
+						"VALUES (?, ?, ?, ?, ?, ?, ?, ?)");
+				firstSave = false;
+			} else {
+				updateStmt = connection.prepareStatement(
+						"UPDATE about SET filetypeversionmajor = ?, filetypeversionminor = ?, creation = ?," +
+						"lastupdate = ?, importdate = ?, filename = ?, timeseriestype = ?, timeshortcolumn = ?");
+			}
 			Date now = new Date();
 			updateStmt.setInt(1, filetypeversionmajor);
 			updateStmt.setInt(2, filetypeversionminor);
@@ -85,12 +99,12 @@ public class About {
 			updateStmt.setLong(4, now.getTime());
 			
 			if(importdate!=null) {
-				updateStmt.setLong(4, importdate.getTime());
+				updateStmt.setLong(5, importdate.getTime());
 			} else {
-				updateStmt.setNull(4, Types.INTEGER);
+				updateStmt.setNull(5, Types.INTEGER);
 			}
 			
-			if(filename==null) {
+			if(filename!=null) {
 				updateStmt.setString(6, filename);
 			} else {
 				updateStmt.setNull(6, Types.VARCHAR);

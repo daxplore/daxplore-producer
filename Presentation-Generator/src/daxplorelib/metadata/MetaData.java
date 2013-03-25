@@ -421,4 +421,8 @@ public class MetaData {
 	public MetaGroupManager getMetaGroupManager() {
 		return metaGroupManager;
 	}
+	
+	public MetaTimepointShortManager getMetaTimepointManager() {
+		return metaTimepointManager;
+	}
 }

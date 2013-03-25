@@ -5,6 +5,7 @@ import gui.groups.GroupsView;
 import gui.navigation.NavigationView;
 import gui.open.OpenFileView;
 import gui.question.QuestionView;
+import gui.timeseries.TimeSeriesView;
 import gui.tools.ToolsView;
 import gui.widget.QuestionWidget;
 import gui.widget.TextWidget;
@@ -35,6 +36,7 @@ public class MainController implements ActionListener {
 	private NavigationView navigationView;
 	private QuestionView questionView;
 	private MainView mainView;
+	private TimeSeriesView timeSeriesView;
 	
 	private Stack<HistoryItem> history = new Stack<HistoryItem>();
 	private HistoryItem currentCommand;
@@ -46,6 +48,7 @@ public class MainController implements ActionListener {
 		OPENFILEVIEW,
 		EDITTEXTVIEW,
 		GROUPSVIEW,
+		TIMESERIESVIEW,
 		TOOLSVIEW,
 		QUESTIONVIEW;
 	}
@@ -153,6 +156,7 @@ public class MainController implements ActionListener {
 		buttonPanelView.updateButtonPanel();
 		groupsView.getController().loadData();
 		editTextView.getController().loadData();
+		
 	}
 
 	
@@ -221,8 +225,17 @@ public class MainController implements ActionListener {
 		this.toolsView = toolsView;
 	}
 
+	public TimeSeriesView getTimeSeriesView() {
+		return timeSeriesView;
+	}
+	
+	public void setTimeSeriesView(TimeSeriesView timeSeriesView) {
+		this.timeSeriesView = timeSeriesView;
+	}
+
 	/* Files and stuff */
 	
+
 	public DaxploreFile getDaxploreFile() {
 		return daxploreFile;
 	}

@@ -153,7 +153,7 @@ public class MetaTimepointShort implements Comparable<MetaTimepointShort> {
 		return id;
 	}
 	
-	public TextReference getName() {
+	public TextReference getTextRef() {
 		return textref;
 	}
 

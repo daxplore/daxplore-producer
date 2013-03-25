@@ -6,6 +6,7 @@ import gui.groups.GroupsView;
 import gui.navigation.NavigationView;
 import gui.open.OpenFileView;
 import gui.question.QuestionView;
+import gui.timeseries.TimeSeriesView;
 import gui.tools.ToolsView;
 
 import java.awt.BorderLayout;
@@ -133,6 +134,9 @@ public class MainView {
 		
 		mainController.setQuestionView(new QuestionView(mainController));
 		mainPanel.add(mainController.getQuestionView(), Views.QUESTIONVIEW.toString());
+
+		mainController.setTimeSeriesView(new TimeSeriesView(mainController));
+		mainPanel.add(mainController.getTimeSeriesView(), Views.TIMESERIESVIEW.toString());
 		
 		mainPanel.setRequestFocusEnabled(true);
 		

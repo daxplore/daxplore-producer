@@ -26,43 +26,10 @@ public class ButtonPanelView extends JPanel {
 	private JRadioButton openButton;
 	private JRadioButton groupsButton;
 	private JRadioButton editButton;
+	private JRadioButton timeSeriesButton;
 	private JRadioButton toolsButton;
 	private ButtonGroup buttonGroup;
 	
-	
-	// getters and setters.
-	public JRadioButton getOpenButton() {
-		return openButton;
-	}
-
-	public void setOpenButton(JRadioButton openButton) {
-		this.openButton = openButton;
-	}
-
-	public JRadioButton getGroupsButton() {
-		return groupsButton;
-	}
-
-	public void setGroupsButton(JRadioButton groupsButton) {
-		this.groupsButton = groupsButton;
-	}
-
-	public JRadioButton getEditButton() {
-		return editButton;
-	}
-
-	public void setEditButton(JRadioButton editButton) {
-		this.editButton = editButton;
-	}
-
-	public JRadioButton getToolsButton() {
-		return toolsButton;
-	}
-
-	public void setToolsButton(JRadioButton toolsButton) {
-		this.toolsButton = toolsButton;
-	}
-
 	public ButtonPanelView(final MainController mainController) {
 		
 		buttonGroup = new ButtonGroup();
@@ -108,6 +75,18 @@ public class ButtonPanelView extends JPanel {
 		buttonGroup.add(editButton);
 		editButton.setIcon(new ImageIcon(MainController.class.getResource("/gui/resources/21.png")));
 		add(editButton);
+
+		timeSeriesButton = new JRadioButton("");
+		timeSeriesButton.setToolTipText("Time series");
+		timeSeriesButton.setActionCommand(Views.TIMESERIESVIEW.toString());
+		timeSeriesButton.addActionListener(mainController);
+		
+		timeSeriesButton.setSelectedIcon(new ImageIcon(MainController.class.getResource("/gui/resources/2_selected.png")));
+		timeSeriesButton.setRolloverEnabled(false);
+		timeSeriesButton.setBorder(new TitledBorder(null, "", TitledBorder.LEADING, TitledBorder.TOP, null, null));
+		buttonGroup.add(timeSeriesButton);
+		timeSeriesButton.setIcon(new ImageIcon(MainController.class.getResource("/gui/resources/2.png")));
+		add(timeSeriesButton);
 		
 		toolsButton = new JRadioButton("");
 		toolsButton.setToolTipText("Tools section");
@@ -129,11 +108,12 @@ public class ButtonPanelView extends JPanel {
 		if (!mainController.fileIsSet()) {
 			groupsButton.setEnabled(false);
 			editButton.setEnabled(false);
+			timeSeriesButton.setEnabled(false);
 			toolsButton.setEnabled(false);
-		}
-		else {
+		} else {
 			groupsButton.setEnabled(true);
 			editButton.setEnabled(true);
+			timeSeriesButton.setEnabled(true);
 			toolsButton.setEnabled(true);
 		}
 	}
@@ -148,6 +128,9 @@ public class ButtonPanelView extends JPanel {
 			break;
 		case EDITTEXTVIEW:
 			editButton.setSelected(true);
+			break;
+		case TIMESERIESVIEW:
+			timeSeriesButton.setSelected(true);
 			break;
 		case TOOLSVIEW:
 			toolsButton.setSelected(true);
