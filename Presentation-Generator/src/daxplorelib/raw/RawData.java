@@ -185,14 +185,23 @@ public class RawData {
 		return false;
 	}
 	
+	/**
+	 * Fetch a list of the different values found in this column in the rawdata
+	 * table and their frequencies.
+	 * 
+	 * <p>The returned list contains pairs of <column-value, frequency>.</p>
+	 * 
+	 * <p><b>Note:</b> Call {@link RawData#hasColumn(String)} first to make sure that the column exists!
+	 * 
+	 * @param column The column in the rawdata table
+	 * @return A list of pairs containing <value, count>
+	 * @throws SQLException
+	 */
 	public LinkedList<Pair<Double, Integer>> getColumnValueCount(String column) throws SQLException {
-		/*PreparedStatement stmt = connection.prepareStatement("SELECT ?, count(*) as cnt from rawdata group by ? order by ?");
-		stmt.setString(1, column);
-		stmt.setString(2, column);
-		stmt.setString(3, column);
-		ResultSet rs = stmt.executeQuery();*/
+		//TODO call hasColumn automatically?
 		//Prepared statement doesn't work, but hasColumn is always called first so this should be relatively injection-safe
-		ResultSet rs = connection.createStatement().executeQuery("select "+ column + " as val, count(*) as cnt from rawdata group by val order by val");
+		ResultSet rs = connection.createStatement().executeQuery(
+				"select "+ column + " as val, count(*) as cnt from rawdata group by val order by val");
 		
 		LinkedList<Pair<Double, Integer>> map = new LinkedList<Pair<Double, Integer>>();
 		while(rs.next()) {
