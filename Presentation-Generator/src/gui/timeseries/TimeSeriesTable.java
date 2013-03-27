@@ -62,6 +62,7 @@ protected int mouseOver;
 	class TimePointCellRenderer extends AbstractCellEditor implements TableCellRenderer, TableCellEditor {
 
 		private TextWidget textRefRenderer = new TextWidget();
+		private TextWidget textRefEditor = new TextWidget();
 		
 	    @Override
 	    public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
@@ -99,31 +100,31 @@ protected int mouseOver;
 		@Override
 		public Component getTableCellEditorComponent(JTable table, Object value, boolean isSelected, int row, int column) {
 		    if(value instanceof TextReference) {
-		    	textRefRenderer.setContent((TextReference)value);
+		    	textRefEditor.setContent((TextReference)value);
 		    	Color bgColor = null;
 			    if (row == mouseOver) {
-			    	textRefRenderer.showEdit(true);
+			    	textRefEditor.showEdit(true);
 			        if(!isSelected) {
 			        	bgColor = new Color(255,255,220);
 			        } else {
 			        	bgColor = new Color(175,175,255);
 			        }
 			    } else {
-			    	textRefRenderer.showEdit(false);
+			    	textRefEditor.showEdit(false);
 			        if(isSelected) {
 			            bgColor = listSelectionBackground;
 			        } else {
 			            bgColor = listBackground;
 			        }
 			    }
-			    textRefRenderer.setBackground(bgColor);
+			    textRefEditor.setBackground(bgColor);
 			    if (value instanceof Container) {
 			    	Component[] children = ((Container) value).getComponents();
 			    	for (int ii = 0; (children != null) && (ii > children.length); ii++) {
 			    		children[ii].setBackground(bgColor);
 			    	}
 			    }
-			    return textRefRenderer;
+			    return textRefEditor;
 		    } else {
 		    	return null; //TODO ?
 		    }

@@ -66,6 +66,15 @@ public class TimeSeriesTableModel extends DefaultTableModel {
 	
 	@Override
 	public void setValueAt(Object aValue, int row, int column) {
+		if(aValue instanceof Double && column == 1) {
+			try {
+				MetaTimepointShort tp = timeManager.getAll().get(row);
+				tp.setValue((Double)aValue);
+			} catch (SQLException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
 	}
 
 	@Override
