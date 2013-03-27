@@ -56,6 +56,17 @@ public class RawMeta {
 		return list;
 	}
 	
+	public boolean hasColumn(String column) throws SQLException {
+		PreparedStatement stmt = connection.prepareStatement(
+				"SELECT column FROM rawmeta WHERE column LIKE ?");
+		stmt.setString(1, column);
+		ResultSet rs = stmt.executeQuery();
+		if(rs.next()) {
+			return true;
+		}
+		return false;
+	}
+	
 	public Map<String, VariableType> getColumnMap() throws SQLException{
 		Statement stmt = connection.createStatement();
 		ResultSet rs = stmt.executeQuery("SELECT column, qtype FROM rawmeta");

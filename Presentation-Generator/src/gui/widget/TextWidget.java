@@ -14,7 +14,7 @@ import javax.swing.JLabel;
 import javax.swing.SwingConstants;
 import javax.swing.border.LineBorder;
 
-import daxplorelib.metadata.TextReference;
+import daxplorelib.metadata.textreference.TextReference;
 
 @SuppressWarnings("serial")
 public class TextWidget extends AbstractWidgetEditor<TextReference>{

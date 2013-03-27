@@ -16,5 +16,6 @@
 	<classpathentry kind="con" path="org.eclipse.jdt.junit.JUNIT_CONTAINER/4"/>
 	<classpathentry kind="lib" path="miglayout15-swing.jar" sourcepath="miglayout-src.zip"/>
 	<classpathentry kind="lib" path="lib/opencsv-2.3.jar"/>
+	<classpathentry kind="lib" path="lib/scottlogic-utils-1.4.jar" sourcepath="/home/axwi4586/Downloads/scottlogic-utils-mr-1.4/PatchWorkArray"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

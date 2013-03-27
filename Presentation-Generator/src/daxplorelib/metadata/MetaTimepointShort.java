@@ -14,7 +14,8 @@ import java.util.Map;
 import daxplorelib.DaxploreException;
 import daxplorelib.DaxploreTable;
 import daxplorelib.SQLTools;
-import daxplorelib.metadata.TextReference.TextReferenceManager;
+import daxplorelib.metadata.textreference.TextReference;
+import daxplorelib.metadata.textreference.TextReferenceManager;
 
 public class MetaTimepointShort implements Comparable<MetaTimepointShort> {
 	/**
@@ -23,14 +24,14 @@ public class MetaTimepointShort implements Comparable<MetaTimepointShort> {
 	 * value: the timepoint's value as it is stored in the column (see above) //TODO support TEXT/REAL/INTEGER for value
 	 */
 	protected static final DaxploreTable pointTable = new DaxploreTable(
-			"CREATE TABLE timepoints (id INTEGER PRIMARY KEY, textref TEXT, timeindex INTEGER UNIQUE, value REAL UNIQUE)", "timepoints"); 
+			"CREATE TABLE timepoints (id INTEGER PRIMARY KEY, textref TEXT, timeindex INTEGER UNIQUE, value REAL)", "timepoints"); 
 	
 	//TODO handle timeindexes (unique, swappable, etc.)
 	public static class MetaTimepointShortManager {
 		private Map<Integer, MetaTimepointShort> pointMap = new HashMap<Integer, MetaTimepointShort>();
 		private List<MetaTimepointShort> toBeAdded = new LinkedList<MetaTimepointShort>();
 		private int addDelta = 0;
-		private List<MetaTimepointShort> toBeRemoved = new LinkedList<MetaTimepointShort>();
+		private Map<Integer, MetaTimepointShort> toBeRemoved = new HashMap<Integer, MetaTimepointShort>();
 		
 		private Connection connection;
 		private TextReferenceManager textReferenceManager;
@@ -47,6 +48,9 @@ public class MetaTimepointShort implements Comparable<MetaTimepointShort> {
 		public MetaTimepointShort get(int id) throws SQLException, DaxploreException {
 			if(pointMap.containsKey(id)) {
 				return pointMap.get(id);
+			}
+			if(toBeRemoved.containsKey(id)) {
+				throw new DaxploreException("No timepoint with id '"+id+"'");
 			}
 			
 			PreparedStatement stmt = connection.prepareStatement("SELECT * FROM timepoints WHERE id = ?");
@@ -79,7 +83,7 @@ public class MetaTimepointShort implements Comparable<MetaTimepointShort> {
 		public void remove(int id) {
 			MetaTimepointShort timepoint = pointMap.remove(id);
 			toBeAdded.remove(timepoint);
-			toBeRemoved.add(timepoint);
+			toBeRemoved.put(id, timepoint);
 		}
 		
 		public void saveAll() throws SQLException {
@@ -99,7 +103,7 @@ public class MetaTimepointShort implements Comparable<MetaTimepointShort> {
 			}
 			updateStmt.executeBatch();
 			
-			for(MetaTimepointShort timepoint : toBeRemoved) {
+			for(MetaTimepointShort timepoint : toBeRemoved.values()) {
 				deleteStmt.setInt(1, timepoint.id);
 				deleteStmt.addBatch();
 			}
@@ -120,10 +124,10 @@ public class MetaTimepointShort implements Comparable<MetaTimepointShort> {
 		
 		public List<MetaTimepointShort> getAll() throws SQLException {
 			Statement stmt = connection.createStatement();
-			ResultSet rs = stmt.executeQuery("SELECT id FROM timepoints");
+			ResultSet rs = stmt.executeQuery("SELECT id FROM timepoints ORDER BY timeindex ASC");
 			while(rs.next()) {
 				int id = rs.getInt("id");
-				if(!pointMap.containsKey(id)) {
+				if(!pointMap.containsKey(id) && !toBeRemoved.containsKey(id)) {
 					try {
 						get(id); //can be improved
 					} catch (DaxploreException e) {
@@ -134,6 +138,10 @@ public class MetaTimepointShort implements Comparable<MetaTimepointShort> {
 			List<MetaTimepointShort> pointList = new LinkedList<MetaTimepointShort>(pointMap.values());
 			Collections.sort(pointList);
 			return pointList;
+		}
+		
+		public int getHighestId() throws SQLException {
+			return SQLTools.maxId(pointTable.name, "id", connection) + addDelta;
 		}
 	}
 	
@@ -185,7 +193,7 @@ public class MetaTimepointShort implements Comparable<MetaTimepointShort> {
 	 */
 	@Override
 	public int compareTo(MetaTimepointShort o) {
-		return timeindex < o.timeindex ? 1: -1;
+		return timeindex > o.timeindex ? 1: -1;
 	}
 
 }

@@ -1,25 +1,33 @@
 package gui.timeseries;
 
+import java.sql.SQLException;
+import java.util.LinkedList;
 import java.util.List;
+import java.util.Vector;
 
 import javax.swing.table.DefaultTableModel;
 
+import daxplorelib.metadata.MetaQuestion;
 import daxplorelib.metadata.MetaTimepointShort;
-import daxplorelib.metadata.TextReference;
+import daxplorelib.metadata.MetaTimepointShort.MetaTimepointShortManager;
+import daxplorelib.metadata.textreference.TextReference;
 
 @SuppressWarnings("serial")
 public class TimeSeriesTableModel extends DefaultTableModel {
 	
-	private List<MetaTimepointShort> timepoints;
+	private MetaTimepointShortManager timeManager;
 	
-	public TimeSeriesTableModel(List<MetaTimepointShort> timepoints) {
-		this.timepoints = timepoints;
+	public TimeSeriesTableModel(MetaTimepointShortManager mtsm) {
+		this.timeManager = mtsm;
 	}
 	
 	@Override
 	public int getRowCount() {
-		if(timepoints == null) return 0;
-		return timepoints.size();
+		try {
+			return timeManager.getAll().size();
+		} catch (SQLException|NullPointerException e) { //TODO figure out why this is needed. (Swing?)
+			return 0;
+		}
 	}
 
 	@Override
@@ -62,7 +70,13 @@ public class TimeSeriesTableModel extends DefaultTableModel {
 
 	@Override
 	public Object getValueAt(int rowIndex, int columnIndex) {
-		MetaTimepointShort row = timepoints.get(rowIndex);
+		MetaTimepointShort row;
+		try {
+			row = timeManager.getAll().get(rowIndex);
+		} catch (SQLException e) {
+			e.printStackTrace();
+			return null;
+		}
 		switch (columnIndex) {
 		case 0:
 			return row.getTextRef();
@@ -71,6 +85,82 @@ public class TimeSeriesTableModel extends DefaultTableModel {
 		default:
 			throw new AssertionError("Invalid column");
 		}
+	}
+	
+	
+	@Override
+	public void removeRow(int row) {
+		MetaTimepointShort tp;
+		try {
+			tp = timeManager.getAll().get(row);
+			timeManager.remove(tp.getId());
+			fireTableRowsDeleted(row, row);
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
+	
+	@SuppressWarnings("rawtypes")
+	@Override
+	public void insertRow(int row, Vector rowData) {
+		if(rowData.size() == 1 && rowData.get(0) instanceof MetaTimepointShort) {
+			MetaTimepointShort newTime = (MetaTimepointShort)rowData.get(0);
+			List<MetaTimepointShort> timelist;
+			try {
+				timelist = timeManager.getAll();
+			} catch (SQLException e) {
+				e.printStackTrace();
+				return;
+			}
+			int timeindex = timelist.get(row).getTimeindex() + 1;
+			newTime.setTimeindex(timeindex++);
+			for(int i = row+1; i < timelist.size(); i++) {
+				timelist.get(i).setTimeindex(timeindex++);
+			}
+			fireTableRowsInserted(row, row);
+		}
+	}
+	
+	@Override
+	public void moveRow(int start, int end, int to) {
+		if(start!=end) {
+			throw new ArrayIndexOutOfBoundsException("Can't support moving many rows");
+		}
+		
+		List<MetaTimepointShort> timeList;
+		List<MetaTimepointShort> moveList = new LinkedList<MetaTimepointShort>();
+		try {
+			timeList = timeManager.getAll();
+		} catch (SQLException e) {
+			e.printStackTrace();
+			return;
+		}
+		
+		for(int i = start; i <= end; i++) {
+			moveList.add(timeList.remove(start)); //TODO: check if it works with more rows than 1
+		}
+		int j = to;
+		for(MetaTimepointShort mq: moveList) {
+			timeList.add(j, mq);
+			j++;
+		}
+
+		for(int i = 0; i < timeList.size(); i++) {
+			timeList.get(i).setTimeindex(i);
+		}
+		
+        int shift = to - start;
+        int first, last;
+        if (shift < 0) {
+            first = to;
+            last = end;
+        } else {
+            first = start;
+            last = to + end - start;
+        }
+        
+        fireTableRowsUpdated(first, last);
 	}
 	
 }

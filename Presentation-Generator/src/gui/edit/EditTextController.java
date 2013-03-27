@@ -26,8 +26,9 @@ import javax.swing.table.TableRowSorter;
 
 import daxplorelib.DaxploreException;
 import daxplorelib.metadata.MetaData.L10nFormat;
-import daxplorelib.metadata.TextReference;
-import daxplorelib.metadata.TextReference.TextReferenceManager;
+import daxplorelib.metadata.textreference.TextReference;
+import daxplorelib.metadata.textreference.TextReferenceManager;
+import daxplorelib.metadata.textreference.TextTree;
 
 public class EditTextController implements ActionListener {
 
@@ -35,7 +36,7 @@ public class EditTextController implements ActionListener {
 	private MainController mainController;
 	private TableRowSorter<TextsTableModel> sorter;
 	private EditTextView editTextView;
-	private List<TextReference> textsList;
+	private TextTree textsList;
 	private TextsTableModel model;
 	private JTable table;
 	private EditToolbarView editToolbar;

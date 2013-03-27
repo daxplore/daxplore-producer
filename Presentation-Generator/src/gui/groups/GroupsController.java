@@ -17,8 +17,8 @@ import daxplorelib.metadata.MetaGroup;
 import daxplorelib.metadata.MetaGroup.GroupType;
 import daxplorelib.metadata.MetaGroup.MetaGroupManager;
 import daxplorelib.metadata.MetaQuestion;
-import daxplorelib.metadata.TextReference;
-import daxplorelib.metadata.TextReference.TextReferenceManager;
+import daxplorelib.metadata.textreference.TextReference;
+import daxplorelib.metadata.textreference.TextReferenceManager;
 
 public class GroupsController implements ActionListener {
 

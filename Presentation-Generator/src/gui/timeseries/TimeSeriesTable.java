@@ -20,7 +20,7 @@ import javax.swing.table.TableCellRenderer;
 import javax.swing.table.TableModel;
 
 import daxplorelib.DaxploreException;
-import daxplorelib.metadata.TextReference;
+import daxplorelib.metadata.textreference.TextReference;
 
 @SuppressWarnings("serial")
 public class TimeSeriesTable extends JTable {

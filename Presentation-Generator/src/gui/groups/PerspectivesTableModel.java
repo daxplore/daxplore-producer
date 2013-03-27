@@ -83,7 +83,7 @@ public class PerspectivesTableModel extends DefaultTableModel {
 		List<MetaQuestion> moveList = new LinkedList<MetaQuestion>();
 		
 		for(int i = start; i <= end; i++) {
-			moveList.add(mqlist.remove(i));
+			moveList.add(mqlist.remove(start)); //TODO: check if it works with more rows than 1
 		}
 		int j = to;
 		for(MetaQuestion mq: moveList) {

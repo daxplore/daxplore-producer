@@ -6,7 +6,7 @@ import javax.swing.table.DefaultTableModel;
 
 import tools.NumberlineCoverage;
 import daxplorelib.metadata.MetaScale;
-import daxplorelib.metadata.TextReference;
+import daxplorelib.metadata.textreference.TextReference;
 
 @SuppressWarnings("serial")
 public class ScaleTableModel extends DefaultTableModel {

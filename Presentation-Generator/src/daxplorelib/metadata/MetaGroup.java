@@ -15,7 +15,8 @@ import daxplorelib.DaxploreException;
 import daxplorelib.DaxploreTable;
 import daxplorelib.SQLTools;
 import daxplorelib.metadata.MetaQuestion.MetaQuestionManager;
-import daxplorelib.metadata.TextReference.TextReferenceManager;
+import daxplorelib.metadata.textreference.TextReference;
+import daxplorelib.metadata.textreference.TextReferenceManager;
 
 public class MetaGroup implements Comparable<MetaGroup> {
 	static final DaxploreTable groupTable = new DaxploreTable("CREATE TABLE metagroup (id INTEGER PRIMARY KEY, textref TEXT, idx INTEGER, type INTEGER)", "metagroup");
@@ -25,7 +26,7 @@ public class MetaGroup implements Comparable<MetaGroup> {
 		
 		private Map<Integer, MetaGroup> groupMap = new HashMap<Integer, MetaGroup>();
 		private List<MetaGroup> toBeAddedGroup = new LinkedList<MetaGroup>();
-		private int addDeltaGroup = 0;
+		private int addDelta = 0;
 		private List<MetaGroupRel> toBeAddedGroupRel = new LinkedList<MetaGroupRel>();
 		private List<MetaGroup> toBeRemoved = new LinkedList<MetaGroup>();
 		private Connection connection;
@@ -71,9 +72,9 @@ public class MetaGroup implements Comparable<MetaGroup> {
 		}
 		
 		public MetaGroup create(TextReference textref, int index, GroupType type, List<MetaQuestion> qList) throws SQLException {
-			addDeltaGroup++;
+			addDelta++;
 			
-			int id = SQLTools.maxId(groupTable.name, "id", connection) + addDeltaGroup;
+			int id = SQLTools.maxId(groupTable.name, "id", connection) + addDelta;
 			MetaGroup mg = new MetaGroup(id, textref, index, type, qList);
 			toBeAddedGroup.add(mg);
 			groupMap.put(id, mg);
@@ -144,7 +145,7 @@ public class MetaGroup implements Comparable<MetaGroup> {
 			}
 			insertGroupStmt.executeBatch();
 			toBeAddedGroup.clear();
-			addDeltaGroup = 0;
+			addDelta = 0;
 			
 			for(MetaGroupRel mgr: toBeAddedGroupRel) {
 				insertGroupRelStmt.setInt(1, mgr.groupid);
@@ -171,7 +172,7 @@ public class MetaGroup implements Comparable<MetaGroup> {
 		}
 
 		public int getHighestId() throws SQLException {
-			return SQLTools.maxId(groupTable.name, "id", connection);
+			return SQLTools.maxId(groupTable.name, "id", connection) + addDelta;
 		}		
 	}
 	

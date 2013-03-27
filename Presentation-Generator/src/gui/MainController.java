@@ -19,7 +19,7 @@ import javax.swing.JFrame;
 
 import daxplorelib.DaxploreFile;
 import daxplorelib.metadata.MetaQuestion;
-import daxplorelib.metadata.TextReference;
+import daxplorelib.metadata.textreference.TextReference;
 
 /**
  * Main window handler class. Initialization of application goes here.
@@ -156,7 +156,7 @@ public class MainController implements ActionListener {
 		buttonPanelView.updateButtonPanel();
 		groupsView.getController().loadData();
 		editTextView.getController().loadData();
-		
+		timeSeriesView.getController().loadData();
 	}
 
 	

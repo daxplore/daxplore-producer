@@ -16,7 +16,8 @@ import daxplorelib.DaxploreTable;
 import daxplorelib.SQLTools;
 import daxplorelib.metadata.MetaScale.MetaScaleManager;
 import daxplorelib.metadata.MetaTimepointShort.MetaTimepointShortManager;
-import daxplorelib.metadata.TextReference.TextReferenceManager;
+import daxplorelib.metadata.textreference.TextReference;
+import daxplorelib.metadata.textreference.TextReferenceManager;
 
 public class MetaQuestion {
 	

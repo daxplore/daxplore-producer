@@ -175,16 +175,6 @@ public class RawData {
 		}
 	}
 	
-	public boolean hasColumn(String column) throws SQLException {
-		ResultSet rs = connection.createStatement().executeQuery("PRAGMA table_info(rawdata)");
-		while(rs.next()) {
-			if(rs.getString("name").equalsIgnoreCase(column)) {
-				return true;
-			}
-		}
-		return false;
-	}
-	
 	/**
 	 * Fetch a list of the different values found in this column in the rawdata
 	 * table and their frequencies.

@@ -52,6 +52,13 @@ public class TimeSeriesView extends JPanel {
 		timeSeriesTextField = new JTextField();
 		panel_2.add(timeSeriesTextField);
 		timeSeriesTextField.setColumns(10);
+		
+		JButton setColumnButton = new JButton("Set");
+		setColumnButton.setActionCommand(TimeSeriesController.TIMESERIES_SET_COLUMN_ACTION_COMMAND);
+		setColumnButton.addActionListener(controller);
+		panel_2.add(setColumnButton);
+		
+		
 		timeSeriesTextField.getDocument().addDocumentListener(new DocumentListener() {
 			@Override
 			public void removeUpdate(DocumentEvent e) {
@@ -103,5 +110,13 @@ public class TimeSeriesView extends JPanel {
 
 	public TimeSeriesController getController() {
 		return controller;
+	}
+	
+	public String getTimeSeriesColumn() {
+		return timeSeriesTextField.getText();
+	}
+	
+	public void setTimeSeriesColumn(String column) {
+		timeSeriesTextField.setText(column);
 	}
 }

@@ -15,7 +15,8 @@ import tools.NumberlineCoverage;
 import tools.NumberlineCoverage.NumberlineCoverageException;
 import daxplorelib.DaxploreTable;
 import daxplorelib.SQLTools;
-import daxplorelib.metadata.TextReference.TextReferenceManager;
+import daxplorelib.metadata.textreference.TextReference;
+import daxplorelib.metadata.textreference.TextReferenceManager;
 
 public class MetaScale {
 	

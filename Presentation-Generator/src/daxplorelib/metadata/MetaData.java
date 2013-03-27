@@ -27,7 +27,9 @@ import daxplorelib.metadata.MetaGroup.MetaGroupManager;
 import daxplorelib.metadata.MetaQuestion.MetaQuestionManager;
 import daxplorelib.metadata.MetaScale.MetaScaleManager;
 import daxplorelib.metadata.MetaTimepointShort.MetaTimepointShortManager;
-import daxplorelib.metadata.TextReference.TextReferenceManager;
+import daxplorelib.metadata.textreference.TextReference;
+import daxplorelib.metadata.textreference.TextReferenceManager;
+import daxplorelib.metadata.textreference.TextTree;
 import daxplorelib.raw.RawMeta;
 import daxplorelib.raw.RawMeta.RawMetaQuestion;
 
@@ -219,8 +221,9 @@ public class MetaData {
 		case PROPERTIES:
 			Properties properties = new SortedProperties();
 			
-			List<TextReference> allTexts = getAllTextReferences();
-			for(TextReference tr: allTexts) {
+			TextTree allTexts = getAllTextReferences();
+			
+			for(TextReference tr: allTexts.iterable()) {
 				if(tr.has(locale)) {
 					properties.setProperty(tr.getRef(), tr.get(locale));
 				} else {
@@ -234,7 +237,7 @@ public class MetaData {
 		case CSV:
 			CSVWriter csvWriter = new CSVWriter(writer);
 			allTexts = getAllTextReferences();
-			for(TextReference tr: allTexts) {
+			for(TextReference tr: allTexts.iterable()) {
 				if(tr.has(locale)) {
 					csvWriter.writeNext(new String[]{tr.getRef(), tr.get(locale)});
 				} else {
@@ -361,7 +364,7 @@ public class MetaData {
 		}
 	}
 	
-	public List<TextReference> getAllTextReferences() throws DaxploreException {
+	public TextTree getAllTextReferences() throws DaxploreException {
 		try {
 			return textsManager.getAll();
 		} catch (SQLException e) {
@@ -393,7 +396,7 @@ public class MetaData {
 		
 		list.add(MetaTimepointShort.pointTable);
 		
-		list.add(TextReference.table);
+		list.add(TextReferenceManager.table);
 
 		return list;
 	}

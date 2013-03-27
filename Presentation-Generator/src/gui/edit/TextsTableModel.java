@@ -1,21 +1,21 @@
 package gui.edit;
 
 import java.util.Collections;
-import java.util.List;
 
 import javax.swing.event.TableModelEvent;
 import javax.swing.event.TableModelListener;
 import javax.swing.table.DefaultTableModel;
 
-import daxplorelib.metadata.TextReference;
+import daxplorelib.metadata.textreference.TextReference;
+import daxplorelib.metadata.textreference.TextTree;
 
 @SuppressWarnings("serial")
 class TextsTableModel extends DefaultTableModel implements TableModelListener {
 	
 	private final EditTextController controller;
-	List<TextReference> textsList;
+	TextTree textsList;
 
-	TextsTableModel(EditTextController controller, List<TextReference> textsList) {
+	TextsTableModel(EditTextController controller, TextTree textsList) {
 		this.textsList = textsList;
 		this.controller = controller;
 	}
@@ -58,7 +58,7 @@ class TextsTableModel extends DefaultTableModel implements TableModelListener {
 	}
 	
 	public int find(TextReference textref) {
-		return Collections.binarySearch(textsList, textref);
+		return textsList.indexOf(textref);
 	}
 
 	public void setValueAt(Object value, int row, int col) {

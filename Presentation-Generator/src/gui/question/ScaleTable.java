@@ -23,7 +23,7 @@ import javax.swing.table.TableCellEditor;
 import javax.swing.table.TableCellRenderer;
 
 import tools.NumberlineCoverage;
-import daxplorelib.metadata.TextReference;
+import daxplorelib.metadata.textreference.TextReference;
 
 @SuppressWarnings("serial")
 public class ScaleTable extends JTable {
