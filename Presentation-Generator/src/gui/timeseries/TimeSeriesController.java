@@ -79,7 +79,7 @@ public class TimeSeriesController implements ActionListener {
 			break;
 		case TIMEPOINT_REMOVE_ACTION_COMMAND:
 			selectedRows = timeSeriesTable.getSelectedRows();
-			if(selectedRows.length < 1 || selectedRows[0] == 0) break;
+			if(selectedRows.length < 1) break;
 			timeSeriesTable.clearSelection();
 			timeSeriesTable.removeEditor();
 			for(int i = selectedRows.length-1; i >= 0; i--) {
