@@ -5,9 +5,6 @@ public class Pair<K, V> implements Comparable<Pair<K, V>> {
 	protected final V value;
 
 	public Pair(K key, V value) {
-		if (key == null || value == null) {
-			throw new NullPointerException();
-		}
 		this.key = key;
 		this.value = value;
 	}
@@ -39,11 +36,7 @@ public class Pair<K, V> implements Comparable<Pair<K, V>> {
 
 	public boolean equals(Pair<K, V> otherPair) {
 		return otherPair != null
-				&& otherPair.key.equals(this.key)
-				&& otherPair.value.equals(this.value);
-	}
-
-	public int hashCode() {
-		return key.hashCode() + 31 * value.hashCode();
+				&& ((otherPair.key == null && key == null) || otherPair.key.equals(this.key))
+				&& ((otherPair.value == null && value == null) || otherPair.value.equals(this.value));
 	}
 }

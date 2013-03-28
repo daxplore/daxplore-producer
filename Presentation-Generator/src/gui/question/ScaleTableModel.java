@@ -1,7 +1,5 @@
 package gui.question;
 
-import java.util.List;
-
 import javax.swing.table.DefaultTableModel;
 
 import tools.NumberlineCoverage;
@@ -11,16 +9,16 @@ import daxplorelib.metadata.textreference.TextReference;
 @SuppressWarnings("serial")
 public class ScaleTableModel extends DefaultTableModel {
 	
-	List<MetaScale.Option> optionList;
+	MetaScale ms;
 	
 	public ScaleTableModel(MetaScale ms) {
-		optionList = ms.getOptions();
+		this.ms = ms;
 	}
 	
 	@Override
 	public int getRowCount() {
-		if(optionList == null) return 0;
-		return optionList.size();
+		if(ms == null) return 0;
+		return ms.getOptionCount();
 	}
 
 	@Override
@@ -63,11 +61,29 @@ public class ScaleTableModel extends DefaultTableModel {
 	
 	@Override
 	public void setValueAt(Object aValue, int row, int column) {
+		switch(column) {
+		case 0:
+			break;
+		case 1:
+			if(aValue instanceof NumberlineCoverage) {
+				ms.getOptions().get(row).setTransformation((NumberlineCoverage)aValue);
+				fireTableCellUpdated(row, column);
+			}
+			break;
+		case 2:
+			if(aValue instanceof Double) {
+				ms.getOptions().get(row).setValue((Double)aValue);
+				fireTableCellUpdated(row, column);
+			}
+			break;
+		default:
+			throw new AssertionError();
+		}
 	}
 
 	@Override
 	public Object getValueAt(int rowIndex, int columnIndex) {
-		MetaScale.Option opt = optionList.get(rowIndex);
+		MetaScale.Option opt = ms.getOptions().get(rowIndex);
 		switch(columnIndex) {
 		case 0:
 			return opt.getTextRef();

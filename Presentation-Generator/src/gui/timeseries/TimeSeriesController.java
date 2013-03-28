@@ -1,6 +1,7 @@
 package gui.timeseries;
 
 import gui.MainController;
+import gui.widget.ColumnTableModel;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;

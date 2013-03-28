@@ -88,9 +88,10 @@ public class MetaScale {
 							new Option(
 									textsManager.get(rs.getString("textref")), 
 									rs.getDouble("value"), 
-									numberlineCoverage));
+									numberlineCoverage,
+									false));
 				}
-				MetaScale ms = new MetaScale(id, options, ignore);
+				MetaScale ms = new MetaScale(id, options, ignore, false);
 				scaleMap.put(id, ms);
 				return ms;
 			}
@@ -99,7 +100,7 @@ public class MetaScale {
 		public MetaScale create(List<Option> options, NumberlineCoverage ignore) throws SQLException {
 			addDelta++;
 			int id = SQLTools.maxId(maintable.name, "id", connection) + addDelta;
-			MetaScale scale = new MetaScale(id, options, ignore);
+			MetaScale scale = new MetaScale(id, options, ignore, true);
 			toBeAdded.add(scale);
 			scaleMap.put(id, scale);
 			return scale;
@@ -118,29 +119,47 @@ public class MetaScale {
 			
 			PreparedStatement addOptionStmt = connection.prepareStatement("INSERT INTO metascaleoption (scaleid, textref, ord, value, transform) VALUES (?, ?, ?, ?, ?)");
 			PreparedStatement deleteOptionStmt = connection.prepareStatement("DELETE FROM metascaleoption WHERE scaleid = ?");
-
+			PreparedStatement updateOptionStmt = connection.prepareStatement("UPDATE metascaleoption SET textref = ?, value = ?, transform = ? WHERE scaleid = ? AND ord = ?");
+			
 			for(MetaScale ms: scaleMap.values()) {
 				if(ms.modified) {
 					updateScaleStmt.setInt(2, ms.id);
 					updateScaleStmt.setString(1, ms.ignore.toString());
 					updateScaleStmt.addBatch();
 					
-					deleteOptionStmt.setInt(1, ms.id);
-					deleteOptionStmt.addBatch();
-					
-					int ord = 0;
-					for(Option opt: ms.options) {
-						ord++;
-						addOptionStmt.setInt(1, ms.id);
-						addOptionStmt.setString(2, opt.textRef.getRef());
-						addOptionStmt.setInt(3, ord);
-						addOptionStmt.setDouble(4, opt.value);
-						addOptionStmt.setString(5, opt.transformation.toString());
-						addOptionStmt.addBatch();
+					if(ms.structureChanged) {
+						deleteOptionStmt.setInt(1, ms.id);
+						deleteOptionStmt.addBatch();
+						
+						int ord = 0;
+						for(Option opt: ms.options) {
+							ord++;
+							addOptionStmt.setInt(1, ms.id);
+							addOptionStmt.setString(2, opt.textRef.getRef());
+							addOptionStmt.setInt(3, ord);
+							addOptionStmt.setDouble(4, opt.value);
+							addOptionStmt.setString(5, opt.transformation.toString());
+							addOptionStmt.addBatch();
+						}
+						addOptionStmt.executeBatch();
 					}
-					addOptionStmt.executeBatch();
 					ms.modified = false;
 				}
+				if(!ms.structureChanged) {
+					for(int ord = 0; ord < ms.options.size(); ord++) {
+						Option opt = ms.options.get(ord);
+						if(opt.modified) {
+							updateOptionStmt.setString(1, opt.textRef.getRef());
+							updateOptionStmt.setDouble(2, opt.value);
+							updateOptionStmt.setString(3, opt.transformation.toString());
+							updateOptionStmt.setInt(4, ms.id);
+							updateOptionStmt.setInt(5, ord);
+							updateOptionStmt.addBatch();
+						}
+					}
+					updateOptionStmt.executeBatch();
+				}
+				ms.structureChanged = false;
 			}
 			updateScaleStmt.executeBatch();
 			deleteOptionStmt.executeBatch();
@@ -190,21 +209,37 @@ public class MetaScale {
 		TextReference textRef;
 		double value;
 		NumberlineCoverage transformation;
+		boolean modified = false;
 		
-		public Option(TextReference textRef, double value, NumberlineCoverage transformation) {
-			this.textRef = textRef; this.value = value; this.transformation = transformation;
+		public Option(TextReference textRef, double value, NumberlineCoverage transformation, boolean setNew) {
+			this.textRef = textRef; this.value = value; this.transformation = transformation; this.modified = setNew;
 		}
 
 		public TextReference getTextRef() {
 			return textRef;
 		}
 
+		public void setTextRef(TextReference textRef) {
+			this.textRef = textRef;
+			modified = true;
+		}
+
 		public double getValue() {
 			return value;
 		}
 
+		public void setValue(double value) {
+			this.value = value;
+			modified = true;
+		}
+
 		public NumberlineCoverage getTransformation() {
 			return transformation;
+		}
+
+		public void setTransformation(NumberlineCoverage transformation) {
+			this.transformation = transformation;
+			modified = true;
 		}
 	}
 	
@@ -215,11 +250,13 @@ public class MetaScale {
 
 	protected int id;
 	protected boolean modified = false;
+	protected boolean structureChanged = false;
 	
-	public MetaScale(int id, List<Option> options, NumberlineCoverage ignore) {
+	public MetaScale(int id, List<Option> options, NumberlineCoverage ignore, boolean newScale) {
 		this.id = id;
 		this.options = options;
 		this.ignore = ignore;
+		this.structureChanged = newScale;
 	}
 	
 	public int getId() {
@@ -236,6 +273,7 @@ public class MetaScale {
 
 	public void setOptions(List<Option> options) {
 		this.options = options;
+		structureChanged = true;
 		modified = true;
 	}
 

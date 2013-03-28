@@ -105,7 +105,7 @@ public class MetaData {
 						Pair<String, Double> s = rmq.valuelables.get(i);
 						TextReference ref = textsManager.get(rmq.column + "_option_" + i);
 						ref.put(s.getKey(), locale);
-						scaleOptions.add(new MetaScale.Option(ref, s.getValue(), new NumberlineCoverage(s.getValue())));
+						scaleOptions.add(new MetaScale.Option(ref, s.getValue(), new NumberlineCoverage(s.getValue()), true));
 					}
 					scale = metaScaleManager.create(scaleOptions, new NumberlineCoverage());
 					break;
@@ -291,7 +291,7 @@ public class MetaData {
 							for(Locale loc: locs) {
 								tr.put(oldtr.get(loc), loc);
 							}
-							newrefs.add(new MetaScale.Option(tr, oldrefs.get(i).value, oldrefs.get(i).transformation));
+							newrefs.add(new MetaScale.Option(tr, oldrefs.get(i).value, oldrefs.get(i).transformation, true));
 						}
 						MetaScale gs = metaScaleManager.create(newrefs, new NumberlineCoverage());
 						//System.out.println("\n" + us.toJSONString() +" -> " + gs.toJSONString());

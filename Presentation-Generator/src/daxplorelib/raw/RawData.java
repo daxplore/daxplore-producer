@@ -195,9 +195,10 @@ public class RawData {
 		
 		LinkedList<Pair<Double, Integer>> map = new LinkedList<Pair<Double, Integer>>();
 		while(rs.next()) {
-			Double val = rs.getDouble(1);
+			double val = rs.getDouble(1);
+			boolean nullVal = rs.wasNull();
 			Integer count = rs.getInt("cnt");
-			if(val!=null) {
+			if(!nullVal) {
 				map.add(new Pair<Double, Integer>(val, count));
 			} else {
 				map.add(new Pair<Double, Integer>(null, count));
