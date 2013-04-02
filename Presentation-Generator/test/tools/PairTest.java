@@ -59,25 +59,4 @@ public class PairTest {
 		assertEquals("Key: " + pair1.toString() + "\tValue: " + pair2.toString(), pp1.toString());
 		assertEquals("Key: " + pair4.toString() + "\tValue: " + pair1.toString(), pp4.toString());
 	}
-
-	@Test
-	public void testCompareTo() {
-		assertTrue(pair1.equals(pair1));
-		assertTrue(pair1.equals(pair2));
-
-		assertFalse(pair1.equals(pair3));
-		assertFalse(pair1.equals(pair4));
-		assertFalse(pair3.equals(pair4));
-
-		assertTrue(pp1.equals(pp1));
-		assertTrue(pp1.equals(pp2));
-
-		assertFalse(pp1.equals(pp3));
-		assertFalse(pp1.equals(pp4));
-		assertFalse(pp3.equals(pp4));
-		
-		Pair<Object, Object> nada1 = new Pair<Object, Object>(new Object(), new Object());
-		Pair<Object, Object> nada2 = new Pair<Object, Object>(new Object(), new Object());
-		assertFalse(nada1.equals(nada2));
-	}
 }

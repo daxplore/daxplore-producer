@@ -133,13 +133,13 @@ public class MetaScale {
 						
 						int ord = 0;
 						for(Option opt: ms.options) {
-							ord++;
 							addOptionStmt.setInt(1, ms.id);
 							addOptionStmt.setString(2, opt.textRef.getRef());
 							addOptionStmt.setInt(3, ord);
 							addOptionStmt.setDouble(4, opt.value);
 							addOptionStmt.setString(5, opt.transformation.toString());
 							addOptionStmt.addBatch();
+							ord++;
 						}
 						addOptionStmt.executeBatch();
 					}
@@ -155,9 +155,10 @@ public class MetaScale {
 							updateOptionStmt.setInt(4, ms.id);
 							updateOptionStmt.setInt(5, ord);
 							updateOptionStmt.addBatch();
+							opt.modified = false;
 						}
+						updateOptionStmt.executeBatch();
 					}
-					updateOptionStmt.executeBatch();
 				}
 				ms.structureChanged = false;
 			}
@@ -181,13 +182,13 @@ public class MetaScale {
 				
 				int ord = 0;
 				for(Option opt: ms.options) {
-					ord++;
 					addOptionStmt.setInt(1, ms.id);
 					addOptionStmt.setString(2, opt.textRef.getRef());
 					addOptionStmt.setInt(3, ord);
 					addOptionStmt.setDouble(4, opt.value);
 					addOptionStmt.setString(5, opt.transformation.toString());
 					addOptionStmt.addBatch();
+					ord++;
 				}
 			}
 			toBeAdded.clear();
@@ -256,6 +257,7 @@ public class MetaScale {
 		this.id = id;
 		this.options = options;
 		this.ignore = ignore;
+		this.modified = newScale;
 		this.structureChanged = newScale;
 	}
 	

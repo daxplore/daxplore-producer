@@ -1,6 +1,6 @@
 package tools;
 
-public class Pair<K, V> implements Comparable<Pair<K, V>> {
+public class Pair<K, V> {
 	protected final K key;
 	protected final V value;
 
@@ -19,19 +19,6 @@ public class Pair<K, V> implements Comparable<Pair<K, V>> {
 
 	public String toString() {
 		return "Key: " + key + "\tValue: " + value;
-	}
-
-	public int compareTo(Pair<K, V> otherPair) {
-		if (null != otherPair) {
-			if (otherPair.equals(this)) {
-				return 0;
-			} else if (otherPair.hashCode() > this.hashCode()) {
-				return 1;
-			} else if (otherPair.hashCode() < this.hashCode()) {
-				return -1;
-			}
-		}
-		return -1;
 	}
 
 	public boolean equals(Pair<K, V> otherPair) {

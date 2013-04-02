@@ -61,18 +61,19 @@ public class ScaleTableModel extends DefaultTableModel {
 	
 	@Override
 	public void setValueAt(Object aValue, int row, int column) {
+		MetaScale.Option opt = ms.getOptions().get(row);
 		switch(column) {
 		case 0:
 			break;
 		case 1:
 			if(aValue instanceof NumberlineCoverage) {
-				ms.getOptions().get(row).setTransformation((NumberlineCoverage)aValue);
+				opt.setTransformation((NumberlineCoverage)aValue);
 				fireTableCellUpdated(row, column);
 			}
 			break;
 		case 2:
 			if(aValue instanceof Double) {
-				ms.getOptions().get(row).setValue((Double)aValue);
+				opt.setValue((Double)aValue);
 				fireTableCellUpdated(row, column);
 			}
 			break;
