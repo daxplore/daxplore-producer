@@ -195,7 +195,27 @@ public class RawData {
 		
 		LinkedList<Pair<Double, Integer>> map = new LinkedList<Pair<Double, Integer>>();
 		while(rs.next()) {
-			double val = rs.getDouble(1);
+			double val = rs.getDouble("val");
+			boolean nullVal = rs.wasNull();
+			Integer count = rs.getInt("cnt");
+			if(!nullVal) {
+				map.add(new Pair<Double, Integer>(val, count));
+			} else {
+				map.add(new Pair<Double, Integer>(null, count));
+			}
+		}
+		return map;
+	}
+	
+	public LinkedList<Pair<Double, Integer>> getColumnValueCountWhere(String column, String column2) throws SQLException {
+		//TODO call hasColumn automatically?
+		//Prepared statement doesn't work, but hasColumn is always called first so this should be relatively injection-safe
+		ResultSet rs = connection.createStatement().executeQuery(
+				"SELECT "+ column + " AS val, count(*) AS cnt FROM rawdata WHERE " + column2 + " IS NOT NULL GROUP BY val ORDER BY val");
+		
+		LinkedList<Pair<Double, Integer>> map = new LinkedList<Pair<Double, Integer>>();
+		while(rs.next()) {
+			double val = rs.getDouble("val");
 			boolean nullVal = rs.wasNull();
 			Integer count = rs.getInt("cnt");
 			if(!nullVal) {

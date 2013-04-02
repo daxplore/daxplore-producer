@@ -17,6 +17,7 @@ import javax.swing.event.TableModelListener;
 
 import tools.Pair;
 
+import daxplorelib.DaxploreException;
 import daxplorelib.metadata.MetaQuestion;
 import daxplorelib.metadata.MetaScale;
 import daxplorelib.metadata.MetaScale.Option;
@@ -53,6 +54,21 @@ public class QuestionController implements TableModelListener {
 		updateCalculatedValues();
 		
 		view.getAfterScrollPane().setViewportView(new JTable(afterTableModel));
+		
+		try {
+			TimePointTableModel timePointTableModel = new TimePointTableModel(
+					mainController.getDaxploreFile().getMetaData().getMetaTimepointManager(),
+					mainController.getDaxploreFile().getImportedData().getRawData(),
+					mainController.getDaxploreFile().getAbout(),
+					mq);
+			
+			TimePointTable timePointTable = new TimePointTable(timePointTableModel);
+			view.getTimePointScrollPane().setViewportView(timePointTable);
+			
+		} catch (SQLException | DaxploreException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 		
 	}
 	

@@ -57,12 +57,16 @@ public class TimeSeriesController implements ActionListener {
 					timeindex = timeList.get(timeList.size()-1).getTimeindex()+1;
 				}
 				
-				double value = 0;
+				Double value = 0.0;
 				RawData rawData = mainController.getDaxploreFile().getImportedData().getRawData();
 				String column = mainController.getDaxploreFile().getAbout().getTimeSeriesShortColumn();
 				List<Pair<Double, Integer>> columnValueCounts= rawData.getColumnValueCount(column);
 				L: for(Pair<Double, Integer> valuePair: columnValueCounts) {
+					if(valuePair.getKey() == null) {
+						continue L;
+					}
 					for(MetaTimepointShort tp: timeList) {
+
 						if(valuePair.getKey().equals(tp.getValue())) {
 							continue L;
 						}
@@ -70,7 +74,7 @@ public class TimeSeriesController implements ActionListener {
 					value = valuePair.getKey();
 					break;
 				}
-			
+				
 				MetaTimepointShort timepoint = timeManager.create(textref, timeindex, value);
 				timeSeriesTableModel.fireTableDataChanged();
 			} catch (SQLException | DaxploreException e) {

@@ -6,8 +6,9 @@ import gui.widget.TextWidget;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Component;
-import java.awt.FlowLayout;
+import java.awt.Dimension;
 
+import javax.swing.BoxLayout;
 import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.JList;
@@ -20,8 +21,6 @@ import javax.swing.border.TitledBorder;
 import daxplorelib.metadata.MetaQuestion;
 import daxplorelib.metadata.MetaScale;
 import daxplorelib.metadata.MetaScale.Option;
-import javax.swing.BoxLayout;
-import java.awt.Dimension;
 
 @SuppressWarnings("serial")
 public class QuestionView extends JPanel {
@@ -33,16 +32,20 @@ public class QuestionView extends JPanel {
 	private JPanel shortTextRefHolder;
 	private TextWidget fullText = new TextWidget();
 	private TextWidget shortText = new TextWidget();
-	private JPanel panel_1;
 	private JScrollPane scaleScrollPane;
 	private JScrollPane beforeScrollPane;
 	private JScrollPane afterScrollPane;
-	private JPanel panel_2;
-	private JPanel panel_3;
+	private JScrollPane timePointScrollPane;
 	private JButton addButton;
 	private JButton upButton;
 	private JButton downButton;
 	private JButton removeButton;
+	private JPanel panel_1;
+	private JPanel panel_2;
+	private JPanel panel_3;
+	private JPanel panel_4;
+	private JPanel panel_5;
+	private JPanel panel_6;
 	
 	class OptionListRenderer implements ListCellRenderer<MetaScale.Option> {
 
@@ -60,20 +63,29 @@ public class QuestionView extends JPanel {
 		
 		JPanel panel = new JPanel();
 		add(panel, BorderLayout.NORTH);
+		panel.setLayout(new BorderLayout(0, 0));
 		
-		questionID = new JLabel();
-		
-		fullTextRefHolder = new JPanel();
-		fullTextRefHolder.setBorder(new TitledBorder(new LineBorder(new Color(0,0,75)), "Full text"));
-		fullTextRefHolder.add(fullText);
-		panel.setLayout(new FlowLayout(FlowLayout.CENTER, 5, 5));
+		panel_4 = new JPanel();
+		panel.add(panel_4, BorderLayout.NORTH);
 		
 		shortTextRefHolder = new JPanel();
+		panel_4.add(shortTextRefHolder);
 		shortTextRefHolder.setBorder(new TitledBorder(new LineBorder(new Color(0,0,75)), "Short text"));
 		shortTextRefHolder.add(shortText);
-		panel.add(shortTextRefHolder);
-		panel.add(fullTextRefHolder);
-		panel.add(questionID);
+		
+		fullTextRefHolder = new JPanel();
+		panel_4.add(fullTextRefHolder);
+		fullTextRefHolder.setBorder(new TitledBorder(new LineBorder(new Color(0,0,75)), "Full text"));
+		fullTextRefHolder.add(fullText);
+		
+		questionID = new JLabel();
+		panel_4.add(questionID);
+		
+		panel_5 = new JPanel();
+		panel.add(panel_5, BorderLayout.CENTER);
+		
+		timePointScrollPane = new JScrollPane();
+		panel_5.add(timePointScrollPane);
 		
 		panel_1 = new JPanel();
 		add(panel_1, BorderLayout.CENTER);
@@ -133,6 +145,10 @@ public class QuestionView extends JPanel {
 
 	JScrollPane getAfterScrollPane() {
 		return afterScrollPane;
+	}
+	
+	JScrollPane getTimePointScrollPane() {
+		return timePointScrollPane;
 	}
 
 }

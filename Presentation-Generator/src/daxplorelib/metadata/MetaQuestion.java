@@ -75,7 +75,7 @@ public class MetaQuestion {
 					stmt2.setString(1, id);
 					ResultSet rs2 = stmt2.executeQuery();
 					while(rs2.next()) {
-						timepoints.add(timePointManager.get(rs.getInt("timeid")));
+						timepoints.add(timePointManager.get(rs2.getInt("timeid")));
 					}
 					
 					MetaQuestion mq = new MetaQuestion(id, shortTextRef, fullTextRef, scale, calculation, timepoints);
