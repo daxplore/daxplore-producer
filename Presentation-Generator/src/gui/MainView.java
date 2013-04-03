@@ -14,6 +14,7 @@ import java.awt.CardLayout;
 import java.awt.Color;
 import java.awt.EventQueue;
 import java.awt.Toolkit;
+import java.io.IOException;
 
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
@@ -38,6 +39,13 @@ public class MainView {
 	 * break windowbuilder parsing.
 	 */
 	public static void main(String[] args) {
+		
+		try {
+			DaxploreLogger.setup();
+		} catch (IOException e2) {
+			System.out.println("Couldn't set upp logger");
+			e2.printStackTrace();
+		}
 		
 		// do a java version check, if target system doesn't have java 7, exit.
 		if (GuiTools.javaVersionCheck() != true) {

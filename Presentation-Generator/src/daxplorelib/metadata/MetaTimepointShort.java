@@ -10,6 +10,8 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import daxplorelib.DaxploreException;
 import daxplorelib.DaxploreTable;
@@ -91,8 +93,11 @@ public class MetaTimepointShort implements Comparable<MetaTimepointShort> {
 			PreparedStatement deleteStmt = connection.prepareStatement("DELETE FROM timepoints WHERE id = ?");
 			PreparedStatement insertStmt = connection.prepareStatement("INSERT INTO timepoints (id, textref, timeindex, value) VALUES (?, ?, ?, ?)");
 			
+			int nNew = 0, nModified = 0, nRemoved = 0;
+			
 			for(MetaTimepointShort timepoint : pointMap.values()) {
 				if(timepoint.modified) {
+					nModified++;
 					updateStmt.setString(1, timepoint.textref.getRef());
 					updateStmt.setInt(2, timepoint.timeindex);
 					updateStmt.setDouble(3, timepoint.value);
@@ -104,6 +109,7 @@ public class MetaTimepointShort implements Comparable<MetaTimepointShort> {
 			updateStmt.executeBatch();
 			
 			for(MetaTimepointShort timepoint : toBeRemoved.values()) {
+				nRemoved++;
 				deleteStmt.setInt(1, timepoint.id);
 				deleteStmt.addBatch();
 			}
@@ -111,6 +117,7 @@ public class MetaTimepointShort implements Comparable<MetaTimepointShort> {
 			toBeRemoved.clear();
 			
 			for(MetaTimepointShort timepoint : toBeAdded) {
+				nNew++;
 				insertStmt.setInt(1, timepoint.id);
 				insertStmt.setString(2, timepoint.textref.getRef());
 				insertStmt.setInt(3, timepoint.timeindex);
@@ -120,6 +127,11 @@ public class MetaTimepointShort implements Comparable<MetaTimepointShort> {
 			insertStmt.executeBatch();
 			toBeAdded.clear();
 			addDelta = 0;
+			
+			if(nModified != 0 || nNew != 0 || nRemoved != 0) {
+				String logString = String.format("MetaTimePoint: Saved %d (%d new), %d removed", nModified, nNew, nRemoved);
+				Logger.getGlobal().log(Level.INFO, logString);
+			}
 		}
 		
 		public List<MetaTimepointShort> getAll() throws SQLException {

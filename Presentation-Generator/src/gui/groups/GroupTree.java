@@ -9,6 +9,8 @@ import gui.widget.QuestionWidget;
 import java.awt.Color;
 import java.awt.Component;
 import java.util.EventObject;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import javax.swing.AbstractCellEditor;
 import javax.swing.JTree;
@@ -55,7 +57,10 @@ public class GroupTree extends JTree {
 				MetaGroup mg = (MetaGroup)value;
 				groupRenderer.setContent(mg);
 				comp = groupRenderer;
-			} else throw new AssertionError();
+			} else {
+				Logger.getGlobal().log(Level.SEVERE, "Tried adding " + value.getClass() + " to grouptree");
+				throw new AssertionError();
+			}
 			
 			int mouseOver = -1;
 			Color bgColor = null;

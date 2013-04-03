@@ -147,7 +147,7 @@ class GroupTreeModel implements TreeModel {
 				}
 			}
 		}
-		throw new Exception("Couldn't remove that");
+		throw new Exception("Couldn't remove " + child.getClass());
 	}
 
 	@Override

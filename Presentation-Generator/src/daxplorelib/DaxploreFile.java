@@ -9,6 +9,8 @@ import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import org.opendatafoundation.data.FileFormatInfo;
 import org.opendatafoundation.data.FileFormatInfo.ASCIIFormat;
@@ -249,21 +251,23 @@ public class DaxploreFile {
 		}
 	}
 	
-	public void saveAll() throws DaxploreException {
+	public void saveAll() throws DaxploreException { //TODO: return boolean instead of throwing exception?
 		try {
 			boolean autocommit = connection.getAutoCommit();
 			connection.setAutoCommit(false);
 			connection.setTransactionIsolation(Connection.TRANSACTION_READ_UNCOMMITTED);
 			
+			Logger.getGlobal().log(Level.INFO, "Save initiated");
 			about.save();
 			metadata.saveAll();
-			System.out.println("Save all the stuff"); //TODO remove
 			
 			connection.commit();
 			connection.setAutoCommit(autocommit);
 		} catch (SQLException e) {
+			Logger.getGlobal().log(Level.SEVERE, "Error while saving data", e);
 			throw new DaxploreException("Error while saving data", e);
 		}
+		Logger.getGlobal().log(Level.INFO, "Save successful");
 	}
 	
 	public void close() throws DaxploreException {

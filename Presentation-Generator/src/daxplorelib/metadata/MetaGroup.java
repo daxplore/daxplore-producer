@@ -10,6 +10,8 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import daxplorelib.DaxploreException;
 import daxplorelib.DaxploreTable;
@@ -101,8 +103,11 @@ public class MetaGroup implements Comparable<MetaGroup> {
 			PreparedStatement deleteGroupRelStmt = connection.prepareStatement("DELETE FROM metagrouprel WHERE groupid = ?");
 			PreparedStatement insertGroupRelStmt = connection.prepareStatement("INSERT INTO metagrouprel (groupid, questionid, idx) VALUES (?, ?, ?)");
 			
+			int nNew = 0, nModified = 0, nRemoved = 0, nQuestion = 0;
+			
 			for(MetaGroup mg: groupMap.values()) {
 				if(mg.modified) {
+					nModified++;
 					updateGroupStmt.setString(1, mg.textref.getRef());
 					updateGroupStmt.setInt(2, mg.index);
 					updateGroupStmt.setInt(3, mg.type.asInt());
@@ -113,6 +118,7 @@ public class MetaGroup implements Comparable<MetaGroup> {
 					deleteGroupRelStmt.executeUpdate();
 					
 					for(int idx = 0; idx < mg.qList.size(); idx++) {
+						nQuestion++;
 						insertGroupRelStmt.setInt(1, mg.id);
 						insertGroupRelStmt.setString(2, mg.qList.get(idx).getId());
 						insertGroupRelStmt.setInt(3, idx);
@@ -126,6 +132,7 @@ public class MetaGroup implements Comparable<MetaGroup> {
 			
 			
 			for(MetaGroup mg: toBeRemoved) {
+				nRemoved++;
 				deleteGroupStmt.setInt(1, mg.id);
 				deleteGroupStmt.addBatch();
 				deleteGroupRelStmt.setInt(1, mg.id);
@@ -137,6 +144,7 @@ public class MetaGroup implements Comparable<MetaGroup> {
 			
 			
 			for(MetaGroup mg: toBeAddedGroup) {
+				nNew++;
 				insertGroupStmt.setInt(1, mg.id);
 				insertGroupStmt.setString(2, mg.textref.getRef());
 				insertGroupStmt.setInt(3, mg.index);
@@ -148,6 +156,7 @@ public class MetaGroup implements Comparable<MetaGroup> {
 			addDelta = 0;
 			
 			for(MetaGroupRel mgr: toBeAddedGroupRel) {
+				nQuestion++;
 				insertGroupRelStmt.setInt(1, mgr.groupid);
 				insertGroupRelStmt.setString(2, mgr.questionid);
 				insertGroupRelStmt.setInt(3, mgr.idx);
@@ -155,6 +164,11 @@ public class MetaGroup implements Comparable<MetaGroup> {
 			}
 			insertGroupRelStmt.executeBatch();
 			toBeAddedGroupRel.clear();
+			
+			if(nModified != 0 || nNew != 0 || nRemoved != 0 || nQuestion != 0) {
+				String logString = String.format("MetaGroup: Saved %d (%d new), %d removed, %d questions position changed", nModified, nNew, nRemoved, nQuestion);
+				Logger.getGlobal().log(Level.INFO, logString);
+			}
 		}
 		
 		public List<MetaGroup> getAll() throws SQLException, DaxploreException {

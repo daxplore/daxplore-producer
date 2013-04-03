@@ -10,6 +10,8 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import tools.NumberlineCoverage;
 import tools.NumberlineCoverage.NumberlineCoverageException;
@@ -121,8 +123,11 @@ public class MetaScale {
 			PreparedStatement deleteOptionStmt = connection.prepareStatement("DELETE FROM metascaleoption WHERE scaleid = ?");
 			PreparedStatement updateOptionStmt = connection.prepareStatement("UPDATE metascaleoption SET textref = ?, value = ?, transform = ? WHERE scaleid = ? AND ord = ?");
 			
+			int nNew = 0, nModified = 0, nRemoved = 0, nOptionModified = 0;
+			
 			for(MetaScale ms: scaleMap.values()) {
 				if(ms.modified) {
+					nModified++;
 					updateScaleStmt.setInt(2, ms.id);
 					updateScaleStmt.setString(1, ms.ignore.toString());
 					updateScaleStmt.addBatch();
@@ -133,6 +138,7 @@ public class MetaScale {
 						
 						int ord = 0;
 						for(Option opt: ms.options) {
+							nOptionModified++;
 							addOptionStmt.setInt(1, ms.id);
 							addOptionStmt.setString(2, opt.textRef.getRef());
 							addOptionStmt.setInt(3, ord);
@@ -149,6 +155,7 @@ public class MetaScale {
 					for(int ord = 0; ord < ms.options.size(); ord++) {
 						Option opt = ms.options.get(ord);
 						if(opt.modified) {
+							nOptionModified++;
 							updateOptionStmt.setString(1, opt.textRef.getRef());
 							updateOptionStmt.setDouble(2, opt.value);
 							updateOptionStmt.setString(3, opt.transformation.toString());
@@ -166,6 +173,7 @@ public class MetaScale {
 			deleteOptionStmt.executeBatch();
 			
 			for(MetaScale ms: toBeRemoved) {
+				nRemoved++;
 				deleteStmt.setInt(1, ms.id);
 				deleteStmt.addBatch();
 				deleteOptionStmt.setInt(1, ms.id);
@@ -176,6 +184,7 @@ public class MetaScale {
 			toBeRemoved.clear();
 			
 			for(MetaScale ms: toBeAdded) {
+				nNew++;
 				insertScaleStmt.setInt(1, ms.id);
 				insertScaleStmt.setString(2, ms.ignore.toString());
 				insertScaleStmt.addBatch();
@@ -195,6 +204,11 @@ public class MetaScale {
 			insertScaleStmt.executeBatch();
 			addOptionStmt.executeBatch();
 			addDelta = 0;
+			
+			if(nModified != 0 || nNew != 0 || nRemoved != 0 || nOptionModified != 0) {
+				String logString = String.format("MetaScale: Saved %d (%d new), %d removed, %d options changed", nModified, nNew, nRemoved, nOptionModified);
+				Logger.getGlobal().log(Level.INFO, logString);
+			}
 		}
 		
 		public List<MetaScale> getAll() throws SQLException {

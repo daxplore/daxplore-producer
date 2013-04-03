@@ -10,6 +10,8 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import daxplorelib.DaxploreException;
 import daxplorelib.DaxploreTable;
@@ -107,8 +109,11 @@ public class MetaQuestion {
 			PreparedStatement deleteRelStmt = connection.prepareStatement("DELETE FROM questtimerel WHERE qid = ?");
 			PreparedStatement insertRelStmt = connection.prepareStatement("INSERT INTO questtimerel (qid, timeid) VALUES (?, ?)");
 			
+			int nNew = 0, nModified = 0, nRemoved = 0, nTimePoint = 0;
+			
 			for(MetaQuestion mq: questionMap.values()) {
 				if(mq.modified) {
+					nModified++;
 					updateStmt.setInt(1, mq.scale.getId());
 					updateStmt.setString(2, mq.fullTextRef.getRef());
 					updateStmt.setString(3, mq.shortTextRef.getRef());
@@ -122,6 +127,7 @@ public class MetaQuestion {
 					deleteRelStmt.executeUpdate();
 					
 					for(MetaTimepointShort timepoint: mq.timepoints) {
+						nTimePoint++;
 						insertRelStmt.setString(1, mq.id);
 						insertRelStmt.setInt(2, timepoint.getId());
 						insertRelStmt.addBatch();
@@ -133,6 +139,7 @@ public class MetaQuestion {
 			}
 			
 			for(MetaQuestion mq: toBeAdded) {
+				nNew++;
 				insertStmt.setString(1, mq.id);
 				if(mq.scale != null) {
 					insertStmt.setInt(2, mq.scale.getId());
@@ -156,6 +163,7 @@ public class MetaQuestion {
 			
 			
 			for(MetaQuestion mq: toBeRemoved) {
+				nRemoved++;
 				deleteStmt.setString(1, mq.id);
 				deleteStmt.addBatch();
 				
@@ -165,6 +173,11 @@ public class MetaQuestion {
 			deleteRelStmt.executeBatch();
 			deleteStmt.executeBatch();
 			toBeRemoved.clear();
+			
+			if(nModified != 0 || nNew != 0 || nRemoved != 0 || nTimePoint != 0) {
+				String logString = String.format("MetaQuestion: Saved %d (%d new), %d removed, %d timepoints changed", nModified, nNew, nRemoved, nTimePoint);
+				Logger.getGlobal().log(Level.INFO, logString);
+			}
 		}
 		
 		public List<MetaQuestion> getAll() throws SQLException, DaxploreException{
