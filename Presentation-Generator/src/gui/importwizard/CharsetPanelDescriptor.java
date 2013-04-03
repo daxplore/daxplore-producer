@@ -68,16 +68,17 @@ public class CharsetPanelDescriptor extends ImportWizardDescriptor implements Ac
 		if(!(e.getSource() instanceof JComboBox)) {
 			return;
 		}
-		JComboBox charsetSource = (JComboBox) e.getSource();
+		@SuppressWarnings("unchecked")
+		JComboBox<String> charsetSource = (JComboBox<String>) e.getSource();
 		
 		String charsetType = (String) charsetSource.getSelectedItem();
-		if (charsetType == charsetPanel.ENCODING_COMBO_BOX_LIST_LABEL)
+		if (CharsetPanel.ENCODING_COMBO_BOX_LIST_LABEL.equals(charsetType) || CharsetPanel.ENCODING_COMBO_BOX_SEPARETOR.equals(charsetType))
 			return;
 		
 		if(charsetType != null && !charsetType.equals("") && 
 				getWizard().getmainController().getSpssFile() != null) {
 			Charset charset = Charset.forName(charsetType);
-			DefaultComboBoxModel stringList = new DefaultComboBoxModel();
+			DefaultComboBoxModel<String> stringList = new DefaultComboBoxModel<String>();
 			try {
 				Set<String> encodedStrings = SPSSTools.getNonAsciiStrings(
 						getWizard().getmainController().getSpssFile(), charset);
@@ -86,7 +87,7 @@ public class CharsetPanelDescriptor extends ImportWizardDescriptor implements Ac
 					stringList.addElement(es);
 				}
 				
-				JList encodedStringsList = new JList(stringList);
+				JList<String> encodedStringsList = new JList<String>(stringList);
 				
 				getWizard().getModel().setCharsetName(charset.name());
 				charsetPanel.setEncodingList(encodedStringsList);

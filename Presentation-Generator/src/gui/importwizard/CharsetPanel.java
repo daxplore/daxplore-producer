@@ -12,11 +12,14 @@ import javax.swing.JList;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 
+import tools.CharsetTest;
+
 public class CharsetPanel extends JPanel {
 
 	private static final long serialVersionUID = 1L;
 	static final String ENCODING_COMBO_BOX_LIST_LABEL = "<Select encoding type>";
-	protected JComboBox encodingComboBox;
+	static final String ENCODING_COMBO_BOX_SEPARETOR =  "----------------------";
+	protected JComboBox<String> encodingComboBox;
 	protected JScrollPane encodingListPanel;
 	protected JPanel contentPanel;
 	
@@ -38,7 +41,7 @@ public class CharsetPanel extends JPanel {
 		JLabel lblNewLabel = new JLabel("Specify encoding:");
 		specifyEncodingPanel.add(lblNewLabel);
 						
-		encodingComboBox = new JComboBox();
+		encodingComboBox = new JComboBox<String>();
 		specifyEncodingPanel.add(encodingComboBox);
 		
 		encodingListPanel = new JScrollPane();
@@ -52,8 +55,15 @@ public class CharsetPanel extends JPanel {
 
 		// populate the combobox with available charsets.
 		encodingComboBox.addItem(ENCODING_COMBO_BOX_LIST_LABEL);
+		encodingComboBox.addItem("US-ASCII");
+		encodingComboBox.addItem("UTF-8");
+		encodingComboBox.addItem("ISO-8859-1");
+		encodingComboBox.addItem("windows-1252");
+		encodingComboBox.addItem(ENCODING_COMBO_BOX_SEPARETOR);
 		for (String charname : cset.keySet()) {
-			encodingComboBox.addItem(charname);
+			if(CharsetTest.charset8bitTest(cset.get(charname))){
+				encodingComboBox.addItem(charname);
+			}
 		}
 	}
 	
