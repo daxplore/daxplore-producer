@@ -21,7 +21,7 @@ import daxplorelib.DaxploreTable;
 import daxplorelib.SQLTools;
 
 public class TextReferenceManager {
-	public static final DaxploreTable table = new DaxploreTable("CREATE TABLE texts (ref TEXT, locale TEXT, text TEXT, UNIQUE ( ref, locale) )", "texts");
+	public static final DaxploreTable table = new DaxploreTable("CREATE TABLE texts (ref TEXT NOT NULL, locale TEXT, text TEXT NOT NULL, UNIQUE ( ref, locale) )", "texts");
 
 	Connection connection;
 	Map<String, TextReference> toBeRemoved = new HashMap<String, TextReference>();

@@ -10,7 +10,7 @@ import org.json.simple.JSONAware;
 import daxplorelib.DaxploreTable;
 
 public class MetaCalculation implements JSONAware{
-	protected static final DaxploreTable table = new DaxploreTable("CREATE TABLE metacalc (id INTEGER, column TEXT)", "metacalc");
+	protected static final DaxploreTable table = new DaxploreTable("CREATE TABLE metacalc (id INTEGER NOT NULL, column TEXT)", "metacalc");
 	int id;
 	Connection connection;
 	
@@ -19,13 +19,14 @@ public class MetaCalculation implements JSONAware{
 		this.connection = connection;
 	}
 	
-	public MetaCalculation(String column, Connection connection) throws SQLException{
+	public MetaCalculation(String column, Connection connection) throws SQLException {
 		PreparedStatement stmt = connection.prepareStatement("SELECT * FROM metacalc WHERE column = ?");
 		stmt.setString(1, column);
 		ResultSet rs = stmt.executeQuery();
 		if(rs.next()) {
 			this.id = rs.getInt("id");
 		}
+		rs.close();
 		stmt.close();
 	}
 	

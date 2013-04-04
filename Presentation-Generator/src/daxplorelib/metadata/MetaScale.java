@@ -24,10 +24,10 @@ import daxplorelib.metadata.textreference.TextReferenceManager;
 public class MetaScale {
 	
 	protected static final DaxploreTable maintable = new DaxploreTable(
-			"CREATE TABLE metascale (id INTEGER PRIMARY KEY, ignore STRING)"
+			"CREATE TABLE metascale (id INTEGER PRIMARY KEY, ignore STRING NOT NULL)"
 			, "metascale");
 	protected static final DaxploreTable optiontable = new DaxploreTable(
-			"CREATE TABLE metascaleoption (scaleid INTEGER, textref STRING, ord INTEGER, value REAL, transform STRING, FOREIGN KEY(scaleid) REFERENCES metascale(id))"
+			"CREATE TABLE metascaleoption (scaleid INTEGER NOT NULL, textref STRING NOT NULL, ord INTEGER NOT NULL, value REAL NOT NULL, transform STRING NOT NULL, FOREIGN KEY(scaleid) REFERENCES metascale(id))"
 			, "metascaleoption");
 	
 	public static class MetaScaleManager {
@@ -60,7 +60,7 @@ public class MetaScale {
 			if(scaleMap.containsKey(id)) {
 				return scaleMap.get(id);
 			} else if(toBeRemoved.containsKey(id)) {
-				throw new DaxploreException("No scale with id '"+id+"'");
+				return null; // TODO: handle non-scales in a more structured way?
 			} else {
 				PreparedStatement stmt = connection.prepareStatement("SELECT * FROM metascale WHERE id = ?");
 				stmt.setInt(1, id);
@@ -70,10 +70,10 @@ public class MetaScale {
 					try {
 						ignore = new NumberlineCoverage(rs.getString("ignore"));
 					} catch (NumberlineCoverageException e) {
-						ignore = new NumberlineCoverage(); //TODO: do something if corrupt data is stored in database?
+						throw new DaxploreException("Corrupt numberline coverage in metascale", e);
 					}
 				} else {
-					ignore = new NumberlineCoverage();
+					return null; // TODO: handle non-scales in a more structured way?
 				}
 				
 				stmt = connection.prepareStatement("SELECT * FROM metascaleoption WHERE scaleid = ? ORDER BY ord");

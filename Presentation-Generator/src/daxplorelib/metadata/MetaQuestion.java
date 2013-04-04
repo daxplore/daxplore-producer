@@ -24,10 +24,10 @@ import daxplorelib.metadata.textreference.TextReferenceManager;
 public class MetaQuestion {
 	
 	protected static final DaxploreTable table = new DaxploreTable(
-			"CREATE TABLE metaquestion (id TEXT PRIMARY KEY, scaleid INTEGER, fulltextref TEXT, shorttextref TEXT, calculation INTEGER, FOREIGN KEY(scaleid) REFERENCES metascale(id))",
+			"CREATE TABLE metaquestion (id TEXT PRIMARY KEY, scaleid INTEGER, fulltextref TEXT NOT NULL, shorttextref TEXT NOT NULL, calculation INTEGER, FOREIGN KEY(scaleid) REFERENCES metascale(id))",
 			"metaquestion");
 	protected static final DaxploreTable timePointTable = new DaxploreTable(
-			"CREATE TABLE questtimerel (qid TEXT, timeid INTEGER, FOREIGN KEY(qid) REFERENCES metaquestion(id), FOREIGN KEY(timeid) REFERENCES timepoints(id))", 
+			"CREATE TABLE questtimerel (qid TEXT NOT NULL, timeid INTEGER NOT NULL, FOREIGN KEY(qid) REFERENCES metaquestion(id), FOREIGN KEY(timeid) REFERENCES timepoints(id))", 
 			"questtimerel");
 	
 	public static class MetaQuestionManager {
@@ -70,8 +70,18 @@ public class MetaQuestion {
 				if(rs.next()) {
 					TextReference fullTextRef = textsManager.get(rs.getString("fulltextref"));
 					TextReference shortTextRef = textsManager.get(rs.getString("shorttextref"));
-					MetaScale scale = metascaleManager.get(rs.getInt("scaleid"));
-					MetaCalculation calculation = new MetaCalculation(rs.getInt("calculation"), connection);
+					
+					int scaleid = rs.getInt("scaleid");
+					MetaScale scale = null;
+					if(!rs.wasNull()) {
+						scale = metascaleManager.get(scaleid);
+					}
+					
+					int calculationID = rs.getInt("calculation");
+					MetaCalculation calculation = null;
+					if(!rs.wasNull()) {
+						calculation = new MetaCalculation(calculationID, connection);
+					}
 					
 					List<MetaTimepointShort> timepoints = new LinkedList<MetaTimepointShort>();
 					PreparedStatement stmt2 = connection.prepareStatement("SELECT timeid FROM questtimerel WHERE qid = ?");

@@ -109,7 +109,9 @@ public class NumberlineCoverage {
 	List<Interval> intervals = new LinkedList<Interval>();
 	
 	public NumberlineCoverage(String intervalString) throws NumberlineCoverageException {
-		if(intervalString.length() == 0) { return; }
+		if (intervalString == null || intervalString.length() == 0) {
+			return;
+		}
 		String[] interStrings = intervalString.split("U");
 		for(String inter: interStrings) {
 			intervals.add(new Interval(inter));
