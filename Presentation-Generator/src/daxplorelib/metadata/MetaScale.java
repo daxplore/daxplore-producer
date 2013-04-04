@@ -15,6 +15,7 @@ import java.util.logging.Logger;
 
 import tools.NumberlineCoverage;
 import tools.NumberlineCoverage.NumberlineCoverageException;
+import daxplorelib.DaxploreException;
 import daxplorelib.DaxploreTable;
 import daxplorelib.SQLTools;
 import daxplorelib.metadata.textreference.TextReference;
@@ -36,7 +37,8 @@ public class MetaScale {
 		
 		private List<MetaScale> toBeAdded = new LinkedList<MetaScale>();
 		private int addDelta = 0;
-		private List<MetaScale> toBeRemoved = new LinkedList<MetaScale>();
+		private Map<Integer, MetaScale> toBeRemoved = new HashMap<Integer, MetaScale>();
+//		private List<MetaScale> toBeRemoved = new LinkedList<MetaScale>();
 		
 		public MetaScaleManager(Connection connection, TextReferenceManager textsManager) {
 			this.connection = connection;
@@ -54,9 +56,11 @@ public class MetaScale {
 			}
 		}
 		
-		public MetaScale get(int id) throws SQLException {
+		public MetaScale get(int id) throws SQLException, DaxploreException {
 			if(scaleMap.containsKey(id)) {
 				return scaleMap.get(id);
+			} else if(toBeRemoved.containsKey(id)) {
+				throw new DaxploreException("No scale with id '"+id+"'");
 			} else {
 				PreparedStatement stmt = connection.prepareStatement("SELECT * FROM metascale WHERE id = ?");
 				stmt.setInt(1, id);
@@ -111,7 +115,7 @@ public class MetaScale {
 		public void remove(int id) {
 			MetaScale scale = scaleMap.remove(id);
 			toBeAdded.remove(scale);
-			toBeRemoved.add(scale);
+			toBeRemoved.put(id, scale);
 		}
 		
 		public void saveAll() throws SQLException {
@@ -172,7 +176,7 @@ public class MetaScale {
 			updateScaleStmt.executeBatch();
 			deleteOptionStmt.executeBatch();
 			
-			for(MetaScale ms: toBeRemoved) {
+			for(MetaScale ms: toBeRemoved.values()) {
 				nRemoved++;
 				deleteStmt.setInt(1, ms.id);
 				deleteStmt.addBatch();
@@ -211,10 +215,14 @@ public class MetaScale {
 			}
 		}
 		
-		public List<MetaScale> getAll() throws SQLException {
+		public List<MetaScale> getAll() throws SQLException, DaxploreException {
+			// make sure all scales are cached before returning the content of the map
 			ResultSet rs = connection.createStatement().executeQuery("SELECT id FROM metascale");
 			while(rs.next()) {
-				get(rs.getInt("id"));
+				int id = rs.getInt("id");
+				if(!scaleMap.containsKey(id) && !toBeRemoved.containsKey(id)) {
+					get(rs.getInt("id"));
+				}
 			}
 			return new LinkedList<MetaScale>(scaleMap.values());
 		}

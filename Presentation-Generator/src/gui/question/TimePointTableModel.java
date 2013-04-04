@@ -1,6 +1,5 @@
 package gui.question;
 
-import java.awt.Checkbox;
 import java.sql.SQLException;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
@@ -10,6 +9,7 @@ import javax.swing.table.DefaultTableModel;
 
 import tools.Pair;
 import daxplorelib.About;
+import daxplorelib.DaxploreException;
 import daxplorelib.metadata.MetaQuestion;
 import daxplorelib.metadata.MetaTimepointShort;
 import daxplorelib.metadata.MetaTimepointShort.MetaTimepointShortManager;
@@ -24,7 +24,7 @@ public class TimePointTableModel extends DefaultTableModel {
 	List<Double> counts = new LinkedList<Double>();
 	MetaQuestion mq;
 	
-	public TimePointTableModel(MetaTimepointShortManager mtsm, RawData rawData, About about, MetaQuestion question) throws SQLException {
+	public TimePointTableModel(MetaTimepointShortManager mtsm, RawData rawData, About about, MetaQuestion question) throws SQLException, DaxploreException {
 		this.mq = question;
 		LinkedList<Pair<Double, Integer>> timePointCount = rawData.getColumnValueCountWhere(about.getTimeSeriesShortColumn(), mq.getId());
 		for(MetaTimepointShort tp: mtsm.getAll()) {

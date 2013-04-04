@@ -6,6 +6,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.sql.Types;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
@@ -23,8 +24,7 @@ public class TextReferenceManager {
 	public static final DaxploreTable table = new DaxploreTable("CREATE TABLE texts (ref TEXT, locale TEXT, text TEXT, UNIQUE ( ref, locale) )", "texts");
 
 	Connection connection;
-	//Map<String, TextReference> textMap = new HashMap<String, TextReference>();
-	List<TextReference> toBeRemoved = new LinkedList<TextReference>();
+	Map<String, TextReference> toBeRemoved = new HashMap<String, TextReference>();
 	
 	TextTree textTree = new TextTree();
 	
@@ -70,7 +70,7 @@ public class TextReferenceManager {
 	}
 	
 	public void remove(String refstring) throws SQLException {
-		toBeRemoved.add(textTree.remove(refstring));
+		toBeRemoved.put(refstring, textTree.remove(refstring));
 	}
 	
 	public void saveAll() throws SQLException {
@@ -78,8 +78,19 @@ public class TextReferenceManager {
 		PreparedStatement selectLocalesStmt = connection.prepareStatement("SELECT locale FROM texts WHERE ref = ?");
 		PreparedStatement deleteTextrefLocaleStmt = connection.prepareStatement("DELETE FROM texts WHERE ref = ? AND locale = ?");
 		
-		int nModified = 0;
 		int nRemoved = 0;
+		int nModified = 0;
+
+		//Delete those marked to be removed
+		PreparedStatement deleteTextrefStmt = connection.prepareStatement("DELETE FROM texts WHERE ref = ?");
+		for(TextReference tr: toBeRemoved.values()) {
+			nRemoved++;
+			deleteTextrefStmt.setString(1, tr.reference);
+			deleteTextrefStmt.addBatch();
+		}
+		deleteTextrefStmt.executeBatch();
+		toBeRemoved.clear();
+		
 		for(TextReferenceReference trr: textTree) {
 			TextReference tr = (TextReference)trr;
 			if(tr.modified) {
@@ -124,15 +135,6 @@ public class TextReferenceManager {
 			}
 		}
 		
-		//Delete those marked to be removed
-		PreparedStatement deleteTextrefStmt = connection.prepareStatement("DELETE FROM texts WHERE ref = ?");
-		for(TextReference tr: toBeRemoved) {
-			nRemoved++;
-			deleteTextrefStmt.setString(1, tr.reference);
-			deleteTextrefStmt.addBatch();
-		}
-		deleteTextrefStmt.executeBatch();
-		toBeRemoved.clear();
 		
 		if(nModified != 0 || nNew != 0 || nRemoved != 0) {
 			String logString = String.format("TextReferences: Saved %d (%d new), %d removed", nModified, nNew, nRemoved);
@@ -157,9 +159,13 @@ public class TextReferenceManager {
 	}
 
 	public TextTree getAll() throws SQLException {
+		// make sure all references are cached before returning the content of the tree
 		ResultSet rs = connection.createStatement().executeQuery("SELECT ref FROM texts");
 		while(rs.next()) {
-			get(rs.getString("ref"));
+			String id = rs.getString("ref");
+			if(!textTree.contains(id) && !toBeRemoved.containsKey(id)) {
+				get(rs.getString("ref"));
+			}
 		}
 		return textTree;
 	}

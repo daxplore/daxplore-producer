@@ -134,17 +134,14 @@ public class MetaTimepointShort implements Comparable<MetaTimepointShort> {
 			}
 		}
 		
-		public List<MetaTimepointShort> getAll() throws SQLException {
+		public List<MetaTimepointShort> getAll() throws SQLException, DaxploreException {
+			// make sure all timepoints are cached before returning the content of the map
 			Statement stmt = connection.createStatement();
 			ResultSet rs = stmt.executeQuery("SELECT id FROM timepoints ORDER BY timeindex ASC");
 			while(rs.next()) {
 				int id = rs.getInt("id");
 				if(!pointMap.containsKey(id) && !toBeRemoved.containsKey(id)) {
-					try {
-						get(id); //can be improved
-					} catch (DaxploreException e) {
-						throw new AssertionError(e);
-					}
+					get(id);
 				}
 			}
 			List<MetaTimepointShort> pointList = new LinkedList<MetaTimepointShort>(pointMap.values());

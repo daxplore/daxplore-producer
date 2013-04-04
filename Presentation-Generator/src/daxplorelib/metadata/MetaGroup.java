@@ -30,7 +30,7 @@ public class MetaGroup implements Comparable<MetaGroup> {
 		private List<MetaGroup> toBeAddedGroup = new LinkedList<MetaGroup>();
 		private int addDelta = 0;
 		private List<MetaGroupRel> toBeAddedGroupRel = new LinkedList<MetaGroupRel>();
-		private List<MetaGroup> toBeRemoved = new LinkedList<MetaGroup>();
+		private Map<Integer, MetaGroup> toBeRemoved = new HashMap<Integer, MetaGroup>();
 		private Connection connection;
 		private TextReferenceManager textsManager;
 		private MetaQuestionManager questionManager;
@@ -49,16 +49,24 @@ public class MetaGroup implements Comparable<MetaGroup> {
 		public MetaGroup get(int id) throws SQLException, DaxploreException {
 			if(groupMap.containsKey(id)) {
 				return groupMap.get(id);
+			} else if(toBeRemoved.containsKey(id)){
+				throw new DaxploreException("No group with id '"+id+"'");
 			}
+			
 			PreparedStatement stmt = connection.prepareStatement("SELECT * FROM metagroup WHERE id = ?");
 			stmt.setInt(1, id);
 			ResultSet rs = stmt.executeQuery();
-			rs.next();
-			
-			TextReference tr = textsManager.get(rs.getString("textref"));
-			int index = rs.getInt("idx");
-			GroupType type = GroupType.fromInt(rs.getInt("type"));
-			rs.close();
+			TextReference tr;
+			int index;
+			GroupType type;
+			if (rs.next()) {
+				tr = textsManager.get(rs.getString("textref"));
+				index = rs.getInt("idx");
+				type = GroupType.fromInt(rs.getInt("type"));
+				rs.close();
+			} else {
+				throw new DaxploreException("No group with id '"+id+"'");
+			}
 			
 			List<MetaQuestion> qList = new LinkedList<MetaQuestion>();
 			PreparedStatement qstmt = connection.prepareStatement("SELECT questionid FROM metagrouprel WHERE groupid = ? ORDER BY idx ASC");
@@ -92,7 +100,7 @@ public class MetaGroup implements Comparable<MetaGroup> {
 		public void remove(int id) {
 			MetaGroup tbr = groupMap.remove(id);
 			toBeAddedGroup.remove(tbr);
-			toBeRemoved.add(tbr);
+			toBeRemoved.put(id, tbr);
 		}
 		
 		public void saveAll() throws SQLException {
@@ -131,7 +139,7 @@ public class MetaGroup implements Comparable<MetaGroup> {
 			}
 			
 			
-			for(MetaGroup mg: toBeRemoved) {
+			for(MetaGroup mg: toBeRemoved.values()) {
 				nRemoved++;
 				deleteGroupStmt.setInt(1, mg.id);
 				deleteGroupStmt.addBatch();
@@ -172,12 +180,13 @@ public class MetaGroup implements Comparable<MetaGroup> {
 		}
 		
 		public List<MetaGroup> getAll() throws SQLException, DaxploreException {
+			// make sure all groups are cached before returning the content of the map
 			Statement stmt = connection.createStatement();
 			ResultSet rs = stmt.executeQuery("SELECT id FROM metagroup");
 			while(rs.next()) {
 				int id = rs.getInt("id");
-				if(!groupMap.containsKey(id)) {
-					get(id); //can be improved
+				if(!groupMap.containsKey(id) && !toBeRemoved.containsKey(id)) {
+					get(id);
 				}
 			}
 			List<MetaGroup> groupList = new LinkedList<MetaGroup>(groupMap.values());

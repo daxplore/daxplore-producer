@@ -38,8 +38,7 @@ public class MetaQuestion {
 		private MetaTimepointShortManager timePointManager;
 		private Map<String, MetaQuestion> questionMap = new HashMap<String, MetaQuestion>();
 		private LinkedList<MetaQuestion> toBeAdded= new LinkedList<MetaQuestion>();
-		
-		protected LinkedList<MetaQuestion> toBeRemoved = new LinkedList<MetaQuestion>();
+		protected Map<String, MetaQuestion> toBeRemoved = new HashMap<String, MetaQuestion>();
 		
 		public MetaQuestionManager(Connection connection, TextReferenceManager textsManager, MetaScaleManager metaScaleManager, MetaTimepointShortManager timePointManager) {
 			this.connection = connection;
@@ -62,6 +61,8 @@ public class MetaQuestion {
 		public MetaQuestion get(String id) throws SQLException, DaxploreException {
 			if(questionMap.containsKey(id)) {
 				return questionMap.get(id);
+			} else if(toBeRemoved.containsKey(id)) {
+				throw new DaxploreException("No question with id '"+id+"'");
 			} else {
 				PreparedStatement stmt = connection.prepareStatement("SELECT * FROM metaquestion WHERE id = ?");
 				stmt.setString(1, id);
@@ -99,7 +100,7 @@ public class MetaQuestion {
 		public void remove(String id) {
 			MetaQuestion mq = questionMap.remove(id);
 			toBeAdded.remove(mq);
-			toBeRemoved.add(mq);
+			toBeRemoved.put(id, mq);
 		}
 		
 		public void saveAll() throws SQLException {
@@ -162,7 +163,7 @@ public class MetaQuestion {
 			toBeAdded.clear();
 			
 			
-			for(MetaQuestion mq: toBeRemoved) {
+			for(MetaQuestion mq: toBeRemoved.values()) {
 				nRemoved++;
 				deleteStmt.setString(1, mq.id);
 				deleteStmt.addBatch();
@@ -181,9 +182,13 @@ public class MetaQuestion {
 		}
 		
 		public List<MetaQuestion> getAll() throws SQLException, DaxploreException{
+			// make sure all questions are cached before returning the content of the map
 			ResultSet rs = connection.createStatement().executeQuery("SELECT id FROM metaquestion");
 			while(rs.next()) {
-				get(rs.getString("id"));
+				String id = rs.getString("id");
+				if(!questionMap.containsKey(id) && !toBeRemoved.containsKey(id)) {
+					get(id);
+				}
 			}
 			return new LinkedList<MetaQuestion>(questionMap.values());
 		}

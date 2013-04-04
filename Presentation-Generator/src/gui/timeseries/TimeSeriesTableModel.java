@@ -7,7 +7,7 @@ import java.util.Vector;
 
 import javax.swing.table.DefaultTableModel;
 
-import daxplorelib.metadata.MetaQuestion;
+import daxplorelib.DaxploreException;
 import daxplorelib.metadata.MetaTimepointShort;
 import daxplorelib.metadata.MetaTimepointShort.MetaTimepointShortManager;
 import daxplorelib.metadata.textreference.TextReference;
@@ -25,7 +25,7 @@ public class TimeSeriesTableModel extends DefaultTableModel {
 	public int getRowCount() {
 		try {
 			return timeManager.getAll().size();
-		} catch (SQLException|NullPointerException e) { //TODO figure out why this is needed. (Swing?)
+		} catch (SQLException|DaxploreException|NullPointerException e) { //TODO figure out why this is needed. (Swing?)
 			return 0;
 		}
 	}
@@ -70,7 +70,7 @@ public class TimeSeriesTableModel extends DefaultTableModel {
 			try {
 				MetaTimepointShort tp = timeManager.getAll().get(row);
 				tp.setValue((Double)aValue);
-			} catch (SQLException e) {
+			} catch (SQLException | DaxploreException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
@@ -82,7 +82,7 @@ public class TimeSeriesTableModel extends DefaultTableModel {
 		MetaTimepointShort row;
 		try {
 			row = timeManager.getAll().get(rowIndex);
-		} catch (SQLException e) {
+		} catch (SQLException | DaxploreException e) {
 			e.printStackTrace();
 			return null;
 		}
@@ -104,7 +104,7 @@ public class TimeSeriesTableModel extends DefaultTableModel {
 			tp = timeManager.getAll().get(row);
 			timeManager.remove(tp.getId());
 			fireTableRowsDeleted(row, row);
-		} catch (SQLException e) {
+		} catch (SQLException | DaxploreException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
@@ -118,7 +118,7 @@ public class TimeSeriesTableModel extends DefaultTableModel {
 			List<MetaTimepointShort> timelist;
 			try {
 				timelist = timeManager.getAll();
-			} catch (SQLException e) {
+			} catch (SQLException | DaxploreException e) {
 				e.printStackTrace();
 				return;
 			}
@@ -141,7 +141,7 @@ public class TimeSeriesTableModel extends DefaultTableModel {
 		List<MetaTimepointShort> moveList = new LinkedList<MetaTimepointShort>();
 		try {
 			timeList = timeManager.getAll();
-		} catch (SQLException e) {
+		} catch (SQLException | DaxploreException e) {
 			e.printStackTrace();
 			return;
 		}
