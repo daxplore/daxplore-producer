@@ -14,5 +14,6 @@
 	<classpathentry kind="lib" path="Presentation-Generator/lib/jcommander-1.28-SNAPSHOT-javadoc.jar"/>
 	<classpathentry kind="lib" path="Presentation-Generator/lib/jcommander-1.28-SNAPSHOT-sources.jar"/>
 	<classpathentry kind="lib" path="Presentation-Generator/lib/opencsv-2.3.jar"/>
+	<classpathentry kind="lib" path="Presentation-Generator/lib/scottlogic-utils-1.4.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
