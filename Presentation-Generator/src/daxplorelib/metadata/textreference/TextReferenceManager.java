@@ -120,7 +120,7 @@ public class TextReferenceManager {
 				} else {
 					insertTextrefStmt.setString(1, tr.reference);
 					insertTextrefStmt.setNull(2, Types.VARCHAR);
-					insertTextrefStmt.setNull(3, Types.VARCHAR);
+					insertTextrefStmt.setString(3, "");
 					insertTextrefStmt.executeUpdate();
 				}
 					
