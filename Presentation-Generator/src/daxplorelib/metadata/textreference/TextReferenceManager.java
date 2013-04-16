@@ -47,7 +47,6 @@ public class TextReferenceManager {
 	public TextReference get(String refstring) throws SQLException {
 		TextReference tr = textTree.get(refstring);
 		if(tr == null) {
-			nNew++;
 			boolean newTextReference = true;
 			PreparedStatement stmt = connection.prepareStatement("SELECT * FROM texts where ref = ?");
 			stmt.setString(1, refstring);
@@ -59,7 +58,9 @@ public class TextReferenceManager {
 					localeMap.put(new Locale(rs.getString("locale")), rs.getString("text"));						
 				}
 				newTextReference = false;
-				nNew--;
+			}
+			if(newTextReference) {
+				nNew++;
 			}
 			tr = new TextReference(refstring, localeMap);
 			tr.modified = newTextReference;
@@ -144,7 +145,7 @@ public class TextReferenceManager {
 	}
 	
 
-	public List<Locale> getAllLocales() throws SQLException {
+	public List<Locale> getAllLocales() throws SQLException { //TODO read from local data, load from databse
 		Statement stmt = connection.createStatement();
 		ResultSet rs = stmt.executeQuery("SELECT DISTINCT locale FROM texts ORDER BY locale");
 		List<Locale> list = new LinkedList<Locale>();
@@ -163,7 +164,7 @@ public class TextReferenceManager {
 		ResultSet rs = connection.createStatement().executeQuery("SELECT ref FROM texts");
 		while(rs.next()) {
 			String id = rs.getString("ref");
-			if(!textTree.contains(id) && !toBeRemoved.containsKey(id)) {
+			if(!textTree.contains(new TextReferenceReference(id)) && !toBeRemoved.containsKey(id)) {
 				get(rs.getString("ref"));
 			}
 		}

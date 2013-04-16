@@ -186,7 +186,7 @@ public class MetaGroup implements Comparable<MetaGroup> {
 			if (nModified != 0 || nNew != 0 || nRemoved != 0 || nQuestion != 0) {
 				String logString = String
 						.format("MetaGroup: Saved %d (%d new), %d removed, %d questions position changed",
-								nModified, nNew, nRemoved, nQuestion);
+								nModified+nNew, nNew, nRemoved, nQuestion);
 				Logger.getGlobal().log(Level.INFO, logString);
 			}
 		}

@@ -129,7 +129,7 @@ public class MetaTimepointShort implements Comparable<MetaTimepointShort> {
 			addDelta = 0;
 			
 			if(nModified != 0 || nNew != 0 || nRemoved != 0) {
-				String logString = String.format("MetaTimePoint: Saved %d (%d new), %d removed", nModified, nNew, nRemoved);
+				String logString = String.format("MetaTimePoint: Saved %d (%d new), %d removed", nModified+nNew, nNew, nRemoved);
 				Logger.getGlobal().log(Level.INFO, logString);
 			}
 		}

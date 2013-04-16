@@ -186,7 +186,7 @@ public class MetaQuestion {
 			toBeRemoved.clear();
 			
 			if(nModified != 0 || nNew != 0 || nRemoved != 0 || nTimePoint != 0) {
-				String logString = String.format("MetaQuestion: Saved %d (%d new), %d removed, %d timepoints changed", nModified, nNew, nRemoved, nTimePoint);
+				String logString = String.format("MetaQuestion: Saved %d (%d new), %d removed, %d timepoints changed", nModified+nNew, nNew, nRemoved, nTimePoint);
 				Logger.getGlobal().log(Level.INFO, logString);
 			}
 		}
