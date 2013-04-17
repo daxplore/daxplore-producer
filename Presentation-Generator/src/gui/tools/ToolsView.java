@@ -4,6 +4,7 @@ import gui.MainController;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.sql.SQLException;
 import java.util.Locale;
 
 import javax.swing.JButton;
@@ -12,6 +13,9 @@ import javax.swing.JPanel;
 import javax.swing.JTextField;
 
 import daxplorelib.DaxploreException;
+import daxplorelib.calc.Crosstabs;
+import daxplorelib.metadata.MetaGroup;
+import daxplorelib.metadata.MetaQuestion;
 
 @SuppressWarnings("serial")
 public class ToolsView extends JPanel {
@@ -53,6 +57,45 @@ public class ToolsView extends JPanel {
 		textField.setBounds(147, 10, 114, 19);
 		add(textField);
 		textField.setColumns(10);
+		
+		JButton addTimepointsButton = new JButton("Replace timepoints");
+		addTimepointsButton.setBounds(27, 189, 185, 47);
+		addTimepointsButton.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				try {
+					mainController.getDaxploreFile().getMetaData().replaceAllTimepointsInQuestions();
+				} catch (DaxploreException|SQLException e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+				}
+			}
+		});
+		
+		add(addTimepointsButton);
+		
+		JButton btnGenerateData = new JButton("Generate Data");
+		btnGenerateData.setBounds(247, 101, 191, 25);
+		btnGenerateData.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				Crosstabs crosstabs = mainController.getDaxploreFile().getCrosstabs();
+				try {
+					MetaGroup perspectives = mainController.getDaxploreFile().getMetaData().getMetaGroupManager().getPerspectiveGroup();
+					for(MetaGroup group : mainController.getDaxploreFile().getMetaData().getMetaGroupManager().getQuestionGroups()) {
+						for(MetaQuestion question : group.getQuestions()) {
+							for(MetaQuestion perspective : perspectives.getQuestions()) {
+								System.out.println(crosstabs.crosstabs2(question, perspective).toJsonString());
+							}
+						}
+					}
+				} catch (DaxploreException | SQLException e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+				}
+			}
+		});
+		add(btnGenerateData);
 		
 	}
 }
