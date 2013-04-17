@@ -207,7 +207,33 @@ public class MetaGroup implements Comparable<MetaGroup> {
 			Collections.sort(groupList);
 			return groupList;
 		}
-
+		
+		public List<MetaGroup> getQuestionGroups() throws SQLException, DaxploreException {
+			// make sure all groups are cached before returning the content of
+			// the map
+			Statement stmt = connection.createStatement();
+			ResultSet rs = stmt.executeQuery("SELECT id FROM metagroup WHERE type = " + GroupType.QUESTIONS.type);
+			while (rs.next()) {
+				int id = rs.getInt("id");
+				if (!groupMap.containsKey(id) && !toBeRemoved.containsKey(id)) {
+					get(id);
+				}
+			}
+			List<MetaGroup> groupList = new LinkedList<MetaGroup>(
+					groupMap.values());
+			Collections.sort(groupList);
+			return groupList;
+		}
+		
+		public MetaGroup getPerspectiveGroup() throws SQLException, DaxploreException {
+			ResultSet rs = connection.createStatement().executeQuery("SELECT id FROM metagroup WHERE type = " + GroupType.PERSPECTIVE.type);
+			if(rs.next()) {
+				return get(rs.getInt("id"));
+			} else {
+				return create(textsManager.get("PERSPECTIVE"), 999, GroupType.PERSPECTIVE, new LinkedList<MetaQuestion>()); //TODO 999 //TODO use in GUI
+			}
+		}
+		
 		public int getHighestId() throws SQLException {
 			return SQLTools.maxId(groupTable.name, "id", connection) + addDelta;
 		}

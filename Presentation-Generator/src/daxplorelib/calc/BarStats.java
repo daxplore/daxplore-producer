@@ -30,8 +30,8 @@ public class BarStats {
 			for(int i = 0; i < bars.size(); i++) {
 				barJson.add("\"" +i + "\":[" + MyTools.join(bars.get(i), ",")+"]");
 			}
-			barJson.add("\"all\":[" + MyTools.join(all, ","));
-			return "{" + MyTools.join(barJson, ",") + ";}";
+			barJson.add("\"all\":[" + MyTools.join(all, ",") + "]");
+			return "{" + MyTools.join(barJson, ",") + "}";
 		}
 	}
 	
@@ -48,7 +48,7 @@ public class BarStats {
 		for(Map.Entry<MetaTimepointShort, BarGroups> entry: data.entrySet()) {
 			tpJson.add("\"" + entry.getKey().getId() + "\":" + entry.getValue().toJsonString());
 		}
-		return "{" + MyTools.join(tpJson, ",") + ";}";
+		return "{" + MyTools.join(tpJson, ",") + "}";
 	}
 
 }

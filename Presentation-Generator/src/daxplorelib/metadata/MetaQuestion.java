@@ -141,9 +141,10 @@ public class MetaQuestion {
 						nTimePoint++;
 						insertRelStmt.setString(1, mq.id);
 						insertRelStmt.setInt(2, timepoint.getId());
-						insertRelStmt.addBatch();
+//						insertRelStmt.addBatch();
+						insertRelStmt.executeUpdate();
 					}
-					insertRelStmt.executeBatch();
+//					insertRelStmt.executeBatch();
 					
 					mq.timemodified = false;
 				}

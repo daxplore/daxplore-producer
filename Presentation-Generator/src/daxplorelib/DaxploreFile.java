@@ -19,6 +19,7 @@ import org.opendatafoundation.data.spss.SPSSFile;
 import org.opendatafoundation.data.spss.SPSSFileException;
 
 import tools.MyTools;
+import daxplorelib.calc.Crosstabs;
 import daxplorelib.metadata.MetaData;
 import daxplorelib.raw.RawImport;
 import daxplorelib.raw.RawMeta;
@@ -235,7 +236,7 @@ public class DaxploreFile {
 			return metadata;
 		} else {
 			try {
-				metadata = new MetaData(connection);
+				metadata = new MetaData(connection, getAbout(), getImportedData().getRawData());
 				return metadata;
 			} catch (SQLException e) {
 				throw new DaxploreException("Couldn't get metadata", e);
@@ -249,6 +250,10 @@ public class DaxploreFile {
 		} catch (SQLException e) {
 			throw new DaxploreException("Could't get RawMeta", e);
 		}
+	}
+	
+	public Crosstabs getCrosstabs() {
+		return new Crosstabs(connection, about);
 	}
 	
 	public void saveAll() throws DaxploreException { //TODO: return boolean instead of throwing exception?

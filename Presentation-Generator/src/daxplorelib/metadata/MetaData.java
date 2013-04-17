@@ -5,6 +5,7 @@ import java.io.Reader;
 import java.io.Writer;
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
@@ -12,6 +13,8 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map.Entry;
 import java.util.Properties;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import tools.MyTools;
 import tools.NumberlineCoverage;
@@ -19,6 +22,7 @@ import tools.Pair;
 import tools.SortedProperties;
 import au.com.bytecode.opencsv.CSVReader;
 import au.com.bytecode.opencsv.CSVWriter;
+import daxplorelib.About;
 import daxplorelib.DaxploreException;
 import daxplorelib.DaxploreFile;
 import daxplorelib.DaxploreTable;
@@ -30,6 +34,7 @@ import daxplorelib.metadata.MetaTimepointShort.MetaTimepointShortManager;
 import daxplorelib.metadata.textreference.TextReference;
 import daxplorelib.metadata.textreference.TextReferenceManager;
 import daxplorelib.metadata.textreference.TextTree;
+import daxplorelib.raw.RawData;
 import daxplorelib.raw.RawMeta;
 import daxplorelib.raw.RawMeta.RawMetaQuestion;
 
@@ -42,6 +47,8 @@ public class MetaData {
 	TextReferenceManager textsManager;
 	MetaGroupManager metaGroupManager;
 	MetaTimepointShortManager metaTimepointManager;
+	About about;
+	RawData rawData;
 	
 	public enum Formats {
 		DATABASE,RESOURCE,JSON,RAW
@@ -51,8 +58,11 @@ public class MetaData {
 		PROPERTIES, CSV
 	}
 	
-	public MetaData(Connection connection) throws SQLException{
+	public MetaData(Connection connection, About about, RawData rawData) throws SQLException{
 		this.connection = connection;
+		this.about = about;
+		this.rawData = rawData;
+		
 		textsManager = new TextReferenceManager(connection);
 		textsManager.init();
 		
@@ -338,6 +348,30 @@ public class MetaData {
 			throw new DaxploreException("Failed to reenable autocommit", e);
 		}
 		
+	}
+	
+	public void replaceAllTimepointsInQuestions() throws DaxploreException, SQLException {
+		List<MetaTimepointShort> timepoints = metaTimepointManager.getAll();
+		int tpAdded = 0, questionsModified = 0;
+		for(MetaQuestion question : getAllQuestions()) {
+			List<MetaTimepointShort> questionTp = new LinkedList<MetaTimepointShort>();
+			LinkedList<Pair<Double, Integer>> valueCounts = rawData.getColumnValueCountWhere(about.getTimeSeriesShortColumn(), question.getId());
+			questionTp.clear();
+			for(Pair<Double, Integer> pair : valueCounts) {
+				for(MetaTimepointShort tp : timepoints) {
+					if(pair.getKey()!=null && tp.getValue() == pair.getKey() && pair.getValue()>0) {
+						questionTp.add(tp);
+					}
+				}
+			}
+			if(questionTp.size()>0) {
+				questionsModified++;
+				tpAdded += questionTp.size();
+				question.setTimepoints(questionTp);
+			}
+		}
+		String logString = String.format("replaceAllTimepointsInQuestions: %d questions affected, %d timepoints added", questionsModified, tpAdded);
+		Logger.getGlobal().log(Level.INFO, logString);
 	}
 	
 	public List<MetaGroup> getAllGroups() throws DaxploreException {
