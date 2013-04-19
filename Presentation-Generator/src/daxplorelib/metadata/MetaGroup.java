@@ -213,14 +213,13 @@ public class MetaGroup implements Comparable<MetaGroup> {
 			// the map
 			Statement stmt = connection.createStatement();
 			ResultSet rs = stmt.executeQuery("SELECT id FROM metagroup WHERE type = " + GroupType.QUESTIONS.type);
+			List<MetaGroup> groupList = new LinkedList<MetaGroup>();
 			while (rs.next()) {
 				int id = rs.getInt("id");
-				if (!groupMap.containsKey(id) && !toBeRemoved.containsKey(id)) {
-					get(id);
+				if (!toBeRemoved.containsKey(id)) {
+					groupList.add(get(id));
 				}
 			}
-			List<MetaGroup> groupList = new LinkedList<MetaGroup>(
-					groupMap.values());
 			Collections.sort(groupList);
 			return groupList;
 		}
@@ -290,10 +289,14 @@ public class MetaGroup implements Comparable<MetaGroup> {
 		this.textref = textref;
 	}
 
+	public int getId() {
+		return id;
+	}
+	
 	public MetaQuestion getQuestion(int index) {
 		return qList.get(index);
 	}
-
+	
 	public void addQuestion(MetaQuestion mq, int atIndex) {
 		qList.add(atIndex, mq);
 		modified = true;
@@ -347,7 +350,7 @@ public class MetaGroup implements Comparable<MetaGroup> {
 
 	@Override
 	public int compareTo(MetaGroup o) {
-		return index < o.index ? 1 : -1;
+		return index > o.index ? 1 : -1;
 	}
 
 	public int getQuestionCount() {

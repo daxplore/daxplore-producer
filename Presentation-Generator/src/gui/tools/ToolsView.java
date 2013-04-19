@@ -6,6 +6,8 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.sql.SQLException;
 import java.util.Locale;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import javax.swing.JButton;
 import javax.swing.JLabel;
@@ -80,11 +82,15 @@ public class ToolsView extends JPanel {
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				Crosstabs crosstabs = mainController.getDaxploreFile().getCrosstabs();
+				Logger.getGlobal().log(Level.INFO, "Starting to generate json data");
 				try {
 					MetaGroup perspectives = mainController.getDaxploreFile().getMetaData().getMetaGroupManager().getPerspectiveGroup();
 					for(MetaGroup group : mainController.getDaxploreFile().getMetaData().getMetaGroupManager().getQuestionGroups()) {
+						System.out.println("group: " + group.getId() + " - " + group.getTextRef().get(new Locale("sv")));
 						for(MetaQuestion question : group.getQuestions()) {
+							System.out.println("question: " + question.getId());
 							for(MetaQuestion perspective : perspectives.getQuestions()) {
+								System.out.print("perspective: " + perspective.getId() + ": ");
 								System.out.println(crosstabs.crosstabs2(question, perspective).toJsonString());
 							}
 						}

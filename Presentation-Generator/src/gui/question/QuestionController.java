@@ -10,7 +10,6 @@ import java.util.TreeMap;
 import gui.MainController;
 import gui.widget.ColumnTableModel;
 
-import javax.swing.DefaultListModel;
 import javax.swing.JTable;
 import javax.swing.event.TableModelEvent;
 import javax.swing.event.TableModelListener;
@@ -20,7 +19,6 @@ import tools.Pair;
 import daxplorelib.DaxploreException;
 import daxplorelib.metadata.MetaQuestion;
 import daxplorelib.metadata.MetaScale;
-import daxplorelib.metadata.MetaScale.Option;
 
 public class QuestionController implements TableModelListener {
 	
@@ -35,6 +33,7 @@ public class QuestionController implements TableModelListener {
 		this.mainController = mainController;
 	}
 
+	//TODO handle null scales properly
 	public void openMetaQuestion(MetaQuestion mq) {
 		this.mq = mq;
 		
@@ -82,6 +81,9 @@ public class QuestionController implements TableModelListener {
 	}
 	
 	LinkedList<Pair<Double, Integer>> calculateAfter() {
+		if(mq.getScale()==null) {
+			return new LinkedList<Pair<Double, Integer>>();
+		}
 		TreeMap<Double, Integer> valueMap = new TreeMap<Double, Integer>();
 		for(MetaScale.Option option: mq.getScale().getOptions()) {
 			int total = 0;

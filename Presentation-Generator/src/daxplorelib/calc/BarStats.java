@@ -29,8 +29,14 @@ public class BarStats {
 			List<String> barJson = new LinkedList<String>();
 			for(int i = 0; i < bars.size(); i++) {
 				barJson.add("\"" +i + "\":[" + MyTools.join(bars.get(i), ",")+"]");
+				int sum = 0;
+				for(int j : bars.get(i)) sum+=j;
+				barJson.add("<sum:"+sum+">");
 			}
 			barJson.add("\"all\":[" + MyTools.join(all, ",") + "]");
+			int sum = 0;
+			for(int i : all) sum+=i;
+			barJson.add("<sum:"+sum+">");
 			return "{" + MyTools.join(barJson, ",") + "}";
 		}
 	}

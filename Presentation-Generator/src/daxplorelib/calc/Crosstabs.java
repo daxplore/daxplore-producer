@@ -51,28 +51,37 @@ public class Crosstabs {
 		if(question.getScale() != null && perspective.getScale() != null) {
 			//TODO: handle case where scale only has ignore
 			
-			PreparedStatement stmt1 = connection.prepareStatement("SELECT ?, ? FROM rawdata WHERE ? = ?");
-			stmt1.setString(1, question.getId());
-			stmt1.setString(2, perspective.getId());
-			stmt1.setString(3, about.getTimeSeriesShortColumn());
-			stmt1.setDouble(4, timepoint.getValue());
-			ResultSet rs = stmt1.executeQuery();
+//			PreparedStatement stmt1 = connection.prepareStatement("SELECT ?, ? FROM rawdata WHERE ? = ?");
+//			stmt1.setString(1, question.getId());
+//			stmt1.setString(2, perspective.getId());
+//			stmt1.setString(3, about.getTimeSeriesShortColumn());
+//			stmt1.setDouble(4, timepoint.getValue());
+//			ResultSet rs = stmt1.executeQuery();
 			
-			int[][] crosstabsdata = new int[question.getScale().getOptionCount()][perspective.getScale().getOptionCount()]; //TODO: switch indexing??
+			ResultSet rs = connection.createStatement().executeQuery("SELECT " + question.getId() + " as q, " + perspective.getId() 
+					+ " as p FROM rawdata WHERE " + about.getTimeSeriesShortColumn() + " = " + timepoint.getValue());
 			
+			int[][] crosstabsdata = new int[perspective.getScale().getOptionCount()][question.getScale().getOptionCount()]; //TODO: switch indexing??
+			
+			int ignore = 0;
 			while(rs.next()) {
 				try {
-					Double qvalue = rs.getDouble(question.getId());
+					Double qvalue = rs.getDouble("q");
 					int qindex = question.getScale().matchIndex(qvalue);
-					Double pvalue = rs.getDouble(perspective.getId());
+					Double pvalue = rs.getDouble("p");
 					int pindex = perspective.getScale().matchIndex(pvalue);
 					
-					crosstabsdata[qindex][pindex]++;
+					crosstabsdata[pindex][qindex]++;
 				} catch (Exception e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
+					if(e.getMessage().equalsIgnoreCase("Ignore Exception")) {
+						//TODO handle ignore?
+						ignore++;
+					} else {
+						e.printStackTrace();
+					}
 				}
 			}
+			System.out.print(" <crossig:" + ignore + "> ");
 			return crosstabsdata;
 		
 		} else {
@@ -83,25 +92,30 @@ public class Crosstabs {
 	}
 	
 	public int[] frequencies(MetaQuestion question, MetaTimepointShort timepoint) throws SQLException {
-		PreparedStatement stmt = connection.prepareStatement("SELECT ? FROM rawdata WHERE ? = ?");
-		stmt.setString(1, question.getId());
-		stmt.setString(2, about.getTimeSeriesShortColumn());
-		stmt.setDouble(3, timepoint.getValue());
-		ResultSet rs = stmt.executeQuery();
+//		PreparedStatement stmt = connection.prepareStatement("SELECT ? FROM rawdata WHERE ? = ?");
+//		stmt.setString(1, question.getId());
+//		stmt.setString(2, about.getTimeSeriesShortColumn());
+//		stmt.setDouble(3, timepoint.getValue());
+//		ResultSet rs = stmt.executeQuery();
+		ResultSet rs = connection.createStatement().executeQuery("SELECT " + question.getId() + " FROM rawdata WHERE " + about.getTimeSeriesShortColumn() + " = " + timepoint.getValue());
 		
 		int[] frequencies = new int[question.getScale().getOptionCount()];
 		
+		int ignore = 0;
 		while(rs.next()) {
 			Double value = rs.getDouble(question.getId());
-			if(!question.getScale().getIgnoreOption().contains(value)) {
-				try {
-					frequencies[question.getScale().matchIndex(value)]++;
-				} catch (Exception e) {
+			try {
+				frequencies[question.getScale().matchIndex(value)]++;
+			} catch (Exception e) {
+				if(e.getMessage().equalsIgnoreCase("Ignore Exception")) {
+					//TODO handle ignore?
+					ignore++;
+				} else {
 					e.printStackTrace();
-					throw new AssertionError("To be ignored or not to be ignored");
 				}
 			}
 		}
+		System.out.print(" <freqig:" + ignore + "> ");
 		return frequencies;
 	}
 	
