@@ -14,11 +14,11 @@ public class StatStore {
 
 	public StatStore(String key, String json, PersistenceManager pm) {
 		this.key = key;
-		this.json = stripJson(json);
+		this.json = stripJSON(json);
 		pm.makePersistent(this);
 	}
 
-	private String stripJson(String json) {
+	private String stripJSON(String json) {
 		json = json.substring(1, json.length() - 1);
 		json = json.replaceAll("\"\"", "\"");
 		return json;
@@ -28,7 +28,7 @@ public class StatStore {
 		return key;
 	}
 
-	public String getJson() {
+	public String getJSON() {
 		return json;
 	}
 }

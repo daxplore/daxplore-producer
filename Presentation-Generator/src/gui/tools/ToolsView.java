@@ -5,7 +5,10 @@ import gui.MainController;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.sql.SQLException;
+import java.util.Comparator;
 import java.util.Locale;
+import java.util.SortedSet;
+import java.util.TreeSet;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -13,6 +16,8 @@ import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
+
+import org.json.simple.JSONArray;
 
 import daxplorelib.DaxploreException;
 import daxplorelib.calc.Crosstabs;
@@ -79,22 +84,42 @@ public class ToolsView extends JPanel {
 		JButton btnGenerateData = new JButton("Generate Data");
 		btnGenerateData.setBounds(247, 101, 191, 25);
 		btnGenerateData.addActionListener(new ActionListener() {
+			@SuppressWarnings("unchecked")
 			@Override
 			public void actionPerformed(ActionEvent e) {
+				Locale locale = new Locale("sv");
 				Crosstabs crosstabs = mainController.getDaxploreFile().getCrosstabs();
 				Logger.getGlobal().log(Level.INFO, "Starting to generate json data");
 				try {
 					MetaGroup perspectives = mainController.getDaxploreFile().getMetaData().getMetaGroupManager().getPerspectiveGroup();
+					SortedSet<MetaQuestion> selectedQuestions = new TreeSet<MetaQuestion>(new Comparator<MetaQuestion>() {
+						@Override
+						public int compare(MetaQuestion o1, MetaQuestion o2) {
+							return o1.getId().compareTo(o2.getId());
+						}
+					});
+					for(MetaQuestion perspective : perspectives.getQuestions()) {
+						selectedQuestions.add(perspective);
+					}
 					for(MetaGroup group : mainController.getDaxploreFile().getMetaData().getMetaGroupManager().getQuestionGroups()) {
-						System.out.println("group: " + group.getId() + " - " + group.getTextRef().get(new Locale("sv")));
 						for(MetaQuestion question : group.getQuestions()) {
-							System.out.println("question: " + question.getId());
+							selectedQuestions.add(question);
 							for(MetaQuestion perspective : perspectives.getQuestions()) {
-								System.out.print("perspective: " + perspective.getId() + ": ");
-								System.out.println(crosstabs.crosstabs2(question, perspective).toJsonString());
+								System.out.println(crosstabs.crosstabs2(question, perspective).toJSONObject().toJSONString());
 							}
 						}
 					}
+					
+					JSONArray questionsJSON = new JSONArray();
+					for(MetaQuestion q : selectedQuestions) {
+						questionsJSON.add(q.toJSONObject(locale));
+					}
+					String questionJSONString = questionsJSON.toJSONString();
+					System.out.println(questionJSONString);
+					String groupJSONString = mainController.getDaxploreFile().getMetaData().getMetaGroupManager().getQuestionGroupsJSON(locale);
+					System.out.println(groupJSONString);
+					String perspectiveJSONString = perspectives.toJSONObject(locale).toJSONString();
+					System.out.println(perspectiveJSONString);
 				} catch (DaxploreException | SQLException e1) {
 					// TODO Auto-generated catch block
 					e1.printStackTrace();

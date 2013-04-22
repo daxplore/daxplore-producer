@@ -9,9 +9,14 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+
+import org.json.simple.JSONArray;
+import org.json.simple.JSONAware;
+import org.json.simple.JSONObject;
 
 import daxplorelib.DaxploreException;
 import daxplorelib.DaxploreTable;
@@ -236,6 +241,15 @@ public class MetaGroup implements Comparable<MetaGroup> {
 		public int getHighestId() throws SQLException {
 			return SQLTools.maxId(groupTable.name, "id", connection) + addDelta;
 		}
+		
+		@SuppressWarnings("unchecked")
+		public String getQuestionGroupsJSON(Locale locale) throws SQLException, DaxploreException {
+			JSONArray json = new JSONArray(); 
+			for(MetaGroup group : getQuestionGroups()) {
+				json.add(group.toJSONObject(locale));
+			}
+			return json.toJSONString();
+		}
 	}
 
 	public enum GroupType {
@@ -355,5 +369,25 @@ public class MetaGroup implements Comparable<MetaGroup> {
 
 	public int getQuestionCount() {
 		return qList.size();
+	}
+	
+	@SuppressWarnings("unchecked")
+	public JSONAware toJSONObject(Locale locale) {
+		JSONArray questions = new JSONArray();
+		for(MetaQuestion q : qList) {
+			questions.add(q.getId());
+		}
+		switch(type) {
+		case PERSPECTIVE:
+			return questions;
+		case QUESTIONS:
+			JSONObject json = new JSONObject();
+			json.put("group", textref.get(locale));
+			json.put("questions", questions);
+			return json;
+		default:
+			throw new AssertionError("Non-existant group type");	
+		}
+			
 	}
 }

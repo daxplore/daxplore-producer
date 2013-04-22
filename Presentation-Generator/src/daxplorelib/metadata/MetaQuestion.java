@@ -9,14 +9,20 @@ import java.sql.Types;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+
+import org.json.simple.JSONArray;
+import org.json.simple.JSONAware;
+import org.json.simple.JSONObject;
 
 import daxplorelib.DaxploreException;
 import daxplorelib.DaxploreTable;
 import daxplorelib.SQLTools;
 import daxplorelib.metadata.MetaScale.MetaScaleManager;
+import daxplorelib.metadata.MetaScale.Option;
 import daxplorelib.metadata.MetaTimepointShort.MetaTimepointShortManager;
 import daxplorelib.metadata.textreference.TextReference;
 import daxplorelib.metadata.textreference.TextReferenceManager;
@@ -271,5 +277,27 @@ public class MetaQuestion {
 	public void setTimepoints(List<MetaTimepointShort> timepoints) {
 		this.timepoints = timepoints;
 		this.timemodified = true;
+	}
+	
+	@SuppressWarnings("unchecked")
+	public JSONAware toJSONObject(Locale locale) {
+		JSONObject json = new JSONObject();
+		json.put("column", id);
+		json.put("short", shortTextRef.get(locale));
+		json.put("text", fullTextRef.get(locale));
+		
+		JSONArray options = new JSONArray();
+		for(Option option : scale.getOptions()) {
+			options.add(option.getTextRef().get(locale));
+		}
+		json.put("options", options);
+		
+		JSONArray tps = new JSONArray();
+		for(MetaTimepointShort tp : timepoints) {
+			tps.add(tp.getTimeindex());
+		}
+		json.put("timepoints", tps);
+
+		return json;
 	}
 }

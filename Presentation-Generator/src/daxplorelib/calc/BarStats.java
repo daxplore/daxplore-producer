@@ -5,13 +5,17 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
-import daxplorelib.metadata.MetaTimepointShort;
+import org.json.simple.JSONArray;
+import org.json.simple.JSONAware;
+import org.json.simple.JSONObject;
 
-import tools.MyTools;
+import daxplorelib.metadata.MetaQuestion;
+import daxplorelib.metadata.MetaTimepointShort;
 
 public class BarStats {
 	
 	LinkedHashMap<MetaTimepointShort, BarGroups> data = new LinkedHashMap<MetaTimepointShort, BarGroups>();
+	private MetaQuestion question, perspective;
 	
 	public static class BarGroups {
 		List<int[]> bars;
@@ -25,43 +29,55 @@ public class BarStats {
 			this.all = all;
 		}
 		
-		public String toJsonString() {
-			List<String> barJson = new LinkedList<String>();
+		@SuppressWarnings("unchecked")
+		public JSONAware toJSONObject() {
+			JSONObject json = new JSONObject();
 			for(int i = 0; i < bars.size(); i++) {
-				barJson.add("\"" +i + "\":[" + MyTools.join(bars.get(i), ",")+"]");
-				int sum = 0;
-				for(int j : bars.get(i)) sum+=j;
-				barJson.add("<sum:"+sum+">");
+				JSONArray barsJSON = new JSONArray();
+				for(int v : bars.get(i)) {
+					barsJSON.add(v);
+				}
+				json.put(i, barsJSON);
 			}
-			barJson.add("\"all\":[" + MyTools.join(all, ",") + "]");
-			int sum = 0;
-			for(int i : all) sum+=i;
-			barJson.add("<sum:"+sum+">");
-			return "{" + MyTools.join(barJson, ",") + "}";
+			
+			JSONArray allJSON = new JSONArray();
+			for(int v : all) {
+				allJSON.add(v);
+			}
+			json.put("all", allJSON);
+			
+			return json;
 		}
 	}
 	
-	public BarStats() {
-		
+	public BarStats(MetaQuestion question, MetaQuestion perspective) {
+		this.question = question;
+		this.perspective = perspective;
 	}
 	
 	public void addTimePoint(MetaTimepointShort timepoint, int[][] crosstabs, int[] frequencies) {
 		data.put(timepoint, new BarGroups(crosstabs, frequencies));
 	}
 	
-	public String toJsonString() {
-		List<String> tpJson = new LinkedList<String>();
+	@SuppressWarnings("unchecked")
+	public JSONAware toJSONObject() {
+		JSONObject json = new JSONObject();
+		json.put("q", question.getId());
+		json.put("p", perspective.getId());
+		
+		JSONObject values = new JSONObject();
 		for(Map.Entry<MetaTimepointShort, BarGroups> entry: data.entrySet()) {
-			tpJson.add("\"" + entry.getKey().getId() + "\":" + entry.getValue().toJsonString());
+			values.put(entry.getKey().getTimeindex(), entry.getValue().toJSONObject());
 		}
-		return "{" + MyTools.join(tpJson, ",") + "}";
+		json.put("values", values);
+		
+		return json;
 	}
 
 }
 
 
 /*
-
 {
 	tp1 : {
 		0 : [2,4,5,7],
@@ -71,7 +87,5 @@ public class BarStats {
 	tp2 : {
 	};
 }
-
-
 
 */

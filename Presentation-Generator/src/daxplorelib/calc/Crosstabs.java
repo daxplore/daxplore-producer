@@ -4,7 +4,6 @@
 package daxplorelib.calc;
 
 import java.sql.Connection;
-import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.LinkedList;
@@ -36,7 +35,7 @@ public class Crosstabs {
 			}
 		}
 		
-		BarStats stats = new BarStats();
+		BarStats stats = new BarStats(question, perspective);
 		
 		for(MetaTimepointShort timepoint: commonTimes) {
 			int[][] crosstabs = crosstabs2(question, perspective, timepoint);
@@ -63,7 +62,6 @@ public class Crosstabs {
 			
 			int[][] crosstabsdata = new int[perspective.getScale().getOptionCount()][question.getScale().getOptionCount()]; //TODO: switch indexing??
 			
-			int ignore = 0;
 			while(rs.next()) {
 				try {
 					Double qvalue = rs.getDouble("q");
@@ -75,13 +73,11 @@ public class Crosstabs {
 				} catch (Exception e) {
 					if(e.getMessage().equalsIgnoreCase("Ignore Exception")) {
 						//TODO handle ignore?
-						ignore++;
 					} else {
 						e.printStackTrace();
 					}
 				}
 			}
-			System.out.print(" <crossig:" + ignore + "> ");
 			return crosstabsdata;
 		
 		} else {
@@ -101,7 +97,6 @@ public class Crosstabs {
 		
 		int[] frequencies = new int[question.getScale().getOptionCount()];
 		
-		int ignore = 0;
 		while(rs.next()) {
 			Double value = rs.getDouble(question.getId());
 			try {
@@ -109,13 +104,11 @@ public class Crosstabs {
 			} catch (Exception e) {
 				if(e.getMessage().equalsIgnoreCase("Ignore Exception")) {
 					//TODO handle ignore?
-					ignore++;
 				} else {
 					e.printStackTrace();
 				}
 			}
 		}
-		System.out.print(" <freqig:" + ignore + "> ");
 		return frequencies;
 	}
 	
