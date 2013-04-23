@@ -8,6 +8,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.ComponentEvent;
 import java.awt.event.ComponentListener;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
 
@@ -38,6 +39,9 @@ public class EditTextView extends JPanel {
 		}
 		public String toString() {
 			return loc.getDisplayLanguage();
+		}
+		public boolean equals(Object o) {
+			return o!=null && o instanceof LocaleItem && ((LocaleItem)o).loc.equals(loc);
 		}
 	}
 	
@@ -81,9 +85,11 @@ public class EditTextView extends JPanel {
 		localeCombo1.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				LocaleItem locale = (LocaleItem)localeCombo1.getSelectedItem();
-				editTextController.setCurrentLocale(locale.loc, 0);
-				doUpdate();
+				if(localeCombo1.getSelectedItem() != null) {
+					LocaleItem locale = (LocaleItem)localeCombo1.getSelectedItem();
+					editTextController.setCurrentLocale(locale.loc, 0);
+					doUpdate();
+				}
 			}
 		});
 		localeCombo2 = new JComboBox<LocaleItem>();
@@ -91,9 +97,11 @@ public class EditTextView extends JPanel {
 		localeCombo2.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				LocaleItem locale = (LocaleItem)localeCombo2.getSelectedItem();
-				editTextController.setCurrentLocale(locale.loc, 1);
-				doUpdate();
+				if(localeCombo2.getSelectedItem() != null) {
+					LocaleItem locale = (LocaleItem)localeCombo2.getSelectedItem();
+					editTextController.setCurrentLocale(locale.loc, 1);
+					doUpdate();
+				}
 			}
 		});
 		
@@ -128,12 +136,43 @@ public class EditTextView extends JPanel {
 	}
 	
 	public void setLocales(List<Locale> localeList) {
+		LocaleItem item1 = (LocaleItem)localeCombo1.getSelectedItem();
+		LocaleItem item2 = (LocaleItem)localeCombo2.getSelectedItem();
 		localeCombo1.removeAllItems();
 		localeCombo2.removeAllItems();
-		for(Locale l: localeList) {
-			localeCombo1.addItem(new LocaleItem(l));
-			localeCombo2.addItem(new LocaleItem(l));
+		List<LocaleItem> localeItemList = new LinkedList<LocaleItem>();
+		for(Locale l: localeList) { 
+			localeItemList.add(new LocaleItem(l));
 		}
+		if(localeList.size() == 0 ) {
+			return;
+		}
+		for(LocaleItem l: localeItemList) {
+			localeCombo1.addItem(l);
+			localeCombo2.addItem(l);
+		}
+		if(localeItemList.contains(item1)) {
+			//localeCombo1.setSelectedItem(item1);
+			// stay same
+		} else if(localeItemList.get(0).equals(item2) && localeItemList.size() > 1) {
+			item1 = localeItemList.get(1);
+		} else {
+			item1 = localeItemList.get(0);
+		}
+		if(localeItemList.contains(item2) && !item1.equals(item2)) {
+			// stay same
+		} else if(localeItemList.size() > 1) {
+			for(LocaleItem l: localeItemList) {
+				if(!l.equals(item1)) {
+					item2 = l;
+					break;
+				}
+			}
+		} else {
+			item2 = localeItemList.get(0);
+		}
+		localeCombo1.setSelectedItem(item1);
+		localeCombo2.setSelectedItem(item2);
 	}
 
 	public void doUpdate() {

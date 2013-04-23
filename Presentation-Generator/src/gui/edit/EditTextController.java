@@ -70,7 +70,7 @@ public class EditTextController implements ActionListener {
 		if(mainController.fileIsSet()) {
 			try {
 				TextReferenceManager trm = mainController.getDaxploreFile().getMetaData().getTextsManager();
-				List<Locale> localeList = trm.getAllLocales();
+				List<Locale> localeList = mainController.getDaxploreFile().getAbout().getLocales();
 				editTextView.setLocales(localeList);
 				textsList = trm.getAll();
 				loadTable();
@@ -138,6 +138,7 @@ public class EditTextController implements ActionListener {
 					return;
 				}
 				
+				mainController.getDaxploreFile().getAbout().addLocale(locale);
 				try {
 					mainController.getDaxploreFile().getMetaData().importL10n(
 							Files.newBufferedReader(file.toPath(), Charset.forName("UTF-8")), format, locale);

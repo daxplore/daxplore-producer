@@ -157,6 +157,7 @@ public class MainController implements ActionListener {
 		groupsView.getController().loadData();
 		editTextView.getController().loadData();
 		timeSeriesView.getController().loadData();
+		toolsView.loadData();
 	}
 
 	

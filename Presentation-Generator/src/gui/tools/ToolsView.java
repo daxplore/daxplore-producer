@@ -31,6 +31,8 @@ import daxplorelib.DaxploreException;
 import daxplorelib.calc.Crosstabs;
 import daxplorelib.metadata.MetaGroup;
 import daxplorelib.metadata.MetaQuestion;
+import javax.swing.JScrollPane;
+import javax.swing.JTable;
 
 @SuppressWarnings("serial")
 public class ToolsView extends JPanel {
@@ -39,8 +41,13 @@ public class ToolsView extends JPanel {
 	private JTextField textField;
 	
 	public static final String IMPORT_RAW_BUTTON_ACTION_COMMAND = "importRawButtonActionCommand";
+	private JTable table;
+	
+	JScrollPane scrollPane;
+	final MainController mainController;
 	
 	public ToolsView(final MainController mainController) {
+		this.mainController = mainController;
 		
 		JButton btnImportfromraw = new JButton("ImportFromRaw");
 		btnImportfromraw.setBounds(12, 67, 145, 25);
@@ -152,6 +159,17 @@ public class ToolsView extends JPanel {
 		});
 		add(btnGenerateData);
 		
+		scrollPane = new JScrollPane();
+		scrollPane.setBounds(301, 234, 294, 204);
+		add(scrollPane);
+	}
+	
+	public void loadData() {
+		if(mainController.fileIsSet()) {
+			LocalesTableModel localeTableModel = new LocalesTableModel(mainController.getDaxploreFile().getAbout(), mainController);
+			table = new JTable(localeTableModel);
+			scrollPane.setViewportView(table);
+		}
 	}
 	
 	public File showExportDialog() {

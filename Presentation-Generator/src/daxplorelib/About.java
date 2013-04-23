@@ -6,7 +6,13 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.sql.Types;
+import java.util.Comparator;
 import java.util.Date;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Locale;
+import java.util.SortedSet;
+import java.util.TreeSet;
 
 /**
  * This class mirrors the 'about' table in the project file
@@ -16,6 +22,8 @@ public class About {
 	protected static final DaxploreTable table = new DaxploreTable(
 			"CREATE TABLE about (filetypeversionmajor INTEGER, filetypeversionminor INTEGER, creation INTEGER," +
 			"lastupdate INTEGER, importdate INTEGER, filename TEXT, timeseriestype TEXT, timeshortcolumn TEXT)", "about");
+	
+	protected static final DaxploreTable localeTable = new DaxploreTable("CREATE TABLE locales (locale TEXT PRIMARY KEY)", "locales");
 	
 	public enum TimeSeriesType {
 		NONE, SHORT, LONG
@@ -31,6 +39,9 @@ public class About {
 	
 	private boolean firstSave = false, modified = false;
 	
+	private SortedSet<Locale> locales;
+	private boolean localesModified = false;
+	
 	/**
 	 * If the timeseries type is SHORT, this is the column that keeps track of time points.
 	 * For other timeseries types, this should be set to null.
@@ -43,8 +54,14 @@ public class About {
 		this(sqliteDatabase, false);
 	}
 	
-	public About(Connection sqliteDatabase, boolean createnew) throws SQLException{
+	public About(Connection sqliteDatabase, boolean createnew) throws SQLException{ 
 		this.connection = sqliteDatabase;
+		locales = new TreeSet<Locale>(new Comparator<Locale>() {
+			@Override
+			public int compare(Locale o1, Locale o2) {
+				return o1.getDisplayLanguage().compareTo(o2.getDisplayLanguage());
+			}
+		});
 		Statement stmt;
 		if(createnew){
 			filetypeversionmajor = DaxploreFile.filetypeversionmajor;
@@ -70,12 +87,19 @@ public class About {
 			filename = rs.getString("filename");
 			timeSeriesType = TimeSeriesType.valueOf(rs.getString("timeseriestype"));
 			timeSeriesShortColumn = rs.getString("timeshortcolumn");
+			
+			rs = stmt.executeQuery("SELECT locale FROM locales");
+			while(rs.next()) {
+				locales.add(new Locale(rs.getString("locale")));
+			}
+
 			stmt.close();
 		}
 	}
 	
 	public void init() throws SQLException {
 		SQLTools.createIfNotExists(table, connection);
+		SQLTools.createIfNotExists(localeTable, connection);
 	}
 	
 	public void save() throws SQLException {
@@ -118,9 +142,20 @@ public class About {
 				updateStmt.setNull(8, Types.VARCHAR);
 			}
 			
+			
 			updateStmt.executeUpdate();
 			updateStmt.close();
 			modified = false;
+		}
+		if(localesModified) {
+			connection.createStatement().executeUpdate("DELETE FROM locales");
+			PreparedStatement insertLocaleStmt = connection.prepareStatement("INSERT INTO locales (locale) VALUES (?)");
+			for(Locale l : locales) {
+				insertLocaleStmt.setString(1, l.toLanguageTag());
+				insertLocaleStmt.addBatch();
+			}
+			insertLocaleStmt.executeBatch();
+			localesModified = false;
 		}
 	}
 	
@@ -163,5 +198,17 @@ public class About {
 	
 	public String getTimeSeriesShortColumn() {
 		return timeSeriesShortColumn;
+	}
+	
+	public void addLocale(Locale locale) {
+		localesModified |= locales.add(locale);
+	}
+	
+	public void removeLocale(Locale locale) {
+		localesModified |= locales.remove(locale);
+	}
+	
+	public List<Locale> getLocales() {
+		return new LinkedList<Locale>(locales);
 	}
 }

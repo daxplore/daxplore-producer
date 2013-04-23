@@ -155,7 +155,7 @@ public class MetaData {
 	 * @throws IOException
 	 * @throws DaxploreException 
 	 */
-	public void importL10n(Reader reader, L10nFormat format, Locale locale) throws IOException, DaxploreException {
+	public void importL10n(Reader reader, L10nFormat format, Locale locale) throws IOException, DaxploreException { //TODO don't write directly to database, talk to managers
 		boolean autocommit = true;
 		try {
 			//save = sqliteDatabase.setSavepoint();
