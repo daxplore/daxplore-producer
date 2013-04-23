@@ -4,6 +4,11 @@ import gui.MainController;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.nio.ByteBuffer;
+import java.nio.charset.Charset;
 import java.sql.SQLException;
 import java.util.Comparator;
 import java.util.Locale;
@@ -11,8 +16,11 @@ import java.util.SortedSet;
 import java.util.TreeSet;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipOutputStream;
 
 import javax.swing.JButton;
+import javax.swing.JFileChooser;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
@@ -27,6 +35,7 @@ import daxplorelib.metadata.MetaQuestion;
 @SuppressWarnings("serial")
 public class ToolsView extends JPanel {
 	
+	Charset charset = Charset.forName("UTF-8");
 	private JTextField textField;
 	
 	public static final String IMPORT_RAW_BUTTON_ACTION_COMMAND = "importRawButtonActionCommand";
@@ -87,6 +96,11 @@ public class ToolsView extends JPanel {
 			@SuppressWarnings("unchecked")
 			@Override
 			public void actionPerformed(ActionEvent e) {
+				File uploadFile = showExportDialog();
+				if(uploadFile == null) {
+					return;
+				}
+				
 				Locale locale = new Locale("sv");
 				Crosstabs crosstabs = mainController.getDaxploreFile().getCrosstabs();
 				Logger.getGlobal().log(Level.INFO, "Starting to generate json data");
@@ -101,26 +115,36 @@ public class ToolsView extends JPanel {
 					for(MetaQuestion perspective : perspectives.getQuestions()) {
 						selectedQuestions.add(perspective);
 					}
+					JSONArray dataJSON = new JSONArray();
 					for(MetaGroup group : mainController.getDaxploreFile().getMetaData().getMetaGroupManager().getQuestionGroups()) {
 						for(MetaQuestion question : group.getQuestions()) {
 							selectedQuestions.add(question);
 							for(MetaQuestion perspective : perspectives.getQuestions()) {
-								System.out.println(crosstabs.crosstabs2(question, perspective).toJSONObject().toJSONString());
+								dataJSON.add(crosstabs.crosstabs2(question, perspective).toJSONObject());
 							}
 						}
 					}
 					
-					JSONArray questionsJSON = new JSONArray();
+					JSONArray questionJSON = new JSONArray();
 					for(MetaQuestion q : selectedQuestions) {
-						questionsJSON.add(q.toJSONObject(locale));
+						questionJSON.add(q.toJSONObject(locale));
 					}
-					String questionJSONString = questionsJSON.toJSONString();
-					System.out.println(questionJSONString);
-					String groupJSONString = mainController.getDaxploreFile().getMetaData().getMetaGroupManager().getQuestionGroupsJSON(locale);
-					System.out.println(groupJSONString);
-					String perspectiveJSONString = perspectives.toJSONObject(locale).toJSONString();
-					System.out.println(perspectiveJSONString);
-				} catch (DaxploreException | SQLException e1) {
+					
+				    ZipOutputStream zout = new ZipOutputStream(new FileOutputStream(uploadFile));
+				    
+				    writeZipString(zout, "data/data.json", dataJSON.toJSONString());
+				    
+				    writeZipString(zout, "meta/questions_"+locale.toLanguageTag()+".json", questionJSON.toJSONString());
+				    
+				    String groupJSONString = mainController.getDaxploreFile().getMetaData().getMetaGroupManager().getQuestionGroupsJSON(locale);
+				    writeZipString(zout, "meta/groups_"+locale.toLanguageTag()+".json", groupJSONString);
+				    
+				    writeZipString(zout, "meta/perspectives_"+locale.toLanguageTag()+".json", perspectives.toJSONObject(locale).toJSONString());
+				    
+				    zout.flush();
+				    zout.close();
+
+				} catch (DaxploreException | SQLException | IOException e1) {
 					// TODO Auto-generated catch block
 					e1.printStackTrace();
 				}
@@ -128,5 +152,27 @@ public class ToolsView extends JPanel {
 		});
 		add(btnGenerateData);
 		
+	}
+	
+	public File showExportDialog() {
+		JFileChooser fc = new JFileChooser();
+		int returnVal = fc.showSaveDialog(this);
+		switch(returnVal) {
+		case JFileChooser.APPROVE_OPTION:
+			return fc.getSelectedFile();
+		default:
+			return null;
+		}
+	}
+	
+	public void writeZipString(ZipOutputStream zout, String filename, String dataString) throws IOException {
+		ZipEntry entry = new ZipEntry(filename);
+	    zout.putNextEntry(entry);
+	    ByteBuffer buffer = charset.encode(dataString);
+	    byte[] outbytes = new byte[buffer.limit()];
+	    buffer.get(outbytes);
+	    zout.write(outbytes);
+	    zout.flush();
+	    zout.closeEntry();
 	}
 }
