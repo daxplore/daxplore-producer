@@ -2,25 +2,54 @@ package daxplorelib;
 
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
+import java.util.Comparator;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Locale;
+import java.util.SortedSet;
+import java.util.TreeSet;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipOutputStream;
 
+import javax.xml.XMLConstants;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.transform.OutputKeys;
+import javax.xml.transform.Transformer;
+import javax.xml.transform.TransformerException;
+import javax.xml.transform.TransformerFactory;
+import javax.xml.transform.TransformerFactoryConfigurationError;
+import javax.xml.transform.dom.DOMSource;
+import javax.xml.transform.stream.StreamResult;
+import javax.xml.transform.stream.StreamSource;
+import javax.xml.validation.Schema;
+import javax.xml.validation.SchemaFactory;
+
+import org.json.simple.JSONArray;
 import org.opendatafoundation.data.FileFormatInfo;
 import org.opendatafoundation.data.FileFormatInfo.ASCIIFormat;
 import org.opendatafoundation.data.FileFormatInfo.Compatibility;
 import org.opendatafoundation.data.spss.SPSSFile;
 import org.opendatafoundation.data.spss.SPSSFileException;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import org.xml.sax.SAXException;
 
 import tools.MyTools;
 import daxplorelib.calc.Crosstabs;
 import daxplorelib.metadata.MetaData;
+import daxplorelib.metadata.MetaGroup;
+import daxplorelib.metadata.MetaQuestion;
 import daxplorelib.raw.RawImport;
 import daxplorelib.raw.RawMeta;
 
@@ -294,4 +323,126 @@ public class DaxploreFile {
 		list.addAll(getImportedData().getTables());
 		return list;
 	}
+	
+	@SuppressWarnings("unchecked")
+	public void writeUploadFile(File file) throws TransformerFactoryConfigurationError, TransformerException, SQLException, DaxploreException, SAXException, IOException, ParserConfigurationException {
+		Crosstabs crosstabs = getCrosstabs();
+		Logger.getGlobal().log(Level.INFO, "Starting to generate json data");
+
+		MetaGroup perspectives = getMetaData().getMetaGroupManager().getPerspectiveGroup();
+		SortedSet<MetaQuestion> selectedQuestions = new TreeSet<MetaQuestion>(new Comparator<MetaQuestion>() {
+			@Override
+			public int compare(MetaQuestion o1, MetaQuestion o2) {
+				return o1.getId().compareTo(o2.getId());
+			}
+		});
+		for(MetaQuestion perspective : perspectives.getQuestions()) {
+			selectedQuestions.add(perspective);
+		}
+		JSONArray dataJSON = new JSONArray();
+		for(MetaGroup group : getMetaData().getMetaGroupManager().getQuestionGroups()) {
+			for(MetaQuestion question : group.getQuestions()) {
+				selectedQuestions.add(question);
+				for(MetaQuestion perspective : perspectives.getQuestions()) {
+					dataJSON.add(crosstabs.crosstabs2(question, perspective).toJSONObject());
+				}
+			}
+		}
+		
+		ZipOutputStream zout = new ZipOutputStream(new FileOutputStream(file));
+//manifest
+		Document manifest = getUploadManifest();
+		Transformer transformer = TransformerFactory.newInstance().newTransformer();
+		transformer.setOutputProperty(OutputKeys.INDENT, "yes");
+		transformer.setOutputProperty("{http://xml.apache.org/xslt}indent-amount", "4");
+		DOMSource xmlSource = new DOMSource(manifest);
+		ZipEntry entry = new ZipEntry("manifest.xml");
+	    zout.putNextEntry(entry);
+		StreamResult streamResult = new StreamResult(zout);
+		transformer.transform(xmlSource, streamResult);
+		zout.flush();
+		zout.closeEntry();
+
+		StreamResult streamResultSystem = new StreamResult(System.out);
+		transformer.transform(xmlSource, streamResultSystem);
+		
+
+		writeZipString(zout, "data/data.json", dataJSON.toJSONString());
+		
+		for(Locale locale : getAbout().getLocales()) {
+			JSONArray questionJSON = new JSONArray();
+			for(MetaQuestion q : selectedQuestions) {
+				questionJSON.add(q.toJSONObject(locale));
+			}
+			
+			// TODO create properties file and write it
+			writeZipString(zout, "properties/usertexts_"+locale.toLanguageTag()+".txt", "pagetitle=" + metadata.getTextsManager().get("page_title").get(locale) + "\n");
+			
+			writeZipString(zout, "meta/questions_"+locale.toLanguageTag()+".json", questionJSON.toJSONString());
+		    
+		    String groupJSONString = getMetaData().getMetaGroupManager().getQuestionGroupsJSON(locale);
+		    writeZipString(zout, "meta/groups_"+locale.toLanguageTag()+".json", groupJSONString);
+		    
+		    writeZipString(zout, "meta/perspectives_"+locale.toLanguageTag()+".json", perspectives.toJSONObject(locale).toJSONString());
+		    
+		}
+
+		zout.flush();
+		zout.close();
+	}
+	
+	private Charset charset = Charset.forName("UTF-8");
+	private void writeZipString(ZipOutputStream zout, String filename, String dataString) throws IOException {
+		ZipEntry entry = new ZipEntry(filename);
+	    zout.putNextEntry(entry);
+	    ByteBuffer buffer = charset.encode(dataString);
+	    byte[] outbytes = new byte[buffer.limit()];
+	    buffer.get(outbytes);
+	    zout.write(outbytes);
+	    zout.flush();
+	    zout.closeEntry();
+	}
+	
+	public Document getUploadManifest() throws SAXException, IOException, ParserConfigurationException {
+		DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
+		dbf.setSchema(getUploadFileManifestSchema());
+		Document doc = dbf.newDocumentBuilder().newDocument();
+		
+		Element root = doc.createElement("daxploreUploadFileManifest");
+		doc.appendChild(root);
+		
+		Element version = doc.createElement("fileVersion");
+		root.appendChild(version);
+		Element major = doc.createElement("major");
+		version.appendChild(major);
+		major.appendChild(doc.createTextNode(""+filetypeversionmajor));
+		Element minor = doc.createElement("minor");
+		version.appendChild(minor);
+		minor.appendChild(doc.createTextNode(""+filetypeversionminor));
+		
+		Element supportedLocales = doc.createElement("supportedLocales");
+		root.appendChild(supportedLocales);
+		for(Locale locale : about.getLocales()) {
+			Element localeElement = doc.createElement("language-BCP47");
+			supportedLocales.appendChild(localeElement);
+			localeElement.appendChild(doc.createTextNode(locale.toLanguageTag()));
+		}
+		
+		Element defaultLocale = doc.createElement("defaultLocale");
+		root.appendChild(defaultLocale);
+		Element localeElement = doc.createElement("language-BCP47");
+		defaultLocale.appendChild(localeElement);
+		localeElement.appendChild(doc.createTextNode(about.getLocales().get(0).toLanguageTag())); // TODO pick default locale properly
+		
+		return doc;
+	}
+	
+	private static Schema getUploadFileManifestSchema() throws SAXException, IOException {
+		InputStream stream = DaxploreFile.class.getResourceAsStream("UploadFileManifest.xsd");
+		SchemaFactory sf = SchemaFactory.newInstance(XMLConstants.W3C_XML_SCHEMA_NS_URI);
+		Schema schema = sf.newSchema(new StreamSource(stream));
+		stream.close();
+		return schema;
+	}
+
 }

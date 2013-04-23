@@ -36,6 +36,7 @@ public class TextReferenceManager {
 	
 	public void init() throws SQLException {
 		SQLTools.createIfNotExists(TextReferenceManager.table, connection);
+		get("page_title"); // create if not exists
 	}
 	
 	/**
