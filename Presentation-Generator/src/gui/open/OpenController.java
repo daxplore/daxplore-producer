@@ -176,7 +176,7 @@ public final class OpenController implements ActionListener {
 	 */
 	public void updateTextFields() {
 		
-		SimpleDateFormat formatter = new SimpleDateFormat("dd/MM/yyyy");
+		SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd");
 		
 		// set the text fields if we have a daxplore file loaded.
 		if (mainController.getDaxploreFile() != null) {

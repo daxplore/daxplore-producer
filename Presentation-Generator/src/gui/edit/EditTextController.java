@@ -71,6 +71,9 @@ public class EditTextController implements ActionListener {
 			try {
 				TextReferenceManager trm = mainController.getDaxploreFile().getMetaData().getTextsManager();
 				List<Locale> localeList = mainController.getDaxploreFile().getAbout().getLocales();
+				if(localeList.size()==0) {
+					return;
+				}
 				editTextView.setLocales(localeList);
 				textsList = trm.getAll();
 				loadTable();

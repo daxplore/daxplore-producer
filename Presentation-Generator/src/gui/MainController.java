@@ -124,6 +124,8 @@ public class MainController implements ActionListener {
 					questionView.getController().openMetaQuestion((MetaQuestion)hi.command);
 				}
 				break;
+			default:
+				throw new AssertionError("Undefined history item command: " + hi.view);
 			}
 		}
 	}
@@ -154,10 +156,10 @@ public class MainController implements ActionListener {
 	
 	public void updateStuff() {
 		buttonPanelView.updateButtonPanel();
+		toolsView.loadData();
 		groupsView.getController().loadData();
 		editTextView.getController().loadData();
 		timeSeriesView.getController().loadData();
-		toolsView.loadData();
 	}
 
 	

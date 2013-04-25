@@ -10,6 +10,7 @@ import java.util.LinkedList;
 import java.util.List;
 
 import daxplorelib.About;
+import daxplorelib.DaxploreException;
 import daxplorelib.metadata.MetaQuestion;
 import daxplorelib.metadata.MetaTimepointShort;
 
@@ -23,27 +24,31 @@ public class Crosstabs {
 		this.about = about;
 	}
 	
-	public BarStats crosstabs2(MetaQuestion question, MetaQuestion perspective) throws SQLException {
-		List<MetaTimepointShort> questionTimes = question.getTimepoints();
-		List<MetaTimepointShort> perspectiveTimes = perspective.getTimepoints();
-		
-		LinkedList<MetaTimepointShort> commonTimes = new LinkedList<MetaTimepointShort>();
-		
-		for(MetaTimepointShort qTime: questionTimes) {
-			if(perspectiveTimes.contains(qTime)) {
-				commonTimes.add(qTime);
+	public BarStats crosstabs2(MetaQuestion question, MetaQuestion perspective) throws DaxploreException {
+		try {
+			List<MetaTimepointShort> questionTimes = question.getTimepoints();
+			List<MetaTimepointShort> perspectiveTimes = perspective.getTimepoints();
+			
+			LinkedList<MetaTimepointShort> commonTimes = new LinkedList<MetaTimepointShort>();
+			
+			for(MetaTimepointShort qTime: questionTimes) {
+				if(perspectiveTimes.contains(qTime)) {
+					commonTimes.add(qTime);
+				}
 			}
+			
+			BarStats stats = new BarStats(question, perspective);
+			
+			for(MetaTimepointShort timepoint: commonTimes) {
+				int[][] crosstabs = crosstabs2(question, perspective, timepoint);
+				int[] frequencies = frequencies(question, timepoint);
+				stats.addTimePoint(timepoint, crosstabs, frequencies);
+			}
+			
+			return stats;
+		} catch (SQLException | NullPointerException e) {
+			throw new DaxploreException("Failed to generate crosstabs for question: " + question.getId() + ", perspective: " + perspective.getId(), e);
 		}
-		
-		BarStats stats = new BarStats(question, perspective);
-		
-		for(MetaTimepointShort timepoint: commonTimes) {
-			int[][] crosstabs = crosstabs2(question, perspective, timepoint);
-			int[] frequencies = frequencies(question, timepoint);
-			stats.addTimePoint(timepoint, crosstabs, frequencies);
-		}
-		
-		return stats;
 	}
 	
 	public int[][] crosstabs2(MetaQuestion question, MetaQuestion perspective, MetaTimepointShort timepoint) throws SQLException {

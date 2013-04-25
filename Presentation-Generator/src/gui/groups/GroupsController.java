@@ -68,9 +68,9 @@ public class GroupsController implements ActionListener {
 			if(groupName != null && !groupName.equals("")) {
 				try {
 					MetaGroupManager metaGroupManager = mainController.getDaxploreFile().getMetaData().getMetaGroupManager();
-					int nextid = metaGroupManager.getHighestId() +1;
+					int nextid = metaGroupManager.getHighestId(); // Assumes perspective group is at index 0, standard groups are 1-indexed
 					TextReferenceManager textReferenceManager = mainController.getDaxploreFile().getMetaData().getTextsManager();
-					TextReference tr = textReferenceManager.get("Group" + nextid);
+					TextReference tr = textReferenceManager.get("group_" + nextid);
 					tr.put(groupName, Settings.getDefaultLocale());
 					MetaGroup mg = metaGroupManager.create(tr, Integer.MAX_VALUE, GroupType.QUESTIONS, new LinkedList<MetaQuestion>());
 					TreePath treepath = groupTreeModel.addGroup(mg, groupTreeModel.getChildCount(groupTreeModel.getRoot()));

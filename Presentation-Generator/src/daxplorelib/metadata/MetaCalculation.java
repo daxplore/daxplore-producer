@@ -5,11 +5,9 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
-import org.json.simple.JSONAware;
-
 import daxplorelib.DaxploreTable;
 
-public class MetaCalculation implements JSONAware{
+public class MetaCalculation {
 	protected static final DaxploreTable table = new DaxploreTable("CREATE TABLE metacalc (id INTEGER NOT NULL, column TEXT)", "metacalc");
 	int id;
 	Connection connection;
@@ -46,16 +44,5 @@ public class MetaCalculation implements JSONAware{
 	
 	public int getID(){
 		return id;
-	}
-
-	@Override
-	public String toJSONString() {
-		try {
-			return '"' + getColumn() + '"';
-		} catch (SQLException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-			return null;
-		}
 	}
 }

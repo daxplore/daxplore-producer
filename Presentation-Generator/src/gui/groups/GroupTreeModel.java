@@ -12,7 +12,6 @@ import javax.swing.event.TreeModelListener;
 import javax.swing.tree.TreeModel;
 import javax.swing.tree.TreePath;
 
-import tools.MyTools;
 import daxplorelib.DaxploreException;
 import daxplorelib.metadata.MetaData;
 import daxplorelib.metadata.MetaGroup;
@@ -70,11 +69,13 @@ class GroupTreeModel implements TreeModel {
 		if(atIndex >= 0 && atIndex <= groups.size()) {
 			groups.add(atIndex, mg);
 			mg.setIndex(atIndex);
-			fireTreeNodesInserted(new TreeModelEvent(this, 
-					new Object[]{root},
-					MyTools.range(0, groups.size() -1),
-					groups.toArray()));
-			return new TreePath(new Object[]{root, mg});
+//			fireTreeNodesInserted(new TreeModelEvent(this, 
+//					new Object[]{root},
+//					MyTools.range(0, groups.size() -1),
+//					groups.toArray()));
+//			return new TreePath(new Object[]{root, mg});
+			fireTreeStructureChanged(null);
+			return new TreePath(new Object[]{root});
 		}
 		throw new Exception("Not allowed to place this at that");
 	}

@@ -14,9 +14,9 @@ import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import org.json.simple.JSONArray;
-import org.json.simple.JSONAware;
-import org.json.simple.JSONObject;
+import net.sf.json.JSONArray;
+import net.sf.json.JSON;
+import net.sf.json.JSONObject;
 
 import daxplorelib.DaxploreException;
 import daxplorelib.DaxploreTable;
@@ -242,13 +242,12 @@ public class MetaGroup implements Comparable<MetaGroup> {
 			return SQLTools.maxId(groupTable.name, "id", connection) + addDelta;
 		}
 		
-		@SuppressWarnings("unchecked")
-		public String getQuestionGroupsJSON(Locale locale) throws SQLException, DaxploreException {
+		public JSON getQuestionGroupsJSON(Locale locale) throws SQLException, DaxploreException {
 			JSONArray json = new JSONArray(); 
 			for(MetaGroup group : getQuestionGroups()) {
 				json.add(group.toJSONObject(locale));
 			}
-			return json.toJSONString();
+			return json;
 		}
 	}
 
@@ -371,8 +370,7 @@ public class MetaGroup implements Comparable<MetaGroup> {
 		return qList.size();
 	}
 	
-	@SuppressWarnings("unchecked")
-	public JSONAware toJSONObject(Locale locale) {
+	public JSON toJSONObject(Locale locale) {
 		JSONArray questions = new JSONArray();
 		for(MetaQuestion q : qList) {
 			questions.add(q.getId());
@@ -382,7 +380,7 @@ public class MetaGroup implements Comparable<MetaGroup> {
 			return questions;
 		case QUESTIONS:
 			JSONObject json = new JSONObject();
-			json.put("group", textref.get(locale));
+			json.put("name", textref.get(locale));
 			json.put("questions", questions);
 			return json;
 		default:

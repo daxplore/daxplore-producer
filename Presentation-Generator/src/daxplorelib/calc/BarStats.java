@@ -5,9 +5,9 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
-import org.json.simple.JSONArray;
-import org.json.simple.JSONAware;
-import org.json.simple.JSONObject;
+import net.sf.json.JSON;
+import net.sf.json.JSONArray;
+import net.sf.json.JSONObject;
 
 import daxplorelib.metadata.MetaQuestion;
 import daxplorelib.metadata.MetaTimepointShort;
@@ -29,8 +29,7 @@ public class BarStats {
 			this.all = all;
 		}
 		
-		@SuppressWarnings("unchecked")
-		public JSONAware toJSONObject() {
+		public JSON toJSONObject() {
 			JSONObject json = new JSONObject();
 			for(int i = 0; i < bars.size(); i++) {
 				JSONArray barsJSON = new JSONArray();
@@ -59,8 +58,7 @@ public class BarStats {
 		data.put(timepoint, new BarGroups(crosstabs, frequencies));
 	}
 	
-	@SuppressWarnings("unchecked")
-	public JSONAware toJSONObject() {
+	public JSON toJSONObject() {
 		JSONObject json = new JSONObject();
 		json.put("q", question.getId());
 		json.put("p", perspective.getId());

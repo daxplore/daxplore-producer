@@ -112,7 +112,11 @@ public class TextReferenceManager {
 						oldLocs.remove(l);
 						insertTextrefStmt.setString(1, tr.reference);
 						insertTextrefStmt.setString(2, l.toLanguageTag());
-						insertTextrefStmt.setString(3, tr.get(l));
+						String trtext = tr.get(l);
+						if (trtext == null) {
+							trtext = "";
+						}
+						insertTextrefStmt.setString(3, trtext);
 						insertTextrefStmt.executeUpdate(); //TODO: figure out why batch dosn't work here.
 					}
 					

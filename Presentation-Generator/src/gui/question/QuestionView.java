@@ -1,6 +1,7 @@
 package gui.question;
 
 import gui.MainController;
+import gui.question.QuestionController.Command;
 import gui.widget.TextWidget;
 
 import java.awt.BorderLayout;
@@ -40,6 +41,7 @@ public class QuestionView extends JPanel {
 	private JButton upButton;
 	private JButton downButton;
 	private JButton removeButton;
+	private JButton invertButton;
 	private JPanel panel_1;
 	private JPanel panel_2;
 	private JPanel panel_3;
@@ -107,16 +109,29 @@ public class QuestionView extends JPanel {
 		panel_2.add(panel_3, BorderLayout.SOUTH);
 		
 		addButton = new JButton("Add");
+		addButton.setActionCommand(Command.ADD);
+		addButton.addActionListener(controller);
 		panel_3.add(addButton);
 		
 		upButton = new JButton("Up");
+		upButton.setActionCommand(Command.UP);
+		upButton.addActionListener(controller);
 		panel_3.add(upButton);
 		
 		downButton = new JButton("Down");
+		downButton.setActionCommand(Command.DOWN);
+		downButton.addActionListener(controller);
 		panel_3.add(downButton);
 		
 		removeButton = new JButton("Remove");
+		removeButton.setActionCommand(Command.REMOVE);
+		removeButton.addActionListener(controller);
 		panel_3.add(removeButton);
+		
+		invertButton = new JButton("Invert");
+		invertButton.setActionCommand(Command.INVERT);
+		invertButton.addActionListener(controller);
+		panel_3.add(invertButton);
 		
 		afterScrollPane = new JScrollPane();
 		afterScrollPane.setPreferredSize(new Dimension(100, 3));
@@ -150,5 +165,4 @@ public class QuestionView extends JPanel {
 	JScrollPane getTimePointScrollPane() {
 		return timePointScrollPane;
 	}
-
 }

@@ -66,7 +66,7 @@ public class SPSSTools {
 				stringSet.add(var2.getName());
 			}
 			s = var.getLabel();
-			if(!asciiEncoder.canEncode(s)){
+			if(s!=null && !asciiEncoder.canEncode(s)){ //TODO figure out why this can be null
 				stringSet.add(var2.getLabel());
 			}
 			Iterator<String> iter = var.categoryMap.keySet().iterator();

@@ -14,9 +14,9 @@ import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import org.json.simple.JSONArray;
-import org.json.simple.JSONAware;
-import org.json.simple.JSONObject;
+import net.sf.json.JSONArray;
+import net.sf.json.JSON;
+import net.sf.json.JSONObject;
 
 import daxplorelib.DaxploreException;
 import daxplorelib.DaxploreTable;
@@ -279,8 +279,7 @@ public class MetaQuestion {
 		this.timemodified = true;
 	}
 	
-	@SuppressWarnings("unchecked")
-	public JSONAware toJSONObject(Locale locale) {
+	public JSON toJSONObject(Locale locale) {
 		JSONObject json = new JSONObject();
 		json.put("column", id);
 		json.put("short", shortTextRef.get(locale));

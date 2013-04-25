@@ -13,6 +13,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import javax.swing.AbstractCellEditor;
+import javax.swing.JPanel;
 import javax.swing.JTree;
 import javax.swing.tree.TreeCellEditor;
 import javax.swing.tree.TreeCellRenderer;
@@ -57,9 +58,11 @@ public class GroupTree extends JTree {
 				MetaGroup mg = (MetaGroup)value;
 				groupRenderer.setContent(mg);
 				comp = groupRenderer;
+			} else if(value instanceof JPanel){
+				return (JPanel)value; //TODO why is it trying to display the root?
 			} else {
-				Logger.getGlobal().log(Level.SEVERE, "Tried adding " + value.getClass() + " to grouptree");
-				throw new AssertionError();
+				Logger.getGlobal().log(Level.SEVERE, "Tried showing " + value.getClass() + " in grouptree");
+				throw new AssertionError("Tried showing " + value.getClass() + " in grouptree");
 			}
 			
 			int mouseOver = -1;

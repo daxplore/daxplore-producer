@@ -6,7 +6,6 @@
 	<classpathentry kind="con" path="org.eclipse.jdt.junit.JUNIT_CONTAINER/4"/>
 	<classpathentry kind="lib" path="Presentation-Generator/lib/appengine-remote-api.jar"/>
 	<classpathentry kind="lib" path="Presentation-Generator/lib/jdo2-api-2.3-eb.jar"/>
-	<classpathentry kind="lib" path="Presentation-Generator/lib/json_simple-1.1.jar"/>
 	<classpathentry kind="lib" path="Presentation-Generator/lib/org.opendatafoundation.data-20111116.jar"/>
 	<classpathentry kind="lib" path="Presentation-Generator/lib/sqlite-jdbc-3.7.2.jar"/>
 	<classpathentry kind="lib" path="Presentation-Generator/lib/jcommander-1.28-SNAPSHOT.jar"/>
@@ -15,5 +14,7 @@
 	<classpathentry kind="lib" path="Presentation-Generator/lib/jcommander-1.28-SNAPSHOT-sources.jar"/>
 	<classpathentry kind="lib" path="Presentation-Generator/lib/opencsv-2.3.jar"/>
 	<classpathentry kind="lib" path="Presentation-Generator/lib/scottlogic-utils-1.4.jar"/>
+	<classpathentry kind="lib" path="Presentation-Generator/lib/json-lib-2.4-jdk15.jar" sourcepath="Presentation-Generator/lib/json-lib-2.4-jdk15-sources.jar"/>
+	<classpathentry kind="lib" path="Presentation-Generator/lib/json_simple-1.1.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

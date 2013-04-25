@@ -35,7 +35,7 @@ import javax.xml.transform.stream.StreamSource;
 import javax.xml.validation.Schema;
 import javax.xml.validation.SchemaFactory;
 
-import org.json.simple.JSONArray;
+import net.sf.json.JSONArray;
 import org.opendatafoundation.data.FileFormatInfo;
 import org.opendatafoundation.data.FileFormatInfo.ASCIIFormat;
 import org.opendatafoundation.data.FileFormatInfo.Compatibility;
@@ -324,7 +324,6 @@ public class DaxploreFile {
 		return list;
 	}
 	
-	@SuppressWarnings("unchecked")
 	public void writeUploadFile(File file) throws TransformerFactoryConfigurationError, TransformerException, SQLException, DaxploreException, SAXException, IOException, ParserConfigurationException {
 		Crosstabs crosstabs = getCrosstabs();
 		Logger.getGlobal().log(Level.INFO, "Starting to generate json data");
@@ -367,7 +366,7 @@ public class DaxploreFile {
 		transformer.transform(xmlSource, streamResultSystem);
 		
 
-		writeZipString(zout, "data/data.json", dataJSON.toJSONString());
+		writeZipString(zout, "data/data.json", dataJSON.toString(4));
 		
 		for(Locale locale : getAbout().getLocales()) {
 			JSONArray questionJSON = new JSONArray();
@@ -378,12 +377,12 @@ public class DaxploreFile {
 			// TODO create properties file and write it
 			writeZipString(zout, "properties/usertexts_"+locale.toLanguageTag()+".txt", "pagetitle=" + metadata.getTextsManager().get("page_title").get(locale) + "\n");
 			
-			writeZipString(zout, "meta/questions_"+locale.toLanguageTag()+".json", questionJSON.toJSONString());
+			writeZipString(zout, "meta/questions_"+locale.toLanguageTag()+".json", questionJSON.toString(4));
 		    
-		    String groupJSONString = getMetaData().getMetaGroupManager().getQuestionGroupsJSON(locale);
+		    String groupJSONString = getMetaData().getMetaGroupManager().getQuestionGroupsJSON(locale).toString(4);
 		    writeZipString(zout, "meta/groups_"+locale.toLanguageTag()+".json", groupJSONString);
 		    
-		    writeZipString(zout, "meta/perspectives_"+locale.toLanguageTag()+".json", perspectives.toJSONObject(locale).toJSONString());
+		    writeZipString(zout, "meta/perspectives_"+locale.toLanguageTag()+".json", perspectives.toJSONObject(locale).toString(4));
 		    
 		}
 
@@ -407,9 +406,12 @@ public class DaxploreFile {
 		DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
 		dbf.setSchema(getUploadFileManifestSchema());
 		Document doc = dbf.newDocumentBuilder().newDocument();
+		doc.setXmlStandalone(true);
 		
 		Element root = doc.createElement("daxploreUploadFileManifest");
 		doc.appendChild(root);
+		root.setAttribute("xmlns:xsi", "http://www.w3.org/2001/XMLSchema-instance");
+		root.setAttribute("xsi:noNamespaceSchemaLocation", "UploadFileManifest.xsd");
 		
 		Element version = doc.createElement("fileVersion");
 		root.appendChild(version);
