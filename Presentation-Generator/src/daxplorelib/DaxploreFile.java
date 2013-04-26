@@ -371,9 +371,8 @@ public class DaxploreFile {
 		Gson plainGson = new Gson();
 		Gson prettyGson = new GsonBuilder().setPrettyPrinting().create();
 		
-		String dataJsonString = plainGson.toJson(dataJSON);
-		dataJsonString = dataJsonString.replaceAll("(}}},\\{)", "}}},\n{");
-		writeZipString(zout, "data/data.json", dataJsonString);
+		// Generate a single json string and replace "}}},{" with "}}},\n{" to create rows in the file
+		writeZipString(zout, "data/data.json", plainGson.toJson(dataJSON).replaceAll("(}}},\\{)", "}}},\n{")); 
 		
 		for(Locale locale : getAbout().getLocales()) {
 			JsonArray questionJSON = new JsonArray();
