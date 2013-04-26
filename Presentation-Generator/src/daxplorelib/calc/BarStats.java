@@ -5,9 +5,10 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
-import net.sf.json.JSON;
-import net.sf.json.JSONArray;
-import net.sf.json.JSONObject;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonPrimitive;
 
 import daxplorelib.metadata.MetaQuestion;
 import daxplorelib.metadata.MetaTimepointShort;
@@ -29,21 +30,21 @@ public class BarStats {
 			this.all = all;
 		}
 		
-		public JSON toJSONObject() {
-			JSONObject json = new JSONObject();
+		public JsonElement toJSONObject() {
+			JsonObject json = new JsonObject();
 			for(int i = 0; i < bars.size(); i++) {
-				JSONArray barsJSON = new JSONArray();
+				JsonArray barsJSON = new JsonArray();
 				for(int v : bars.get(i)) {
-					barsJSON.add(v);
+					barsJSON.add(new JsonPrimitive(v));
 				}
-				json.put(i, barsJSON);
+				json.add(Integer.toString(i), barsJSON);
 			}
 			
-			JSONArray allJSON = new JSONArray();
+			JsonArray allJSON = new JsonArray();
 			for(int v : all) {
-				allJSON.add(v);
+				allJSON.add(new JsonPrimitive(v));
 			}
-			json.put("all", allJSON);
+			json.add("all", allJSON);
 			
 			return json;
 		}
@@ -58,16 +59,16 @@ public class BarStats {
 		data.put(timepoint, new BarGroups(crosstabs, frequencies));
 	}
 	
-	public JSON toJSONObject() {
-		JSONObject json = new JSONObject();
-		json.put("q", question.getId());
-		json.put("p", perspective.getId());
+	public JsonElement toJSONObject() {
+		JsonObject json = new JsonObject();
+		json.add("q", new JsonPrimitive(question.getId()));
+		json.add("p", new JsonPrimitive(perspective.getId()));
 		
-		JSONObject values = new JSONObject();
+		JsonObject values = new JsonObject();
 		for(Map.Entry<MetaTimepointShort, BarGroups> entry: data.entrySet()) {
-			values.put(entry.getKey().getTimeindex(), entry.getValue().toJSONObject());
+			values.add(Integer.toString(entry.getKey().getTimeindex()), entry.getValue().toJSONObject());
 		}
-		json.put("values", values);
+		json.add("values", values);
 		
 		return json;
 	}

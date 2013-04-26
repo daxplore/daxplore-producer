@@ -14,9 +14,10 @@ import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import net.sf.json.JSONArray;
-import net.sf.json.JSON;
-import net.sf.json.JSONObject;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonPrimitive;
 
 import daxplorelib.DaxploreException;
 import daxplorelib.DaxploreTable;
@@ -242,8 +243,8 @@ public class MetaGroup implements Comparable<MetaGroup> {
 			return SQLTools.maxId(groupTable.name, "id", connection) + addDelta;
 		}
 		
-		public JSON getQuestionGroupsJSON(Locale locale) throws SQLException, DaxploreException {
-			JSONArray json = new JSONArray(); 
+		public JsonElement getQuestionGroupsJSON(Locale locale) throws SQLException, DaxploreException {
+			JsonArray json = new JsonArray(); 
 			for(MetaGroup group : getQuestionGroups()) {
 				json.add(group.toJSONObject(locale));
 			}
@@ -370,18 +371,18 @@ public class MetaGroup implements Comparable<MetaGroup> {
 		return qList.size();
 	}
 	
-	public JSON toJSONObject(Locale locale) {
-		JSONArray questions = new JSONArray();
+	public JsonElement toJSONObject(Locale locale) {
+		JsonArray questions = new JsonArray();
 		for(MetaQuestion q : qList) {
-			questions.add(q.getId());
+			questions.add(new JsonPrimitive(q.getId()));
 		}
 		switch(type) {
 		case PERSPECTIVE:
 			return questions;
 		case QUESTIONS:
-			JSONObject json = new JSONObject();
-			json.put("name", textref.get(locale));
-			json.put("questions", questions);
+			JsonObject json = new JsonObject();
+			json.add("name", new JsonPrimitive(textref.get(locale)));
+			json.add("questions", questions);
 			return json;
 		default:
 			throw new AssertionError("Non-existant group type");	

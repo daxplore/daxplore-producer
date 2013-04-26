@@ -14,9 +14,11 @@ import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import net.sf.json.JSONArray;
-import net.sf.json.JSON;
-import net.sf.json.JSONObject;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonNull;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonPrimitive;
 
 import daxplorelib.DaxploreException;
 import daxplorelib.DaxploreTable;
@@ -279,23 +281,29 @@ public class MetaQuestion {
 		this.timemodified = true;
 	}
 	
-	public JSON toJSONObject(Locale locale) {
-		JSONObject json = new JSONObject();
-		json.put("column", id);
-		json.put("short", shortTextRef.get(locale));
-		json.put("text", fullTextRef.get(locale));
+	public JsonElement toJSONObject(Locale locale) {
 		
-		JSONArray options = new JSONArray();
+		JsonObject json = new JsonObject();
+		json.addProperty("column", id);
+		json.addProperty("short", shortTextRef.get(locale));
+		json.addProperty("text", fullTextRef.get(locale));
+		
+		JsonArray options = new JsonArray();
 		for(Option option : scale.getOptions()) {
-			options.add(option.getTextRef().get(locale));
+			String text = option.getTextRef().get(locale);
+			if(text!=null) {
+				options.add(new JsonPrimitive(text));
+			} else {
+				options.add(JsonNull.INSTANCE);
+			}
 		}
-		json.put("options", options);
+		json.add("options", options);
 		
-		JSONArray tps = new JSONArray();
+		JsonArray tps = new JsonArray();
 		for(MetaTimepointShort tp : timepoints) {
-			tps.add(tp.getTimeindex());
+			tps.add(new JsonPrimitive(tp.getTimeindex()));
 		}
-		json.put("timepoints", tps);
+		json.add("timepoints", tps);
 
 		return json;
 	}

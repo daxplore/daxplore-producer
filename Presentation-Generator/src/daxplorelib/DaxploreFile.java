@@ -35,7 +35,6 @@ import javax.xml.transform.stream.StreamSource;
 import javax.xml.validation.Schema;
 import javax.xml.validation.SchemaFactory;
 
-import net.sf.json.JSONArray;
 import org.opendatafoundation.data.FileFormatInfo;
 import org.opendatafoundation.data.FileFormatInfo.ASCIIFormat;
 import org.opendatafoundation.data.FileFormatInfo.Compatibility;
@@ -44,6 +43,10 @@ import org.opendatafoundation.data.spss.SPSSFileException;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.xml.sax.SAXException;
+
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.google.gson.JsonArray;
 
 import tools.MyTools;
 import daxplorelib.calc.Crosstabs;
@@ -338,7 +341,7 @@ public class DaxploreFile {
 		for(MetaQuestion perspective : perspectives.getQuestions()) {
 			selectedQuestions.add(perspective);
 		}
-		JSONArray dataJSON = new JSONArray();
+		JsonArray dataJSON = new JsonArray();
 		for(MetaGroup group : getMetaData().getMetaGroupManager().getQuestionGroups()) {
 			for(MetaQuestion question : group.getQuestions()) {
 				selectedQuestions.add(question);
@@ -365,11 +368,15 @@ public class DaxploreFile {
 		StreamResult streamResultSystem = new StreamResult(System.out);
 		transformer.transform(xmlSource, streamResultSystem);
 		
-
-		writeZipString(zout, "data/data.json", dataJSON.toString(4));
+		Gson plainGson = new Gson();
+		Gson prettyGson = new GsonBuilder().setPrettyPrinting().create();
+		
+		String dataJsonString = plainGson.toJson(dataJSON);
+		dataJsonString = dataJsonString.replaceAll("(}}},\\{)", "}}},\n{");
+		writeZipString(zout, "data/data.json", dataJsonString);
 		
 		for(Locale locale : getAbout().getLocales()) {
-			JSONArray questionJSON = new JSONArray();
+			JsonArray questionJSON = new JsonArray();
 			for(MetaQuestion q : selectedQuestions) {
 				questionJSON.add(q.toJSONObject(locale));
 			}
@@ -377,12 +384,12 @@ public class DaxploreFile {
 			// TODO create properties file and write it
 			writeZipString(zout, "properties/usertexts_"+locale.toLanguageTag()+".txt", "pagetitle=" + metadata.getTextsManager().get("page_title").get(locale) + "\n");
 			
-			writeZipString(zout, "meta/questions_"+locale.toLanguageTag()+".json", questionJSON.toString(4));
+			writeZipString(zout, "meta/questions_"+locale.toLanguageTag()+".json", prettyGson.toJson(questionJSON));
 		    
-		    String groupJSONString = getMetaData().getMetaGroupManager().getQuestionGroupsJSON(locale).toString(4);
+		    String groupJSONString = prettyGson.toJson(getMetaData().getMetaGroupManager().getQuestionGroupsJSON(locale));
 		    writeZipString(zout, "meta/groups_"+locale.toLanguageTag()+".json", groupJSONString);
 		    
-		    writeZipString(zout, "meta/perspectives_"+locale.toLanguageTag()+".json", perspectives.toJSONObject(locale).toString(4));
+		    writeZipString(zout, "meta/perspectives_"+locale.toLanguageTag()+".json", prettyGson.toJson(perspectives.toJSONObject(locale)));
 		    
 		}
 
