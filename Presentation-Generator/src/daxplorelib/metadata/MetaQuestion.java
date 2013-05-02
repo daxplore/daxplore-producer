@@ -6,6 +6,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.sql.Types;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -273,6 +274,7 @@ public class MetaQuestion {
 	}
 
 	public List<MetaTimepointShort> getTimepoints() {
+		Collections.sort(timepoints);
 		return timepoints;
 	}
 	
@@ -294,7 +296,7 @@ public class MetaQuestion {
 			if(text!=null) {
 				options.add(new JsonPrimitive(text));
 			} else {
-				options.add(JsonNull.INSTANCE);
+				options.add(new JsonPrimitive(""));
 			}
 		}
 		json.add("options", options);

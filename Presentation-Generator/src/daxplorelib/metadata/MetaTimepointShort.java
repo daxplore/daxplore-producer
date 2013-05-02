@@ -89,7 +89,6 @@ public class MetaTimepointShort implements Comparable<MetaTimepointShort> {
 		}
 		
 		public void saveAll() throws SQLException {
-			PreparedStatement updateStmt = connection.prepareStatement("UPDATE timepoints SET textref = ?, timeindex = ?, value = ? WHERE id = ?");
 			PreparedStatement deleteStmt = connection.prepareStatement("DELETE FROM timepoints WHERE id = ?");
 			PreparedStatement insertStmt = connection.prepareStatement("INSERT INTO timepoints (id, textref, timeindex, value) VALUES (?, ?, ?, ?)");
 			
@@ -98,16 +97,19 @@ public class MetaTimepointShort implements Comparable<MetaTimepointShort> {
 			for(MetaTimepointShort timepoint : pointMap.values()) {
 				if(timepoint.modified) {
 					nModified++;
-					updateStmt.setString(1, timepoint.textref.getRef());
-					updateStmt.setInt(2, timepoint.timeindex);
-					updateStmt.setDouble(3, timepoint.value);
-					updateStmt.setInt(4, timepoint.id);
-					updateStmt.addBatch();
+					deleteStmt.setInt(1, timepoint.id);
+					deleteStmt.addBatch();
+					insertStmt.setInt(1, timepoint.id);
+					insertStmt.setString(2, timepoint.textref.getRef());
+					insertStmt.setInt(3, timepoint.timeindex);
+					insertStmt.setDouble(4, timepoint.value);
+					insertStmt.addBatch();
 					timepoint.modified = false;
 				}
 			}
-			updateStmt.executeBatch();
-			
+			deleteStmt.executeBatch();
+			insertStmt.executeBatch();
+
 			for(MetaTimepointShort timepoint : toBeRemoved.values()) {
 				nRemoved++;
 				deleteStmt.setInt(1, timepoint.id);
