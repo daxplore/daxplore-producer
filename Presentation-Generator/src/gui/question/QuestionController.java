@@ -227,7 +227,7 @@ public class QuestionController implements TableModelListener, ActionListener  {
 	}
 	
 	private void addOption(double value) throws SQLException, DaxploreException {
-		int i = 0;
+		int i = -1;
 		for(Option optionText : mq.getScale().getOptions()){
 			String ref = optionText.getTextRef().getRef();
 			int j = Integer.parseInt(ref.substring(ref.lastIndexOf('_')+1));
