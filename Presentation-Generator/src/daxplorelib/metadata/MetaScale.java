@@ -310,22 +310,33 @@ public class MetaScale {
 		modified = true;
 	}
 	
-	public double transform(double value) throws Exception {
+	/**
+	 * 
+	 * @param value
+	 * @return Output value Double.NaN if not found
+	 * @throws Exception
+	 */
+	public double transform(double value) {
 		for(Option opt: options) {
 			if(opt.transformation.contains(value)) {
 				return opt.value;
 			}
 		}
-		throw new Exception("Ignore Exception");
+		return Double.NaN;
 	}
 	
-	public int matchIndex(double value) throws Exception {
+	/**
+	 * 
+	 * @param value
+	 * @return index of value, -1 if not found
+	 */
+	public int matchIndex(double value) {
 		for(int i = 0; i < options.size(); i++ ) {
 			if(options.get(i).transformation.contains(value)) {
 				return i;
 			}
 		}
-		throw new Exception("Ignore Exception");
+		return -1;
 	}
 	
 	public boolean ignored(double value) {

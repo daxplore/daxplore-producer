@@ -328,8 +328,12 @@ public class DaxploreFile {
 	}
 	
 	public void writeUploadFile(File file) throws TransformerFactoryConfigurationError, TransformerException, SQLException, DaxploreException, SAXException, IOException, ParserConfigurationException {
-		Crosstabs crosstabs = getCrosstabs();
+		long time = System.nanoTime();
 		Logger.getGlobal().log(Level.INFO, "Starting to generate json data");
+		
+		Crosstabs crosstabs = getCrosstabs();
+		crosstabs.loadRawToMem();
+		
 
 		MetaGroup perspectives = getMetaData().getMetaGroupManager().getPerspectiveGroup();
 		SortedSet<MetaQuestion> selectedQuestions = new TreeSet<MetaQuestion>(new Comparator<MetaQuestion>() {
@@ -350,6 +354,9 @@ public class DaxploreFile {
 				}
 			}
 		}
+		
+		Logger.getGlobal().log(Level.INFO, "Generated data in " + ((System.nanoTime() -time)/Math.pow(10,9)) + "s");
+		time = System.nanoTime();
 		
 		ZipOutputStream zout = new ZipOutputStream(new FileOutputStream(file));
 //manifest
@@ -394,6 +401,10 @@ public class DaxploreFile {
 
 		zout.flush();
 		zout.close();
+		
+		crosstabs.dropRawFromMem();
+		
+		Logger.getGlobal().log(Level.INFO, "Created file in " + ((System.nanoTime() -time)/Math.pow(10,9)) + "s");
 	}
 	
 	private Charset charset = Charset.forName("UTF-8");
