@@ -47,6 +47,8 @@ import org.xml.sax.SAXException;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
 
 import tools.MyTools;
 import daxplorelib.calc.Crosstabs;
@@ -57,8 +59,6 @@ import daxplorelib.raw.RawImport;
 import daxplorelib.raw.RawMeta;
 
 public class DaxploreFile {
-	public static final int filetypeversionmajor = 0;
-	public static final int filetypeversionminor = 1;
 	Connection connection;
 	About about;
 	File file = null;
@@ -380,8 +380,8 @@ public class DaxploreFile {
 				questionJSON.add(q.toJSONObject(locale));
 			}
 			
-			// TODO create properties file and write it
-			writeZipString(zout, "properties/usertexts_"+locale.toLanguageTag()+".txt", "pagetitle=" + metadata.getTextsManager().get("page_title").get(locale) + "\n");
+			String propertiesJSONString = prettyGson.toJson(getPropertiesJson(locale));
+			writeZipString(zout, "properties/usertexts_"+locale.toLanguageTag()+".json", propertiesJSONString);
 			
 			writeZipString(zout, "meta/questions_"+locale.toLanguageTag()+".json", prettyGson.toJson(questionJSON));
 		    
@@ -423,10 +423,10 @@ public class DaxploreFile {
 		root.appendChild(version);
 		Element major = doc.createElement("major");
 		version.appendChild(major);
-		major.appendChild(doc.createTextNode(""+filetypeversionmajor));
+		major.appendChild(doc.createTextNode(""+DaxploreProperties.filetypeversionmajor));
 		Element minor = doc.createElement("minor");
 		version.appendChild(minor);
-		minor.appendChild(doc.createTextNode(""+filetypeversionminor));
+		minor.appendChild(doc.createTextNode(""+DaxploreProperties.filetypeversionminor));
 		
 		Element supportedLocales = doc.createElement("supportedLocales");
 		root.appendChild(supportedLocales);
@@ -451,6 +451,14 @@ public class DaxploreFile {
 		Schema schema = sf.newSchema(new StreamSource(stream));
 		stream.close();
 		return schema;
+	}
+	
+	private JsonElement getPropertiesJson(Locale locale) throws SQLException {
+		JsonObject json = new JsonObject();
+		for(String property: DaxploreProperties.properties) {
+			json.addProperty(property, metadata.getTextsManager().get(property).get(locale));
+		}
+		return json;
 	}
 
 }

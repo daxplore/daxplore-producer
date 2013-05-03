@@ -17,6 +17,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import tools.SmallMap;
+import daxplorelib.DaxploreProperties;
 import daxplorelib.DaxploreTable;
 import daxplorelib.SQLTools;
 
@@ -36,7 +37,9 @@ public class TextReferenceManager {
 	
 	public void init() throws SQLException {
 		SQLTools.createIfNotExists(TextReferenceManager.table, connection);
-		get("page_title"); // create if not exists
+		for(String property: DaxploreProperties.properties) {
+			get(property);
+		}
 	}
 	
 	/**

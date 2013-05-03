@@ -29,8 +29,8 @@ public class AboutTest {
 
 	@Test
 	public void testFiletypeVersion() {
-		assertEquals(DaxploreFile.filetypeversionmajor, about.filetypeversionmajor);
-		assertEquals(DaxploreFile.filetypeversionminor, about.filetypeversionminor);
+		assertEquals(DaxploreProperties.filetypeversionmajor, about.filetypeversionmajor);
+		assertEquals(DaxploreProperties.filetypeversionminor, about.filetypeversionminor);
 		
 		//TODO test version for a loaded file
 	}

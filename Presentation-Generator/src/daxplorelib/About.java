@@ -64,8 +64,8 @@ public class About {
 		});
 		Statement stmt;
 		if(createnew){
-			filetypeversionmajor = DaxploreFile.filetypeversionmajor;
-			filetypeversionminor = DaxploreFile.filetypeversionminor;
+			filetypeversionmajor = DaxploreProperties.filetypeversionmajor;
+			filetypeversionminor = DaxploreProperties.filetypeversionminor;
 			creation = new Date();
 			lastupdate = (Date) creation.clone();
 			importdate = null;
