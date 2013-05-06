@@ -55,6 +55,7 @@ import daxplorelib.calc.Crosstabs;
 import daxplorelib.metadata.MetaData;
 import daxplorelib.metadata.MetaGroup;
 import daxplorelib.metadata.MetaQuestion;
+import daxplorelib.metadata.MetaTimepointShort;
 import daxplorelib.raw.RawImport;
 import daxplorelib.raw.RawMeta;
 
@@ -464,10 +465,13 @@ public class DaxploreFile {
 		return schema;
 	}
 	
-	private JsonElement getPropertiesJson(Locale locale) throws SQLException {
+	private JsonElement getPropertiesJson(Locale locale) throws SQLException, DaxploreException {
 		JsonObject json = new JsonObject();
 		for(String property: DaxploreProperties.properties) {
 			json.addProperty(property, metadata.getTextsManager().get(property).get(locale));
+		}
+		for(MetaTimepointShort mtp: metadata.getMetaTimepointManager().getAll()) {
+			json.addProperty("timepoint_" + mtp.getTimeindex(), mtp.getTextRef().get(locale));
 		}
 		return json;
 	}

@@ -125,7 +125,7 @@ public class MetaScale {
 			
 			PreparedStatement addOptionStmt = connection.prepareStatement("INSERT INTO metascaleoption (scaleid, textref, ord, value, transform) VALUES (?, ?, ?, ?, ?)");
 			PreparedStatement deleteOptionStmt = connection.prepareStatement("DELETE FROM metascaleoption WHERE scaleid = ?");
-			PreparedStatement updateOptionStmt = connection.prepareStatement("UPDATE metascaleoption SET textref = ?, value = ?, transform = ? WHERE scaleid = ? AND ord = ?");
+			//PreparedStatement updateOptionStmt = connection.prepareStatement("UPDATE metascaleoption SET textref = ?, value = ?, transform = ? WHERE scaleid = ? AND ord = ?");
 			
 			int nNew = 0, nModified = 0, nRemoved = 0, nOptionModified = 0;
 			
@@ -151,30 +151,31 @@ public class MetaScale {
 							addOptionStmt.addBatch();
 							ord++;
 						}
-						addOptionStmt.executeBatch();
+						ms.structureChanged = false;
 					}
 					ms.modified = false;
 				}
-				if(!ms.structureChanged) {
-					for(int ord = 0; ord < ms.options.size(); ord++) {
-						Option opt = ms.options.get(ord);
-						if(opt.modified) {
-							nOptionModified++;
-							updateOptionStmt.setString(1, opt.textRef.getRef());
-							updateOptionStmt.setDouble(2, opt.value);
-							updateOptionStmt.setString(3, opt.transformation.toString());
-							updateOptionStmt.setInt(4, ms.id);
-							updateOptionStmt.setInt(5, ord);
-							updateOptionStmt.addBatch();
-							opt.modified = false;
-						}
-						updateOptionStmt.executeBatch();
+				if(ms.structureChanged) {
+					deleteOptionStmt.setInt(1, ms.id);
+					deleteOptionStmt.addBatch();
+					
+					int ord = 0;
+					for(Option opt: ms.options) {
+						nOptionModified++;
+						addOptionStmt.setInt(1, ms.id);
+						addOptionStmt.setString(2, opt.textRef.getRef());
+						addOptionStmt.setInt(3, ord);
+						addOptionStmt.setDouble(4, opt.value);
+						addOptionStmt.setString(5, opt.transformation.toString());
+						addOptionStmt.addBatch();
+						ord++;
 					}
+					ms.structureChanged = false;
 				}
-				ms.structureChanged = false;
 			}
 			updateScaleStmt.executeBatch();
 			deleteOptionStmt.executeBatch();
+			addOptionStmt.executeBatch();
 			
 			for(MetaScale ms: toBeRemoved.values()) {
 				nRemoved++;
@@ -292,7 +293,7 @@ public class MetaScale {
 	}
 	
 	public List<Option> getOptions() {
-		return options;
+		return new LinkedList<Option>(options);
 	}
 
 	public void setOptions(List<Option> options) {
