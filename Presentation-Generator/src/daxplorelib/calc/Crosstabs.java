@@ -4,7 +4,6 @@
 package daxplorelib.calc;
 
 import java.sql.Connection;
-import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -16,10 +15,7 @@ import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import com.google.appengine.repackaged.org.apache.commons.logging.Log;
-
 import tools.Pair;
-
 import daxplorelib.About;
 import daxplorelib.DaxploreException;
 import daxplorelib.metadata.MetaQuestion;
@@ -99,8 +95,15 @@ public class Crosstabs {
 		rawdataTable = null;
 		rawColnames = null;
 	}
-	
-	public BarStats crosstabs2(MetaQuestion question, MetaQuestion perspective) throws DaxploreException {
+	/**
+	 * Generates crosstabs between cquestion and perspective. No result only if total results is over lowerlimit.
+	 * @param question
+	 * @param perspective
+	 * @param lowerLimit
+	 * @return
+	 * @throws DaxploreException
+	 */
+	public BarStats crosstabs2(MetaQuestion question, MetaQuestion perspective, int lowerLimit) throws DaxploreException {
 		try {
 			List<MetaTimepointShort> questionTimes = question.getTimepoints();
 			List<MetaTimepointShort> perspectiveTimes = perspective.getTimepoints();
@@ -116,8 +119,8 @@ public class Crosstabs {
 			BarStats stats = new BarStats(question, perspective);
 			
 			for(MetaTimepointShort timepoint: commonTimes) {
-				int[][] crosstabs = crosstabs2(question, perspective, timepoint);
-				int[] frequencies = frequencies(question, timepoint);
+				int[][] crosstabs = crosstabs2(question, perspective, timepoint, lowerLimit);
+				int[] frequencies = frequencies(question, timepoint, lowerLimit);
 				stats.addTimePoint(timepoint, crosstabs, frequencies);
 			}
 			
@@ -127,10 +130,12 @@ public class Crosstabs {
 		}
 	}
 	
-	public int[][] crosstabs2(MetaQuestion question, MetaQuestion perspective, MetaTimepointShort timepoint) throws SQLException {
+	public int[][] crosstabs2(MetaQuestion question, MetaQuestion perspective, MetaTimepointShort timepoint, int lowerlimit) throws SQLException {
 		if(question.getScale() != null && perspective.getScale() != null) {
 			int[][] crosstabsdata = new int[perspective.getScale().getOptionCount()][question.getScale().getOptionCount()];
-
+			
+			int[] totals = new int[perspective.getScale().getOptionCount()];	
+			
 			if(hasLoadedRawdata) {
 				
 				int questionColIndex = Arrays.binarySearch(rawColnames, question.getId());
@@ -146,23 +151,16 @@ public class Crosstabs {
 						if(qindex == -1 || pindex == -1) {
 							continue;
 						}
+						totals[pindex]++;
 						crosstabsdata[pindex][qindex]++;
 					}
 				}
-				return crosstabsdata;
-				
+
 			} else {
 				//TODO: handle case where scale only has ignore
 				
-	//			PreparedStatement stmt1 = connection.prepareStatement("SELECT ?, ? FROM rawdata WHERE ? = ?");
-	//			stmt1.setString(1, question.getId());
-	//			stmt1.setString(2, perspective.getId());
-	//			stmt1.setString(3, about.getTimeSeriesShortColumn());
-	//			stmt1.setDouble(4, timepoint.getValue());
-	//			ResultSet rs = stmt1.executeQuery();
-				
 				ResultSet rs = connection.createStatement().executeQuery("SELECT " + question.getId() + " as q, " + perspective.getId() 
-						+ " as p FROM rawdata WHERE " + about.getTimeSeriesShortColumn() + " = " + timepoint.getValue());
+						+ " as p FROM rawdata WHERE " + about.getTimeSeriesShortColumn() + " = " + timepoint.getValue()); //TODO: get query to work with prepared statement
 				
 				while(rs.next()) {
 					Double qvalue = rs.getDouble("q");
@@ -173,18 +171,28 @@ public class Crosstabs {
 					if(qindex == -1 || pindex == -1) {
 						continue;
 					}
+					totals[pindex]++;
 					crosstabsdata[pindex][qindex]++;
 				}
-				return crosstabsdata;
+
 			}
+			
+			for(int ti = 0; ti < totals.length; ti++) {
+				if(totals[ti] < lowerlimit) {
+					crosstabsdata[ti] = new int[crosstabsdata[ti].length];
+				}
+			}
+			
+			return crosstabsdata;
 		} else {
 			//TODO handle cases where there is no scale
 			return null;
 		}
 	}
 	
-	public int[] frequencies(MetaQuestion question, MetaTimepointShort timepoint) throws SQLException {
+	public int[] frequencies(MetaQuestion question, MetaTimepointShort timepoint, int lowerlimit) throws SQLException {
 		int[] frequencies = new int[question.getScale().getOptionCount()];
+		int total = 0;
 
 		if(hasLoadedRawdata) {
 			MetaScale scale = question.getScale();
@@ -195,19 +203,16 @@ public class Crosstabs {
 				if(rawdataTable[rawTimePointIndex][row] == timepoint.getValue()) {
 					int index = scale.matchIndex(rawdataTable[questionColIndex][row]);
 					if(index != -1) {
-						frequencies[index]++;;
+						frequencies[index]++;
+						total++;
 					}
 				}
 			}
-			return frequencies;
+
 			
 		} else {
-	//		PreparedStatement stmt = connection.prepareStatement("SELECT ? FROM rawdata WHERE ? = ?");
-	//		stmt.setString(1, question.getId());
-	//		stmt.setString(2, about.getTimeSeriesShortColumn());
-	//		stmt.setDouble(3, timepoint.getValue());
-	//		ResultSet rs = stmt.executeQuery();
-			ResultSet rs = connection.createStatement().executeQuery("SELECT " + question.getId() + " FROM rawdata WHERE " + about.getTimeSeriesShortColumn() + " = " + timepoint.getValue());
+
+			ResultSet rs = connection.createStatement().executeQuery("SELECT " + question.getId() + " FROM rawdata WHERE " + about.getTimeSeriesShortColumn() + " = " + timepoint.getValue()); //TODO: get query to work with prepared statement
 			
 			
 			while(rs.next()) {
@@ -215,10 +220,16 @@ public class Crosstabs {
 				int index = question.getScale().matchIndex(value);
 				if(index != -1) {
 					frequencies[index]++;
+					total++;
 				}
 			}
-			return frequencies;
 		}
+		
+		if(total < lowerlimit) {
+			return new int[frequencies.length];
+		}
+		
+		return frequencies;
 	}
 	
 }
