@@ -27,7 +27,7 @@ public class MetaScale {
 			"CREATE TABLE metascale (id INTEGER PRIMARY KEY, ignore STRING NOT NULL)"
 			, "metascale");
 	protected static final DaxploreTable optiontable = new DaxploreTable(
-			"CREATE TABLE metascaleoption (scaleid INTEGER NOT NULL, textref STRING NOT NULL, ord INTEGER NOT NULL, value REAL NOT NULL, transform STRING NOT NULL, FOREIGN KEY(scaleid) REFERENCES metascale(id))"
+			"CREATE TABLE metascaleoption (scaleid INTEGER NOT NULL, textref STRING NOT NULL, ord INTEGER NOT NULL, value REAL NOT NULL, transform STRING NOT NULL, FOREIGN KEY(scaleid) REFERENCES metascale(id))" /*, UNIQUE(scaleid, textref) ON CONFLICT REPLACE)" */
 			, "metascaleoption");
 	
 	public static class MetaScaleManager {
@@ -129,6 +129,30 @@ public class MetaScale {
 			
 			int nNew = 0, nModified = 0, nRemoved = 0, nOptionModified = 0;
 			
+			for(MetaScale ms: toBeAdded) {
+				nNew++;
+				insertScaleStmt.setInt(1, ms.id);
+				insertScaleStmt.setString(2, ms.ignore.toString());
+				insertScaleStmt.addBatch();
+				
+				int ord = 0;
+				for(Option opt: ms.options) {
+					addOptionStmt.setInt(1, ms.id);
+					addOptionStmt.setString(2, opt.textRef.getRef());
+					addOptionStmt.setInt(3, ord);
+					addOptionStmt.setDouble(4, opt.value);
+					addOptionStmt.setString(5, opt.transformation.toString());
+					addOptionStmt.addBatch();
+					ord++;
+				}
+				ms.modified = false;
+				ms.structureChanged = false;
+			}
+			toBeAdded.clear();
+			insertScaleStmt.executeBatch();
+			addOptionStmt.executeBatch();
+			addDelta = 0;
+			
 			for(MetaScale ms: scaleMap.values()) {
 				if(ms.modified) {
 					nModified++;
@@ -187,28 +211,6 @@ public class MetaScale {
 			deleteStmt.executeBatch();
 			deleteOptionStmt.executeBatch();
 			toBeRemoved.clear();
-			
-			for(MetaScale ms: toBeAdded) {
-				nNew++;
-				insertScaleStmt.setInt(1, ms.id);
-				insertScaleStmt.setString(2, ms.ignore.toString());
-				insertScaleStmt.addBatch();
-				
-				int ord = 0;
-				for(Option opt: ms.options) {
-					addOptionStmt.setInt(1, ms.id);
-					addOptionStmt.setString(2, opt.textRef.getRef());
-					addOptionStmt.setInt(3, ord);
-					addOptionStmt.setDouble(4, opt.value);
-					addOptionStmt.setString(5, opt.transformation.toString());
-					addOptionStmt.addBatch();
-					ord++;
-				}
-			}
-			toBeAdded.clear();
-			insertScaleStmt.executeBatch();
-			addOptionStmt.executeBatch();
-			addDelta = 0;
 			
 			if(nModified != 0 || nNew != 0 || nRemoved != 0 || nOptionModified != 0) {
 				String logString = String.format("MetaScale: Saved %d (%d new), %d removed, %d options changed", nModified, nNew, nRemoved, nOptionModified);
