@@ -1,5 +1,6 @@
 package gui.edit;
 
+import gui.Settings;
 import gui.edit.EditTextView.LocaleItem;
 
 import java.awt.GridLayout;
@@ -48,6 +49,7 @@ public class EditToolbarView extends JPanel {
 		int returnVal = efc.showSaveDialog(this);
 		switch(returnVal) {
 		case JFileChooser.APPROVE_OPTION:
+			Settings.setWorkingDirectory(efc.getCurrentDirectory());
 			return efc.getSelectedFile();
 		default:
 			return null;
@@ -63,6 +65,7 @@ public class EditToolbarView extends JPanel {
 		private JComboBox<LocaleItem> localeBox;
 		
 		public LocalizationFileChooser(List<Locale> localeList) {
+			super(Settings.getWorkingDirectory());
 			localeBox = new JComboBox<LocaleItem>();
 			localeBox.addItem(null);
 			for(Locale loc: localeList) {

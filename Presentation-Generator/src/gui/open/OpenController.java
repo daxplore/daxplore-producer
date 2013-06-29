@@ -1,6 +1,7 @@
 package gui.open;
 
 import gui.MainController;
+import gui.Settings;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -43,7 +44,7 @@ public final class OpenController implements ActionListener {
 	 */
 	public void createButtonPressed() {
 		
-		final JFileChooser fc = new JFileChooser() {
+		final JFileChooser fc = new JFileChooser(Settings.getWorkingDirectory()) {
 
 	        private static final long serialVersionUID = 7919427933588163126L;
 	        
@@ -76,6 +77,7 @@ public final class OpenController implements ActionListener {
 		int returnVal = fc.showSaveDialog(this.mainController.getMainFrame());
 
 		if (returnVal == JFileChooser.APPROVE_OPTION) {
+			Settings.setWorkingDirectory(fc.getCurrentDirectory());
 			try {
 				if (mainController.getDaxploreFile() != null) {
 					mainController.getDaxploreFile().close();
@@ -113,7 +115,7 @@ public final class OpenController implements ActionListener {
 	 */
 	public void openButtonPressed() {
 		
-		JFileChooser fc = new JFileChooser();
+		JFileChooser fc = new JFileChooser(Settings.getWorkingDirectory());
 		FileNameExtensionFilter filter = new FileNameExtensionFilter(
 				"Daxplore Files", "daxplore");
 		fc.setFileFilter(filter);
@@ -121,6 +123,7 @@ public final class OpenController implements ActionListener {
 		int returnVal = fc.showOpenDialog(this.mainController.getMainFrame());
 
 		if (returnVal == JFileChooser.APPROVE_OPTION) {
+			Settings.setWorkingDirectory(fc.getCurrentDirectory());
 			try {
 				if (mainController.getDaxploreFile() != null) {
 					mainController.getDaxploreFile().close();

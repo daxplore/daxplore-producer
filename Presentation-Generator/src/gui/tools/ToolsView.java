@@ -1,6 +1,7 @@
 package gui.tools;
 
 import gui.MainController;
+import gui.Settings;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -120,10 +121,11 @@ public class ToolsView extends JPanel {
 	}
 	
 	public File showExportDialog() {
-		JFileChooser fc = new JFileChooser();
+		JFileChooser fc = new JFileChooser(Settings.getWorkingDirectory());
 		int returnVal = fc.showSaveDialog(this);
 		switch(returnVal) {
 		case JFileChooser.APPROVE_OPTION:
+			Settings.setWorkingDirectory(fc.getCurrentDirectory());
 			return fc.getSelectedFile();
 		default:
 			return null;

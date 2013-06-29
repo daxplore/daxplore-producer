@@ -1,5 +1,7 @@
 package gui.importwizard;
 
+import gui.Settings;
+
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
@@ -70,7 +72,7 @@ public class OpenFilePanelDescriptor extends ImportWizardDescriptor implements A
 	 * Opens up a file dialogue with options to open SPSS files.
 	 */
     public void openSpssFileAction() {
-		JFileChooser fc = new JFileChooser();
+		JFileChooser fc = new JFileChooser(Settings.getWorkingDirectory());
 		FileNameExtensionFilter filter = new FileNameExtensionFilter(
 				"SPSS Files", "sav");
 		fc.setFileFilter(filter);
@@ -78,7 +80,7 @@ public class OpenFilePanelDescriptor extends ImportWizardDescriptor implements A
 		int returnVal = fc.showOpenDialog(getWizard());
 
 		if (returnVal == JFileChooser.APPROVE_OPTION) {
-
+			Settings.setWorkingDirectory(fc.getCurrentDirectory());
 			File file = fc.getSelectedFile();
 			System.out.println("Opening file: " + file.getName() + ".");
 
