@@ -43,6 +43,8 @@ public class RawData {
 	public void importSPSS(SPSSFile spssFile) throws SQLException, DaxploreException {
 		
 		if(SQLTools.tableExists("rawdata", connection)) {
+			//TODO this code is broken
+			//java.sql.SQLException: database table is locked
 			Statement stmt = connection.createStatement();
 			stmt.executeUpdate("DROP TABLE " + table.name);
 			stmt.close();
