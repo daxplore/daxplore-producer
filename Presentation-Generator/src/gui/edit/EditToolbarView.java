@@ -13,6 +13,8 @@ import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JFileChooser;
 import javax.swing.JPanel;
+import javax.swing.filechooser.FileFilter;
+import javax.swing.filechooser.FileNameExtensionFilter;
 
 @SuppressWarnings("serial")
 public class EditToolbarView extends JPanel {
@@ -35,6 +37,11 @@ public class EditToolbarView extends JPanel {
 	
 	public File showImportDialog(List<Locale> localeList) {
 		LocalizationFileChooser ifc = new LocalizationFileChooser(localeList);
+		
+		FileFilter filter = new FileNameExtensionFilter("language files", "csv", "properties");
+		ifc.addChoosableFileFilter(filter);
+		ifc.setFileFilter(filter);
+		
 		int returnVal = ifc.showOpenDialog(this);
 		switch(returnVal) {
 		case JFileChooser.APPROVE_OPTION:

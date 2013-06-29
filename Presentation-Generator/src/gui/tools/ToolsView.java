@@ -17,6 +17,8 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.JTextField;
+import javax.swing.filechooser.FileFilter;
+import javax.swing.filechooser.FileNameExtensionFilter;
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.transform.TransformerException;
 import javax.xml.transform.TransformerFactoryConfigurationError;
@@ -122,6 +124,11 @@ public class ToolsView extends JPanel {
 	
 	public File showExportDialog() {
 		JFileChooser fc = new JFileChooser(Settings.getWorkingDirectory());
+		
+		FileFilter filter = new FileNameExtensionFilter("Zip files", "zip");
+		fc.addChoosableFileFilter(filter);
+		fc.setFileFilter(filter);
+		
 		int returnVal = fc.showSaveDialog(this);
 		switch(returnVal) {
 		case JFileChooser.APPROVE_OPTION:
