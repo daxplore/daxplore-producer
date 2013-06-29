@@ -17,7 +17,6 @@ import java.util.logging.Logger;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
-import com.google.gson.JsonNull;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonPrimitive;
 
@@ -302,7 +301,7 @@ public class MetaQuestion {
 		json.add("options", options);
 		
 		JsonArray tps = new JsonArray();
-		for(MetaTimepointShort tp : timepoints) {
+		for(MetaTimepointShort tp : getTimepoints()) {
 			tps.add(new JsonPrimitive(tp.getTimeindex()));
 		}
 		json.add("timepoints", tps);
