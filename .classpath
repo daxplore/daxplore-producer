@@ -1,20 +1,22 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <classpath>
-	<classpathentry kind="src" path="Presentation-Generator/test"/>
-	<classpathentry kind="src" path="Presentation-Generator/src"/>
-	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
+	<classpathentry kind="src" path="src"/>
+	<classpathentry kind="src" path="test"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-1.7"/>
+	<classpathentry kind="lib" path="lib/json_simple-1.1.jar"/>
+	<classpathentry kind="lib" path="lib/sqlite-jdbc-3.7.2.jar"/>
+	<classpathentry kind="lib" path="lib/jdo2-api-2.3-eb.jar"/>
+	<classpathentry kind="lib" path="lib/appengine-remote-api.jar"/>
+	<classpathentry kind="lib" path="lib/org.opendatafoundation.data-20111116.jar" sourcepath="/org.opendatafoundation.data"/>
+	<classpathentry kind="lib" path="lib/jcommander-1.28-SNAPSHOT.jar" sourcepath="lib/jcommander-1.28-SNAPSHOT-sources.jar">
+		<attributes>
+			<attribute name="javadoc_location" value="jar:file:/home/axwi4586/devspace/Daxel-Producer/Presentation-Generator/lib/jcommander-1.28-SNAPSHOT-javadoc.jar!/"/>
+		</attributes>
+	</classpathentry>
 	<classpathentry kind="con" path="org.eclipse.jdt.junit.JUNIT_CONTAINER/4"/>
-	<classpathentry kind="lib" path="Presentation-Generator/lib/appengine-remote-api.jar"/>
-	<classpathentry kind="lib" path="Presentation-Generator/lib/jdo2-api-2.3-eb.jar"/>
-	<classpathentry kind="lib" path="Presentation-Generator/lib/org.opendatafoundation.data-20111116.jar"/>
-	<classpathentry kind="lib" path="Presentation-Generator/lib/sqlite-jdbc-3.7.2.jar"/>
-	<classpathentry kind="lib" path="Presentation-Generator/lib/jcommander-1.28-SNAPSHOT.jar"/>
-	<classpathentry kind="lib" path="Presentation-Generator/lib/jcommander-1.28-SNAPSHOT-bundle.jar"/>
-	<classpathentry kind="lib" path="Presentation-Generator/lib/jcommander-1.28-SNAPSHOT-javadoc.jar"/>
-	<classpathentry kind="lib" path="Presentation-Generator/lib/jcommander-1.28-SNAPSHOT-sources.jar"/>
-	<classpathentry kind="lib" path="Presentation-Generator/lib/opencsv-2.3.jar"/>
-	<classpathentry kind="lib" path="Presentation-Generator/lib/scottlogic-utils-1.4.jar"/>
-	<classpathentry kind="lib" path="Presentation-Generator/lib/gson-2.2.3.jar" sourcepath="Presentation-Generator/lib/google-gson-2.2.3/gson-2.2.3-sources.jar"/>
-	<classpathentry kind="lib" path="Presentation-Generator/lib/json_simple-1.1.jar"/>
+	<classpathentry kind="lib" path="miglayout15-swing.jar" sourcepath="miglayout-src.zip"/>
+	<classpathentry kind="lib" path="lib/opencsv-2.3.jar"/>
+	<classpathentry kind="lib" path="lib/scottlogic-utils-1.4.jar" sourcepath="/home/axwi4586/Downloads/scottlogic-utils-mr-1.4/PatchWorkArray"/>
+	<classpathentry kind="lib" path="lib/gson-2.2.3.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
