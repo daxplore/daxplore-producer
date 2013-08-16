@@ -237,7 +237,7 @@ public class ImportWizardDialog extends JDialog implements PropertyChangeListene
 		importWizardModel.addPropertyChangeListener(this);       
         importWizardController = new ImportWizardController(this);       
 		
-		setIconImage(Toolkit.getDefaultToolkit().getImage(ImportWizardDialog.class.getResource("/gui/resources/Arrow-Up-48.png")));
+		setIconImage(Toolkit.getDefaultToolkit().getImage(ImportWizardDialog.class.getResource("/org/daxplore/producer/gui/resources/Arrow-Up-48.png")));
 		setDialog(this);
 		setTitle("SPSS File Wizard");
 		setBounds(100, 100, 762, 622);

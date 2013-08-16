@@ -46,10 +46,10 @@ public class ButtonPanelView extends JPanel {
 		openButton.addActionListener(mainController);
 
 		openButton.setRolloverEnabled(false);
-		openButton.setSelectedIcon(new ImageIcon(MainController.class.getResource("/gui/resources/8_selected.png")));
+		openButton.setSelectedIcon(new ImageIcon(MainView.class.getResource("/org/daxplore/producer/gui/resources/8_selected.png")));
 		openButton.setBorder(new TitledBorder(null, "", TitledBorder.LEADING, TitledBorder.TOP, null, null));
 		buttonGroup.add(openButton);
-		openButton.setIcon(new ImageIcon(MainController.class.getResource("/gui/resources/8.png")));
+		openButton.setIcon(new ImageIcon(MainController.class.getResource("/org/daxplore/producer/gui/resources/8.png")));
 		add(openButton);
 
 		groupsButton = new JRadioButton("");
@@ -57,11 +57,11 @@ public class ButtonPanelView extends JPanel {
 		groupsButton.setActionCommand(Views.GROUPSVIEW.toString());
 		groupsButton.addActionListener(mainController);
 		
-		groupsButton.setSelectedIcon(new ImageIcon(ButtonPanelView.class.getResource("/gui/resources/29_selected.png")));
+		groupsButton.setSelectedIcon(new ImageIcon(ButtonPanelView.class.getResource("/org/daxplore/producer/gui/resources/29_selected.png")));
 		groupsButton.setRolloverEnabled(false);
 		groupsButton.setBorder(new TitledBorder(null, "", TitledBorder.LEADING, TitledBorder.TOP, null, null));
 		buttonGroup.add(groupsButton);
-		groupsButton.setIcon(new ImageIcon(ButtonPanelView.class.getResource("/gui/resources/29.png")));
+		groupsButton.setIcon(new ImageIcon(ButtonPanelView.class.getResource("/org/daxplore/producer/gui/resources/29.png")));
 		add(groupsButton);
 	
 		editButton = new JRadioButton("");
@@ -69,11 +69,11 @@ public class ButtonPanelView extends JPanel {
 		editButton.setActionCommand(Views.EDITTEXTVIEW.toString());
 		editButton.addActionListener(mainController);
 		
-		editButton.setSelectedIcon(new ImageIcon(MainController.class.getResource("/gui/resources/21_selected.png")));
+		editButton.setSelectedIcon(new ImageIcon(MainController.class.getResource("/org/daxplore/producer/gui/resources/21_selected.png")));
 		editButton.setRolloverEnabled(false);
 		editButton.setBorder(new TitledBorder(null, "", TitledBorder.LEADING, TitledBorder.TOP, null, null));
 		buttonGroup.add(editButton);
-		editButton.setIcon(new ImageIcon(MainController.class.getResource("/gui/resources/21.png")));
+		editButton.setIcon(new ImageIcon(MainController.class.getResource("/org/daxplore/producer/gui/resources/21.png")));
 		add(editButton);
 
 		timeSeriesButton = new JRadioButton("");
@@ -81,11 +81,11 @@ public class ButtonPanelView extends JPanel {
 		timeSeriesButton.setActionCommand(Views.TIMESERIESVIEW.toString());
 		timeSeriesButton.addActionListener(mainController);
 		
-		timeSeriesButton.setSelectedIcon(new ImageIcon(MainController.class.getResource("/gui/resources/2_selected.png")));
+		timeSeriesButton.setSelectedIcon(new ImageIcon(MainController.class.getResource("/org/daxplore/producer/gui/resources/2_selected.png")));
 		timeSeriesButton.setRolloverEnabled(false);
 		timeSeriesButton.setBorder(new TitledBorder(null, "", TitledBorder.LEADING, TitledBorder.TOP, null, null));
 		buttonGroup.add(timeSeriesButton);
-		timeSeriesButton.setIcon(new ImageIcon(MainController.class.getResource("/gui/resources/2.png")));
+		timeSeriesButton.setIcon(new ImageIcon(MainController.class.getResource("/org/daxplore/producer/gui/resources/2.png")));
 		add(timeSeriesButton);
 		
 		toolsButton = new JRadioButton("");
@@ -93,11 +93,11 @@ public class ButtonPanelView extends JPanel {
 		toolsButton.setActionCommand(Views.TOOLSVIEW.toString());
 		toolsButton.addActionListener(mainController);
 				
-		toolsButton.setSelectedIcon(new ImageIcon(ButtonPanelView.class.getResource("/gui/resources/24_selected.png")));
+		toolsButton.setSelectedIcon(new ImageIcon(ButtonPanelView.class.getResource("/org/daxplore/producer/gui/resources/24_selected.png")));
 		toolsButton.setRolloverEnabled(false);
 		toolsButton.setBorder(new TitledBorder(null, "", TitledBorder.LEADING, TitledBorder.TOP, null, null));
 		buttonGroup.add(toolsButton);
-		toolsButton.setIcon(new ImageIcon(ButtonPanelView.class.getResource("/gui/resources/24.png")));
+		toolsButton.setIcon(new ImageIcon(ButtonPanelView.class.getResource("/org/daxplore/producer/gui/resources/24.png")));
 		add(toolsButton);
 		
 		updateButtonPanel();

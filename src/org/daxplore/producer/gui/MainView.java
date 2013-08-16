@@ -106,7 +106,7 @@ public class MainView {
 		
 		mainControllerFrame = new JFrame();
 		mainController.setMainFrame(mainControllerFrame);
-		mainControllerFrame.setIconImage(Toolkit.getDefaultToolkit().getImage(MainController.class.getResource("/gui/resources/Colorful_Chart_Icon_vol2.png")));
+		mainControllerFrame.setIconImage(Toolkit.getDefaultToolkit().getImage(MainController.class.getResource("/org/daxplore/producer/gui/resources/Colorful_Chart_Icon_vol2.png")));
 		mainControllerFrame.setTitle("Daxplore Producer Developer Version");
 		mainControllerFrame.setBounds(100, 100, 900, 787);
 		mainControllerFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);

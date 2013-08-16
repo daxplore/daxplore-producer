@@ -36,7 +36,7 @@ public class QuestionWidget extends AbstractWidgetEditor<MetaQuestion> {
 		add(labelHolder, BorderLayout.WEST);
 		gotoButton = new JButton("");
 		gotoButton.setHideActionText(true);
-		gotoButton.setIcon(new ImageIcon(QuestionWidget.class.getResource("/gui/resources/edit_go_32.png")));
+		gotoButton.setIcon(new ImageIcon(QuestionWidget.class.getResource("/org/daxplore/producer/gui/resources/edit_go_32.png")));
 		gotoButton.setOpaque(false);
 		gotoButton.setContentAreaFilled(false);
 		gotoButton.setBorderPainted(false);
