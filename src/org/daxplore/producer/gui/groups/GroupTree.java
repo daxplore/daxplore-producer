@@ -16,10 +16,10 @@ import javax.swing.tree.TreeCellRenderer;
 import org.daxplore.producer.daxplorelib.metadata.MetaGroup;
 import org.daxplore.producer.daxplorelib.metadata.MetaQuestion;
 import org.daxplore.producer.gui.widget.AbstractWidgetEditor;
+import org.daxplore.producer.gui.widget.AbstractWidgetEditor.InvalidContentException;
 import org.daxplore.producer.gui.widget.GroupEditor;
 import org.daxplore.producer.gui.widget.GroupRenderer;
 import org.daxplore.producer.gui.widget.QuestionWidget;
-import org.daxplore.producer.gui.widget.AbstractWidgetEditor.InvalidContentException;
 
 @SuppressWarnings("serial")
 public class GroupTree extends JTree {

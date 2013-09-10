@@ -2,7 +2,6 @@ package org.daxplore.producer.gui.timeseries;
 
 import java.awt.Color;
 import java.awt.Component;
-import java.awt.Container;
 import java.awt.Point;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
@@ -18,8 +17,8 @@ import javax.swing.table.TableModel;
 
 import org.daxplore.producer.daxplorelib.DaxploreException;
 import org.daxplore.producer.daxplorelib.metadata.textreference.TextReference;
-import org.daxplore.producer.gui.widget.TextWidget;
 import org.daxplore.producer.gui.widget.AbstractWidgetEditor.InvalidContentException;
+import org.daxplore.producer.gui.widget.TextWidget;
 
 @SuppressWarnings("serial")
 public class TimeSeriesTable extends JTable {

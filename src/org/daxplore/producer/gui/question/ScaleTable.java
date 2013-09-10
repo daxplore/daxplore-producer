@@ -17,11 +17,11 @@ import javax.swing.table.TableCellRenderer;
 import org.daxplore.producer.daxplorelib.metadata.textreference.TextReference;
 import org.daxplore.producer.gui.widget.AbstractWidget;
 import org.daxplore.producer.gui.widget.AbstractWidgetEditor;
+import org.daxplore.producer.gui.widget.AbstractWidgetEditor.InvalidContentException;
 import org.daxplore.producer.gui.widget.NumberLineEditor;
 import org.daxplore.producer.gui.widget.NumberLineRenderer;
 import org.daxplore.producer.gui.widget.QuestionWidget;
 import org.daxplore.producer.gui.widget.TextWidget;
-import org.daxplore.producer.gui.widget.AbstractWidgetEditor.InvalidContentException;
 import org.daxplore.producer.tools.NumberlineCoverage;
 
 @SuppressWarnings("serial")

@@ -17,8 +17,8 @@ import javax.swing.table.TableModel;
 
 import org.daxplore.producer.daxplorelib.DaxploreException;
 import org.daxplore.producer.daxplorelib.metadata.MetaQuestion;
-import org.daxplore.producer.gui.widget.QuestionWidget;
 import org.daxplore.producer.gui.widget.AbstractWidgetEditor.InvalidContentException;
+import org.daxplore.producer.gui.widget.QuestionWidget;
 
 @SuppressWarnings("serial")
 public class QuestionTable extends JTable {

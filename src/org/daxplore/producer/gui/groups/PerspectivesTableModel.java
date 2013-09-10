@@ -7,8 +7,8 @@ import java.util.Vector;
 import javax.swing.table.DefaultTableModel;
 
 import org.daxplore.producer.daxplorelib.metadata.MetaGroup;
-import org.daxplore.producer.daxplorelib.metadata.MetaQuestion;
 import org.daxplore.producer.daxplorelib.metadata.MetaGroup.GroupType;
+import org.daxplore.producer.daxplorelib.metadata.MetaQuestion;
 
 @SuppressWarnings("serial")
 public class PerspectivesTableModel extends DefaultTableModel {
