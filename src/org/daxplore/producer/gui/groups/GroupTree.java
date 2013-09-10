@@ -2,6 +2,7 @@ package org.daxplore.producer.gui.groups;
 
 import java.awt.Color;
 import java.awt.Component;
+import java.awt.Container;
 import java.util.EventObject;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -48,15 +49,15 @@ public class GroupTree extends JTree {
 		
 		@Override
 		public Component getTreeCellRendererComponent(JTree tree, Object value, boolean selected, boolean expanded, boolean leaf, int row, boolean hasFocus) {
-			Component comp;
+			Container container;
 			if(value instanceof MetaQuestion) {
 				MetaQuestion mq = (MetaQuestion)value;
 				questionRenderer.setContent(mq);
-				comp = questionRenderer;
+				container = questionRenderer;
 			} else if(value instanceof MetaGroup) {
 				MetaGroup mg = (MetaGroup)value;
 				groupRenderer.setContent(mg);
-				comp = groupRenderer;
+				container = groupRenderer;
 			} else if(value instanceof JPanel){
 				return (JPanel)value; //TODO why is it trying to display the root?
 			} else {
@@ -64,7 +65,7 @@ public class GroupTree extends JTree {
 				throw new AssertionError("Tried showing " + value.getClass() + " in grouptree");
 			}
 			
-			int mouseOver = -1;
+			int mouseOver = -1; //TODO fix broken mouse over
 			Color bgColor = null;
 		    if (row == mouseOver) {
 		        if(!selected) {
@@ -79,8 +80,14 @@ public class GroupTree extends JTree {
 		            bgColor = listBackground;
 		        }
 		    }
-		    comp.setBackground(bgColor);
-			return comp;
+		    container.setBackground(bgColor);
+		    
+		    Component[] children = container.getComponents();
+	    	for (int ii = 0; (children != null) && (ii < children.length); ii++) {
+	    		children[ii].setBackground(bgColor);
+	    	}
+	    	
+			return container;
 		}
 
 		@Override
@@ -95,6 +102,21 @@ public class GroupTree extends JTree {
 			} else {
 				throw new AssertionError(); 
 			}
+			
+			Color bgColor = null;
+			if(isSelected) {
+	            bgColor = listSelectionBackground;
+	        } else {
+	            bgColor = listBackground;
+	        }
+			
+			editor.setBackground(bgColor);
+		    
+		    Component[] children = editor.getComponents();
+	    	for (int ii = 0; (children != null) && (ii < children.length); ii++) {
+	    		children[ii].setBackground(bgColor);
+	    	}
+			
 			return editor;
 		}
 		

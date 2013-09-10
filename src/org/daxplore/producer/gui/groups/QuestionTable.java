@@ -2,7 +2,6 @@ package org.daxplore.producer.gui.groups;
 
 import java.awt.Color;
 import java.awt.Component;
-import java.awt.Container;
 import java.awt.Point;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
@@ -72,7 +71,7 @@ public class QuestionTable extends JTable {
 			    if (row == mouseOver) {
 			        qwRenderer.showEdit(true);
 			        if(!isSelected) {
-			        	bgColor = new Color(255,255,220);
+			        	bgColor = new Color(200,200,255);
 			        } else {
 			        	bgColor = new Color(175,175,255);
 			        }
@@ -85,12 +84,11 @@ public class QuestionTable extends JTable {
 			        }
 			    }
 			    qwRenderer.setBackground(bgColor);
-			    if (value instanceof Container) {
-			    	Component[] children = ((Container) value).getComponents();
-			    	for (int ii = 0; (children != null) && (ii > children.length); ii++) {
-			    		children[ii].setBackground(bgColor);
-			    	}
-			    }
+			    
+		    	Component[] children = qwRenderer.getComponents();
+		    	for (int ii = 0; (children != null) && (ii < children.length); ii++) {
+		    		children[ii].setBackground(bgColor);
+		    	}
 			    return qwRenderer;
 		    } else {
 		    	System.out.println("not renderer MetaQuestion");
@@ -106,7 +104,7 @@ public class QuestionTable extends JTable {
 			    if (row == mouseOver) {
 			    	qwEditor.showEdit(true);
 			        if(!isSelected) {
-			        	bgColor = new Color(255,255,220);
+			        	bgColor = new Color(150,150,255);
 			        } else {
 			        	bgColor = new Color(175,175,255);
 			        }
@@ -119,12 +117,11 @@ public class QuestionTable extends JTable {
 			        }
 			    }
 			    qwEditor.setBackground(bgColor);
-			    if (value instanceof Container) {
-			    	Component[] children = ((Container) value).getComponents();
-			    	for (int ii = 0; (children != null) && (ii > children.length); ii++) {
-			    		children[ii].setBackground(bgColor);
-			    	}
-			    }
+
+			    Component[] children = qwEditor.getComponents();
+		    	for (int ii = 0; (children != null) && (ii < children.length); ii++) {
+		    		children[ii].setBackground(bgColor);
+		    	}
 			    return qwEditor;
 		    } else {
 		    	System.out.println("not editor MetaQuestion");

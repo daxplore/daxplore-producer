@@ -71,7 +71,7 @@ protected int mouseOver;
 			    if (row == mouseOver) {
 			    	textRefRenderer.showEdit(true);
 			        if(!isSelected) {
-			        	bgColor = new Color(255,255,220);
+			        	bgColor = new Color(200,200,255);
 			        } else {
 			        	bgColor = new Color(175,175,255);
 			        }
@@ -84,12 +84,11 @@ protected int mouseOver;
 			        }
 			    }
 			    textRefRenderer.setBackground(bgColor);
-			    if (value instanceof Container) {
-			    	Component[] children = ((Container) value).getComponents();
-			    	for (int ii = 0; (children != null) && (ii > children.length); ii++) {
-			    		children[ii].setBackground(bgColor);
-			    	}
-			    }
+			    
+		    	Component[] children = textRefRenderer.getComponents();
+		    	for (int ii = 0; (children != null) && (ii < children.length); ii++) {
+		    		children[ii].setBackground(bgColor);
+		    	}
 			    return textRefRenderer;
 		    } else {
 		    	return null; // TODO ?
@@ -104,7 +103,7 @@ protected int mouseOver;
 			    if (row == mouseOver) {
 			    	textRefEditor.showEdit(true);
 			        if(!isSelected) {
-			        	bgColor = new Color(255,255,220);
+			        	bgColor = new Color(200,200,255);
 			        } else {
 			        	bgColor = new Color(175,175,255);
 			        }
@@ -117,12 +116,11 @@ protected int mouseOver;
 			        }
 			    }
 			    textRefEditor.setBackground(bgColor);
-			    if (value instanceof Container) {
-			    	Component[] children = ((Container) value).getComponents();
-			    	for (int ii = 0; (children != null) && (ii > children.length); ii++) {
-			    		children[ii].setBackground(bgColor);
-			    	}
-			    }
+			    
+		    	Component[] children = textRefEditor.getComponents();
+		    	for (int ii = 0; (children != null) && (ii < children.length); ii++) {
+		    		children[ii].setBackground(bgColor);
+		    	}
 			    return textRefEditor;
 		    } else {
 		    	return null; //TODO ?
