@@ -137,7 +137,11 @@ public class NumberlineCoverage {
 	}
 	
 	protected void addInterval(Interval interval) {
-		addInterval(interval.clone());
+		try {
+			addInterval(interval.low, interval.lowInclusive, interval.high, interval.highInclusive);
+		} catch (NumberlineCoverageException e) {
+			throw new AssertionError("Malformed intervals should not exist to begin with");
+		}
 	}
 	
 	public void addInterval(double a, boolean aInclusive, double b, boolean bInclusive) throws NumberlineCoverageException {
