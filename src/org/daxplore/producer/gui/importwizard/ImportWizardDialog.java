@@ -118,8 +118,10 @@ public class ImportWizardDialog extends JDialog implements PropertyChangeListene
         //  be displayed. If the identifier passed in is null, then close
         //  the dialog.
         
-        if (id == null)
+        if (id == null) {
             close(ERROR_RETURN_CODE);
+            return;
+        }
         
         ImportWizardDescriptor oldPanelDescriptor = importWizardModel.getCurrentPanelDescriptor();
         if (oldPanelDescriptor != null)
@@ -132,8 +134,6 @@ public class ImportWizardDialog extends JDialog implements PropertyChangeListene
         
         cardLayout.show(contentPanel, id.toString());
         importWizardModel.getCurrentPanelDescriptor().displayingPanel();        
-        
-        
     }
 	
     // used to update button properties as events are triggered.
