@@ -21,9 +21,14 @@ public class Pair<K, V> {
 		return "Key: " + key + "\tValue: " + value;
 	}
 
-	public boolean equals(Pair<K, V> otherPair) {
-		return otherPair != null
-				&& ((otherPair.key == null && key == null) || otherPair.key.equals(this.key))
-				&& ((otherPair.value == null && value == null) || otherPair.value.equals(this.value));
+	public boolean equals(Object otherPair) {
+		if(otherPair instanceof Pair) {
+			@SuppressWarnings("rawtypes")
+			Pair op = (Pair)otherPair;
+			return otherPair != null
+					&& ((op.key == null && key == null) || (key != null && key.equals(op.key)))
+					&& ((op.value == null && value == null) || (value != null && value.equals(op.value)));
+		}
+		return false;
 	}
 }
