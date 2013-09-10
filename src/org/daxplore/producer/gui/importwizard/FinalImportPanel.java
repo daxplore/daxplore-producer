@@ -8,6 +8,7 @@ import javax.swing.JTable;
 import javax.swing.table.TableColumn;
 import javax.swing.table.TableModel;
 
+@SuppressWarnings("serial")
 public class FinalImportPanel extends JPanel {
 	protected JTable table = new JTable();
 	private JScrollPane scrollPane = new JScrollPane();

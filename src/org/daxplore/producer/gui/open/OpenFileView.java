@@ -31,9 +31,9 @@ import org.daxplore.producer.gui.importwizard.OpenFilePanelDescriptor;
  * @author hkfs89
  *
  */
+@SuppressWarnings("serial")
 public class OpenFileView extends JPanel {
 	
-	private static final long serialVersionUID = 1L;
 	private JTextField fileNameField = new JTextField();
 	private JTextField importDateField = new JTextField();;
 	private JTextField creationDateField = new JTextField();

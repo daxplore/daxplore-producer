@@ -24,12 +24,9 @@ import javax.swing.filechooser.FileNameExtensionFilter;
 import com.google.appengine.tools.remoteapi.RemoteApiInstaller;
 import com.google.appengine.tools.remoteapi.RemoteApiOptions;
 
+@SuppressWarnings("serial")
 public class RemoteUploader extends JFrame {
 
-	/**
-	 * 
-	 */
-	private static final long serialVersionUID = 1L;
 	private static final PersistenceManagerFactory pmfInstance = JDOHelper.getPersistenceManagerFactory("transactions-optional");
 	private JPanel panel;
 	private JTextArea area;

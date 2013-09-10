@@ -24,6 +24,7 @@ import org.daxplore.producer.gui.widget.QuestionWidget;
 import org.daxplore.producer.gui.widget.TextWidget;
 import org.daxplore.producer.tools.NumberlineCoverage;
 
+@SuppressWarnings("serial")
 public class TimePointTable extends JTable {
 
     static Color listBackground, listSelectionBackground;

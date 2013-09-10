@@ -27,11 +27,8 @@ import org.daxplore.producer.gui.MainController;
  * uses a CardLayout manager, the order of the panels is not linear. Each panel
  * determines at runtime what its next and previous panel will be.
  */
+@SuppressWarnings("serial")
 public class ImportWizardDialog extends JDialog implements PropertyChangeListener, WindowListener {
-
-
-	private static final long serialVersionUID = 1L;
-	
 	// store instances of classes that will be used.
 	private MainController mainController;
 	private JDialog importWizardDialog;

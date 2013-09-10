@@ -14,9 +14,8 @@ import javax.swing.JScrollPane;
 
 import org.daxplore.producer.tools.CharsetTest;
 
+@SuppressWarnings("serial")
 public class CharsetPanel extends JPanel {
-
-	private static final long serialVersionUID = 1L;
 	static final String ENCODING_COMBO_BOX_LIST_LABEL = "<Select encoding type>";
 	static final String ENCODING_COMBO_BOX_SEPARETOR =  "----------------------";
 	protected JComboBox<String> encodingComboBox;
