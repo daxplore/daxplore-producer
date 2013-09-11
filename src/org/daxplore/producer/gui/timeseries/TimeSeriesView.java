@@ -1,16 +1,13 @@
 package org.daxplore.producer.gui.timeseries;
 
-import javax.swing.JPanel;
-
 import java.awt.BorderLayout;
-
-import javax.swing.JScrollPane;
-
 import java.awt.FlowLayout;
 
 import javax.swing.JButton;
-import javax.swing.JTextField;
 import javax.swing.JLabel;
+import javax.swing.JPanel;
+import javax.swing.JScrollPane;
+import javax.swing.JTextField;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 

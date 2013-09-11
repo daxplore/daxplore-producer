@@ -1,10 +1,7 @@
 package org.daxplore.producer.daxplorelib.raw;
 
+@SuppressWarnings("serial")
 public class ImportSPSSException extends Exception {
-	/**
-	 * 
-	 */
-	private static final long serialVersionUID = -4015862126487945499L;
 	private Exception originalException;
 	
 	public ImportSPSSException(String message){

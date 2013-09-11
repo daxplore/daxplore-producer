@@ -41,11 +41,10 @@ public final class OpenController implements ActionListener {
 	 * Method triggers when create button is pressed. Loads a create file panel and controls
 	 * creation of daxplore files.
 	 */
+	@SuppressWarnings("serial")
 	public void createButtonPressed() {
 		
 		final JFileChooser fc = new JFileChooser(Settings.getWorkingDirectory()) {
-
-	        private static final long serialVersionUID = 7919427933588163126L;
 	        
 	        // override default operation of approveSelection() so it can handle overwriting files.
 	        public void approveSelection() {

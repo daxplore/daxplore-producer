@@ -4,7 +4,6 @@
 package org.daxplore.producer.daxplorelib.calc;
 
 import java.sql.Connection;
-import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -13,8 +12,6 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 import org.daxplore.producer.daxplorelib.About;
 import org.daxplore.producer.daxplorelib.DaxploreException;
@@ -22,8 +19,6 @@ import org.daxplore.producer.daxplorelib.metadata.MetaQuestion;
 import org.daxplore.producer.daxplorelib.metadata.MetaScale;
 import org.daxplore.producer.daxplorelib.metadata.MetaTimepointShort;
 import org.daxplore.producer.tools.Pair;
-
-import com.google.appengine.repackaged.org.apache.commons.logging.Log;
 
 public class CopyOfCrosstabs {
 

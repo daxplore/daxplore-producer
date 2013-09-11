@@ -15,11 +15,8 @@ import java.util.Vector;
  * <i>"There is no restriction to use individual How-To in a development
  * (compiled/source) but a mention is appreciated."</i></p>
  */
+@SuppressWarnings("serial")
 public class SortedProperties extends Properties {
-	/**
-	 * Generated serial version ID
-	 */
-	private static final long serialVersionUID = -8809785959474015736L;
 	
 	/**
      * Creates an empty property list with no default values.

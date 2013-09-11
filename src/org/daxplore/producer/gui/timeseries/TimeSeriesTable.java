@@ -2,7 +2,6 @@ package org.daxplore.producer.gui.timeseries;
 
 import java.awt.Color;
 import java.awt.Component;
-import java.awt.Container;
 import java.awt.Point;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
@@ -18,8 +17,8 @@ import javax.swing.table.TableModel;
 
 import org.daxplore.producer.daxplorelib.DaxploreException;
 import org.daxplore.producer.daxplorelib.metadata.textreference.TextReference;
-import org.daxplore.producer.gui.widget.TextWidget;
 import org.daxplore.producer.gui.widget.AbstractWidgetEditor.InvalidContentException;
+import org.daxplore.producer.gui.widget.TextWidget;
 
 @SuppressWarnings("serial")
 public class TimeSeriesTable extends JTable {
@@ -71,7 +70,7 @@ protected int mouseOver;
 			    if (row == mouseOver) {
 			    	textRefRenderer.showEdit(true);
 			        if(!isSelected) {
-			        	bgColor = new Color(255,255,220);
+			        	bgColor = new Color(200,200,255);
 			        } else {
 			        	bgColor = new Color(175,175,255);
 			        }
@@ -84,12 +83,11 @@ protected int mouseOver;
 			        }
 			    }
 			    textRefRenderer.setBackground(bgColor);
-			    if (value instanceof Container) {
-			    	Component[] children = ((Container) value).getComponents();
-			    	for (int ii = 0; (children != null) && (ii > children.length); ii++) {
-			    		children[ii].setBackground(bgColor);
-			    	}
-			    }
+			    
+		    	Component[] children = textRefRenderer.getComponents();
+		    	for (int ii = 0; (children != null) && (ii < children.length); ii++) {
+		    		children[ii].setBackground(bgColor);
+		    	}
 			    return textRefRenderer;
 		    } else {
 		    	return null; // TODO ?
@@ -104,7 +102,7 @@ protected int mouseOver;
 			    if (row == mouseOver) {
 			    	textRefEditor.showEdit(true);
 			        if(!isSelected) {
-			        	bgColor = new Color(255,255,220);
+			        	bgColor = new Color(200,200,255);
 			        } else {
 			        	bgColor = new Color(175,175,255);
 			        }
@@ -117,12 +115,11 @@ protected int mouseOver;
 			        }
 			    }
 			    textRefEditor.setBackground(bgColor);
-			    if (value instanceof Container) {
-			    	Component[] children = ((Container) value).getComponents();
-			    	for (int ii = 0; (children != null) && (ii > children.length); ii++) {
-			    		children[ii].setBackground(bgColor);
-			    	}
-			    }
+			    
+		    	Component[] children = textRefEditor.getComponents();
+		    	for (int ii = 0; (children != null) && (ii < children.length); ii++) {
+		    		children[ii].setBackground(bgColor);
+		    	}
 			    return textRefEditor;
 		    } else {
 		    	return null; //TODO ?

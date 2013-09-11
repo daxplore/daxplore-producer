@@ -26,7 +26,7 @@ import org.daxplore.producer.gui.tools.ToolsView;
 
 public class MainView {
 
-	private JFrame mainControllerFrame;
+	public JFrame mainControllerFrame;
 	final JPanel mainPanel = new JPanel();
 	private JPanel panel;
 	

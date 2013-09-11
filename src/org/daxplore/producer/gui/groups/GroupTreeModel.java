@@ -15,8 +15,8 @@ import javax.swing.tree.TreePath;
 import org.daxplore.producer.daxplorelib.DaxploreException;
 import org.daxplore.producer.daxplorelib.metadata.MetaData;
 import org.daxplore.producer.daxplorelib.metadata.MetaGroup;
-import org.daxplore.producer.daxplorelib.metadata.MetaQuestion;
 import org.daxplore.producer.daxplorelib.metadata.MetaGroup.GroupType;
+import org.daxplore.producer.daxplorelib.metadata.MetaQuestion;
 
 class GroupTreeModel implements TreeModel {
 

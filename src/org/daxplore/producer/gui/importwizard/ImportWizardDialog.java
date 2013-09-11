@@ -27,11 +27,8 @@ import org.daxplore.producer.gui.MainController;
  * uses a CardLayout manager, the order of the panels is not linear. Each panel
  * determines at runtime what its next and previous panel will be.
  */
+@SuppressWarnings("serial")
 public class ImportWizardDialog extends JDialog implements PropertyChangeListener, WindowListener {
-
-
-	private static final long serialVersionUID = 1L;
-	
 	// store instances of classes that will be used.
 	private MainController mainController;
 	private JDialog importWizardDialog;
@@ -121,8 +118,10 @@ public class ImportWizardDialog extends JDialog implements PropertyChangeListene
         //  be displayed. If the identifier passed in is null, then close
         //  the dialog.
         
-        if (id == null)
+        if (id == null) {
             close(ERROR_RETURN_CODE);
+            return;
+        }
         
         ImportWizardDescriptor oldPanelDescriptor = importWizardModel.getCurrentPanelDescriptor();
         if (oldPanelDescriptor != null)
@@ -135,8 +134,6 @@ public class ImportWizardDialog extends JDialog implements PropertyChangeListene
         
         cardLayout.show(contentPanel, id.toString());
         importWizardModel.getCurrentPanelDescriptor().displayingPanel();        
-        
-        
     }
 	
     // used to update button properties as events are triggered.
