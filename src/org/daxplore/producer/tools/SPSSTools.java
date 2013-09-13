@@ -52,7 +52,9 @@ public class SPSSTools {
 			sf2.loadMetadata();
 		} catch (SPSSFileException | IOException e) {
 			sf.close();
-			sf2.close();
+			if(sf2!=null) {
+				sf2.close();
+			}
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 			throw new Exception("Couldn't open file");

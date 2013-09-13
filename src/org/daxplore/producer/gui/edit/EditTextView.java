@@ -37,11 +37,17 @@ public class EditTextView extends JPanel {
 		public LocaleItem(Locale loc) {
 			this.loc = loc;
 		}
+		@Override
 		public String toString() {
 			return loc.getDisplayLanguage();
 		}
+		@Override
 		public boolean equals(Object o) {
-			return o!=null && o instanceof LocaleItem && ((LocaleItem)o).loc.equals(loc);
+			return o!=null && o instanceof LocaleItem && loc != null && loc.equals(((LocaleItem)o).loc);
+		}
+		@Override
+		public int hashCode() {
+			return loc==null ? 7 : loc.hashCode();
 		}
 	}
 	

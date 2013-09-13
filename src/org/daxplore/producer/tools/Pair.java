@@ -21,14 +21,37 @@ public class Pair<K, V> {
 		return "Key: " + key + "\tValue: " + value;
 	}
 
-	public boolean equals(Object otherPair) {
-		if(otherPair instanceof Pair) {
-			@SuppressWarnings("rawtypes")
-			Pair op = (Pair)otherPair;
-			return otherPair != null
-					&& ((op.key == null && key == null) || (key != null && key.equals(op.key)))
-					&& ((op.value == null && value == null) || (value != null && value.equals(op.value)));
-		}
-		return false;
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public int hashCode() {
+		final int prime = 23;
+		int result = 1;
+		result = prime * result + ((key == null) ? 0 : key.hashCode());
+		result = prime * result + ((value == null) ? 0 : value.hashCode());
+		return result;
 	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj) {
+			return true;
+		}
+		if (obj == null || !(obj instanceof Pair)) {
+			return false;
+		}
+		Pair other = (Pair) obj;
+		if ((key == null && other.key != null) || (key!=null  && !key.equals(other.key))) {
+			return false;
+		}
+		if ((value == null && other.value != null) || (value!=null && !value.equals(other.value))) {
+			return false;
+		}
+		return true;
+	}
+
 }
