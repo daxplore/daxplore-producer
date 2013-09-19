@@ -3,7 +3,6 @@ package org.daxplore.producer.tools;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
-import org.daxplore.producer.tools.NumberlineCoverage;
 import org.daxplore.producer.tools.NumberlineCoverage.NumberlineCoverageException;
 import org.junit.Test;
 

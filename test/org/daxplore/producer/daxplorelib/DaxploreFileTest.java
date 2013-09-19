@@ -8,8 +8,6 @@ import static org.junit.Assert.assertEquals;
 import java.io.File;
 import java.io.IOException;
 
-import org.daxplore.producer.daxplorelib.DaxploreException;
-import org.daxplore.producer.daxplorelib.DaxploreFile;
 import org.junit.Test;
 
 public class DaxploreFileTest {

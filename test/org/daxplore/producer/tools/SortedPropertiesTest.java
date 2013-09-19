@@ -14,8 +14,6 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Random;
 
-import org.daxplore.producer.tools.Pair;
-import org.daxplore.producer.tools.SortedProperties;
 import org.junit.Test;
 
 public class SortedPropertiesTest {

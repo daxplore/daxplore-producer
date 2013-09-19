@@ -70,7 +70,7 @@ public class CharsetPanel extends JPanel {
 		encodingComboBox.addActionListener(l);
 	}
 	
-	public void setEncodingList(JList list) {
+	public void setEncodingList(JList<String> list) {
 		encodingListPanel.getViewport().setView(list);
 		encodingListPanel.validate();
 	}

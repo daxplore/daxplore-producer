@@ -10,10 +10,6 @@ import java.io.File;
 import java.io.IOException;
 import java.util.Date;
 
-import org.daxplore.producer.daxplorelib.About;
-import org.daxplore.producer.daxplorelib.DaxploreException;
-import org.daxplore.producer.daxplorelib.DaxploreFile;
-import org.daxplore.producer.daxplorelib.DaxploreProperties;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;

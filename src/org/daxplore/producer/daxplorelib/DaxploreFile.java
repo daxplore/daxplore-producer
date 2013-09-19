@@ -122,10 +122,6 @@ public class DaxploreFile {
 		}
 	}
 	
-	public DaxploreMemoryFile getInMemoryFile() throws DaxploreException {
-		return DaxploreMemoryFile.createCopy(this);
-	}
-	
 	public void openSPSS(File spssFile, Charset charset) throws FileNotFoundException, IOException, DaxploreException {
 		FileFormatInfo ffi = new FileFormatInfo();
 		ffi.namesOnFirstLine = false;
