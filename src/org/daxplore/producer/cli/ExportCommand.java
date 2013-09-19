@@ -58,28 +58,27 @@ public class ExportCommand {
 			if(outfile.exists()) {
 				System.out.println("File " + outfile.getName() + " already exists");
 				return;
-			} else {
-				try {
-					outfile.createNewFile();
-					if(!outfile.canWrite()) {
-						System.out.println("Can't write to file: " + outfile.getName());
-						return;
-					} 
-				} catch (IOException e) {
-					System.out.println("Couln't create file: " + outfile.getName());
-					e.printStackTrace();
-					return;
-				}
-				FileWriter fw = null;
-				try {
-					fw = new FileWriter(outfile);
-				} catch (IOException e) {
-					System.out.println("Could not open file for writing");
-					e.printStackTrace();
-					return;
-				}
-				w = new BufferedWriter(fw);
 			}
+			try {
+				outfile.createNewFile();
+				if(!outfile.canWrite()) {
+					System.out.println("Can't write to file: " + outfile.getName());
+					return;
+				} 
+			} catch (IOException e) {
+				System.out.println("Couln't create file: " + outfile.getName());
+				e.printStackTrace();
+				return;
+			}
+			FileWriter fw = null;
+			try {
+				fw = new FileWriter(outfile);
+			} catch (IOException e) {
+				System.out.println("Could not open file for writing");
+				e.printStackTrace();
+				return;
+			}
+			w = new BufferedWriter(fw);
 			MetaData metadata;
 			try {
 				metadata = dax.getMetaData();

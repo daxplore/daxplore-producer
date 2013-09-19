@@ -240,13 +240,13 @@ public class MyTools {
 		System.err.println("Message: " + e.getMessage());
 		System.err.println("State: " + e.getSQLState());
 		System.err.println("Code: " + e.getErrorCode());
-		System.err.println(e.getStackTrace());
+		e.printStackTrace();
 		System.err.println("=================== Exception chain =====================");
 		Iterator<Throwable> ex = e.iterator();
 		while(ex.hasNext()) {
 			Throwable t = ex.next();
 			System.err.println(t.getMessage());
-			System.err.println(t.getStackTrace());
+			t.printStackTrace();
 		}
 		System.err.println("------ End of SQLException -------");
 	}

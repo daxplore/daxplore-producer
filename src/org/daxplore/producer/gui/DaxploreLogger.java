@@ -6,6 +6,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.logging.SimpleFormatter;
 
+//TODO fix broken logger
 public class DaxploreLogger {
 
 	  static private FileHandler fileTxt;
@@ -13,6 +14,7 @@ public class DaxploreLogger {
 
 	  static public void setup() throws IOException {
 
+		  //TODO logger settings are lost in OpenJDK (see FindBugs)
 	    // Get the global logger to configure it
 	    Logger logger = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
 
