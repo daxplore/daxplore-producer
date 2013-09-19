@@ -29,6 +29,7 @@ import org.daxplore.producer.daxplorelib.metadata.textreference.TextReferenceMan
 import org.daxplore.producer.daxplorelib.metadata.textreference.TextTree;
 import org.daxplore.producer.daxplorelib.raw.RawData;
 import org.daxplore.producer.daxplorelib.raw.RawMeta;
+import org.daxplore.producer.daxplorelib.raw.VariableType;
 import org.daxplore.producer.daxplorelib.raw.RawMeta.RawMetaQuestion;
 import org.daxplore.producer.tools.MyTools;
 import org.daxplore.producer.tools.NumberlineCoverage;
@@ -108,9 +109,8 @@ public class MetaData {
 				fulltext.put(rmq.qtext, locale);
 				MetaCalculation calc = new MetaCalculation(rmq.column, connection);
 				MetaScale scale = null;
-				switch(rmq.qtype) {
-				case MAPPED:
-					LinkedList<MetaScale.Option> scaleOptions = new LinkedList<MetaScale.Option>();
+				if(rmq.qtype == VariableType.MAPPED) {
+					LinkedList<MetaScale.Option> scaleOptions = new LinkedList<>();
 					for(int i = 0; i < rmq.valuelables.size(); i++) {
 						Pair<String, Double> s = rmq.valuelables.get(i);
 						TextReference ref = textsManager.get(rmq.column + "_option_" + i);
@@ -118,14 +118,10 @@ public class MetaData {
 						scaleOptions.add(new MetaScale.Option(ref, s.getValue(), new NumberlineCoverage(s.getValue()), true));
 					}
 					scale = metaScaleManager.create(scaleOptions, new NumberlineCoverage());
-					break;
-				default:
-					scale = null;
-					break;
 				}
 				
 				TextReference shorttext = textsManager.get(rmq.column + "_shorttext");
-				List<MetaTimepointShort> timepoints = new LinkedList<MetaTimepointShort>();
+				List<MetaTimepointShort> timepoints = new LinkedList<>();
 				metaQuestionManager.create(rmq.column, shorttext, fulltext, scale, calc, timepoints);
 			}
 		} catch (SQLException e) {
@@ -140,11 +136,11 @@ public class MetaData {
 		}
 	}
 	
-	public void importStructure(Reader r) throws IOException {
+	public void importStructure(Reader r) {
 		//TODO: XML
 	}
 	
-	public void exportStructure(Writer w) throws DaxploreException, IOException, SQLException{
+	public void exportStructure(Writer w) {
 		//TODO: XML
 	}
 	
@@ -186,8 +182,7 @@ public class MetaData {
 			}
 			break;
 		case CSV:
-			CSVReader csvReader = new CSVReader(reader);
-			try {
+			try (CSVReader csvReader = new CSVReader(reader)) {
 				for (String[] row : csvReader.readAll()) {
 					if(row.length==0) {
 						continue;
@@ -202,8 +197,6 @@ public class MetaData {
 			} catch (SQLException e) {
 				MyTools.printSQLExeption(e);
 				throw new DaxploreException("Error on Text import", e);
-			} finally {
-				csvReader.close();
 			}
 			break;
 		default:
@@ -282,9 +275,9 @@ public class MetaData {
 		
 		try {
 			List<MetaScale> scaleList = metaScaleManager.getAll();
-			List<MetaScale> uniqueScales = new LinkedList<MetaScale>();
-			List<MetaScale> genericScales = new LinkedList<MetaScale>();
-			LinkedHashMap<MetaScale, MetaScale> scaleMap = new LinkedHashMap<MetaScale, MetaScale>();
+			List<MetaScale> uniqueScales = new LinkedList<>();
+			List<MetaScale> genericScales = new LinkedList<>();
+			LinkedHashMap<MetaScale, MetaScale> scaleMap = new LinkedHashMap<>();
 			NextScale: for(MetaScale s: scaleList) {
 				//System.out.print("\n.");
 				for(MetaScale us: uniqueScales) {
@@ -293,7 +286,7 @@ public class MetaData {
 						//System.out.print("+");
 						//If scale exists previously, create new generic scale 
 						List<MetaScale.Option> oldrefs = us.getOptions();
-						List<MetaScale.Option> newrefs = new LinkedList<MetaScale.Option>();
+						List<MetaScale.Option> newrefs = new LinkedList<>();
 						for(int i = 0; i < oldrefs.size(); i++) {
 							TextReference tr = textsManager.get("generic" + (genericScales.size() +1) + "_option_" + i);
 							TextReference oldtr = oldrefs.get(i).textRef;
@@ -354,7 +347,7 @@ public class MetaData {
 		List<MetaTimepointShort> timepoints = metaTimepointManager.getAll();
 		int tpAdded = 0, questionsModified = 0;
 		for(MetaQuestion question : getAllQuestions()) {
-			List<MetaTimepointShort> questionTp = new LinkedList<MetaTimepointShort>();
+			List<MetaTimepointShort> questionTp = new LinkedList<>();
 			LinkedList<Pair<Double, Integer>> valueCounts = rawData.getColumnValueCountWhere(about.getTimeSeriesShortColumn(), question.getId());
 			questionTp.clear();
 			for(Pair<Double, Integer> pair : valueCounts) {
@@ -414,8 +407,8 @@ public class MetaData {
 		}
 	}
 	
-	public List<DaxploreTable> getTables() {
-		List<DaxploreTable> list = new LinkedList<DaxploreTable>();
+	public static List<DaxploreTable> getTables() {
+		List<DaxploreTable> list = new LinkedList<>();
 		
 		list.add(MetaCalculation.table);
 		
@@ -435,7 +428,7 @@ public class MetaData {
 		return list;
 	}
 	
-	public void saveAll() throws DaxploreException, SQLException {
+	public void saveAll() throws SQLException {
 		textsManager.saveAll();
 		metaScaleManager.saveAll();
 		metaQuestionManager.saveAll();

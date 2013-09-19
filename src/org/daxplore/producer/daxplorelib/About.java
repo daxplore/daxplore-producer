@@ -54,15 +54,14 @@ public class About {
 		this(sqliteDatabase, false);
 	}
 	
-	public About(Connection sqliteDatabase, boolean createnew) throws SQLException{ 
+	public About(Connection sqliteDatabase, boolean createnew) throws SQLException { 
 		this.connection = sqliteDatabase;
-		locales = new TreeSet<Locale>(new Comparator<Locale>() {
+		locales = new TreeSet<>(new Comparator<Locale>() {
 			@Override
 			public int compare(Locale o1, Locale o2) {
 				return o1.getDisplayLanguage().compareTo(o2.getDisplayLanguage());
 			}
 		});
-		Statement stmt;
 		if(createnew){
 			filetypeversionmajor = DaxploreProperties.filetypeversionmajor;
 			filetypeversionminor = DaxploreProperties.filetypeversionminor;
@@ -75,25 +74,25 @@ public class About {
 			modified = true;
 			firstSave = true;
 		}else{
-			stmt = connection.createStatement();
-			stmt.execute("SELECT * FROM about");
-			ResultSet rs = stmt.getResultSet();
-			rs.next();
-			filetypeversionmajor = rs.getInt("filetypeversionmajor");
-			filetypeversionminor = rs.getInt("filetypeversionminor");
-			creation = rs.getDate("creation");
-			lastupdate = rs.getDate("lastupdate");
-			importdate = rs.getDate("importdate");
-			filename = rs.getString("filename");
-			timeSeriesType = TimeSeriesType.valueOf(rs.getString("timeseriestype"));
-			timeSeriesShortColumn = rs.getString("timeshortcolumn");
-			
-			rs = stmt.executeQuery("SELECT locale FROM locales");
-			while(rs.next()) {
-				locales.add(new Locale(rs.getString("locale")));
+			try (Statement stmt = connection.createStatement()) {
+				stmt.execute("SELECT * FROM about");
+				try(ResultSet rs = stmt.getResultSet()) {
+					rs.next();
+					filetypeversionmajor = rs.getInt("filetypeversionmajor");
+					filetypeversionminor = rs.getInt("filetypeversionminor");
+					creation = rs.getDate("creation");
+					lastupdate = rs.getDate("lastupdate");
+					importdate = rs.getDate("importdate");
+					filename = rs.getString("filename");
+					timeSeriesType = TimeSeriesType.valueOf(rs.getString("timeseriestype"));
+					timeSeriesShortColumn = rs.getString("timeshortcolumn");
+				}
+				try(ResultSet rs = stmt.executeQuery("SELECT locale FROM locales")) {
+					while(rs.next()) {
+						locales.add(new Locale(rs.getString("locale")));
+					}
+				}
 			}
-
-			stmt.close();
 		}
 	}
 	
@@ -104,57 +103,60 @@ public class About {
 	
 	public void save() throws SQLException {
 		if(modified) {
-			PreparedStatement updateStmt;
+			String stmtString;
 			if(firstSave) {
-				updateStmt = connection.prepareStatement(
+				stmtString = 
 						"INSERT INTO about (filetypeversionmajor, filetypeversionminor, creation," +
 						"lastupdate, importdate, filename, timeseriestype, timeshortcolumn) " +
-						"VALUES (?, ?, ?, ?, ?, ?, ?, ?)");
+						"VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
 				firstSave = false;
 			} else {
-				updateStmt = connection.prepareStatement(
+				stmtString =
 						"UPDATE about SET filetypeversionmajor = ?, filetypeversionminor = ?, creation = ?," +
-						"lastupdate = ?, importdate = ?, filename = ?, timeseriestype = ?, timeshortcolumn = ?");
+						"lastupdate = ?, importdate = ?, filename = ?, timeseriestype = ?, timeshortcolumn = ?";
 			}
-			Date now = new Date();
-			updateStmt.setInt(1, filetypeversionmajor);
-			updateStmt.setInt(2, filetypeversionminor);
-			updateStmt.setLong(3, creation.getTime());
-			updateStmt.setLong(4, now.getTime());
-			
-			if(importdate!=null) {
-				updateStmt.setLong(5, importdate.getTime());
-			} else {
-				updateStmt.setNull(5, Types.INTEGER);
+			try(PreparedStatement updateStmt = connection.prepareStatement(stmtString)) {
+				Date now = new Date();
+				updateStmt.setInt(1, filetypeversionmajor);
+				updateStmt.setInt(2, filetypeversionminor);
+				updateStmt.setLong(3, creation.getTime());
+				updateStmt.setLong(4, now.getTime());
+				
+				if(importdate!=null) {
+					updateStmt.setLong(5, importdate.getTime());
+				} else {
+					updateStmt.setNull(5, Types.INTEGER);
+				}
+				
+				if(filename!=null) {
+					updateStmt.setString(6, filename);
+				} else {
+					updateStmt.setNull(6, Types.VARCHAR);
+				}
+				
+				updateStmt.setString(7, timeSeriesType.name());
+				
+				if(timeSeriesShortColumn!=null) {
+					updateStmt.setString(8, timeSeriesShortColumn);
+				} else {
+					updateStmt.setNull(8, Types.VARCHAR);
+				}
+				
+				updateStmt.executeUpdate();
+				modified = false;
 			}
-			
-			if(filename!=null) {
-				updateStmt.setString(6, filename);
-			} else {
-				updateStmt.setNull(6, Types.VARCHAR);
-			}
-			
-			updateStmt.setString(7, timeSeriesType.name());
-			
-			if(timeSeriesShortColumn!=null) {
-				updateStmt.setString(8, timeSeriesShortColumn);
-			} else {
-				updateStmt.setNull(8, Types.VARCHAR);
-			}
-			
-			
-			updateStmt.executeUpdate();
-			updateStmt.close();
-			modified = false;
 		}
 		if(localesModified) {
-			connection.createStatement().executeUpdate("DELETE FROM locales");
-			PreparedStatement insertLocaleStmt = connection.prepareStatement("INSERT INTO locales (locale) VALUES (?)");
-			for(Locale l : locales) {
-				insertLocaleStmt.setString(1, l.toLanguageTag());
-				insertLocaleStmt.addBatch();
+			try(Statement stmt = connection.createStatement()) {
+				stmt.executeUpdate("DELETE FROM locales");
 			}
-			insertLocaleStmt.executeBatch();
+			try(PreparedStatement insertLocaleStmt = connection.prepareStatement("INSERT INTO locales (locale) VALUES (?)")) {
+				for(Locale l : locales) {
+					insertLocaleStmt.setString(1, l.toLanguageTag());
+					insertLocaleStmt.addBatch();
+				}
+				insertLocaleStmt.executeBatch();
+			}
 			localesModified = false;
 		}
 	}
@@ -171,7 +173,7 @@ public class About {
 		return importdate;
 	}
 	
-	public void setImport(String filename) throws SQLException {
+	public void setImport(String filename) {
 		Date now = new Date();
 		this.filename = filename;
 		this.importdate = now;
@@ -182,7 +184,7 @@ public class About {
 		return filename;
 	}
 	
-	public void setTimeSeriesType(TimeSeriesType timeSeriesType) throws SQLException {
+	public void setTimeSeriesType(TimeSeriesType timeSeriesType) {
 		this.timeSeriesType = timeSeriesType;
 		modified = true;
 	}
@@ -191,7 +193,7 @@ public class About {
 		return timeSeriesType;
 	}
 	
-	public void setTimeSeriesShortColumn(String column) throws SQLException {
+	public void setTimeSeriesShortColumn(String column) {
 		timeSeriesShortColumn = column;
 		modified = true;
 	}
@@ -209,6 +211,6 @@ public class About {
 	}
 	
 	public List<Locale> getLocales() {
-		return new LinkedList<Locale>(locales);
+		return new LinkedList<>(locales);
 	}
 }

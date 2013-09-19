@@ -18,27 +18,26 @@ public class MetaCalculation {
 	}
 	
 	public MetaCalculation(String column, Connection connection) throws SQLException {
-		PreparedStatement stmt = connection.prepareStatement("SELECT * FROM metacalc WHERE column = ?");
-		stmt.setString(1, column);
-		ResultSet rs = stmt.executeQuery();
-		if(rs.next()) {
-			this.id = rs.getInt("id");
+		try(PreparedStatement stmt = connection.prepareStatement("SELECT * FROM metacalc WHERE column = ?")) {
+			stmt.setString(1, column);
+			try (ResultSet rs = stmt.executeQuery()) {
+				if(rs.next()) {
+					this.id = rs.getInt("id");
+				}
+			}
 		}
-		rs.close();
-		stmt.close();
 	}
 	
 	public String getColumn() throws SQLException{
-		PreparedStatement stmt = connection.prepareStatement("SELECT column FROM metacalc WHERE id = ?");
-		stmt.setInt(1, id);
-		ResultSet rs = stmt.executeQuery();
-		if(rs.next()) {
-			String column = rs.getString("column");
-			stmt.close();
-			return column;
-		} else {
-			stmt.close();
-			return null;
+		try (PreparedStatement stmt = connection.prepareStatement("SELECT column FROM metacalc WHERE id = ?")) {
+			stmt.setInt(1, id);
+			try(ResultSet rs = stmt.executeQuery()) {
+				if(!rs.next()) {
+					return null;
+				}
+				String column = rs.getString("column");
+				return column;
+			}
 		}
 	}
 	

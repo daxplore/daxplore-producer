@@ -15,7 +15,7 @@ import com.google.gson.JsonPrimitive;
 
 public class BarStats {
 	
-	LinkedHashMap<MetaTimepointShort, BarGroups> data = new LinkedHashMap<MetaTimepointShort, BarGroups>();
+	LinkedHashMap<MetaTimepointShort, BarGroups> data = new LinkedHashMap<>();
 	private MetaQuestion question, perspective;
 	
 	public static class BarGroups {
@@ -23,7 +23,7 @@ public class BarStats {
 		int[] all;
 		
 		public BarGroups(int[][] barsData, int[] all) {
-			bars = new LinkedList<int[]>();
+			bars = new LinkedList<>();
 			for(int i = 0; i < barsData.length; i++) {
 				bars.add(barsData[i]);
 			}

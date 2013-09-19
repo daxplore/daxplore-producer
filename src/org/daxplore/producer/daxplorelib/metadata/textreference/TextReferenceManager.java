@@ -25,7 +25,7 @@ public class TextReferenceManager {
 	public static final DaxploreTable table = new DaxploreTable("CREATE TABLE texts (ref TEXT NOT NULL, locale TEXT, text TEXT NOT NULL, UNIQUE ( ref, locale) )", "texts");
 
 	Connection connection;
-	Map<String, TextReference> toBeRemoved = new HashMap<String, TextReference>();
+	Map<String, TextReference> toBeRemoved = new HashMap<>();
 	
 	TextTree textTree = new TextTree();
 	
@@ -52,16 +52,18 @@ public class TextReferenceManager {
 		TextReference tr = textTree.get(refstring);
 		if(tr == null) {
 			boolean newTextReference = true;
-			PreparedStatement stmt = connection.prepareStatement("SELECT * FROM texts where ref = ?");
-			stmt.setString(1, refstring);
-			ResultSet rs = stmt.executeQuery();
-			Map<Locale, String> localeMap = new SmallMap<Locale, String>();
-			while(rs.next()) {
-				String loc = rs.getString("locale");
-				if(loc != null && !"".equals(loc)) { //TODO verify that we want to create it?
-					localeMap.put(new Locale(rs.getString("locale")), rs.getString("text"));						
+			Map<Locale, String> localeMap = new SmallMap<>();
+			try (PreparedStatement stmt = connection.prepareStatement("SELECT * FROM texts where ref = ?")) {
+				stmt.setString(1, refstring);
+				try(ResultSet rs = stmt.executeQuery()) {
+					while(rs.next()) {
+						String loc = rs.getString("locale");
+						if(loc != null && !loc.isEmpty()) { //TODO verify that we want to create it?
+							localeMap.put(new Locale(rs.getString("locale")), rs.getString("text"));						
+						}
+						newTextReference = false;
+					}
 				}
-				newTextReference = false;
 			}
 			if(newTextReference) {
 				nNew++;
@@ -74,73 +76,74 @@ public class TextReferenceManager {
 		return tr;
 	}
 	
-	public void remove(String refstring) throws SQLException {
+	public void remove(String refstring) {
 		toBeRemoved.put(refstring, textTree.remove(refstring));
 	}
 	
 	public void saveAll() throws SQLException {
-		PreparedStatement insertTextrefStmt = connection.prepareStatement("INSERT OR REPLACE INTO texts (ref, locale, text) VALUES (?, ? , ?)");
-		PreparedStatement selectLocalesStmt = connection.prepareStatement("SELECT locale FROM texts WHERE ref = ?");
-		PreparedStatement deleteTextrefLocaleStmt = connection.prepareStatement("DELETE FROM texts WHERE ref = ? AND locale = ?");
-		
-		int nRemoved = 0;
-		int nModified = 0;
-
-		//Delete those marked to be removed
-		PreparedStatement deleteTextrefStmt = connection.prepareStatement("DELETE FROM texts WHERE ref = ?");
-		for(TextReference tr: toBeRemoved.values()) {
-			nRemoved++;
-			deleteTextrefStmt.setString(1, tr.reference);
-			deleteTextrefStmt.addBatch();
-		}
-		deleteTextrefStmt.executeBatch();
-		toBeRemoved.clear();
-		
-		for(TextReferenceReference trr: textTree) {
-			TextReference tr = (TextReference)trr;
-			if(tr.modified) {
-				nModified++;
-				//first get existing locales
-				Set<Locale> oldLocs = new HashSet<Locale>();
-				selectLocalesStmt.setString(1, tr.reference);
-				ResultSet rs = selectLocalesStmt.executeQuery();
-				while(rs.next()) {
-					String loc = rs.getString("locale");
-					if(loc != null && !"".equals(loc)) {
-						oldLocs.add(new Locale(loc));
-					}
-				}
-				if(tr.localeMap.size() > 0) {
-					for(Locale l: tr.localeMap.keySet()) {
-						oldLocs.remove(l);
-						insertTextrefStmt.setString(1, tr.reference);
-						insertTextrefStmt.setString(2, l.toLanguageTag());
-						String trtext = tr.get(l);
-						if (trtext == null) {
-							trtext = "";
+		int nRemoved = 0, nModified = 0;
+		try (
+			PreparedStatement insertTextrefStmt = connection.prepareStatement("INSERT OR REPLACE INTO texts (ref, locale, text) VALUES (?, ? , ?)");
+			PreparedStatement selectLocalesStmt = connection.prepareStatement("SELECT locale FROM texts WHERE ref = ?");
+			PreparedStatement deleteTextrefLocaleStmt = connection.prepareStatement("DELETE FROM texts WHERE ref = ? AND locale = ?");
+			PreparedStatement deleteTextrefStmt = connection.prepareStatement("DELETE FROM texts WHERE ref = ?");
+		) {
+			//Delete those marked to be removed
+			for(TextReference tr: toBeRemoved.values()) {
+				nRemoved++;
+				deleteTextrefStmt.setString(1, tr.reference);
+				deleteTextrefStmt.addBatch();
+			}
+			deleteTextrefStmt.executeBatch();
+			toBeRemoved.clear();
+			
+			for(TextReferenceReference trr: textTree) {
+				TextReference tr = (TextReference)trr;
+				if(tr.modified) {
+					nModified++;
+					//first get existing locales
+					Set<Locale> oldLocs = new HashSet<>();
+					selectLocalesStmt.setString(1, tr.reference);
+					try (ResultSet rs = selectLocalesStmt.executeQuery()) {
+						while(rs.next()) {
+							String loc = rs.getString("locale");
+							if(loc != null && !"".equals(loc)) {
+								oldLocs.add(new Locale(loc));
+							}
 						}
-						insertTextrefStmt.setString(3, trtext);
-						insertTextrefStmt.executeUpdate(); //TODO: figure out why batch dosn't work here.
 					}
+					if(tr.localeMap.size() > 0) {
+						for(Locale l: tr.localeMap.keySet()) {
+							oldLocs.remove(l);
+							insertTextrefStmt.setString(1, tr.reference);
+							insertTextrefStmt.setString(2, l.toLanguageTag());
+							String trtext = tr.get(l);
+							if (trtext == null) {
+								trtext = "";
+							}
+							insertTextrefStmt.setString(3, trtext);
+							insertTextrefStmt.executeUpdate(); //TODO: figure out why batch dosn't work here.
+						}
+						
+						deleteTextrefLocaleStmt.setString(1, tr.reference);
+						deleteTextrefLocaleStmt.setNull(2, Types.VARCHAR);
+						deleteTextrefLocaleStmt.executeUpdate();
+					} else {
+						insertTextrefStmt.setString(1, tr.reference);
+						insertTextrefStmt.setNull(2, Types.VARCHAR);
+						insertTextrefStmt.setString(3, "");
+						insertTextrefStmt.executeUpdate();
+					}
+						
+					for(Locale l: oldLocs) {
+						deleteTextrefLocaleStmt.setString(1, tr.reference);
+						deleteTextrefLocaleStmt.setString(2, l.toLanguageTag());
+						deleteTextrefLocaleStmt.addBatch();
+					}
+					deleteTextrefLocaleStmt.executeBatch();
 					
-					deleteTextrefLocaleStmt.setString(1, tr.reference);
-					deleteTextrefLocaleStmt.setNull(2, Types.VARCHAR);
-					deleteTextrefLocaleStmt.executeUpdate();
-				} else {
-					insertTextrefStmt.setString(1, tr.reference);
-					insertTextrefStmt.setNull(2, Types.VARCHAR);
-					insertTextrefStmt.setString(3, "");
-					insertTextrefStmt.executeUpdate();
+					tr.modified = false;
 				}
-					
-				for(Locale l: oldLocs) {
-					deleteTextrefLocaleStmt.setString(1, tr.reference);
-					deleteTextrefLocaleStmt.setString(2, l.toLanguageTag());
-					deleteTextrefLocaleStmt.addBatch();
-				}
-				deleteTextrefLocaleStmt.executeBatch();
-				
-				tr.modified = false;
 			}
 		}
 		
@@ -154,26 +157,28 @@ public class TextReferenceManager {
 	
 
 	public List<Locale> getAllLocales() throws SQLException { //TODO read from local data, load from databse
-		Statement stmt = connection.createStatement();
-		ResultSet rs = stmt.executeQuery("SELECT DISTINCT locale FROM texts ORDER BY locale");
-		List<Locale> list = new LinkedList<Locale>();
-		while(rs.next()) {
-			String loc = rs.getString("locale");
-			if(!rs.wasNull() && !"".equals(loc)) {
-				list.add(new Locale(loc));
+		List<Locale> list = new LinkedList<>();
+		try (Statement stmt = connection.createStatement();
+				ResultSet rs = stmt.executeQuery("SELECT DISTINCT locale FROM texts ORDER BY locale");
+				) {
+			while(rs.next()) {
+				String loc = rs.getString("locale");
+				if(!rs.wasNull() && !"".equals(loc)) {
+					list.add(new Locale(loc));
+				}
 			}
 		}
-		stmt.close();
 		return list;
 	}
 
 	public TextTree getAll() throws SQLException {
 		// make sure all references are cached before returning the content of the tree
-		ResultSet rs = connection.createStatement().executeQuery("SELECT ref FROM texts");
-		while(rs.next()) {
-			String id = rs.getString("ref");
-			if(!textTree.contains(new TextReferenceReference(id)) && !toBeRemoved.containsKey(id)) {
-				get(rs.getString("ref"));
+		try (ResultSet rs = connection.createStatement().executeQuery("SELECT ref FROM texts")) {
+			while(rs.next()) {
+				String id = rs.getString("ref");
+				if(!textTree.contains(new TextReferenceReference(id)) && !toBeRemoved.containsKey(id)) {
+					get(rs.getString("ref"));
+				}
 			}
 		}
 		return textTree;

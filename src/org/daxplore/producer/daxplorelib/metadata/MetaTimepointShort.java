@@ -30,10 +30,10 @@ public class MetaTimepointShort implements Comparable<MetaTimepointShort> {
 	
 	//TODO handle timeindexes (unique, swappable, etc.)
 	public static class MetaTimepointShortManager {
-		private Map<Integer, MetaTimepointShort> pointMap = new HashMap<Integer, MetaTimepointShort>();
-		private List<MetaTimepointShort> toBeAdded = new LinkedList<MetaTimepointShort>();
+		private Map<Integer, MetaTimepointShort> pointMap = new HashMap<>();
+		private List<MetaTimepointShort> toBeAdded = new LinkedList<>();
 		private int addDelta = 0;
-		private Map<Integer, MetaTimepointShort> toBeRemoved = new HashMap<Integer, MetaTimepointShort>();
+		private Map<Integer, MetaTimepointShort> toBeRemoved = new HashMap<>();
 		
 		private Connection connection;
 		private TextReferenceManager textReferenceManager;
@@ -55,19 +55,20 @@ public class MetaTimepointShort implements Comparable<MetaTimepointShort> {
 				throw new DaxploreException("No timepoint with id '"+id+"'");
 			}
 			
-			PreparedStatement stmt = connection.prepareStatement("SELECT * FROM timepoints WHERE id = ?");
-			stmt.setInt(1, id);
-			ResultSet rs = stmt.executeQuery();
-			if(rs.next()) {
-				TextReference textref = textReferenceManager.get(rs.getString("textref"));
-				int timeindex = rs.getInt("timeindex"); 
-				double value = rs.getDouble("value");
-				rs.close();			
-				MetaTimepointShort timepoint = new MetaTimepointShort(id, textref, timeindex, value);
-				pointMap.put(id, timepoint);
-				return timepoint;
-			} else {
-				throw new DaxploreException("No timepoint with id '"+id+"'");
+			try (PreparedStatement stmt = connection.prepareStatement("SELECT * FROM timepoints WHERE id = ?")) {
+				stmt.setInt(1, id);
+				try (ResultSet rs = stmt.executeQuery()) {
+					if(!rs.next()) {
+						throw new DaxploreException("No timepoint with id '"+id+"'");
+					}
+					TextReference textref = textReferenceManager.get(rs.getString("textref"));
+					int timeindex = rs.getInt("timeindex"); 
+					double value = rs.getDouble("value");
+					rs.close();			
+					MetaTimepointShort timepoint = new MetaTimepointShort(id, textref, timeindex, value);
+					pointMap.put(id, timepoint);
+					return timepoint;
+				}
 			}
 		}
 		
@@ -89,46 +90,48 @@ public class MetaTimepointShort implements Comparable<MetaTimepointShort> {
 		}
 		
 		public void saveAll() throws SQLException {
-			PreparedStatement deleteStmt = connection.prepareStatement("DELETE FROM timepoints WHERE id = ?");
-			PreparedStatement insertStmt = connection.prepareStatement("INSERT INTO timepoints (id, textref, timeindex, value) VALUES (?, ?, ?, ?)");
-			
 			int nNew = 0, nModified = 0, nRemoved = 0;
+			try (
+				PreparedStatement deleteStmt = connection.prepareStatement("DELETE FROM timepoints WHERE id = ?");
+				PreparedStatement insertStmt = connection.prepareStatement("INSERT INTO timepoints (id, textref, timeindex, value) VALUES (?, ?, ?, ?)");
+			) {
 			
-			for(MetaTimepointShort timepoint : pointMap.values()) {
-				if(timepoint.modified) {
-					nModified++;
+				for(MetaTimepointShort timepoint : pointMap.values()) {
+					if(timepoint.modified) {
+						nModified++;
+						deleteStmt.setInt(1, timepoint.id);
+						deleteStmt.addBatch();
+						insertStmt.setInt(1, timepoint.id);
+						insertStmt.setString(2, timepoint.textref.getRef());
+						insertStmt.setInt(3, timepoint.timeindex);
+						insertStmt.setDouble(4, timepoint.value);
+						insertStmt.addBatch();
+						timepoint.modified = false;
+					}
+				}
+				deleteStmt.executeBatch();
+				insertStmt.executeBatch();
+	
+				for(MetaTimepointShort timepoint : toBeRemoved.values()) {
+					nRemoved++;
 					deleteStmt.setInt(1, timepoint.id);
 					deleteStmt.addBatch();
+				}
+				deleteStmt.executeBatch();
+				toBeRemoved.clear();
+				
+				for(MetaTimepointShort timepoint : toBeAdded) {
+					nNew++;
 					insertStmt.setInt(1, timepoint.id);
 					insertStmt.setString(2, timepoint.textref.getRef());
 					insertStmt.setInt(3, timepoint.timeindex);
 					insertStmt.setDouble(4, timepoint.value);
 					insertStmt.addBatch();
-					timepoint.modified = false;
 				}
+				insertStmt.executeBatch();
+				toBeAdded.clear();
+				addDelta = 0;
 			}
-			deleteStmt.executeBatch();
-			insertStmt.executeBatch();
-
-			for(MetaTimepointShort timepoint : toBeRemoved.values()) {
-				nRemoved++;
-				deleteStmt.setInt(1, timepoint.id);
-				deleteStmt.addBatch();
-			}
-			deleteStmt.executeBatch();
-			toBeRemoved.clear();
-			
-			for(MetaTimepointShort timepoint : toBeAdded) {
-				nNew++;
-				insertStmt.setInt(1, timepoint.id);
-				insertStmt.setString(2, timepoint.textref.getRef());
-				insertStmt.setInt(3, timepoint.timeindex);
-				insertStmt.setDouble(4, timepoint.value);
-				insertStmt.addBatch();
-			}
-			insertStmt.executeBatch();
-			toBeAdded.clear();
-			addDelta = 0;
 			
 			if(nModified != 0 || nNew != 0 || nRemoved != 0) {
 				String logString = String.format("MetaTimePoint: Saved %d (%d new), %d removed", nModified+nNew, nNew, nRemoved);
@@ -138,15 +141,16 @@ public class MetaTimepointShort implements Comparable<MetaTimepointShort> {
 		
 		public List<MetaTimepointShort> getAll() throws SQLException, DaxploreException {
 			// make sure all timepoints are cached before returning the content of the map
-			Statement stmt = connection.createStatement();
-			ResultSet rs = stmt.executeQuery("SELECT id FROM timepoints ORDER BY timeindex ASC");
-			while(rs.next()) {
-				int id = rs.getInt("id");
-				if(!pointMap.containsKey(id) && !toBeRemoved.containsKey(id)) {
-					get(id);
+			try (Statement stmt = connection.createStatement();
+			ResultSet rs = stmt.executeQuery("SELECT id FROM timepoints ORDER BY timeindex ASC")) {
+				while(rs.next()) {
+					int id = rs.getInt("id");
+					if(!pointMap.containsKey(id) && !toBeRemoved.containsKey(id)) {
+						get(id);
+					}
 				}
 			}
-			List<MetaTimepointShort> pointList = new LinkedList<MetaTimepointShort>(pointMap.values());
+			List<MetaTimepointShort> pointList = new LinkedList<>(pointMap.values());
 			Collections.sort(pointList);
 			return pointList;
 		}

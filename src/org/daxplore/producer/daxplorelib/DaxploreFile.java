@@ -201,47 +201,43 @@ public class DaxploreFile {
 	}
 	
 	public void importSPSS(File spssFile, Charset charset) throws FileNotFoundException, IOException, DaxploreException{
-		SPSSFile sf = null;
 		FileFormatInfo ffi = new FileFormatInfo();
 		ffi.namesOnFirstLine = false;
 		ffi.asciiFormat = ASCIIFormat.CSV;
 		ffi.compatibility = Compatibility.GENERIC;
-		try {
-			sf = new SPSSFile(spssFile,charset);
-			sf.logFlag = false;
-			sf.loadMetadata();
+		
+		try (SPSSFile importSPSSFile = new SPSSFile(spssFile,charset)) {
+			importSPSSFile.logFlag = false;
+			importSPSSFile.loadMetadata();
+		
+			boolean autocommit = false;
+			try {
+				autocommit = connection.getAutoCommit();
+				connection.setAutoCommit(false);
+				int isolation = connection.getTransactionIsolation();
+				connection.setTransactionIsolation(Connection.TRANSACTION_READ_UNCOMMITTED);
+				
+				RawImport rawImport = new RawImport(connection);
+				rawImport.importSPSS(importSPSSFile, charset);
+					
+				about.setImport(importSPSSFile.file.getName());
+				
+				connection.commit();
+				connection.setTransactionIsolation(isolation);
+				connection.setAutoCommit(autocommit);
+			} catch (SQLException e) {
+				MyTools.printSQLExeption(e);
+				try {
+					connection.rollback();
+					connection.setAutoCommit(autocommit);
+				} catch (SQLException e1) {
+					throw new DaxploreException("Import error. Could not rollback.", e);
+				}
+				throw new DaxploreException("Import error.", e);
+			}
 		} catch (SPSSFileException e2) {
-			sf.close();
 			throw new DaxploreException("SPSSFileException", e2);
 		}
-		
-		boolean autocommit = true;
-		try {
-			autocommit = connection.getAutoCommit();
-			connection.setAutoCommit(false);
-			int isolation = connection.getTransactionIsolation();
-			connection.setTransactionIsolation(Connection.TRANSACTION_READ_UNCOMMITTED);
-			
-			RawImport rawImport = new RawImport(connection);
-
-			rawImport.importSPSS(sf, charset);
-
-				
-			about.setImport(sf.file.getName());
-			
-			connection.commit();
-			connection.setTransactionIsolation(isolation);
-			connection.setAutoCommit(autocommit);
-		} catch (SQLException e) {
-			MyTools.printSQLExeption(e);
-			try {
-				connection.rollback();
-			} catch (SQLException e1) {
-				throw new DaxploreException("Import error. Could not rollback.", e);
-			}
-			throw new DaxploreException("Import error.", e);
-		}
-		sf.close();
 	}
 	
 	public About getAbout(){
@@ -262,13 +258,12 @@ public class DaxploreFile {
 	public MetaData getMetaData() throws DaxploreException {
 		if(metadata != null) {
 			return metadata;
-		} else {
-			try {
-				metadata = new MetaData(connection, getAbout(), getImportedData().getRawData());
-				return metadata;
-			} catch (SQLException e) {
-				throw new DaxploreException("Couldn't get metadata", e);
-			}
+		}
+		try {
+			metadata = new MetaData(connection, getAbout(), getImportedData().getRawData());
+			return metadata;
+		} catch (SQLException e) {
+			throw new DaxploreException("Couldn't get metadata", e);
 		}
 	}
 	
@@ -315,15 +310,15 @@ public class DaxploreFile {
 		return file;
 	}
 	
-	protected List<DaxploreTable> getTables() throws DaxploreException {
-		List<DaxploreTable> list = new LinkedList<DaxploreTable>();
+	protected List<DaxploreTable> getTables() {
+		List<DaxploreTable> list = new LinkedList<>();
 		list.add(About.table);
-		list.addAll(getMetaData().getTables());
+		list.addAll(MetaData.getTables());
 		list.addAll(getImportedData().getTables());
 		return list;
 	}
 	
-	public void writeUploadFile(File file) throws TransformerFactoryConfigurationError, TransformerException, SQLException, DaxploreException, SAXException, IOException, ParserConfigurationException {
+	public void writeUploadFile(File outputFile) throws TransformerFactoryConfigurationError, TransformerException, SQLException, DaxploreException, SAXException, IOException, ParserConfigurationException {
 		long time = System.nanoTime();
 		Logger.getGlobal().log(Level.INFO, "Starting to generate json data");
 		
@@ -332,7 +327,7 @@ public class DaxploreFile {
 		
 
 		MetaGroup perspectives = getMetaData().getMetaGroupManager().getPerspectiveGroup();
-		SortedSet<MetaQuestion> selectedQuestions = new TreeSet<MetaQuestion>(new Comparator<MetaQuestion>() {
+		SortedSet<MetaQuestion> selectedQuestions = new TreeSet<>(new Comparator<MetaQuestion>() {
 			@Override
 			public int compare(MetaQuestion o1, MetaQuestion o2) {
 				return o1.getId().compareTo(o2.getId());
@@ -354,60 +349,60 @@ public class DaxploreFile {
 		Logger.getGlobal().log(Level.INFO, "Generated data in " + ((System.nanoTime() -time)/Math.pow(10,9)) + "s");
 		time = System.nanoTime();
 		
-		ZipOutputStream zout = new ZipOutputStream(new FileOutputStream(file));
-//manifest
-		Document manifest = getUploadManifest();
-		Transformer transformer = TransformerFactory.newInstance().newTransformer();
-		transformer.setOutputProperty(OutputKeys.INDENT, "yes");
-		transformer.setOutputProperty("{http://xml.apache.org/xslt}indent-amount", "4");
-		DOMSource xmlSource = new DOMSource(manifest);
-		ZipEntry entry = new ZipEntry("manifest.xml");
-	    zout.putNextEntry(entry);
-		StreamResult streamResult = new StreamResult(zout);
-		transformer.transform(xmlSource, streamResult);
-		zout.flush();
-		zout.closeEntry();
+		try (ZipOutputStream zout = new ZipOutputStream(new FileOutputStream(outputFile))) {
+			//manifest
+			Document manifest = getUploadManifest();
+			Transformer transformer = TransformerFactory.newInstance().newTransformer();
+			transformer.setOutputProperty(OutputKeys.INDENT, "yes");
+			transformer.setOutputProperty("{http://xml.apache.org/xslt}indent-amount", "4");
+			DOMSource xmlSource = new DOMSource(manifest);
+			ZipEntry entry = new ZipEntry("manifest.xml");
+		    zout.putNextEntry(entry);
+			StreamResult streamResult = new StreamResult(zout);
+			transformer.transform(xmlSource, streamResult);
+			zout.flush();
+			zout.closeEntry();
 
-		StreamResult streamResultSystem = new StreamResult(System.out);
-		transformer.transform(xmlSource, streamResultSystem);
-		
-		Gson plainGson = new Gson();
-		Gson prettyGson = new GsonBuilder().setPrettyPrinting().create();
-		
-		// Generate a single json string and replace "}}},{" with "}}},\n{" to create rows in the file
-		writeZipString(zout, "data/data.json", plainGson.toJson(dataJSON).replaceAll("(}}},\\{)", "}}},\n{")); 
-		
-		for(Locale locale : getAbout().getLocales()) {
-			JsonArray questionJSON = new JsonArray();
-			for(MetaQuestion q : selectedQuestions) {
-				questionJSON.add(q.toJSONObject(locale));
+			StreamResult streamResultSystem = new StreamResult(System.out);
+			transformer.transform(xmlSource, streamResultSystem);
+			
+			Gson plainGson = new Gson();
+			Gson prettyGson = new GsonBuilder().setPrettyPrinting().create();
+			
+			// Generate a single json string and replace "}}},{" with "}}},\n{" to create rows in the file
+			writeZipString(zout, "data/data.json", plainGson.toJson(dataJSON).replaceAll("(}}},\\{)", "}}},\n{")); 
+			
+			for(Locale locale : getAbout().getLocales()) {
+				JsonArray questionJSON = new JsonArray();
+				for(MetaQuestion q : selectedQuestions) {
+					questionJSON.add(q.toJSONObject(locale));
+				}
+				
+				String propertiesJSONString = prettyGson.toJson(getPropertiesJson(locale));
+				writeZipString(zout, "properties/usertexts_"+locale.toLanguageTag()+".json", propertiesJSONString);
+				
+				writeZipString(zout, "meta/questions_"+locale.toLanguageTag()+".json", prettyGson.toJson(questionJSON));
+			    
+			    String groupJSONString = prettyGson.toJson(getMetaData().getMetaGroupManager().getQuestionGroupsJSON(locale));
+			    writeZipString(zout, "meta/groups_"+locale.toLanguageTag()+".json", groupJSONString);
+			    
+			    writeZipString(zout, "meta/perspectives_"+locale.toLanguageTag()+".json", prettyGson.toJson(perspectives.toJSONObject(locale)));
+			    
 			}
-			
-			String propertiesJSONString = prettyGson.toJson(getPropertiesJson(locale));
-			writeZipString(zout, "properties/usertexts_"+locale.toLanguageTag()+".json", propertiesJSONString);
-			
-			writeZipString(zout, "meta/questions_"+locale.toLanguageTag()+".json", prettyGson.toJson(questionJSON));
-		    
-		    String groupJSONString = prettyGson.toJson(getMetaData().getMetaGroupManager().getQuestionGroupsJSON(locale));
-		    writeZipString(zout, "meta/groups_"+locale.toLanguageTag()+".json", groupJSONString);
-		    
-		    writeZipString(zout, "meta/perspectives_"+locale.toLanguageTag()+".json", prettyGson.toJson(perspectives.toJSONObject(locale)));
-		    
+	
+			zout.flush();
 		}
-
-		zout.flush();
-		zout.close();
 		
 		crosstabs.dropRawFromMem();
 		
 		Logger.getGlobal().log(Level.INFO, "Created file in " + ((System.nanoTime() -time)/Math.pow(10,9)) + "s");
 	}
 	
-	private Charset charset = Charset.forName("UTF-8");
-	private void writeZipString(ZipOutputStream zout, String filename, String dataString) throws IOException {
+	private static final Charset utf8charset = Charset.forName("UTF-8");
+	private static void writeZipString(ZipOutputStream zout, String filename, String dataString) throws IOException {
 		ZipEntry entry = new ZipEntry(filename);
 	    zout.putNextEntry(entry);
-	    ByteBuffer buffer = charset.encode(dataString);
+	    ByteBuffer buffer = utf8charset.encode(dataString);
 	    byte[] outbytes = new byte[buffer.limit()];
 	    buffer.get(outbytes);
 	    zout.write(outbytes);
@@ -453,11 +448,11 @@ public class DaxploreFile {
 	}
 	
 	private static Schema getUploadFileManifestSchema() throws SAXException, IOException {
-		InputStream stream = DaxploreFile.class.getResourceAsStream("UploadFileManifest.xsd");
-		SchemaFactory sf = SchemaFactory.newInstance(XMLConstants.W3C_XML_SCHEMA_NS_URI);
-		Schema schema = sf.newSchema(new StreamSource(stream));
-		stream.close();
-		return schema;
+		try (InputStream stream = DaxploreFile.class.getResourceAsStream("UploadFileManifest.xsd")) {
+			SchemaFactory sf = SchemaFactory.newInstance(XMLConstants.W3C_XML_SCHEMA_NS_URI);
+			Schema schema = sf.newSchema(new StreamSource(stream));
+			return schema;
+		}
 	}
 	
 	private JsonElement getPropertiesJson(Locale locale) throws SQLException, DaxploreException {

@@ -44,9 +44,9 @@ public class MetaQuestion {
 		private MetaScaleManager metascaleManager;
 		private TextReferenceManager textsManager;
 		private MetaTimepointShortManager timePointManager;
-		private Map<String, MetaQuestion> questionMap = new HashMap<String, MetaQuestion>();
-		private LinkedList<MetaQuestion> toBeAdded= new LinkedList<MetaQuestion>();
-		protected Map<String, MetaQuestion> toBeRemoved = new HashMap<String, MetaQuestion>();
+		private Map<String, MetaQuestion> questionMap = new HashMap<>();
+		private LinkedList<MetaQuestion> toBeAdded= new LinkedList<>();
+		protected Map<String, MetaQuestion> toBeRemoved = new HashMap<>();
 		
 		public MetaQuestionManager(Connection connection, TextReferenceManager textsManager, MetaScaleManager metaScaleManager, MetaTimepointShortManager timePointManager) {
 			this.connection = connection;
@@ -57,12 +57,14 @@ public class MetaQuestion {
 		
 		public void init() throws SQLException {
 			if(!SQLTools.tableExists(table.name, connection)) {
-				Statement stmt = connection.createStatement();
-				stmt.executeUpdate(table.sql);
+				try(Statement stmt = connection.createStatement()) {
+					stmt.executeUpdate(table.sql);
+				}
 			}
 			if(!SQLTools.tableExists(timePointTable.name, connection)) {
-				Statement stmt = connection.createStatement();
-				stmt.executeUpdate(timePointTable.sql);
+				try(Statement stmt = connection.createStatement()) {
+					stmt.executeUpdate(timePointTable.sql);
+				}
 			}
 		}
 		
@@ -71,44 +73,48 @@ public class MetaQuestion {
 				return questionMap.get(id);
 			} else if(toBeRemoved.containsKey(id)) {
 				throw new DaxploreException("No question with id '"+id+"'");
-			} else {
-				PreparedStatement stmt = connection.prepareStatement("SELECT * FROM metaquestion WHERE id = ?");
+			}
+			
+			TextReference fullTextRef, shortTextRef;
+			MetaScale scale = null;
+			MetaCalculation calculation = null;
+			try (PreparedStatement stmt = connection.prepareStatement("SELECT * FROM metaquestion WHERE id = ?")) {
 				stmt.setString(1, id);
-				ResultSet rs = stmt.executeQuery();
-				if(rs.next()) {
-					TextReference fullTextRef = textsManager.get(rs.getString("fulltextref"));
-					TextReference shortTextRef = textsManager.get(rs.getString("shorttextref"));
+				try(ResultSet rs = stmt.executeQuery()) {
+					if(!rs.next()) {
+						throw new IllegalArgumentException("QuestionID does not exist?");
+					}
+					fullTextRef = textsManager.get(rs.getString("fulltextref"));
+					shortTextRef = textsManager.get(rs.getString("shorttextref"));
 					
 					int scaleid = rs.getInt("scaleid");
-					MetaScale scale = null;
 					if(!rs.wasNull()) {
 						scale = metascaleManager.get(scaleid);
 					}
 					
 					int calculationID = rs.getInt("calculation");
-					MetaCalculation calculation = null;
 					if(!rs.wasNull()) {
 						calculation = new MetaCalculation(calculationID, connection);
 					}
+				}
+			}
 					
-					List<MetaTimepointShort> timepoints = new LinkedList<MetaTimepointShort>();
-					PreparedStatement stmt2 = connection.prepareStatement("SELECT timeid FROM questtimerel WHERE qid = ?");
-					stmt2.setString(1, id);
-					ResultSet rs2 = stmt2.executeQuery();
+			List<MetaTimepointShort> timepoints = new LinkedList<>();
+			try(PreparedStatement stmt2 = connection.prepareStatement("SELECT timeid FROM questtimerel WHERE qid = ?")) {
+				stmt2.setString(1, id);
+				try(ResultSet rs2 = stmt2.executeQuery()) {
 					while(rs2.next()) {
 						timepoints.add(timePointManager.get(rs2.getInt("timeid")));
 					}
 					
-					MetaQuestion mq = new MetaQuestion(id, shortTextRef, fullTextRef, scale, calculation, timepoints);
-					questionMap.put(id, mq);
-					return mq;				
-				} else {
-					throw new AssertionError("QuestionID does not exist?");
 				}
 			}
+			MetaQuestion mq = new MetaQuestion(id, shortTextRef, fullTextRef, scale, calculation, timepoints);
+			questionMap.put(id, mq);
+			return mq;
 		}
 		
-		public MetaQuestion create(String id, TextReference shortTextRef, TextReference fullTextRef, MetaScale scale, MetaCalculation calculation, List<MetaTimepointShort> timepoints) throws SQLException {
+		public MetaQuestion create(String id, TextReference shortTextRef, TextReference fullTextRef, MetaScale scale, MetaCalculation calculation, List<MetaTimepointShort> timepoints) {
 			MetaQuestion mq = new MetaQuestion(id, shortTextRef, fullTextRef, scale, calculation, timepoints);
 			toBeAdded.add(mq);
 			questionMap.put(id, mq);
@@ -122,77 +128,79 @@ public class MetaQuestion {
 		}
 		
 		public void saveAll() throws SQLException {
+			int nNew = 0, nModified = 0, nRemoved = 0, nTimePoint = 0;
+			try (
 			PreparedStatement updateStmt = connection.prepareStatement("UPDATE metaquestion SET scaleid = ?, fulltextref = ?, shorttextref = ?, calculation = ? WHERE id = ?");
 			PreparedStatement insertStmt = connection.prepareStatement("INSERT INTO metaquestion (id, scaleid, fulltextref, shorttextref, calculation) VALUES (?, ?, ?, ? ,?)");
 			PreparedStatement deleteStmt = connection.prepareStatement("DELETE FROM metaquestion WHERE id = ?");
 			PreparedStatement deleteRelStmt = connection.prepareStatement("DELETE FROM questtimerel WHERE qid = ?");
 			PreparedStatement insertRelStmt = connection.prepareStatement("INSERT INTO questtimerel (qid, timeid) VALUES (?, ?)");
+			) {
 			
-			int nNew = 0, nModified = 0, nRemoved = 0, nTimePoint = 0;
-			
-			for(MetaQuestion mq: questionMap.values()) {
-				if(mq.modified) {
-					nModified++;
-					updateStmt.setInt(1, mq.scale.getId());
-					updateStmt.setString(2, mq.fullTextRef.getRef());
-					updateStmt.setString(3, mq.shortTextRef.getRef());
-					updateStmt.setInt(4, mq.calculation.getID());
-					updateStmt.setString(5, mq.id);
-					updateStmt.executeUpdate();
-					mq.modified = false;
+				for(MetaQuestion mq: questionMap.values()) {
+					if(mq.modified) {
+						nModified++;
+						updateStmt.setInt(1, mq.scale.getId());
+						updateStmt.setString(2, mq.fullTextRef.getRef());
+						updateStmt.setString(3, mq.shortTextRef.getRef());
+						updateStmt.setInt(4, mq.calculation.getID());
+						updateStmt.setString(5, mq.id);
+						updateStmt.executeUpdate();
+						mq.modified = false;
+					}
+					if(mq.timemodified) {
+						deleteRelStmt.setString(1, mq.id);
+						deleteRelStmt.executeUpdate();
+						
+						for(MetaTimepointShort timepoint: mq.timepoints) {
+							nTimePoint++;
+							insertRelStmt.setString(1, mq.id);
+							insertRelStmt.setInt(2, timepoint.getId());
+	//						insertRelStmt.addBatch();
+							insertRelStmt.executeUpdate();
+						}
+	//					insertRelStmt.executeBatch();
+						
+						mq.timemodified = false;
+					}
 				}
-				if(mq.timemodified) {
-					deleteRelStmt.setString(1, mq.id);
-					deleteRelStmt.executeUpdate();
+				
+				for(MetaQuestion mq: toBeAdded) {
+					nNew++;
+					insertStmt.setString(1, mq.id);
+					if(mq.scale != null) {
+						insertStmt.setInt(2, mq.scale.getId());
+					} else {
+						insertStmt.setNull(2, Types.INTEGER);
+					}
+					insertStmt.setString(3, mq.fullTextRef.getRef());
+					insertStmt.setString(4, mq.shortTextRef.getRef());
+					insertStmt.setInt(5, mq.calculation.getID());
+					insertStmt.addBatch();
 					
 					for(MetaTimepointShort timepoint: mq.timepoints) {
-						nTimePoint++;
 						insertRelStmt.setString(1, mq.id);
 						insertRelStmt.setInt(2, timepoint.getId());
-//						insertRelStmt.addBatch();
-						insertRelStmt.executeUpdate();
+						insertRelStmt.addBatch();
 					}
-//					insertRelStmt.executeBatch();
+					insertRelStmt.executeBatch();
+				}
+				insertStmt.executeBatch();
+				toBeAdded.clear();
+				
+				
+				for(MetaQuestion mq: toBeRemoved.values()) {
+					nRemoved++;
+					deleteStmt.setString(1, mq.id);
+					deleteStmt.addBatch();
 					
-					mq.timemodified = false;
+					deleteRelStmt.setString(1, mq.id);
+					deleteRelStmt.addBatch();
 				}
+				deleteRelStmt.executeBatch();
+				deleteStmt.executeBatch();
+				toBeRemoved.clear();
 			}
-			
-			for(MetaQuestion mq: toBeAdded) {
-				nNew++;
-				insertStmt.setString(1, mq.id);
-				if(mq.scale != null) {
-					insertStmt.setInt(2, mq.scale.getId());
-				} else {
-					insertStmt.setNull(2, Types.INTEGER);
-				}
-				insertStmt.setString(3, mq.fullTextRef.getRef());
-				insertStmt.setString(4, mq.shortTextRef.getRef());
-				insertStmt.setInt(5, mq.calculation.getID());
-				insertStmt.addBatch();
-				
-				for(MetaTimepointShort timepoint: mq.timepoints) {
-					insertRelStmt.setString(1, mq.id);
-					insertRelStmt.setInt(2, timepoint.getId());
-					insertRelStmt.addBatch();
-				}
-				insertRelStmt.executeBatch();
-			}
-			insertStmt.executeBatch();
-			toBeAdded.clear();
-			
-			
-			for(MetaQuestion mq: toBeRemoved.values()) {
-				nRemoved++;
-				deleteStmt.setString(1, mq.id);
-				deleteStmt.addBatch();
-				
-				deleteRelStmt.setString(1, mq.id);
-				deleteRelStmt.addBatch();
-			}
-			deleteRelStmt.executeBatch();
-			deleteStmt.executeBatch();
-			toBeRemoved.clear();
 			
 			if(nModified != 0 || nNew != 0 || nRemoved != 0 || nTimePoint != 0) {
 				String logString = String.format("MetaQuestion: Saved %d (%d new), %d removed, %d timepoints changed", nModified+nNew, nNew, nRemoved, nTimePoint);
@@ -202,14 +210,15 @@ public class MetaQuestion {
 		
 		public List<MetaQuestion> getAll() throws SQLException, DaxploreException{
 			// make sure all questions are cached before returning the content of the map
-			ResultSet rs = connection.createStatement().executeQuery("SELECT id FROM metaquestion");
-			while(rs.next()) {
-				String id = rs.getString("id");
-				if(!questionMap.containsKey(id) && !toBeRemoved.containsKey(id)) {
-					get(id);
+			try (ResultSet rs = connection.createStatement().executeQuery("SELECT id FROM metaquestion")) {
+				while(rs.next()) {
+					String id = rs.getString("id");
+					if(!questionMap.containsKey(id) && !toBeRemoved.containsKey(id)) {
+						get(id);
+					}
 				}
 			}
-			return new LinkedList<MetaQuestion>(questionMap.values());
+			return new LinkedList<>(questionMap.values());
 		}
 	}
 	

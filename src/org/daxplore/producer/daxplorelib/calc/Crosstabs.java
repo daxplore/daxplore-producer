@@ -38,15 +38,16 @@ public class Crosstabs {
 		this.about = about;
 	}
 	
-	public <T> void loadRawToMem() throws SQLException {
+	public void loadRawToMem() throws SQLException {
 		long time = System.nanoTime();
-		ResultSet rs = connection.createStatement().executeQuery("PRAGMA TABLE_INFO(rawdata)");
-		ArrayList<Pair<String, Integer>> tempRawColnames = new ArrayList<Pair<String, Integer>>();
+		ArrayList<Pair<String, Integer>> tempRawColnames = new ArrayList<>();
 		
-		for(int colIndex = 0; rs.next(); colIndex++) {
-			String type = rs.getString("type");
-			if(type.equalsIgnoreCase("real")) {
-				tempRawColnames.add(new Pair<String, Integer>(rs.getString("name"), colIndex));
+		try (ResultSet rs = connection.createStatement().executeQuery("PRAGMA TABLE_INFO(rawdata)")) {
+			for(int colIndex = 0; rs.next(); colIndex++) {
+				String type = rs.getString("type");
+				if(type.equalsIgnoreCase("real")) {
+					tempRawColnames.add(new Pair<>(rs.getString("name"), colIndex));
+				}
 			}
 		}
 		
@@ -58,23 +59,21 @@ public class Crosstabs {
 			}
 		});
 		
+		try (ResultSet rs = connection.createStatement().executeQuery("SELECT count(*) as cnt from rawdata")) {
+			rs.next();
+			int rowCount = rs.getInt("cnt");
+			rawdataTable = new double[colCount][rowCount];
+		}
 		
-		
-		rs = connection.createStatement().executeQuery("SELECT count(*) as cnt from rawdata");
-		rs.next();
-		int rowCount = rs.getInt("cnt");
-		
-		rawdataTable = new double[colCount][rowCount];
-		
-		rs = connection.createStatement().executeQuery("SELECT * FROM rawdata");
-		
-		for(int row = 0; rs.next(); row++) {
-			for(int col = 0; col < tempRawColnames.size(); col++) {
-				double val = rs.getDouble(tempRawColnames.get(col).getValue() + 1);
-				if(rs.wasNull()) {
-					val = Double.NaN;
+		try(ResultSet rs = connection.createStatement().executeQuery("SELECT * FROM rawdata")) {
+			for(int row = 0; rs.next(); row++) {
+				for(int col = 0; col < tempRawColnames.size(); col++) {
+					double val = rs.getDouble(tempRawColnames.get(col).getValue() + 1);
+					if(rs.wasNull()) {
+						val = Double.NaN;
+					}
+					rawdataTable[col][row] = val;
 				}
-				rawdataTable[col][row] = val;
 			}
 		}
 		
@@ -108,7 +107,7 @@ public class Crosstabs {
 			List<MetaTimepointShort> questionTimes = question.getTimepoints();
 			List<MetaTimepointShort> perspectiveTimes = perspective.getTimepoints();
 			
-			LinkedList<MetaTimepointShort> commonTimes = new LinkedList<MetaTimepointShort>();
+			LinkedList<MetaTimepointShort> commonTimes = new LinkedList<>();
 			
 			for(MetaTimepointShort qTime: questionTimes) {
 				if(perspectiveTimes.contains(qTime)) {
@@ -131,37 +130,40 @@ public class Crosstabs {
 	}
 	
 	public int[][] crosstabs2(MetaQuestion question, MetaQuestion perspective, MetaTimepointShort timepoint, int lowerlimit) throws SQLException {
-		if(question.getScale() != null && perspective.getScale() != null) {
-			int[][] crosstabsdata = new int[perspective.getScale().getOptionCount()][question.getScale().getOptionCount()];
+		if(question.getScale() == null && perspective.getScale() == null) { 
+			return null;
+		}
+		
+		int[][] crosstabsdata = new int[perspective.getScale().getOptionCount()][question.getScale().getOptionCount()];
+		
+		int[] totals = new int[perspective.getScale().getOptionCount()];	
+		
+		if(hasLoadedRawdata) {
 			
-			int[] totals = new int[perspective.getScale().getOptionCount()];	
+			int questionColIndex = Arrays.binarySearch(rawColnames, question.getId());
+			int perspectiveColIndex = Arrays.binarySearch(rawColnames, perspective.getId());
 			
-			if(hasLoadedRawdata) {
-				
-				int questionColIndex = Arrays.binarySearch(rawColnames, question.getId());
-				int perspectiveColIndex = Arrays.binarySearch(rawColnames, perspective.getId());
-				
-				MetaScale questionScale = question.getScale();
-				MetaScale perspectiveScale = perspective.getScale();
-				
-				for(int row = 0; row < rawdataTable[0].length; row++) {
-					if(rawdataTable[rawTimePointIndex][row] == timepoint.getValue()) {
-						int qindex = questionScale.matchIndex(rawdataTable[questionColIndex][row]);
-						int pindex = perspectiveScale.matchIndex(rawdataTable[perspectiveColIndex][row]);
-						if(qindex == -1 || pindex == -1) {
-							continue;
-						}
-						totals[pindex]++;
-						crosstabsdata[pindex][qindex]++;
+			MetaScale questionScale = question.getScale();
+			MetaScale perspectiveScale = perspective.getScale();
+			
+			for(int row = 0; row < rawdataTable[0].length; row++) {
+				if(rawdataTable[rawTimePointIndex][row] == timepoint.getValue()) {
+					int qindex = questionScale.matchIndex(rawdataTable[questionColIndex][row]);
+					int pindex = perspectiveScale.matchIndex(rawdataTable[perspectiveColIndex][row]);
+					if(qindex == -1 || pindex == -1) {
+						continue;
 					}
+					totals[pindex]++;
+					crosstabsdata[pindex][qindex]++;
 				}
+			}
 
-			} else {
-				//TODO: handle case where scale only has ignore
-				
-				ResultSet rs = connection.createStatement().executeQuery("SELECT " + question.getId() + " as q, " + perspective.getId() 
-						+ " as p FROM rawdata WHERE " + about.getTimeSeriesShortColumn() + " = " + timepoint.getValue()); //TODO: get query to work with prepared statement
-				
+		} else {
+			//TODO: handle case where scale only has ignore
+			
+			try (ResultSet rs = connection.createStatement().executeQuery("SELECT " + question.getId() + " as q, " + perspective.getId() 
+					+ " as p FROM rawdata WHERE " + about.getTimeSeriesShortColumn() + " = " + timepoint.getValue())) { //TODO: get query to work with prepared statement
+			
 				while(rs.next()) {
 					Double qvalue = rs.getDouble("q");
 					int qindex = question.getScale().matchIndex(qvalue);
@@ -174,20 +176,18 @@ public class Crosstabs {
 					totals[pindex]++;
 					crosstabsdata[pindex][qindex]++;
 				}
+			}
 
-			}
-			
-			for(int ti = 0; ti < totals.length; ti++) {
-				if(totals[ti] < lowerlimit) {
-					crosstabsdata[ti] = new int[crosstabsdata[ti].length];
-				}
-			}
-			
-			return crosstabsdata;
-		} else {
-			//TODO handle cases where there is no scale
-			return null;
 		}
+		
+		for(int ti = 0; ti < totals.length; ti++) {
+			if(totals[ti] < lowerlimit) {
+				crosstabsdata[ti] = new int[crosstabsdata[ti].length];
+			}
+		}
+		
+		return crosstabsdata;
+		
 	}
 	
 	public int[] frequencies(MetaQuestion question, MetaTimepointShort timepoint, int lowerlimit) throws SQLException {
@@ -212,15 +212,17 @@ public class Crosstabs {
 			
 		} else {
 
-			ResultSet rs = connection.createStatement().executeQuery("SELECT " + question.getId() + " FROM rawdata WHERE " + about.getTimeSeriesShortColumn() + " = " + timepoint.getValue()); //TODO: get query to work with prepared statement
+			try (ResultSet rs = connection.createStatement()
+					.executeQuery("SELECT " + question.getId() + " FROM rawdata WHERE " 
+			+ about.getTimeSeriesShortColumn() + " = " + timepoint.getValue())) { //TODO: get query to work with prepared statement
 			
-			
-			while(rs.next()) {
-				Double value = rs.getDouble(question.getId());
-				int index = question.getScale().matchIndex(value);
-				if(index != -1) {
-					frequencies[index]++;
-					total++;
+				while(rs.next()) {
+					Double value = rs.getDouble(question.getId());
+					int index = question.getScale().matchIndex(value);
+					if(index != -1) {
+						frequencies[index]++;
+						total++;
+					}
 				}
 			}
 		}

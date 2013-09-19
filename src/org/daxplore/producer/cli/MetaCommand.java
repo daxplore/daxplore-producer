@@ -60,21 +60,18 @@ public class MetaCommand {
 				case DATABASE:
 					if(filename != null) {
 						throw new ParameterException("No file needed for " + ff.format.toString());
-					} else {
-						return ff;
 					}
+					return ff;
 				case JSON:
 				case RESOURCE:
 					if(filename != null) {
 						ff.file = new File(filename);
 						if(ff.file.isDirectory()){
 							throw new ParameterException("File is a direcory");
-						} else {
-							return ff;
 						}
-					} else {
-						throw new ParameterException("Filename needed, write like: " + ff.format.toString() + "=filename");
+						return ff;
 					}
+					throw new ParameterException("Filename needed, write like: " + ff.format.toString() + "=filename");
 				default:
 					throw new ParameterException("How did I get here?");
 			}
