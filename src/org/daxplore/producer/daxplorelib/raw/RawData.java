@@ -1,5 +1,6 @@
 package org.daxplore.producer.daxplorelib.raw;
 
+import java.io.IOException;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -17,6 +18,7 @@ import org.daxplore.producer.daxplorelib.SQLTools;
 import org.daxplore.producer.tools.MyTools;
 import org.daxplore.producer.tools.Pair;
 import org.opendatafoundation.data.spss.SPSSFile;
+import org.opendatafoundation.data.spss.SPSSFileException;
 import org.opendatafoundation.data.spss.SPSSNumericVariable;
 import org.opendatafoundation.data.spss.SPSSStringVariable;
 import org.opendatafoundation.data.spss.SPSSVariable;
@@ -30,26 +32,27 @@ public class RawData {
 	public RawData(Connection connection) throws SQLException{
 		this.connection = connection;
 		if(SQLTools.tableExists(table.name, connection)){
-			PreparedStatement stmt = connection.prepareStatement("SELECT sql FROM sqlite_master WHERE name=?");
-			stmt.setString(1, table.name);
-			ResultSet rs = stmt.executeQuery();
-			rs.next();
-			table.sql = rs.getString("sql");
-			stmt.close();
+			try (PreparedStatement stmt = connection.prepareStatement("SELECT sql FROM sqlite_master WHERE name=?")) {
+				stmt.setString(1, table.name);
+				try(ResultSet rs = stmt.executeQuery()) {
+					rs.next();
+					table.sql = rs.getString("sql");
+				}
+			}
 		}
 	}
 	
 	public void importSPSS(SPSSFile spssFile) throws SQLException, DaxploreException {
 		
 		if(SQLTools.tableExists("rawdata", connection)) {
-			//TODO this code is broken
+			//TODO this code is/was broken, may be fixed now as the project uses try-with-resource for everything
 			//java.sql.SQLException: database table is locked
-			Statement stmt = connection.createStatement();
-			stmt.executeUpdate("DROP TABLE " + table.name);
-			stmt.close();
+			try(Statement stmt = connection.createStatement()) {
+				stmt.executeUpdate("DROP TABLE " + table.name);
+			}
 		}
 		
-		Map<String, VariableType> columns = new LinkedHashMap<String, VariableType>();//metadata.getColumnMap();
+		Map<String, VariableType> columns = new LinkedHashMap<>();//metadata.getColumnMap();
 		
 		for(int i = 0; i < spssFile.getVariableCount(); i++){
 			SPSSVariable var = spssFile.getVariable(i);
@@ -63,28 +66,24 @@ public class RawData {
 			} else throw new Error("shuoldn't happen");
 		}
 		
-		Statement stmt = connection.createStatement();
-		String createString = createRawDataTableString(columns, connection);
+		try(Statement stmt = connection.createStatement()) {
+			String createString = createRawDataTableString(columns);
+			table.sql = createString;
+			stmt.execute(createString);
+		}
 		
-		table.sql = createString;
-		stmt.execute(createString);
-		stmt.close();
-		
-		PreparedStatement addRowStatement = addRowStatement(columns, connection);
-		try{
+		try (PreparedStatement addRowStatement = addRowStatement(columns, connection)) {
 			Iterator<Object[]> iter = spssFile.getDataIterator();
 			while(iter.hasNext()){
 				Object[] data = iter.next();
 				addRow(columns, addRowStatement, data);
 			}
-			addRowStatement.close();
-		} catch (Exception e){
-			e.printStackTrace();
-			throw new DaxploreException("Something went wrong with spss-file");
+		} catch (IOException | SPSSFileException e) {
+			throw new DaxploreException("Failed to read SPSS file");
 		}
 	}
 	
-	protected static String createRawDataTableString(Map<String, VariableType> columns, Connection conn) throws SQLException{
+	protected static String createRawDataTableString(Map<String, VariableType> columns) {
 		StringBuilder sb = new StringBuilder();
 		Iterator<String> iter = columns.keySet().iterator();
 		sb.append("create table " + tablename + " (");
@@ -105,7 +104,7 @@ public class RawData {
 	}
 	
 	protected static PreparedStatement addRowStatement(Map<String, VariableType> columns, Connection connection) throws SQLException {
-		LinkedList<String> qmarks = new LinkedList<String>();
+		LinkedList<String> qmarks = new LinkedList<>();
 		for(int i = 0; i < columns.size(); i++){
 			qmarks.add("?");
 		}
@@ -152,26 +151,23 @@ public class RawData {
 	}
 	
 	int getNumberOfRows() throws SQLException {
-		Statement stmt = connection.createStatement();
-		ResultSet rs = stmt.executeQuery("SELECT count(*) FROM " + tablename);
-		rs.next();
-		int ret = rs.getInt(1);
-		stmt.close();
+		int ret;
+		try (Statement stmt = connection.createStatement()) {
+			try (ResultSet rs = stmt.executeQuery("SELECT count(*) FROM " + tablename)) {
+				rs.next();
+				ret = rs.getInt(1);
+			}
+		}
 		return ret;
 	}
 	
 	public boolean hasData() {
-		if(SQLTools.tableExists("rawdata", connection)) {
-			try {
-				if(getNumberOfRows() > 0) {
-					return true;
-				} else {
-					return false;
-				}
-			} catch (SQLException e) {
-				return false;
-			}
-		} else {
+		if(!SQLTools.tableExists("rawdata", connection)) {
+			return false;
+		}
+		try {
+			return getNumberOfRows() > 0;
+		} catch (SQLException e) {
 			return false;
 		}
 	}
@@ -189,40 +185,41 @@ public class RawData {
 	 * @throws SQLException
 	 */
 	public LinkedList<Pair<Double, Integer>> getColumnValueCount(String column) throws SQLException {
+		LinkedList<Pair<Double, Integer>> map = new LinkedList<>();
 		//TODO call hasColumn automatically?
 		//Prepared statement doesn't work, but hasColumn is always called first so this should be relatively injection-safe
-		ResultSet rs = connection.createStatement().executeQuery(
-				"select "+ column + " as val, count(*) as cnt from rawdata group by val order by val");
-		
-		LinkedList<Pair<Double, Integer>> map = new LinkedList<Pair<Double, Integer>>();
-		while(rs.next()) {
-			double val = rs.getDouble("val");
-			boolean nullVal = rs.wasNull();
-			Integer count = rs.getInt("cnt");
-			if(!nullVal) {
-				map.add(new Pair<Double, Integer>(val, count));
-			} else {
-				map.add(new Pair<Double, Integer>(null, count));
+		try (Statement stmt = connection.createStatement();
+				ResultSet rs = stmt.executeQuery(
+				"select "+ column + " as val, count(*) as cnt from rawdata group by val order by val")) {
+			while(rs.next()) {
+				double val = rs.getDouble("val");
+				boolean nullVal = rs.wasNull();
+				Integer count = rs.getInt("cnt");
+				if(!nullVal) {
+					map.add(new Pair<>(val, count));
+				} else {
+					map.add(new Pair<Double, Integer>(null, count));
+				}
 			}
 		}
 		return map;
 	}
 	
 	public LinkedList<Pair<Double, Integer>> getColumnValueCountWhere(String column, String column2) throws SQLException {
+		LinkedList<Pair<Double, Integer>> map = new LinkedList<>();
 		//TODO call hasColumn automatically?
 		//Prepared statement doesn't work, but hasColumn is always called first so this should be relatively injection-safe
-		ResultSet rs = connection.createStatement().executeQuery(
-				"SELECT "+ column + " AS val, count(*) AS cnt FROM rawdata WHERE " + column2 + " IS NOT NULL GROUP BY val ORDER BY val");
-		
-		LinkedList<Pair<Double, Integer>> map = new LinkedList<Pair<Double, Integer>>();
-		while(rs.next()) {
-			double val = rs.getDouble("val");
-			boolean nullVal = rs.wasNull();
-			Integer count = rs.getInt("cnt");
-			if(!nullVal) {
-				map.add(new Pair<Double, Integer>(val, count));
-			} else {
-				map.add(new Pair<Double, Integer>(null, count));
+		try (ResultSet rs = connection.createStatement().executeQuery(
+				"SELECT "+ column + " AS val, count(*) AS cnt FROM rawdata WHERE " + column2 + " IS NOT NULL GROUP BY val ORDER BY val")) {
+			while(rs.next()) {
+				double val = rs.getDouble("val");
+				boolean nullVal = rs.wasNull();
+				Integer count = rs.getInt("cnt");
+				if(!nullVal) {
+					map.add(new Pair<>(val, count));
+				} else {
+					map.add(new Pair<Double, Integer>(null, count));
+				}
 			}
 		}
 		return map;

@@ -36,7 +36,8 @@ public class ImportWizardController implements ActionListener {
      * the correct course of action.
      * @param evt The ActionEvent that occurred.
      */    
-    public void actionPerformed(java.awt.event.ActionEvent evt) {
+    @Override
+	public void actionPerformed(java.awt.event.ActionEvent evt) {
         
         if (evt.getActionCommand().equals(ImportWizardDialog.CANCEL_BUTTON_ACTION_COMMAND))
             cancelButtonPressed();

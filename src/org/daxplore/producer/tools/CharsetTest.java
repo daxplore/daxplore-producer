@@ -59,9 +59,8 @@ public class CharsetTest {
 				b2 = bb.get();
 				if(b2 == b) {
 					return false;
-				} else {
-					b = b2;
 				}
+				b = b2;
 				s++;
 			}
 		} catch (BufferUnderflowException e) {

@@ -36,12 +36,13 @@ public class TextReference extends TextReferenceReference{
 	 * @throws SQLException 
 	 */
 	public List<Locale> getLocales() {
-		return new LinkedList<Locale>(localeMap.keySet());
+		return new LinkedList<>(localeMap.keySet());
 	}
 	
-	public boolean equalsLocale(TextReference other, Locale locale) throws SQLException {
-		if(has(locale) && other.has(locale)) {
-			return get(locale).equals(other.get(locale));
-		} else return false;
+	public boolean equalsLocale(TextReference other, Locale locale) {
+		if(!has(locale) || !other.has(locale)) {
+			return false;
+		}
+		return get(locale).equals(other.get(locale));
 	}
 }

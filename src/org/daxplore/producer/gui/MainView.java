@@ -69,16 +69,7 @@ public class MainView {
 		} catch (Exception e) {
 			try {
 				UIManager.setLookAndFeel("javax.swing.plaf.nimbus.NimbusLookAndFeel");
-			} catch (ClassNotFoundException e1) {
-				// TODO Auto-generated catch block
-				e1.printStackTrace();
-			} catch (InstantiationException e1) {
-				// TODO Auto-generated catch block
-				e1.printStackTrace();
-			} catch (IllegalAccessException e1) {
-				// TODO Auto-generated catch block
-				e1.printStackTrace();
-			} catch (UnsupportedLookAndFeelException e1) {
+			} catch (ClassNotFoundException | InstantiationException | IllegalAccessException | UnsupportedLookAndFeelException e1) {
 				// TODO Auto-generated catch block
 				e1.printStackTrace();
 			}
@@ -86,6 +77,7 @@ public class MainView {
 		
 		// thread handler for main window.
 		EventQueue.invokeLater(new Runnable() {
+			@Override
 			public void run() {
 				try {
 					MainView window = new MainView();
@@ -124,7 +116,7 @@ public class MainView {
 		panel.add(mainPanel, BorderLayout.CENTER);
 		
 		// create main panel window.
-		mainPanel.setBorder(new MatteBorder(0, 1, 0, 0, (Color) Color.GRAY));
+		mainPanel.setBorder(new MatteBorder(0, 1, 0, 0, Color.GRAY));
 		mainLayout = new CardLayout(0,0);
 		mainPanel.setLayout(mainLayout);
 		

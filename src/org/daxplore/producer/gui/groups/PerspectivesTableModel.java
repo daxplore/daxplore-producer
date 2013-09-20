@@ -80,7 +80,7 @@ public class PerspectivesTableModel extends DefaultTableModel {
 	@Override
 	public void moveRow(int start, int end, int to) {
 		List<MetaQuestion> mqlist = mg.getQuestions();
-		List<MetaQuestion> moveList = new LinkedList<MetaQuestion>();
+		List<MetaQuestion> moveList = new LinkedList<>();
 		
 		for(int i = start; i <= end; i++) {
 			moveList.add(mqlist.remove(start)); //TODO: check if it works with more rows than 1

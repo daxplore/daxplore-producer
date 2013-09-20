@@ -40,7 +40,7 @@ public class CharsetPanel extends JPanel {
 		JLabel lblNewLabel = new JLabel("Specify encoding:");
 		specifyEncodingPanel.add(lblNewLabel);
 						
-		encodingComboBox = new JComboBox<String>();
+		encodingComboBox = new JComboBox<>();
 		specifyEncodingPanel.add(encodingComboBox);
 		
 		encodingListPanel = new JScrollPane();

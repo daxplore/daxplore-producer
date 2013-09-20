@@ -86,7 +86,7 @@ public class EditTextView extends JPanel {
 		
 		
 		
-		localeCombo1 = new JComboBox<LocaleItem>();
+		localeCombo1 = new JComboBox<>();
 		panel.add(localeCombo1);
 		localeCombo1.addActionListener(new ActionListener() {
 			@Override
@@ -98,7 +98,7 @@ public class EditTextView extends JPanel {
 				}
 			}
 		});
-		localeCombo2 = new JComboBox<LocaleItem>();
+		localeCombo2 = new JComboBox<>();
 		panel.add(localeCombo2);
 		localeCombo2.addActionListener(new ActionListener() {
 			@Override
@@ -146,7 +146,7 @@ public class EditTextView extends JPanel {
 		LocaleItem item2 = (LocaleItem)localeCombo2.getSelectedItem();
 		localeCombo1.removeAllItems();
 		localeCombo2.removeAllItems();
-		List<LocaleItem> localeItemList = new LinkedList<LocaleItem>();
+		List<LocaleItem> localeItemList = new LinkedList<>();
 		for(Locale l: localeList) { 
 			localeItemList.add(new LocaleItem(l));
 		}

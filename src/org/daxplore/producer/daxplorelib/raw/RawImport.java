@@ -1,6 +1,5 @@
 package org.daxplore.producer.daxplorelib.raw;
 
-import java.nio.charset.Charset;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.Date;
@@ -29,8 +28,8 @@ public class RawImport {
 		this.rawdata = new RawData(connection);
 	}
 	
-	public void importSPSS(SPSSFile spssFile, Charset charset) throws SQLException, DaxploreException{	
-		rawmeta.importSPSS(spssFile, charset);
+	public void importSPSS(SPSSFile spssFile) throws SQLException, DaxploreException{	
+		rawmeta.importSPSS(spssFile);
 		rawdata.importSPSS(spssFile);
 	}
 	
@@ -38,8 +37,8 @@ public class RawImport {
 		rawdata.importSPSS(spssFile);
 	}
 	
-	public void importSPSSMeta(SPSSFile spssFile, Charset charset) throws SQLException {
-		rawmeta.importSPSS(spssFile, charset);
+	public void importSPSSMeta(SPSSFile spssFile) throws SQLException {
+		rawmeta.importSPSS(spssFile);
 	}
 	
 	/**
@@ -50,7 +49,7 @@ public class RawImport {
 	 */
 	public Map<String, Integer> compareColumns(RawImport other){
 		try {
-			Map<String, Integer> columnMap = new HashMap<String,Integer>();
+			Map<String, Integer> columnMap = new HashMap<>();
 			List<String> columnsthis = rawmeta.getColumns();
 			List<String> columnsother = other.rawmeta.getColumns();
 			for(String s: columnsthis){
@@ -103,7 +102,7 @@ public class RawImport {
 	}
 	
 	public List<DaxploreTable> getTables() {
-		List<DaxploreTable> list = new LinkedList<DaxploreTable>();
+		List<DaxploreTable> list = new LinkedList<>();
 		if(SQLTools.tableExists("rawdata", connection)){
 			list.add(RawMeta.table);
 			list.add(rawdata.table);

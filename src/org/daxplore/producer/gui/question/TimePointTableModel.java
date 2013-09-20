@@ -20,8 +20,8 @@ import org.daxplore.producer.tools.Pair;
 public class TimePointTableModel extends DefaultTableModel {
 	
 	
-	LinkedHashMap<MetaTimepointShort, Integer> timePoints = new LinkedHashMap<MetaTimepointShort, Integer>();
-	List<Double> counts = new LinkedList<Double>();
+	LinkedHashMap<MetaTimepointShort, Integer> timePoints = new LinkedHashMap<>();
+	List<Double> counts = new LinkedList<>();
 	MetaQuestion mq;
 	
 	public TimePointTableModel(MetaTimepointShortManager mtsm, RawData rawData, About about, MetaQuestion question) throws SQLException, DaxploreException {

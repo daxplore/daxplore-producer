@@ -54,8 +54,8 @@ public class NumberlineCoverage {
 					throw new NumberlineCoverageException("Malformed interval string: " + inter);
 				}
 				
-				inter = inter.substring(1, inter.length()-1);
-				String[] numbers = inter.split(",");
+				String interTrimmed = inter.substring(1, inter.length()-1);
+				String[] numbers = interTrimmed.split(",");
 				if(numbers.length != 2) {
 					throw new NumberlineCoverageException("Malformed interval string: " + inter);
 				}
@@ -88,6 +88,7 @@ public class NumberlineCoverage {
 			}
 		}
 		
+		@Override
 		public String toString() {
 			return low==high?
 					low + "":
@@ -106,7 +107,7 @@ public class NumberlineCoverage {
 		
 	}
 	
-	List<Interval> intervals = new LinkedList<Interval>();
+	List<Interval> intervals = new LinkedList<>();
 	
 	public NumberlineCoverage(String intervalString) throws NumberlineCoverageException {
 		if (intervalString == null || intervalString.length() == 0) {
@@ -146,7 +147,7 @@ public class NumberlineCoverage {
 	
 	public void addInterval(double a, boolean aInclusive, double b, boolean bInclusive) throws NumberlineCoverageException {
 		Interval newInterval = new Interval(a, aInclusive, b, bInclusive);
-		List<Interval> interlist = new LinkedList<Interval>();
+		List<Interval> interlist = new LinkedList<>();
 		
 		for(int i = 0; i < intervals.size(); i++) {
 			Interval oldInterval = intervals.get(i);
@@ -190,7 +191,7 @@ public class NumberlineCoverage {
 		} catch (NumberlineCoverageException e) {
 			return;
 		}
-		List<Interval> interlist = new LinkedList<Interval>();
+		List<Interval> interlist = new LinkedList<>();
 		
 		try {
 			for(int i = 0; i < intervals.size(); i++) {
@@ -266,7 +267,7 @@ public class NumberlineCoverage {
 	}
 	
 	public void intersectWith(NumberlineCoverage otherInterval) {
-		List<Interval> interlist = new LinkedList<Interval>();
+		List<Interval> interlist = new LinkedList<>();
 		
 		for(Interval newInterval: otherInterval.intervals) {
 			for(int i = 0; i < intervals.size(); i++) {

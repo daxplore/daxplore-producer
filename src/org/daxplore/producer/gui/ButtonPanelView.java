@@ -15,8 +15,6 @@ import org.daxplore.producer.gui.MainController.Views;
 
 /**
  * Left button panel 
- * @author jorgenrosen
- *
  */
 @SuppressWarnings("serial")
 public class ButtonPanelView extends JPanel {
@@ -36,7 +34,7 @@ public class ButtonPanelView extends JPanel {
 		this.mainController = mainController;
 		
 		// create the button panel
-		setBorder(new MatteBorder(0, 0, 0, 1, (Color) Color.LIGHT_GRAY));
+		setBorder(new MatteBorder(0, 0, 0, 1, Color.LIGHT_GRAY));
 		setLayout(new GridLayout(0, 1, 0, 0));
 		
 		openButton = new JRadioButton("");
@@ -135,6 +133,7 @@ public class ButtonPanelView extends JPanel {
 		case TOOLSVIEW:
 			toolsButton.setSelected(true);
 			break;
+		case QUESTIONVIEW: // TODO unused enum
 		default:
 			buttonGroup.clearSelection();
 		}

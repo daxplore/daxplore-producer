@@ -18,6 +18,7 @@ class TextsTableModel extends DefaultTableModel implements TableModelListener {
 		this.controller = controller;
 	}
 
+	@Override
 	public String getColumnName(int col) {
 		switch(col) {
 		case 0:
@@ -26,19 +27,23 @@ class TextsTableModel extends DefaultTableModel implements TableModelListener {
 			return controller.getCurrentLocale(0).getDisplayLanguage();
 		case 2:
 			return controller.getCurrentLocale(1).getDisplayLanguage();
+		default:
+			throw new IndexOutOfBoundsException("Column out of bounds: " + col);
 		}
-		throw new AssertionError();
 	}
 
+	@Override
 	public int getRowCount() {
 		if(textsList == null) return 0;
 		return textsList.size();
 	}
 
+	@Override
 	public int getColumnCount() {
 		return 3;
 	}
 
+	@Override
 	public Object getValueAt(int row, int col) {
 		switch (col) {
 		case 0:
@@ -47,10 +52,12 @@ class TextsTableModel extends DefaultTableModel implements TableModelListener {
 			return textsList.get(row).get(controller.getCurrentLocale(0));
 		case 2:
 			return textsList.get(row).get(controller.getCurrentLocale(1));
+		default:
+			throw new IndexOutOfBoundsException("Column out of bounds: " + col);
 		}
-		throw new AssertionError();
 	}
 
+	@Override
 	public boolean isCellEditable(int row, int col) {
 		return col > 0;
 	}
@@ -59,6 +66,7 @@ class TextsTableModel extends DefaultTableModel implements TableModelListener {
 		return textsList.indexOf(textref);
 	}
 
+	@Override
 	public void setValueAt(Object value, int row, int col) {
 		textsList.get(row).put(value.toString(), controller.getCurrentLocale(col-1));
 	}

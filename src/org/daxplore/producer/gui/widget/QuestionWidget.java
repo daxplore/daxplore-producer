@@ -66,7 +66,7 @@ public class QuestionWidget extends AbstractWidgetEditor<MetaQuestion> {
 	}
 
 	@Override
-	public MetaQuestion getContent() throws org.daxplore.producer.gui.widget.AbstractWidgetEditor.InvalidContentException {
+	public MetaQuestion getContent() {
 		return metaQuestion;
 	}
 }

@@ -8,7 +8,6 @@ import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.io.UnsupportedEncodingException;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.StandardOpenOption;
@@ -48,7 +47,7 @@ public class EditTextController implements ActionListener {
 	
 	/**
 	 * current locales has two locales for the two columns in text edit field
-	 * @param i = 0 | 1 for first and secound columns
+	 * @param i = 0 | 1 for first and second columns
 	 * @return a Locale or null
 	 */
 	Locale getCurrentLocale(int i) {
@@ -88,7 +87,7 @@ public class EditTextController implements ActionListener {
 	
 	void loadTable() {
 		model = new TextsTableModel(this, textsList);
-		sorter = new TableRowSorter<TextsTableModel>(model);
+		sorter = new TableRowSorter<>(model);
 		table = new JTable(model);
 		table.setRowSorter(sorter);
 		table.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
@@ -158,20 +157,10 @@ public class EditTextController implements ActionListener {
 				
 				localeList = mainController.getDaxploreFile().getMetaData().getAllLocales();
 				file = editToolbar.showExportDialog(localeList);
-				
-				BufferedWriter writer;
-				Charset cs = Charset.forName("UTF-8");
 				if(file == null) {
 					System.out.println("File is null");
-					return;
-				} else if(file.exists() && file.canWrite()) {
-					writer = Files.newBufferedWriter(file.toPath(), cs, StandardOpenOption.WRITE, StandardOpenOption.TRUNCATE_EXISTING);
-				} else if (!file.exists()) {
-					writer = Files.newBufferedWriter(file.toPath(), cs, StandardOpenOption.CREATE_NEW, StandardOpenOption.WRITE);
-				} else {
-					System.out.println("Files is write protected");
-					return;
-				}
+					return; //TODO communicate error properly
+				} 
 				
 				L10nFormat format;
 				String filename = file.toPath().getFileName().toString().toLowerCase();
@@ -181,27 +170,33 @@ public class EditTextController implements ActionListener {
 				} else if(filename.endsWith(".properties")) {
 					format = L10nFormat.PROPERTIES;
 				} else {
-					System.out.println("Unsupported file suffix: " + filename); //TODO communicate error properly
-					return;
+					System.out.println("Unsupported file suffix: " + filename);
+					return; //TODO communicate error properly
 				}
 				Locale locale = editToolbar.getSelectedLocale();
-				mainController.getDaxploreFile().getMetaData().exportL10n(writer, format, locale);
+				
+				Charset cs = Charset.forName("UTF-8");
+				if(file.exists() && file.canWrite()) {
+					try (BufferedWriter writer = Files.newBufferedWriter(file.toPath(), cs, StandardOpenOption.WRITE, StandardOpenOption.TRUNCATE_EXISTING)) {
+						mainController.getDaxploreFile().getMetaData().exportL10n(writer, format, locale);
+					}
+				} else if (!file.exists()) {
+					try (BufferedWriter writer = Files.newBufferedWriter(file.toPath(), cs, StandardOpenOption.CREATE_NEW, StandardOpenOption.WRITE)) {
+						mainController.getDaxploreFile().getMetaData().exportL10n(writer, format, locale);
+					}
+				} else {
+					System.out.println("File is write protected");
+					return; //TODO communicate error properly
+				}
 
-			} catch (DaxploreException e1) {
-				// TODO Auto-generated catch block
-				e1.printStackTrace();
-			} catch (UnsupportedEncodingException e1) {
-				// TODO Auto-generated catch block
-				e1.printStackTrace();
-			} catch (FileNotFoundException e1) {
-				// TODO Auto-generated catch block
-				e1.printStackTrace();
-			} catch (IOException e1) {
+			} catch (DaxploreException | IOException e1) {
 				// TODO Auto-generated catch block
 				e1.printStackTrace();
 			}
 			
 			break;
+		default:
+			throw new AssertionError("No such action command: '" + e.getActionCommand() + "'");
 		}
 	}
 	

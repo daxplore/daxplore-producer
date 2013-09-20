@@ -168,7 +168,7 @@ public class DaxploreFile {
 		}
 	}
 	
-	public void importMetaDataFromSPSS(Charset charset) throws DaxploreException {
+	public void importMetaDataFromSPSS() throws DaxploreException {
 		if(sf == null) {
 			throw new DaxploreException("No SPSSfile loaded");
 		}
@@ -181,7 +181,7 @@ public class DaxploreFile {
 			
 			RawImport rawImport = new RawImport(connection);
 
-			rawImport.importSPSSMeta(sf, charset);
+			rawImport.importSPSSMeta(sf);
 
 				
 			about.setImport(sf.file.getName());
@@ -218,7 +218,7 @@ public class DaxploreFile {
 				connection.setTransactionIsolation(Connection.TRANSACTION_READ_UNCOMMITTED);
 				
 				RawImport rawImport = new RawImport(connection);
-				rawImport.importSPSS(importSPSSFile, charset);
+				rawImport.importSPSS(importSPSSFile);
 					
 				about.setImport(importSPSSFile.file.getName());
 				

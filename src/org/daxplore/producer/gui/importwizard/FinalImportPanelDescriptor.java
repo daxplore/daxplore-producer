@@ -2,7 +2,6 @@ package org.daxplore.producer.gui.importwizard;
 
 import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.StringTokenizer;
@@ -28,11 +27,13 @@ public class FinalImportPanelDescriptor extends ImportWizardDescriptor {
         finalImportPanel = (FinalImportPanel) super.getPanelComponent();
     }
     
-    public Object getNextPanelDescriptor() {
+    @Override
+	public Object getNextPanelDescriptor() {
         return FINISH;
     }
     
-    public Object getBackPanelDescriptor() {
+    @Override
+	public Object getBackPanelDescriptor() {
         return CharsetPanelDescriptor.IDENTIFIER;
     }
     
@@ -57,60 +58,34 @@ public class FinalImportPanelDescriptor extends ImportWizardDescriptor {
 	 * @param sf
 	 * @return TableColumn
 	 */
-	public TableModel spssTable(File file) {
+	public static TableModel spssTable(File file) {
 		File temp;
 		FileFormatInfo ffi = new FileFormatInfo();
 		ffi.namesOnFirstLine = false;
 		ffi.asciiFormat = ASCIIFormat.CSV;
 		ffi.compatibility = Compatibility.GENERIC;
-		BufferedReader br = null;
-		
-		SPSSFile sf = null;
-		try {
-			sf = new SPSSFile(file, "r");
-		} catch (FileNotFoundException e1) {
-			System.out.println("No SPSS file found, exiting.");
-			e1.printStackTrace();
-			return null;
-		}
-		
-		try {
+
+		String[] columns = null;
+		Object[][] data = null;
+		try (SPSSFile sf = new SPSSFile(file, "r")) {
 			sf.logFlag = false;
 			sf.loadMetadata();
 			temp = File.createTempFile("spsscsv", ".csv.tmp");
 			sf.exportData(temp, ffi);
-		} catch (SPSSFileException | IOException e) {
-			try {
-				sf.close();
-			} catch (IOException e1) {
-				// TODO Auto-generated catch block
-				e1.printStackTrace();
+			columns =  new String[sf.getVariableCount()];
+			data =  new Object[sf.getRecordCount()][sf.getVariableCount()];
+			for(int i = 0; i < sf.getVariableCount(); i++){
+				SPSSVariable var = sf.getVariable(i);
+				columns[i] = var.getShortName();
+				// just for testing output so we can see data is being processed.
+				System.out.print(sf.getVariable(i).getShortName() + ", ");
 			}
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+		} catch (SPSSFileException | IOException e) {
 			return null;
 		}
-		
-		String[] columns = new String[sf.getVariableCount()];
-		Object[][] data = new Object[sf.getRecordCount()][sf.getVariableCount()];
-		for(int i = 0; i < sf.getVariableCount(); i++){
-			SPSSVariable var = sf.getVariable(i);
-			columns[i] = var.getShortName();
-			// just for testing output so we can see data is being processed.
-			System.out.print(sf.getVariable(i).getShortName() + ", ");
-		}
-		
-		if (sf != null) {
-			try {
-				sf.close();
-			} catch (IOException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-		}
 
-		try {
-			br = new BufferedReader(new FileReader(temp));
+		try (BufferedReader br = new BufferedReader(new FileReader(temp))){
+			
 			String line;
 			int l = 0;
 			while((line = br.readLine()) != null){
@@ -123,20 +98,10 @@ public class FinalImportPanelDescriptor extends ImportWizardDescriptor {
 				l++;
 			}
 		} catch (IOException e) {
-			try {
-				if(br!=null) {
-					br.close();
-				}
-			} catch (IOException e1) {
-				// TODO Auto-generated catch block
-				e1.printStackTrace();
-			}
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		
-		TableModel model = new DefaultTableModel(data, columns);
-		
-		return model;
+		return new DefaultTableModel(data, columns);
 	}
 }

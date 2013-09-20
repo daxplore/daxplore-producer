@@ -37,7 +37,7 @@ public class MainController implements ActionListener {
 	private MainView mainView;
 	private TimeSeriesView timeSeriesView;
 	
-	private Stack<HistoryItem> history = new Stack<HistoryItem>();
+	private Stack<HistoryItem> history = new Stack<>();
 	private HistoryItem currentCommand;
 	
 	private DaxploreFile daxploreFile = null;
@@ -123,6 +123,8 @@ public class MainController implements ActionListener {
 					questionView.getController().openMetaQuestion((MetaQuestion)hi.command);
 				}
 				break;
+			case TIMESERIESVIEW:
+				break;
 			default:
 				throw new AssertionError("Undefined history item command: " + hi.view);
 			}
@@ -137,6 +139,10 @@ public class MainController implements ActionListener {
 		case GROUPSVIEW:
 			navigationView.setToolbar(groupsView.getController().getToolbar());
 			return;
+		case OPENFILEVIEW: break;
+		case QUESTIONVIEW: break;
+		case TIMESERIESVIEW: break;
+		case TOOLSVIEW: break;
 		default:
 			navigationView.setToolbar(null);
 			break;
@@ -146,7 +152,7 @@ public class MainController implements ActionListener {
 	@Override
 	public void actionPerformed(ActionEvent e) {
 		try { //from buttonPanelView
-			Views view = Views.valueOf(Views.class, e.getActionCommand());
+			Views view = Views.valueOf(e.getActionCommand());
 			switchTo(view);
 		} catch (IllegalArgumentException e2) {
 			//place for other types of buttons

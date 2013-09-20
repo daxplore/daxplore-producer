@@ -17,6 +17,7 @@ public class Pair<K, V> {
 		return value;
 	}
 
+	@Override
 	public String toString() {
 		return "Key: " + key + "\tValue: " + value;
 	}
@@ -44,6 +45,7 @@ public class Pair<K, V> {
 		if (obj == null || !(obj instanceof Pair)) {
 			return false;
 		}
+		@SuppressWarnings("rawtypes")
 		Pair other = (Pair) obj;
 		if ((key == null && other.key != null) || (key!=null  && !key.equals(other.key))) {
 			return false;

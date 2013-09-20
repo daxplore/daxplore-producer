@@ -212,11 +212,10 @@ public class MyTools {
 	public static String splitInTwoHTML(String text) {
 		int splitPosition = text.length() / 2;
 		splitPosition = text.indexOf(' ', splitPosition);
-		if (splitPosition > 0) {
-			return justifyHTML(text, splitPosition);
-		} else {
+		if (splitPosition <= 0) {
 			return text;
 		}
+		return justifyHTML(text, splitPosition);
 	}
 
 	public static boolean equalsAnyIgnoreCase(String in, String[] compareToList){
@@ -264,10 +263,11 @@ public class MyTools {
 			size = -size;
 			step = -1;
 		}
+		int position = from;
 		int[] array = new int[size+1];
 		for(int i = 0; i < size; i++) {
-			array[i] = from;
-			from += step;
+			array[i] = position;
+			position += step;
 		}
 		return array;
 	}

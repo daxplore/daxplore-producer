@@ -84,8 +84,7 @@ public class OpenFilePanelDescriptor extends ImportWizardDescriptor implements A
 			System.out.println("Opening file: " + file.getName() + ".");
 
 			// save SPSS file.
-			try {
-				SPSSFile spssFile = new SPSSFile(file, "r");
+			try (SPSSFile spssFile = new SPSSFile(file, "r")) {
 				spssFile.logFlag = false;
 				spssFile.loadMetadata();
 				spssFile.close();

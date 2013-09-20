@@ -96,9 +96,9 @@ public class QuestionController implements TableModelListener, ActionListener  {
 	
 	LinkedList<Pair<Double, Integer>> calculateAfter() {
 		if(mq.getScale()==null) {
-			return new LinkedList<Pair<Double, Integer>>();
+			return new LinkedList<>();
 		}
-		TreeMap<Double, Integer> valueMap = new TreeMap<Double, Integer>();
+		TreeMap<Double, Integer> valueMap = new TreeMap<>();
 		for(MetaScale.Option option: mq.getScale().getOptions()) {
 			int total = 0;
 			for(Pair<Double, Integer> value: values) {
@@ -114,9 +114,9 @@ public class QuestionController implements TableModelListener, ActionListener  {
 			}
 		}
 		
-		LinkedList<Pair<Double, Integer>> list = new LinkedList<Pair<Double, Integer>>();
+		LinkedList<Pair<Double, Integer>> list = new LinkedList<>();
 		for(Entry<Double, Integer> entry : valueMap.entrySet()) {
-			list.add(new Pair<Double, Integer>(entry.getKey(), entry.getValue()));
+			list.add(new Pair<>(entry.getKey(), entry.getValue()));
 		}
 		
 		Collections.sort(list, new Comparator<Pair<Double, Integer>>() {
@@ -211,7 +211,7 @@ public class QuestionController implements TableModelListener, ActionListener  {
 			break;
 		case Command.INVERT:
 			options = mq.getScale().getOptions();
-			List<Option> invertedOptions = new LinkedList<Option>();
+			List<Option> invertedOptions = new LinkedList<>();
 			for(Option option : options) {
 				invertedOptions.add(0, option);
 			}

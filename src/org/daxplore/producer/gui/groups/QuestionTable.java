@@ -31,7 +31,7 @@ public class QuestionTable extends JTable {
         listSelectionBackground = new Color(200, 200, 255);
     }
 	
-	public QuestionTable(TableModel model) throws DaxploreException {
+	public QuestionTable(TableModel model) {
 		super(model);
 		this.setTableHeader(null);
 		
@@ -90,10 +90,9 @@ public class QuestionTable extends JTable {
 		    		children[ii].setBackground(bgColor);
 		    	}
 			    return qwRenderer;
-		    } else {
-		    	System.out.println("not renderer MetaQuestion");
-		    	return null;
 		    }
+	    	System.out.println("not renderer MetaQuestion");
+	    	return null;
 		}
 	    
 		@Override
@@ -123,10 +122,9 @@ public class QuestionTable extends JTable {
 		    		children[ii].setBackground(bgColor);
 		    	}
 			    return qwEditor;
-		    } else {
-		    	System.out.println("not editor MetaQuestion");
-		    	return null;
 		    }
+	    	System.out.println("not editor MetaQuestion");
+	    	return null;
 		}
 		
 

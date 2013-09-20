@@ -110,7 +110,6 @@ public class TimeSeriesTableModel extends DefaultTableModel {
 		}
 	}
 	
-	@SuppressWarnings("rawtypes")
 	@Override
 	public void insertRow(int row, Vector rowData) {
 		if(rowData.size() == 1 && rowData.get(0) instanceof MetaTimepointShort) {
@@ -138,7 +137,7 @@ public class TimeSeriesTableModel extends DefaultTableModel {
 		}
 		
 		List<MetaTimepointShort> timeList;
-		List<MetaTimepointShort> moveList = new LinkedList<MetaTimepointShort>();
+		List<MetaTimepointShort> moveList = new LinkedList<>();
 		try {
 			timeList = timeManager.getAll();
 		} catch (SQLException | DaxploreException e) {

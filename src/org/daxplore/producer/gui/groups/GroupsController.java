@@ -235,6 +235,8 @@ public class GroupsController implements ActionListener {
 		case RELOADDATA:
 			loadData();
 			break;
+		default:
+			throw new AssertionError("Action command not implemented: '" + e.getActionCommand() + "'");
 		}
 		
 	}

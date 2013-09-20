@@ -22,7 +22,7 @@ class GroupTreeModel implements TreeModel {
 
 	JPanel root = new JPanel();
 	//List<GroupWidget> groups = new LinkedList<GroupWidget>();
-	List<MetaGroup> groups = new LinkedList<MetaGroup>();
+	List<MetaGroup> groups = new LinkedList<>();
 	
 	private EventListenerList listeners = new EventListenerList();
 	//private Vector<TreeModelListener> listeners = new Vector<TreeModelListener>(); // Declare the listeners vector
@@ -47,14 +47,12 @@ class GroupTreeModel implements TreeModel {
 		if(parent == root) {
 			if(index < groups.size()) {
 				return groups.get(index);
-			} else return null;
+			}
 		} else if(parent instanceof MetaGroup) {
 			MetaGroup p = (MetaGroup)parent;
 			if(index < p.getQuestionCount()) {
 				return p.getQuestion(index);
-			} else return null;
-		} else if (parent instanceof MetaQuestion) {
-			return null;
+			}
 		}
 		return null;
 	}
@@ -172,9 +170,7 @@ class GroupTreeModel implements TreeModel {
 			MetaGroup p = (MetaGroup)parent;
 			if(groups.contains(p)) {
 				return p.getQuestions().indexOf(child);				
-			} else return -1;
-		} else if (parent instanceof MetaQuestion) {
-			return -1;
+			}
 		}
 		return -1;
 	}

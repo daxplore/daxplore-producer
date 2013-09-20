@@ -1,6 +1,5 @@
 package org.daxplore.producer.daxplorelib.raw;
 
-import java.nio.charset.Charset;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -45,48 +44,47 @@ public class RawMeta {
 	}
 	
 	public List<String> getColumns() throws SQLException{
-		Statement stmt = connection.createStatement();
-		ResultSet rs = stmt.executeQuery("SELECT column FROM rawmeta");
-		List<String> list = new LinkedList<String>();
-		while(rs.next()){
-			list.add(rs.getString("column"));
+		List<String> list = new LinkedList<>();
+		try (Statement stmt = connection.createStatement();
+				ResultSet rs = stmt.executeQuery("SELECT column FROM rawmeta")) {
+			while(rs.next()){
+				list.add(rs.getString("column"));
+			}
 		}
-		stmt.close();
 		return list;
 	}
 	
 	public boolean hasColumn(String column) throws SQLException {
-		PreparedStatement stmt = connection.prepareStatement(
-				"SELECT column FROM rawmeta WHERE column LIKE ?");
-		stmt.setString(1, column);
-		ResultSet rs = stmt.executeQuery();
-		if(rs.next()) {
-			return true;
+		try (PreparedStatement stmt = connection.prepareStatement(
+				"SELECT column FROM rawmeta WHERE column LIKE ?")) {
+			stmt.setString(1, column);
+			try (ResultSet rs = stmt.executeQuery()) {
+				return rs.next();
+			}
 		}
-		return false;
 	}
 	
 	public Map<String, VariableType> getColumnMap() throws SQLException{
-		Statement stmt = connection.createStatement();
-		ResultSet rs = stmt.executeQuery("SELECT column, qtype FROM rawmeta");
-		Map<String, VariableType> columns = new LinkedHashMap<String,VariableType>();
-		while(rs.next()){
-			String col = rs.getString("column");
-			VariableType type = VariableType.valueOf(rs.getString("qtype"));
-			columns.put(col, type);
+		Map<String, VariableType> columns = new LinkedHashMap<>();
+		try (Statement stmt = connection.createStatement();
+				ResultSet rs = stmt.executeQuery("SELECT column, qtype FROM rawmeta")) {
+			while(rs.next()){
+				String col = rs.getString("column");
+				VariableType type = VariableType.valueOf(rs.getString("qtype"));
+				columns.put(col, type);
+			}
 		}
-		stmt.close();
 		return columns;
 	}
 	
-	public void importSPSS(SPSSFile spssFile, Charset charset) throws SQLException {
-		Map<String, String> columns = new LinkedHashMap<String,String>();
+	public void importSPSS(SPSSFile spssFile) throws SQLException {
+		Map<String, String> columns = new LinkedHashMap<>();
 		try {
 			clearRawMetaTable(connection);
 		} catch (SQLException e) {
 			System.out.println("error clearing table");
 			MyTools.printSQLExeption(e);
-			throw e;
+			throw e; //TODO both catching and throwing SQLException!?
 		}
 		for(int i = 0; i < spssFile.getVariableCount(); i++){
 			SPSSVariable var = spssFile.getVariable(i);
@@ -107,8 +105,8 @@ public class RawMeta {
 				valuelabels = categoriesToJSON(var.categoryMap);
 			}
 			String measure = var.getMeasureLabel();
-			try {
-				PreparedStatement stmt = connection.prepareStatement("INSERT INTO rawmeta values (?, ?, ?, ?, ?, ?, ?)");
+			try(PreparedStatement stmt = connection.prepareStatement(
+					"INSERT INTO rawmeta values (?, ?, ?, ?, ?, ?, ?)")) {
 				addColumnMeta(
 						stmt,
 						var.getShortName(),
@@ -117,26 +115,23 @@ public class RawMeta {
 						qtype,
 						spsstype,
 						valuelabels,
-						connection,
 						measure
 						);
-				stmt.close();
 			} catch (SQLException e) {
 				System.out.println("Error adding row");
 				MyTools.printSQLExeption(e);
-				throw e;
+				throw e; //TODO both catching and throwing SQLException!?
 			}
 		}
 	}
 	
 	protected static void clearRawMetaTable(Connection conn) throws SQLException {
-		Statement stmt = conn.createStatement();
-		stmt.executeUpdate("DELETE FROM rawmeta");
-		stmt.close();
-		
+		try(Statement stmt = conn.createStatement()) {
+			stmt.executeUpdate("DELETE FROM rawmeta");
+		}
 	}
 	
-	protected static void addColumnMeta(PreparedStatement stmt, String column, String longname, String qtext, String qtype, String spsstype, String valuelabels, Connection conn, String measure) throws SQLException {
+	protected static void addColumnMeta(PreparedStatement stmt, String column, String longname, String qtext, String qtype, String spsstype, String valuelabels, String measure) throws SQLException {
 		
 		if(column != null)stmt.setString(1, column);
 		else throw new NullPointerException();
@@ -164,7 +159,7 @@ public class RawMeta {
 	
 	protected static String categoriesToJSON(Map<String, SPSSVariableCategory> categories){
 		Set<String> keyset = categories.keySet();
-		Map<Object,String> catObj = new LinkedHashMap<Object, String>();
+		Map<Object,String> catObj = new LinkedHashMap<>();
 		for(String key : keyset){
 			//if(categories.get(key).value != Double.NaN){
 			//	catObj.put(new Double(categories.get(key).value), categories.get(key).label);
@@ -177,13 +172,15 @@ public class RawMeta {
 	
 	@SuppressWarnings("rawtypes")
 	protected static List<Pair<String, Double>> JSONtoCategories(String jsonstring) {
-		List<Pair<String, Double>> list = new LinkedList<Pair<String,Double>>();
+		List<Pair<String, Double>> list = new LinkedList<>();
 		
 		JSONParser parser = new JSONParser();
 		ContainerFactory containerFactory = new ContainerFactory(){
+			@Override
 			public List creatArrayContainer() {
 				return new LinkedList();
 			}
+			@Override
 			public Map createObjectContainer() {
 				return new LinkedHashMap();
 			}
@@ -199,87 +196,45 @@ public class RawMeta {
 	    
 	    while(iter.hasNext()) {
 	    	Map.Entry entry = (Map.Entry)iter.next();
-			list.add(new Pair<String, Double>(
-					(String)entry.getValue(),
-					Double.parseDouble((String) entry.getKey())
-					));
+			list.add(new Pair<>((String)entry.getValue(), Double.parseDouble((String) entry.getKey())));
 	    }
 	    
 		return list;
 	}
 	
-	public Iterator<RawMetaQuestion> getQuestionIterator() throws SQLException{
-		PreparedStatement stmt = connection.prepareStatement("SELECT count(*) AS c FROM rawmeta");
-		ResultSet r = stmt.executeQuery();
-		final int count = r.getInt("c");
-		
-		stmt = connection.prepareStatement("SELECT * FROM rawmeta ORDER BY column ASC");
-		final ResultSet rs = stmt.executeQuery();
-		
-		Iterator<RawMetaQuestion> iter = new Iterator<RawMetaQuestion>() {
-			int i = 0;
-			
-			@Override
-			public boolean hasNext() {
-				if(!(i < count)) {
-					try {
-						rs.close();
-					} catch (SQLException e) {
-						MyTools.printSQLExeption(e);
-					}
+	public List<RawMetaQuestion> getQuestions() throws SQLException { 
+		List<RawMetaQuestion> rawQuestionList = new LinkedList<>();
+		try(PreparedStatement stmt = connection.prepareStatement("SELECT * FROM rawmeta ORDER BY column ASC");
+			final ResultSet rs = stmt.executeQuery()) {
+			while (rs.next()) {
+				RawMetaQuestion rmq = new RawMetaQuestion();
+				rmq.column = rs.getString("column");
+				rmq.longname = rs.getString("longname");
+				rmq.measure = rs.getString("measure");
+				rmq.qtext = rs.getString("qtext");
+				String qtype = rs.getString("qtype");
+				rmq.qtype = VariableType.valueOf(qtype);
+				rmq.spsstype = rs.getString("spsstype");
+				String cats = rs.getString("valuelabels");
+				if(cats != null && !cats.isEmpty()) {
+					rmq.valuelables = JSONtoCategories(rs.getString("valuelabels"));
+				} else {
+					rmq.valuelables = new LinkedList<>(); 
 				}
-				return i < count;
+				rawQuestionList.add(rmq);
 			}
-
-			@Override
-			public RawMetaQuestion next() {
-				try {
-					rs.next();
-					i++;
-					RawMetaQuestion rmq = new RawMetaQuestion();
-					rmq.column = rs.getString("column");
-					rmq.longname = rs.getString("longname");
-					rmq.measure = rs.getString("measure");;
-					rmq.qtext = rs.getString("qtext");
-					String qtype = rs.getString("qtype");
-					rmq.qtype = VariableType.valueOf(qtype);
-					rmq.spsstype = rs.getString("spsstype");
-					String cats = rs.getString("valuelabels");
-					if(cats != null && !cats.equals("")) {
-						rmq.valuelables = JSONtoCategories(rs.getString("valuelabels"));
-					} else {
-						rmq.valuelables = new LinkedList<Pair<String,Double>>(); 
-					}
-					return rmq;
-				} catch (SQLException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
-				
-				return null;
-			}
-
-			@Override
-			public void remove() {
-				// TODO Auto-generated method stub
-				
-			}
-			
-		};
-		//stmt.closeOnCompletion();
-		return iter;
-		
+		}
+		return rawQuestionList;
 	}
 	
 	public boolean hasData() {
-		if(SQLTools.tableExists("rawmeta", connection)) {
-			try {
-				if(getColumns().size() > 0) {
-					return true;
-				} else { return false; }
-			} catch (SQLException e) {
-				return false;
-			}
-		} else { return false; }
+		if(!SQLTools.tableExists("rawmeta", connection)) {
+			return false;
+		}
+		try {
+			return getColumns().size() > 0;
+		} catch (SQLException e) {
+			return false;
+		}
 	}
 }

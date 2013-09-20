@@ -73,7 +73,7 @@ public class EditToolbarView extends JPanel {
 		
 		public LocalizationFileChooser(List<Locale> localeList) {
 			super(Settings.getWorkingDirectory());
-			localeBox = new JComboBox<LocaleItem>();
+			localeBox = new JComboBox<>();
 			localeBox.addItem(null);
 			for(Locale loc: localeList) {
 				localeBox.addItem(new LocaleItem(loc));

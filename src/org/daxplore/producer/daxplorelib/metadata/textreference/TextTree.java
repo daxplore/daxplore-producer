@@ -28,6 +28,7 @@ public class TextTree extends SortedList<TextReferenceReference> implements Rand
 		return n!=null? (TextReference)n.getValue(): null;
 	}
 	
+	@Override
 	public TextReference get(int index) {
 		return (TextReference)super.get(index);
 	}
@@ -50,9 +51,8 @@ public class TextTree extends SortedList<TextReferenceReference> implements Rand
 		Node n = findFirstNodeWithValue(tr);
 		if(n != null) {
 			return false;
-		} else {
-			return super.add(tr);
 		}
+		return super.add(tr);
 	}
 	
 	public Iterable<TextReference> iterable() {
@@ -76,8 +76,7 @@ public class TextTree extends SortedList<TextReferenceReference> implements Rand
 						iter.remove();
 					}
 				};
-			};
+			}
 		};
-		
 	}
 }

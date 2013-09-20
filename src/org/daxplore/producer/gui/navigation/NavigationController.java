@@ -31,6 +31,8 @@ public class NavigationController implements ActionListener {
 				e1.printStackTrace();
 			}
 			break;
+		default:
+			break;
 		}
 	}
 	

@@ -11,7 +11,6 @@ import javax.swing.table.TableModel;
 @SuppressWarnings("serial")
 public class FinalImportPanel extends JPanel {
 	protected JTable table = new JTable();
-	private JScrollPane scrollPane = new JScrollPane();
 
 	public FinalImportPanel() {
 		setLayout(new BorderLayout());		
@@ -20,6 +19,7 @@ public class FinalImportPanel extends JPanel {
 	public void showTable(TableModel model) {
 			
 		table = new JTable(model) {
+			@Override
 			public boolean isCellEditable(int rowIndex, int colIndex) {
 				return false; //Disallow the editing of any cell
 			}

@@ -47,7 +47,8 @@ public final class OpenController implements ActionListener {
 		final JFileChooser fc = new JFileChooser(Settings.getWorkingDirectory()) {
 	        
 	        // override default operation of approveSelection() so it can handle overwriting files.
-	        public void approveSelection() {
+	        @Override
+			public void approveSelection() {
 	            File f = getSelectedFile();
 	            if (f.exists() && getDialogType() == SAVE_DIALOG) {
 	                int result = JOptionPane.showConfirmDialog(this,

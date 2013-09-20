@@ -25,7 +25,7 @@ public class NavigationView extends JPanel {
 		this.mainController = mainController;
 		navigationController = new NavigationController(this, mainController);
 		setLayout(new BorderLayout(0, 0));
-		setBorder(new MatteBorder(0, 1, 0, 0, (Color) Color.GRAY));
+		setBorder(new MatteBorder(0, 1, 0, 0, Color.GRAY));
 		
 		backButton = new JButton("Back");
 		backButton.setActionCommand("BACK");

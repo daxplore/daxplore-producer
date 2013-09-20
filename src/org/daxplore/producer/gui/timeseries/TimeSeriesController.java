@@ -39,7 +39,6 @@ public class TimeSeriesController implements ActionListener {
 	
 	@Override
 	public void actionPerformed(ActionEvent arg0) {
-		Object[] path;
 		int[] selectedRows;
 		switch(arg0.getActionCommand()) {
 		case TIMEPOINT_ADD_ACTION_COMMAND:
@@ -73,7 +72,7 @@ public class TimeSeriesController implements ActionListener {
 					break;
 				}
 				
-				MetaTimepointShort timepoint = timeManager.create(textref, timeindex, value);
+				timeManager.create(textref, timeindex, value);
 				timeSeriesTableModel.fireTableDataChanged();
 			} catch (SQLException | DaxploreException e) {
 				// TODO Auto-generated catch block
@@ -171,7 +170,7 @@ public class TimeSeriesController implements ActionListener {
 			RawData rawData = mainController.getDaxploreFile().getImportedData().getRawData();
 			RawMeta rawMeta = mainController.getDaxploreFile().getRawMeta();
 			if(rawMeta.hasColumn(text)) {
-				LinkedList<Pair<Double, Integer>> columnValueList = rawData.<Double>getColumnValueCount(text);
+				LinkedList<Pair<Double, Integer>> columnValueList = rawData.getColumnValueCount(text);
 				ColumnTableModel model = new ColumnTableModel(columnValueList);
 				JTable columnValueTable = new JTable(model);
 				view.getColumnValueCountPane().setViewportView(columnValueTable);

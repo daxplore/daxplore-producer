@@ -16,7 +16,7 @@ public enum VariableType {
 		this.sqltype = sqltype;
 		this.javatype = javatype;
 	}
-	public String sqltype(){ return sqltype; };
+	public String sqltype(){ return sqltype; }
 	
 	public Class<?> javatype() {return javatype;}
 }

@@ -100,11 +100,9 @@ public class MetaData {
 		
 		try {
 			RawMeta rawmeta = daxfile.getRawMeta();
-			Iterator<RawMetaQuestion> iter = rawmeta.getQuestionIterator();	
 			System.out.print("\n");
-			while(iter.hasNext()) {
+			for(RawMetaQuestion rmq : rawmeta.getQuestions()) {
 				System.out.print(".");
-				RawMetaQuestion rmq = iter.next();
 				TextReference fulltext = textsManager.get(rmq.column + "_fulltext");
 				fulltext.put(rmq.qtext, locale);
 				MetaCalculation calc = new MetaCalculation(rmq.column, connection);

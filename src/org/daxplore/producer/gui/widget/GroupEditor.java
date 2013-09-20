@@ -19,7 +19,7 @@ public class GroupEditor extends AbstractWidgetEditor<MetaGroup> {
 	}
 	
 	@Override
-	public MetaGroup getContent() throws InvalidContentException {
+	public MetaGroup getContent() {
 		return metaGroup;
 	}
 

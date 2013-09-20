@@ -61,7 +61,7 @@ public class TextWidget extends AbstractWidgetEditor<TextReference>{
 	}
 
 	@Override
-	public TextReference getContent() throws org.daxplore.producer.gui.widget.AbstractWidgetEditor.InvalidContentException {
+	public TextReference getContent() {
 		return textRef;
 	}
 

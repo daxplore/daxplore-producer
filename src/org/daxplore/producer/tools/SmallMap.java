@@ -39,12 +39,12 @@ public class SmallMap<K, V> extends AbstractMap<K, V> {
 
     private ArrayList<K> keyArray() {
         if (this.keyArray == null)
-            this.keyArray = new ArrayList<K>(0);
+            this.keyArray = new ArrayList<>(0);
         return this.keyArray;
     }
     private ArrayList<V> valueArray() {
         if (this.valueArray == null)
-            this.valueArray = new ArrayList<V>(0);
+            this.valueArray = new ArrayList<>(0);
         return this.valueArray;
     }
     /**
@@ -82,9 +82,8 @@ public class SmallMap<K, V> extends AbstractMap<K, V> {
             ka.add(key);
             va.add(value);
             return null;
-        } else {
-            return va.set(ind, value);
         }
+		return va.set(ind, value);
     }
 
     @Override
@@ -110,7 +109,7 @@ public class SmallMap<K, V> extends AbstractMap<K, V> {
                     @Override
                     public Entry<K, V> next() {
                         int pos = this.posNext++;
-                        return new SimpleEntry<K, V>(
+                        return new SimpleEntry<>(
                                 SmallMap.this.keyArray.get(pos),
                                 SmallMap.this.valueArray.get(pos));
                     }

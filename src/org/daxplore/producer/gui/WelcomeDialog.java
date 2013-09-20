@@ -53,16 +53,7 @@ public class WelcomeDialog {
 		} catch (Exception e) {
 			try {
 				UIManager.setLookAndFeel("javax.swing.plaf.nimbus.NimbusLookAndFeel");
-			} catch (ClassNotFoundException e1) {
-				// TODO Auto-generated catch block
-				e1.printStackTrace();
-			} catch (InstantiationException e1) {
-				// TODO Auto-generated catch block
-				e1.printStackTrace();
-			} catch (IllegalAccessException e1) {
-				// TODO Auto-generated catch block
-				e1.printStackTrace();
-			} catch (UnsupportedLookAndFeelException e1) {
+			} catch (ClassNotFoundException | InstantiationException | IllegalAccessException | UnsupportedLookAndFeelException e1) {
 				// TODO Auto-generated catch block
 				e1.printStackTrace();
 			}
@@ -114,6 +105,7 @@ public class WelcomeDialog {
 					final File file = fileChooser.getSelectedFile();
 					System.out.println("Opening: " + file.getName() + ".");
 					EventQueue.invokeLater(new Runnable() {
+						@Override
 						public void run() {
 							try {
 								MainView window = new MainView();
@@ -122,8 +114,8 @@ public class WelcomeDialog {
 								window.mainController.updateStuff();
 								welcomeFrame.setVisible(false);
 								welcomeFrame.dispose();
-							} catch (Exception e) {
-								e.printStackTrace();
+							} catch (Exception e1) {
+								e1.printStackTrace();
 							}
 						}
 					});
@@ -134,8 +126,5 @@ public class WelcomeDialog {
 			}
 		});
 		welcomeFrame.add(existingProjectButton);
-		
-		
 	}
-
 }

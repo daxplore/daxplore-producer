@@ -30,7 +30,7 @@ protected int mouseOver;
         listSelectionBackground = new Color(200, 200, 255);
     }
 	
-	public TimeSeriesTable(TableModel model) throws DaxploreException {
+	public TimeSeriesTable(TableModel model) {
 		super(model);
 		this.setTableHeader(null);
 		
@@ -89,9 +89,9 @@ protected int mouseOver;
 		    		children[ii].setBackground(bgColor);
 		    	}
 			    return textRefRenderer;
-		    } else {
-		    	return null; // TODO ?
 		    }
+		    
+		    return null; // TODO ?
 		}
 	    
 		@Override
@@ -121,19 +121,15 @@ protected int mouseOver;
 		    		children[ii].setBackground(bgColor);
 		    	}
 			    return textRefEditor;
-		    } else {
-		    	return null; //TODO ?
 		    }
+		    
+	    	return null; //TODO ?
 		}
 		
 
 		@Override
 		public Object getCellEditorValue() {
-			try {
-				return textRefRenderer.getContent();
-			} catch (InvalidContentException e) {
-				return null;
-			}
+			return textRefRenderer.getContent();
 		}
 
 	    @Override
