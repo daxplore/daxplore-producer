@@ -2,8 +2,10 @@ package org.daxplore.producer.cli;
 
 import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.OutputStreamWriter;
 import java.io.Writer;
 import java.util.List;
 import java.util.Locale;
@@ -108,8 +110,9 @@ public class ExportCommand {
 				e.printStackTrace();
 				return;
 			}
-			try (FileWriter fw = new FileWriter(outfile);
-					Writer w = new BufferedWriter(fw);
+			try (FileOutputStream fos = new FileOutputStream(outfile);
+					OutputStreamWriter osw = new OutputStreamWriter(fos, "UTF-8");
+					Writer w = new BufferedWriter(osw);
 					DaxploreFile dax = DaxploreFile.createFromExistingFile(file)) {
 				MetaData metadata = dax.getMetaData();
 				metadata.exportL10n(w, L10nFormat.PROPERTIES, locale);

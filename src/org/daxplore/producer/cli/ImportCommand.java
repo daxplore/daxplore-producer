@@ -2,9 +2,11 @@ package org.daxplore.producer.cli;
 
 import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.io.Reader;
 import java.nio.charset.Charset;
 import java.util.List;
@@ -155,10 +157,10 @@ public class ImportCommand {
 					System.out.println("Can't read from file: " + infile.getName());
 					return;
 				} 
-				try (FileReader fr = new FileReader(infile);
-						Reader r = new BufferedReader(fr)) {
-					MetaData metadata;
-					metadata = dax.getMetaData();
+				try (FileInputStream fis = new FileInputStream(infile);
+						InputStreamReader isr = new InputStreamReader(fis, "UTF-8");
+						Reader r = new BufferedReader(isr)) {
+ 					MetaData metadata = dax.getMetaData();
 					metadata.importL10n(r, L10nFormat.PROPERTIES, locale);
 				} catch (DaxploreException | IOException e) {
 					//TODO handle exception
