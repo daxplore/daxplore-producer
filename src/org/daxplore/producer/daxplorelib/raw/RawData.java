@@ -209,7 +209,8 @@ public class RawData {
 		LinkedList<Pair<Double, Integer>> map = new LinkedList<>();
 		//TODO call hasColumn automatically?
 		//Prepared statement doesn't work, but hasColumn is always called first so this should be relatively injection-safe
-		try (ResultSet rs = connection.createStatement().executeQuery(
+		try (Statement stmt = connection.createStatement();
+				ResultSet rs = stmt.executeQuery(
 				"SELECT "+ column + " AS val, count(*) AS cnt FROM rawdata WHERE " + column2 + " IS NOT NULL GROUP BY val ORDER BY val")) {
 			while(rs.next()) {
 				double val = rs.getDouble("val");

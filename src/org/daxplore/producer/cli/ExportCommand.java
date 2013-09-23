@@ -53,8 +53,7 @@ public class ExportCommand {
 				}
 				
 				try {
-					outfile.createNewFile();
-					if(!outfile.canWrite()) {
+					if(!outfile.createNewFile() || !outfile.canWrite()) {
 						System.out.println("Can't write to file: " + outfile.getName());
 						return;
 					} 
@@ -99,8 +98,7 @@ public class ExportCommand {
 				return;
 			}
 			try {
-				outfile.createNewFile();
-				if(!outfile.canWrite()) {
+				if(!outfile.createNewFile() || !outfile.canWrite()) {
 					System.out.println("Can't write to file: " + outfile.getName());
 					return;
 				} 

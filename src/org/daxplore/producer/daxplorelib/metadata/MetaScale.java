@@ -227,7 +227,8 @@ public class MetaScale {
 		
 		public List<MetaScale> getAll() throws SQLException, DaxploreException {
 			// make sure all scales are cached before returning the content of the map
-			try(ResultSet rs = connection.createStatement().executeQuery("SELECT id FROM metascale")) {
+			try(Statement stmt = connection.createStatement();
+					ResultSet rs = stmt.executeQuery("SELECT id FROM metascale")) {
 				while(rs.next()) {
 					int id = rs.getInt("id");
 					if(!scaleMap.containsKey(id) && !toBeRemoved.containsKey(id)) {
@@ -243,7 +244,7 @@ public class MetaScale {
 		TextReference textRef;
 		double value;
 		NumberlineCoverage transformation;
-		boolean modified = false;
+		boolean modified = false; //TODO remove modified tag as it's never read and Options are overwritten in saveall anyway?
 		
 		public Option(TextReference textRef, double value, NumberlineCoverage transformation, boolean setNew) {
 			this.textRef = textRef; this.value = value; this.transformation = transformation; this.modified = setNew;

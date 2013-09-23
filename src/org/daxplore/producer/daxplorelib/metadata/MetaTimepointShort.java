@@ -208,7 +208,31 @@ public class MetaTimepointShort implements Comparable<MetaTimepointShort> {
 	 */
 	@Override
 	public int compareTo(MetaTimepointShort o) {
-		return timeindex > o.timeindex ? 1: -1;
+		if (timeindex == o.timeindex) {
+			return 0;
+		}
+		return timeindex > o.timeindex ? 1 : -1;
+	}
+	
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + timeindex;
+		return result;
 	}
 
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj || obj == null || getClass() != obj.getClass()) {
+			return false;
+		}
+		return timeindex == ((MetaTimepointShort)obj).timeindex;
+	}
 }

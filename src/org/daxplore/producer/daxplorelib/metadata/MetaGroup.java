@@ -372,9 +372,37 @@ public class MetaGroup implements Comparable<MetaGroup> {
 		this.modified = true;
 	}
 
+	/**
+	 * {@inheritDoc}
+	 */
 	@Override
 	public int compareTo(MetaGroup o) {
+		if(index == o.index) {
+			return 0;
+		}
 		return index > o.index ? 1 : -1;
+	}
+	
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + id;
+		return result;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj || obj == null || getClass() != obj.getClass()) {
+			return false;
+		}
+		return id == ((MetaGroup)obj).id;
 	}
 
 	public int getQuestionCount() {

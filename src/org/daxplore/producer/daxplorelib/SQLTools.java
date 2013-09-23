@@ -99,7 +99,8 @@ public class SQLTools {
 	}
 	
 	public static int lastId(Connection connection) throws SQLException {
-		try (ResultSet rs = connection.createStatement().executeQuery("SELECT last_insert_rowid()")) {
+		try (Statement stmt = connection.createStatement();
+				ResultSet rs = stmt.executeQuery("SELECT last_insert_rowid()")) {
 			rs.next();
 			return (int) rs.getLong(1);
 		}
@@ -115,7 +116,8 @@ public class SQLTools {
 		stmt.setString(1, columnname);
 		stmt.setString(2, tablename);
 		ResultSet rs = stmt.executeQuery();*/
-		try(ResultSet rs = connection.createStatement().executeQuery("SELECT max( " + columnname + ") AS maxid FROM " + tablename)) {
+		try(Statement stmt = connection.createStatement();
+				ResultSet rs = stmt.executeQuery("SELECT max( " + columnname + ") AS maxid FROM " + tablename)) {
 			if(!rs.next()){
 				throw new SQLException("No max value, table empty");
 			}

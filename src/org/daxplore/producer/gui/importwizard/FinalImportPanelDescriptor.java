@@ -3,10 +3,8 @@ package org.daxplore.producer.gui.importwizard;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.io.Reader;
 import java.util.StringTokenizer;
 
 import javax.swing.table.DefaultTableModel;

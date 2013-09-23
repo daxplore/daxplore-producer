@@ -210,7 +210,8 @@ public class MetaQuestion {
 		
 		public List<MetaQuestion> getAll() throws SQLException, DaxploreException{
 			// make sure all questions are cached before returning the content of the map
-			try (ResultSet rs = connection.createStatement().executeQuery("SELECT id FROM metaquestion")) {
+			try (Statement stmt = connection.createStatement();
+					ResultSet rs = stmt.executeQuery("SELECT id FROM metaquestion")) {
 				while(rs.next()) {
 					String id = rs.getString("id");
 					if(!questionMap.containsKey(id) && !toBeRemoved.containsKey(id)) {

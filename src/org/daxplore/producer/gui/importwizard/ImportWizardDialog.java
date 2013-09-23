@@ -169,7 +169,7 @@ public class ImportWizardDialog extends JDialog implements PropertyChangeListene
      * @param boolean newValue The new enabled status of the button.
      */ 
     public void setBackButtonEnabled(boolean newValue) {
-    	importWizardModel.setBackButtonEnabled(new Boolean(newValue));
+    	importWizardModel.setBackButtonEnabled(Boolean.valueOf(newValue));
     }
 
    /**
@@ -185,7 +185,7 @@ public class ImportWizardDialog extends JDialog implements PropertyChangeListene
      * @param boolean newValue The new enabled status of the button.
      */ 
     public void setNextFinishButtonEnabled(boolean newValue) {
-    	importWizardModel.setNextFinishButtonEnabled(new Boolean(newValue));
+    	importWizardModel.setNextFinishButtonEnabled(Boolean.valueOf(newValue));
     }
  
    /**
@@ -201,7 +201,7 @@ public class ImportWizardDialog extends JDialog implements PropertyChangeListene
      * @param boolean newValue The new enabled status of the button.
      */ 
     public void setCancelButtonEnabled(boolean newValue) {
-    	importWizardModel.setCancelButtonEnabled(new Boolean(newValue));
+    	importWizardModel.setCancelButtonEnabled(Boolean.valueOf(newValue));
     }
     
     /**

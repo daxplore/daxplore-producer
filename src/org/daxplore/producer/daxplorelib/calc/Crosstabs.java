@@ -6,6 +6,7 @@ package org.daxplore.producer.daxplorelib.calc;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -42,7 +43,8 @@ public class Crosstabs {
 		long time = System.nanoTime();
 		ArrayList<Pair<String, Integer>> tempRawColnames = new ArrayList<>();
 		
-		try (ResultSet rs = connection.createStatement().executeQuery("PRAGMA TABLE_INFO(rawdata)")) {
+		try (Statement stmt = connection.createStatement();
+				ResultSet rs = stmt.executeQuery("PRAGMA TABLE_INFO(rawdata)")) {
 			for(int colIndex = 0; rs.next(); colIndex++) {
 				String type = rs.getString("type");
 				if(type.equalsIgnoreCase("real")) {
@@ -59,13 +61,15 @@ public class Crosstabs {
 			}
 		});
 		
-		try (ResultSet rs = connection.createStatement().executeQuery("SELECT count(*) as cnt from rawdata")) {
+		try (Statement stmt = connection.createStatement();
+				ResultSet rs = stmt.executeQuery("SELECT count(*) as cnt from rawdata")) {
 			rs.next();
 			int rowCount = rs.getInt("cnt");
 			rawdataTable = new double[colCount][rowCount];
 		}
 		
-		try(ResultSet rs = connection.createStatement().executeQuery("SELECT * FROM rawdata")) {
+		try(Statement stmt = connection.createStatement();
+				ResultSet rs = stmt.executeQuery("SELECT * FROM rawdata")) {
 			for(int row = 0; rs.next(); row++) {
 				for(int col = 0; col < tempRawColnames.size(); col++) {
 					double val = rs.getDouble(tempRawColnames.get(col).getValue() + 1);
@@ -161,9 +165,9 @@ public class Crosstabs {
 		} else {
 			//TODO: handle case where scale only has ignore
 			
-			try (ResultSet rs = connection.createStatement().executeQuery("SELECT " + question.getId() + " as q, " + perspective.getId() 
+			try (Statement stmt = connection.createStatement();
+					ResultSet rs = stmt.executeQuery("SELECT " + question.getId() + " as q, " + perspective.getId() 
 					+ " as p FROM rawdata WHERE " + about.getTimeSeriesShortColumn() + " = " + timepoint.getValue())) { //TODO: get query to work with prepared statement
-			
 				while(rs.next()) {
 					Double qvalue = rs.getDouble("q");
 					int qindex = question.getScale().matchIndex(qvalue);
@@ -177,7 +181,6 @@ public class Crosstabs {
 					crosstabsdata[pindex][qindex]++;
 				}
 			}
-
 		}
 		
 		for(int ti = 0; ti < totals.length; ti++) {
@@ -212,8 +215,8 @@ public class Crosstabs {
 			
 		} else {
 
-			try (ResultSet rs = connection.createStatement()
-					.executeQuery("SELECT " + question.getId() + " FROM rawdata WHERE " 
+			try (Statement stmt = connection.createStatement();
+					ResultSet rs = stmt.executeQuery("SELECT " + question.getId() + " FROM rawdata WHERE " 
 			+ about.getTimeSeriesShortColumn() + " = " + timepoint.getValue())) { //TODO: get query to work with prepared statement
 			
 				while(rs.next()) {

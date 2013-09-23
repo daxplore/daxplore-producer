@@ -173,7 +173,8 @@ public class TextReferenceManager {
 
 	public TextTree getAll() throws SQLException {
 		// make sure all references are cached before returning the content of the tree
-		try (ResultSet rs = connection.createStatement().executeQuery("SELECT ref FROM texts")) {
+		try (Statement stmt = connection.createStatement();
+				ResultSet rs = stmt.executeQuery("SELECT ref FROM texts")) {
 			while(rs.next()) {
 				String id = rs.getString("ref");
 				if(!textTree.contains(new TextReferenceReference(id)) && !toBeRemoved.containsKey(id)) {
