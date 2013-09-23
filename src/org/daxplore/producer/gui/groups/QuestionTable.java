@@ -130,11 +130,7 @@ public class QuestionTable extends JTable {
 
 		@Override
 		public Object getCellEditorValue() {
-			try {
-				return qwEditor.getContent();
-			} catch (InvalidContentException e) {
-				return null;
-			}
+			return qwEditor.getContent();
 		}
 
 	    @Override
