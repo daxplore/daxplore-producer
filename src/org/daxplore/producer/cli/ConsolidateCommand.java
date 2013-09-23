@@ -24,49 +24,11 @@ public class ConsolidateCommand {
 			System.out.println("File is not readwritable");
 			return;
 		}
-		DaxploreFile dax;
-		try {
-			dax = DaxploreFile.createFromExistingFile(file);
-		} catch (DaxploreException e) {
-			System.out.println("Could not open daxplorefile (not a daxplorefile?)");
-			System.out.println(e.getMessage());
-			Throwable e2 = e.getCause();
-			if(e2 != null) {
-				e2.printStackTrace();
-			}
-			e.printStackTrace();
-			return;
-		}
-		MetaData metadata;
-		try {
-			metadata = dax.getMetaData();
-		} catch (DaxploreException e) {
-			System.out.println("Could not get metadata");
-			System.out.println(e.getMessage());
-			Throwable e2 = e.getCause();
-			if(e2 != null) {
-				e2.printStackTrace();
-			}
-			e.printStackTrace();
-			return;
-		}
-		try {
+		try (DaxploreFile dax = DaxploreFile.createFromExistingFile(file)) {
+			MetaData metadata = dax.getMetaData();
 			metadata.consolidateScales(locale);
 		} catch (DaxploreException e) {
-			System.out.println("Could not transfer metadata");
-			System.out.println(e.getMessage());
-			Throwable e2 = e.getCause();
-			if(e2 != null) {
-				e2.printStackTrace();
-			}
-			e.printStackTrace();
-			return;
-		}
-		
-		try {
-			dax.close();
-		} catch (DaxploreException e) {
-			System.out.println("Closing error");
+			System.out.println("Consolidate command failed");
 			System.out.println(e.getMessage());
 			Throwable e2 = e.getCause();
 			if(e2 != null) {
@@ -76,5 +38,4 @@ public class ConsolidateCommand {
 			return;
 		}
 	}
-	
 }

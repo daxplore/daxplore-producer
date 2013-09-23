@@ -23,17 +23,17 @@ public class SortedPropertiesTest {
 		Random rnd = new Random(0xf290157a);
 
 		SortedProperties sp = new SortedProperties();
-		List<Pair<String, String>> props = new LinkedList<Pair<String, String>>();
+		List<Pair<String, String>> props = new LinkedList<>();
 		for(int i=1; i<200; i++) {
 			String key = new BigInteger(i, rnd).toString(36);
 			String value = new BigInteger(i, rnd).toString(36);
-			props.add(new Pair<String, String>(key, value));
+			props.add(new Pair<>(key, value));
 			sp.setProperty(key, value);
 		}
 		File tempFile = File.createTempFile("sorted-properties", ".props");
-		FileOutputStream fos = new FileOutputStream(tempFile);
-		sp.store(fos, "sorted properties");
-		fos.close();
+		try (FileOutputStream fos = new FileOutputStream(tempFile)) {
+			sp.store(fos, "sorted properties");
+		}
 		
 		Collections.sort(props, new Comparator<Pair<String, String>>() {
 			@Override
@@ -42,16 +42,16 @@ public class SortedPropertiesTest {
 			}
 		});
 		
-		BufferedReader br = new BufferedReader(new FileReader(tempFile));
-		assertEquals("#sorted properties", br.readLine());
-		br.readLine(); // ignore date-comment line
-		int i = 0;
-		String line;
-		while ((line=br.readLine())!=null) {
-			Pair<String, String> pair = props.get(i);
-			assertEquals(pair.getKey() + "=" + pair.getValue(), line);
-			i++;
+		try (BufferedReader br = new BufferedReader(new FileReader(tempFile))) {
+			assertEquals("#sorted properties", br.readLine());
+			br.readLine(); // ignore date-comment line
+			int i = 0;
+			String line;
+			while ((line=br.readLine())!=null) {
+				Pair<String, String> pair = props.get(i);
+				assertEquals(pair.getKey() + "=" + pair.getValue(), line);
+				i++;
+			}
 		}
-		br.close();
 	}
 }

@@ -43,39 +43,37 @@ public class ExportCommand {
 		public List<File> files;
 		
 		public void run(File file) {
-			DaxploreFile dax;
-			try {
-				dax = DaxploreFile.createFromExistingFile(file);
-			} catch (DaxploreException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-				return;
-			}
-			
-			File outfile = files.get(0);
-			if(outfile.exists()) {
-				System.out.println("File " + outfile.getName() + " already exists");
-				return;
-			}
-			try {
-				outfile.createNewFile();
-				if(!outfile.canWrite()) {
-					System.out.println("Can't write to file: " + outfile.getName());
+			try (DaxploreFile dax = DaxploreFile.createFromExistingFile(file)) {
+				File outfile = files.get(0);
+				if(outfile.exists()) {
+					System.out.println("File " + outfile.getName() + " already exists");
 					return;
-				} 
-			} catch (IOException e) {
-				System.out.println("Couln't create file: " + outfile.getName());
-				e.printStackTrace();
-				return;
-			}
-			try (FileWriter fw = new FileWriter(outfile);
-					Writer w = new BufferedWriter(fw)) {
-				MetaData metadata = dax.getMetaData();
-				metadata.exportStructure(w);
-				w.flush();
-			} catch (DaxploreException | IOException e) {
-				//TODO handle exception
-				System.out.println("Error exporting structure");
+				}
+				
+				try {
+					outfile.createNewFile();
+					if(!outfile.canWrite()) {
+						System.out.println("Can't write to file: " + outfile.getName());
+						return;
+					} 
+				} catch (IOException e) {
+					System.out.println("Couln't create file: " + outfile.getName());
+					e.printStackTrace();
+					return;
+				}
+
+				try (FileWriter fw = new FileWriter(outfile);
+						Writer w = new BufferedWriter(fw)) {
+					MetaData metadata = dax.getMetaData();
+					metadata.exportStructure(w);
+					w.flush();
+				} catch (DaxploreException | IOException e) {
+					//TODO handle exception
+					System.out.println("Error exporting structure");
+					e.printStackTrace();
+				}
+			} catch (DaxploreException e) {
+				System.out.println(e.getMessage());
 				e.printStackTrace();
 			}
 		}
@@ -111,8 +109,8 @@ public class ExportCommand {
 				return;
 			}
 			try (FileWriter fw = new FileWriter(outfile);
-					Writer w = new BufferedWriter(fw)) {
-				DaxploreFile dax = DaxploreFile.createFromExistingFile(file);
+					Writer w = new BufferedWriter(fw);
+					DaxploreFile dax = DaxploreFile.createFromExistingFile(file)) {
 				MetaData metadata = dax.getMetaData();
 				metadata.exportL10n(w, L10nFormat.PROPERTIES, locale);
 				w.flush();

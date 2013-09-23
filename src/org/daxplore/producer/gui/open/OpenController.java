@@ -77,14 +77,8 @@ public final class OpenController implements ActionListener {
 
 		if (returnVal == JFileChooser.APPROVE_OPTION) {
 			Settings.setWorkingDirectory(fc.getCurrentDirectory());
-			try {
-				if (mainController.getDaxploreFile() != null) {
-					mainController.getDaxploreFile().close();
-				}
-			} catch (DaxploreException e2) {
-				System.out.println("Couldn't close file");
-				e2.printStackTrace();
-				return;
+			if (mainController.getDaxploreFile() != null) {
+				mainController.getDaxploreFile().close();
 			}
 
 			// set the appropriate file ending.
@@ -123,15 +117,10 @@ public final class OpenController implements ActionListener {
 
 		if (returnVal == JFileChooser.APPROVE_OPTION) {
 			Settings.setWorkingDirectory(fc.getCurrentDirectory());
-			try {
-				if (mainController.getDaxploreFile() != null) {
-					mainController.getDaxploreFile().close();
-				}
-			} catch (DaxploreException e2) {
-				System.out.println("Couldn't close file");
-				e2.printStackTrace();
-				return;
+			if (mainController.getDaxploreFile() != null) {
+				mainController.getDaxploreFile().close();
 			}
+
 			File file = fc.getSelectedFile();
 			System.out.println("Opening: " + file.getName() + ".");
 			try {

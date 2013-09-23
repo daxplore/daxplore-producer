@@ -48,16 +48,16 @@ public class QuestionController implements TableModelListener, ActionListener  {
 	}
 
 	//TODO handle null scales properly
-	public void openMetaQuestion(MetaQuestion mq) {
-		this.mq = mq;
+	public void openMetaQuestion(MetaQuestion metaQuestion) {
+		this.mq = metaQuestion;
 		
-		scaleTableModel = new ScaleTableModel(mq.getScale());
+		scaleTableModel = new ScaleTableModel(metaQuestion.getScale());
 		scaleTableModel.addTableModelListener(this);
 		scaleTable = new ScaleTable(scaleTableModel);
 		view.getScaleScrollPane().setViewportView(scaleTable);
 		
 		try {
-			values = mainController.getDaxploreFile().getImportedData().getRawData().getColumnValueCount(mq.getId());
+			values = mainController.getDaxploreFile().getImportedData().getRawData().getColumnValueCount(metaQuestion.getId());
 			view.getBeforeScrollPane().setViewportView(new JTable(new ColumnTableModel(values)));
 		} catch (SQLException e) {
 			// TODO Auto-generated catch block
@@ -73,7 +73,7 @@ public class QuestionController implements TableModelListener, ActionListener  {
 					mainController.getDaxploreFile().getMetaData().getMetaTimepointManager(),
 					mainController.getDaxploreFile().getImportedData().getRawData(),
 					mainController.getDaxploreFile().getAbout(),
-					mq);
+					metaQuestion);
 			
 			TimePointTable timePointTable = new TimePointTable(timePointTableModel);
 			view.getTimePointScrollPane().setViewportView(timePointTable);

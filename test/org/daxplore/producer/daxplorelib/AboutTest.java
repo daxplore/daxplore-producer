@@ -59,7 +59,7 @@ public class AboutTest {
 	}
 	
 	@After
-	public void tearDown() throws DaxploreException {
+	public void tearDown() {
 		file.close();
 	}
 

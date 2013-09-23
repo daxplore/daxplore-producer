@@ -35,7 +35,7 @@ import org.daxplore.producer.gui.importwizard.OpenFilePanelDescriptor;
 public class OpenFileView extends JPanel {
 	
 	private JTextField fileNameField = new JTextField();
-	private JTextField importDateField = new JTextField();;
+	private JTextField importDateField = new JTextField();
 	private JTextField creationDateField = new JTextField();
 	private JTextField lastImportFileNameField = new JTextField();
 	public JTextPane spssFileInfoText = new JTextPane();

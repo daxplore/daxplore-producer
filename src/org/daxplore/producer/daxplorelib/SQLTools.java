@@ -98,7 +98,7 @@ public class SQLTools {
 		return true;
 	}
 	
-	public static int lastId(String tablename, Connection connection) throws SQLException {
+	public static int lastId(Connection connection) throws SQLException {
 		try (ResultSet rs = connection.createStatement().executeQuery("SELECT last_insert_rowid()")) {
 			rs.next();
 			return (int) rs.getLong(1);

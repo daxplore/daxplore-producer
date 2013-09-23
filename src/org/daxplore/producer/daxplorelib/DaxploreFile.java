@@ -1,5 +1,6 @@
 package org.daxplore.producer.daxplorelib;
 
+import java.io.Closeable;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
@@ -58,7 +59,7 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 
-public class DaxploreFile {
+public class DaxploreFile implements Closeable {
 	Connection connection;
 	About about;
 	File file = null;
@@ -298,11 +299,13 @@ public class DaxploreFile {
 		Logger.getGlobal().log(Level.INFO, "Save successful");
 	}
 	
-	public void close() throws DaxploreException {
+	@Override
+	public void close() {
 		try {
 			connection.close();
 		} catch (SQLException e) {
-			throw new DaxploreException("Could not close", e);
+			//TODO handle error?
+			e.printStackTrace();
 		}
 	}
 	

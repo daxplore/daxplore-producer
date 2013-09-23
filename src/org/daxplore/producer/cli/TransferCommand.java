@@ -24,49 +24,38 @@ public class TransferCommand {
 			System.out.println("File is not readwritable");
 			return;
 		}
-		DaxploreFile dax;
-		try {
-			dax = DaxploreFile.createFromExistingFile(file);
+		
+		try (DaxploreFile dax = DaxploreFile.createFromExistingFile(file)) {
+			
+			MetaData metadata;
+			try {
+				metadata = dax.getMetaData();
+			} catch (DaxploreException e) {
+				System.out.println("Could not get metadata");
+				System.out.println(e.getMessage());
+				Throwable e2 = e.getCause();
+				if(e2 != null) {
+					e2.printStackTrace();
+				}
+				e.printStackTrace();
+				return;
+			}
+			
+			try {
+				metadata.importFromRaw(dax, locale);
+			} catch (DaxploreException e) {
+				System.out.println("Could not transfer metadata");
+				System.out.println(e.getMessage());
+				Throwable e2 = e.getCause();
+				if(e2 != null) {
+					e2.printStackTrace();
+				}
+				e.printStackTrace();
+				return;
+			}
+			
 		} catch (DaxploreException e) {
 			System.out.println("Could not open daxplorefile (not a daxplorefile?)");
-			System.out.println(e.getMessage());
-			Throwable e2 = e.getCause();
-			if(e2 != null) {
-				e2.printStackTrace();
-			}
-			e.printStackTrace();
-			return;
-		}
-		MetaData metadata;
-		try {
-			metadata = dax.getMetaData();
-		} catch (DaxploreException e) {
-			System.out.println("Could not get metadata");
-			System.out.println(e.getMessage());
-			Throwable e2 = e.getCause();
-			if(e2 != null) {
-				e2.printStackTrace();
-			}
-			e.printStackTrace();
-			return;
-		}
-		try {
-			metadata.importFromRaw(dax, locale);
-		} catch (DaxploreException e) {
-			System.out.println("Could not transfer metadata");
-			System.out.println(e.getMessage());
-			Throwable e2 = e.getCause();
-			if(e2 != null) {
-				e2.printStackTrace();
-			}
-			e.printStackTrace();
-			return;
-		}
-		
-		try {
-			dax.close();
-		} catch (DaxploreException e) {
-			System.out.println("Closing error");
 			System.out.println(e.getMessage());
 			Throwable e2 = e.getCause();
 			if(e2 != null) {

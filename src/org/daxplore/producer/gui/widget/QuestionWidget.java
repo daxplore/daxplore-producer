@@ -43,6 +43,7 @@ public class QuestionWidget extends AbstractWidgetEditor<MetaQuestion> {
 		gotoButton.setEnabled(true);
 		//gotoButton.setVisible(false);
 		gotoButton.addActionListener(new ActionListener() {
+			@Override
 			public void actionPerformed(ActionEvent e) {
 				//mainController.switchTo(Views.EDITTEXTVIEW, metaQuestion.getFullTextRef());
 				mainController.switchTo(Views.QUESTIONVIEW, metaQuestion);

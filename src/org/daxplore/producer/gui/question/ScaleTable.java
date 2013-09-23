@@ -52,7 +52,8 @@ public class ScaleTable extends JTable {
         setRowHeight(new QuestionWidget().getPreferredSize().height);
         
         addMouseMotionListener(new MouseMotionAdapter() {
-            public void mouseMoved(MouseEvent e) {
+            @Override
+			public void mouseMoved(MouseEvent e) {
             	mouseOverRow = rowAtPoint(e.getPoint());
             	mouseOverColumn = columnAtPoint(e.getPoint());
                 repaint();
@@ -60,7 +61,8 @@ public class ScaleTable extends JTable {
         });
 
         addMouseListener(new MouseAdapter() {
-            public void mouseExited(MouseEvent e) {
+            @Override
+			public void mouseExited(MouseEvent e) {
                 mouseOverRow = -1;
                 mouseOverColumn = -1;
                 repaint();

@@ -46,7 +46,6 @@ public class QuestionView extends JPanel {
 	private JPanel panel_3;
 	private JPanel panel_4;
 	private JPanel panel_5;
-	private JPanel panel_6;
 	
 	class OptionListRenderer implements ListCellRenderer<MetaScale.Option> {
 

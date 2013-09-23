@@ -61,6 +61,7 @@ public class WelcomeDialog {
 		
 		// thread handler for main window.
 		EventQueue.invokeLater(new Runnable() {
+			@Override
 			public void run() {
 				try {
 					WelcomeDialog welcomeDialog = new WelcomeDialog();

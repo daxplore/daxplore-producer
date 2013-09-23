@@ -111,7 +111,6 @@ public class ScaleTableModel extends DefaultTableModel {
 		fireTableRowsDeleted(row, row);
 	}
 	
-	@SuppressWarnings("rawtypes")
 	@Override
 	public void insertRow(int row, Vector rowData) {
 		if(rowData.size() == 1 && rowData.get(0) instanceof MetaQuestion) {
@@ -125,7 +124,7 @@ public class ScaleTableModel extends DefaultTableModel {
 	@Override
 	public void moveRow(int start, int end, int to) {
 		List<Option> options= ms.getOptions();
-		List<Option> moveList = new LinkedList<Option>();
+		List<Option> moveList = new LinkedList<>();
 		
 		for(int i = start; i <= end; i++) {
 			moveList.add(options.remove(start)); //TODO: check if it works with more rows than 1

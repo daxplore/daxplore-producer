@@ -19,28 +19,28 @@ public class PairTest {
 
 	@Before
 	public void setUp() {
-		pair1 = new Pair<String, Integer>("foo", 1);
-		pair2 = new Pair<String, Integer>("foo", 1);
-		pair3 = new Pair<String, Integer>("bar", 1);
-		pair4 = new Pair<String, Integer>("bar", Integer.MIN_VALUE);
+		pair1 = new Pair<>("foo", 1);
+		pair2 = new Pair<>("foo", 1);
+		pair3 = new Pair<>("bar", 1);
+		pair4 = new Pair<>("bar", Integer.MIN_VALUE);
 
-		pp1 = new Pair<Pair<String, Integer>, Pair<String, Integer>>(pair1, pair2);
-		pp2 = new Pair<Pair<String, Integer>, Pair<String, Integer>>(pair1, pair2);
-		pp3 = new Pair<Pair<String, Integer>, Pair<String, Integer>>(pair1, pair3);
-		pp4 = new Pair<Pair<String, Integer>, Pair<String, Integer>>(pair4, pair1);
+		pp1 = new Pair<>(pair1, pair2);
+		pp2 = new Pair<>(pair1, pair2);
+		pp3 = new Pair<>(pair1, pair3);
+		pp4 = new Pair<>(pair4, pair1);
 	}
 
 	@Test
 	public void testConstructor() {
 		try {
-			new Pair<Object, Object>(null, new Object());
+			new Pair<>(null, new Object());
 			fail();
 		} catch (NullPointerException e) {
 			// Success
 		}
 
 		try {
-			new Pair<Object, Object>(new Object(), null);
+			new Pair<>(new Object(), null);
 			fail();
 		} catch (NullPointerException e) {
 			// Success

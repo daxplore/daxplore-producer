@@ -22,8 +22,7 @@ public class InfoCommand {
 			System.out.println("File does not exist");
 			return;
 		}
-		try {
-			DaxploreFile daxplore = DaxploreFile.createFromExistingFile(file);
+		try (DaxploreFile daxplore = DaxploreFile.createFromExistingFile(file)) {
 			About about = daxplore.getAbout();
 			System.out.println("File: " + file.getName());
 			System.out.println("Creation date: " + about.getCreationDate().toString());

@@ -96,8 +96,7 @@ public class ImportCommand {
 				}
 				
 			} else {
-				try {
-					DaxploreFile daxplorefile = DaxploreFile.createFromExistingFile(file);
+				try (DaxploreFile daxplorefile = DaxploreFile.createFromExistingFile(file)) {
 					System.out.println("Importing...");
 					daxplorefile.importSPSS(importFile, charset);
 					System.out.println("Data imported");
@@ -144,36 +143,34 @@ public class ImportCommand {
 		public List<File> files;
 		
 		public void run(File file) {
-			DaxploreFile dax;
-			
-			System.out.println("Importing texts for locale: " + locale.getLanguage());
-			try {
-				dax = DaxploreFile.createFromExistingFile(file);
+			try (DaxploreFile dax = DaxploreFile.createFromExistingFile(file)) {
+				System.out.println("Importing texts for locale: " + locale.getLanguage());
+				
+				File infile = files.get(0);
+				if(!infile.exists()) {
+					System.out.println("File " + infile.getName() + " doesn't exist");
+					return;
+				}
+				if(!infile.canRead()) {
+					System.out.println("Can't read from file: " + infile.getName());
+					return;
+				} 
+				try (FileReader fr = new FileReader(infile);
+						Reader r = new BufferedReader(fr)) {
+					MetaData metadata;
+					metadata = dax.getMetaData();
+					metadata.importL10n(r, L10nFormat.PROPERTIES, locale);
+				} catch (DaxploreException | IOException e) {
+					//TODO handle exception
+					System.out.println("Error exporting texts");
+					e.printStackTrace();
+				}
+
 			} catch (DaxploreException e) {
-				// TODO Auto-generated catch block
+				System.out.println(e.getMessage());
 				e.printStackTrace();
 				return;
 			}
-			
-			File infile = files.get(0);
-			if(!infile.exists()) {
-				System.out.println("File " + infile.getName() + " doesn't exist");
-				return;
-			}
-			if(!infile.canRead()) {
-				System.out.println("Can't read from file: " + infile.getName());
-				return;
-			} 
-			try (FileReader fr = new FileReader(infile);
-					Reader r = new BufferedReader(fr)) {
-				MetaData metadata;
-				metadata = dax.getMetaData();
-				metadata.importL10n(r, L10nFormat.PROPERTIES, locale);
-			} catch (DaxploreException | IOException e) {
-				//TODO handle exception
-				System.out.println("Error exporting texts");
-				e.printStackTrace();
-			}			
 		}
 	}
 }

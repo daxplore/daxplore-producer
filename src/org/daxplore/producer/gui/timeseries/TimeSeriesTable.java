@@ -15,9 +15,7 @@ import javax.swing.table.TableCellEditor;
 import javax.swing.table.TableCellRenderer;
 import javax.swing.table.TableModel;
 
-import org.daxplore.producer.daxplorelib.DaxploreException;
 import org.daxplore.producer.daxplorelib.metadata.textreference.TextReference;
-import org.daxplore.producer.gui.widget.AbstractWidgetEditor.InvalidContentException;
 import org.daxplore.producer.gui.widget.TextWidget;
 
 @SuppressWarnings("serial")
@@ -43,14 +41,16 @@ protected int mouseOver;
         setRowHeight(new TextWidget().getPreferredSize().height);
         
         addMouseMotionListener(new MouseMotionAdapter() {
-            public void mouseMoved(MouseEvent e) {
+            @Override
+			public void mouseMoved(MouseEvent e) {
             	mouseOver = rowAtPoint(new Point(e.getX(), e.getY()));
                 repaint();
             }
         });
 
         addMouseListener(new MouseAdapter() {
-            public void mouseExited(MouseEvent e) {
+            @Override
+			public void mouseExited(MouseEvent e) {
                 mouseOver = -1;
                 repaint();
             }

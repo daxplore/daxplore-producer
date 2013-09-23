@@ -38,6 +38,7 @@ public class TextWidget extends AbstractWidgetEditor<TextReference>{
 		gotoButton.setEnabled(true);
 		//gotoButton.setVisible(false);
 		gotoButton.addActionListener(new ActionListener() {
+			@Override
 			public void actionPerformed(ActionEvent e) {
 				//mainController.switchTo(Views.EDITTEXTVIEW, metaQuestion.getFullTextRef());
 				mainController.switchTo(Views.EDITTEXTVIEW, textRef);

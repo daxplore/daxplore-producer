@@ -14,8 +14,8 @@ public class CreateCommand {
 			System.out.println("File already exists");
 			return;
 		}
-		try {
-			DaxploreFile.createWithNewFile(file);
+		try (DaxploreFile created = DaxploreFile.createWithNewFile(file)) {
+			
 		} catch (DaxploreException e) {
 			System.out.println("Couldn't create file");
 			Throwable e2 = e.getCause();

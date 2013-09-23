@@ -15,9 +15,9 @@ public class DaxploreFileTest {
 	@Test
 	public void testCreateFile() throws IOException, DaxploreException {
 		File tempFile = File.createTempFile("daxplore-file", ".dax");
-		DaxploreFile file = DaxploreFile.createWithNewFile(tempFile);
-		assertEquals(tempFile, file.getFile());
-		file.close();
+		try (DaxploreFile file = DaxploreFile.createWithNewFile(tempFile)) {
+			assertEquals(tempFile, file.getFile());
+		}
 	}
 
 }

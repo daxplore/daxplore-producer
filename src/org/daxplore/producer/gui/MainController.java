@@ -124,7 +124,6 @@ public class MainController implements ActionListener {
 				}
 				break;
 			case TIMESERIESVIEW:
-				break;
 			default:
 				throw new AssertionError("Undefined history item command: " + hi.view);
 			}
@@ -139,10 +138,10 @@ public class MainController implements ActionListener {
 		case GROUPSVIEW:
 			navigationView.setToolbar(groupsView.getController().getToolbar());
 			return;
-		case OPENFILEVIEW: break;
-		case QUESTIONVIEW: break;
-		case TIMESERIESVIEW: break;
-		case TOOLSVIEW: break;
+		case OPENFILEVIEW:
+		case QUESTIONVIEW:
+		case TIMESERIESVIEW:
+		case TOOLSVIEW:
 		default:
 			navigationView.setToolbar(null);
 			break;

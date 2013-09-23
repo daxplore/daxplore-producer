@@ -137,8 +137,8 @@ public class ImportWizardDialog extends JDialog implements PropertyChangeListene
     }
 	
     // used to update button properties as events are triggered.
-    public void propertyChange(PropertyChangeEvent evt) {
-        
+    @Override
+	public void propertyChange(PropertyChangeEvent evt) {
         if (evt.getPropertyName().equals(ImportWizardModel.CURRENT_PANEL_DESCRIPTOR_PROPERTY)) {
             importWizardController.resetButtonsToPanelRules(); 
         } else if (evt.getPropertyName().equals(ImportWizardModel.NEXT_FINISH_BUTTON_TEXT_PROPERTY)) {            
