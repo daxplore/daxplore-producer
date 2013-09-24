@@ -1,6 +1,7 @@
 package org.daxplore.producer.cli;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.List;
 
 import org.daxplore.producer.daxplorelib.About;
@@ -41,7 +42,7 @@ public class InfoCommand {
 			} else {
 				System.out.println("Has never imported data");
 			}
-		} catch (DaxploreException e) {
+		} catch (DaxploreException | IOException e) {
 			// TODO Auto-generated catch block
 			e.getCause().printStackTrace();
 		}

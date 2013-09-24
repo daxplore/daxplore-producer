@@ -1,6 +1,7 @@
 package org.daxplore.producer.cli;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.Locale;
 
 import org.daxplore.producer.daxplorelib.DaxploreException;
@@ -27,7 +28,7 @@ public class ConsolidateCommand {
 		try (DaxploreFile dax = DaxploreFile.createFromExistingFile(file)) {
 			MetaData metadata = dax.getMetaData();
 			metadata.consolidateScales(locale);
-		} catch (DaxploreException e) {
+		} catch (DaxploreException | IOException e) {
 			System.out.println("Consolidate command failed");
 			System.out.println(e.getMessage());
 			Throwable e2 = e.getCause();

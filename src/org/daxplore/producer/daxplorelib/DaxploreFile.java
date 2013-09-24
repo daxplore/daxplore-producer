@@ -300,12 +300,11 @@ public class DaxploreFile implements Closeable {
 	}
 	
 	@Override
-	public void close() {
+	public void close() throws IOException {
 		try {
 			connection.close();
 		} catch (SQLException e) {
-			//TODO handle error?
-			e.printStackTrace();
+			throw new IOException("Failed to close database connection", e);
 		}
 	}
 	

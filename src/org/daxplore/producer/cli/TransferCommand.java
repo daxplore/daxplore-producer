@@ -1,6 +1,7 @@
 package org.daxplore.producer.cli;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.Locale;
 
 import org.daxplore.producer.daxplorelib.DaxploreException;
@@ -54,7 +55,7 @@ public class TransferCommand {
 				return;
 			}
 			
-		} catch (DaxploreException e) {
+		} catch (DaxploreException | IOException e) {
 			System.out.println("Could not open daxplorefile (not a daxplorefile?)");
 			System.out.println(e.getMessage());
 			Throwable e2 = e.getCause();

@@ -3,6 +3,7 @@ package org.daxplore.producer.gui.open;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
+import java.io.IOException;
 import java.text.SimpleDateFormat;
 
 import javax.swing.JFileChooser;
@@ -76,9 +77,16 @@ public final class OpenController implements ActionListener {
 		int returnVal = fc.showSaveDialog(this.mainController.getMainFrame());
 
 		if (returnVal == JFileChooser.APPROVE_OPTION) {
-			Settings.setWorkingDirectory(fc.getCurrentDirectory());
-			if (mainController.getDaxploreFile() != null) {
-				mainController.getDaxploreFile().close();
+			try {
+				Settings.setWorkingDirectory(fc.getCurrentDirectory());
+				if (mainController.getDaxploreFile() != null) {
+					mainController.getDaxploreFile().close();
+				}
+			} catch (IOException e) {
+				System.out.println("Failed to close old daxplore file");
+				e.printStackTrace();
+				//TODO communicate error to user? Still allow opening a new file?
+				return; 
 			}
 
 			// set the appropriate file ending.
@@ -117,8 +125,16 @@ public final class OpenController implements ActionListener {
 
 		if (returnVal == JFileChooser.APPROVE_OPTION) {
 			Settings.setWorkingDirectory(fc.getCurrentDirectory());
-			if (mainController.getDaxploreFile() != null) {
-				mainController.getDaxploreFile().close();
+			try {
+				Settings.setWorkingDirectory(fc.getCurrentDirectory());
+				if (mainController.getDaxploreFile() != null) {
+					mainController.getDaxploreFile().close();
+				}
+			} catch (IOException e) {
+				System.out.println("Failed to close old daxplore file");
+				e.printStackTrace();
+				//TODO communicate error to user? Still allow opening a new file?
+				return; 
 			}
 
 			File file = fc.getSelectedFile();

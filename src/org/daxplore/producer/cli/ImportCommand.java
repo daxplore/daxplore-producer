@@ -167,7 +167,7 @@ public class ImportCommand {
 					e.printStackTrace();
 				}
 
-			} catch (DaxploreException e) {
+			} catch (DaxploreException | IOException e) {
 				System.out.println(e.getMessage());
 				e.printStackTrace();
 				return;

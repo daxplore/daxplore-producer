@@ -73,7 +73,7 @@ public class ExportCommand {
 					System.out.println("Error exporting structure");
 					e.printStackTrace();
 				}
-			} catch (DaxploreException e) {
+			} catch (DaxploreException | IOException e) {
 				System.out.println(e.getMessage());
 				e.printStackTrace();
 			}

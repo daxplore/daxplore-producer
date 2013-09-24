@@ -1,6 +1,7 @@
 package org.daxplore.producer.cli;
 
 import java.io.File;
+import java.io.IOException;
 
 import org.daxplore.producer.daxplorelib.DaxploreException;
 import org.daxplore.producer.daxplorelib.DaxploreFile;
@@ -16,7 +17,7 @@ public class CreateCommand {
 		}
 		try (DaxploreFile created = DaxploreFile.createWithNewFile(file)) {
 			
-		} catch (DaxploreException e) {
+		} catch (DaxploreException | IOException e) {
 			System.out.println("Couldn't create file");
 			Throwable e2 = e.getCause();
 			if(e2 != null) {
