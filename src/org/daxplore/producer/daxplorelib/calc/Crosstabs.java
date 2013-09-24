@@ -133,7 +133,7 @@ public class Crosstabs {
 		}
 	}
 	
-	public int[][] crosstabs2(MetaQuestion question, MetaQuestion perspective, MetaTimepointShort timepoint, int lowerlimit) throws SQLException {
+	private int[][] crosstabs2(MetaQuestion question, MetaQuestion perspective, MetaTimepointShort timepoint, int lowerlimit) throws SQLException {
 		if(question.getScale() == null && perspective.getScale() == null) { 
 			return null;
 		}
@@ -193,7 +193,7 @@ public class Crosstabs {
 		
 	}
 	
-	public int[] frequencies(MetaQuestion question, MetaTimepointShort timepoint, int lowerlimit) throws SQLException {
+	private int[] frequencies(MetaQuestion question, MetaTimepointShort timepoint, int lowerlimit) throws SQLException {
 		int[] frequencies = new int[question.getScale().getOptionCount()];
 		int total = 0;
 

@@ -19,11 +19,11 @@ import java.util.TreeSet;
  * It's a one row table with information about the entire save file.
  */
 public class About {
-	protected static final DaxploreTable table = new DaxploreTable(
+	private static final DaxploreTable table = new DaxploreTable(
 			"CREATE TABLE about (filetypeversionmajor INTEGER, filetypeversionminor INTEGER, creation INTEGER," +
 			"lastupdate INTEGER, importdate INTEGER, filename TEXT, timeseriestype TEXT, timeshortcolumn TEXT)", "about");
 	
-	protected static final DaxploreTable localeTable = new DaxploreTable("CREATE TABLE locales (locale TEXT PRIMARY KEY)", "locales");
+	private static final DaxploreTable localeTable = new DaxploreTable("CREATE TABLE locales (locale TEXT PRIMARY KEY)", "locales");
 	
 	public enum TimeSeriesType {
 		NONE, SHORT, LONG
@@ -46,15 +46,15 @@ public class About {
 	 * If the timeseries type is SHORT, this is the column that keeps track of time points.
 	 * For other timeseries types, this should be set to null.
 	 */
-	String timeSeriesShortColumn;
+	private String timeSeriesShortColumn;
 	
-	Connection connection;
+	private Connection connection;
 	
 	public About(Connection sqliteDatabase) throws SQLException {
 		this(sqliteDatabase, false);
 	}
 	
-	public About(Connection sqliteDatabase, boolean createnew) throws SQLException { 
+	About(Connection sqliteDatabase, boolean createnew) throws SQLException { 
 		this.connection = sqliteDatabase;
 		locales = new TreeSet<>(new Comparator<Locale>() {
 			@Override
@@ -96,12 +96,12 @@ public class About {
 		}
 	}
 	
-	public void init() throws SQLException {
+	void init() throws SQLException {
 		SQLTools.createIfNotExists(table, connection);
 		SQLTools.createIfNotExists(localeTable, connection);
 	}
 	
-	public void save() throws SQLException {
+	void save() throws SQLException {
 		if(modified) {
 			String stmtString;
 			if(firstSave) {

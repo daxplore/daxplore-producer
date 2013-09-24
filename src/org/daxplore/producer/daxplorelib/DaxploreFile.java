@@ -60,11 +60,11 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 
 public class DaxploreFile implements Closeable {
-	Connection connection;
-	About about;
-	File file = null;
-	MetaData metadata;
-	SPSSFile sf = null;
+	private Connection connection;
+	private About about;
+	private File file = null;
+	private MetaData metadata;
+	private SPSSFile sf = null;
 	
 	public static DaxploreFile createFromExistingFile(File file) throws DaxploreException {
 		try {
@@ -111,7 +111,7 @@ public class DaxploreFile implements Closeable {
 		}
 	}*/
 	
-	protected DaxploreFile(Connection connection, boolean createNew, File file) throws DaxploreException {
+	private DaxploreFile(Connection connection, boolean createNew, File file) throws DaxploreException {
 		this.connection = connection;
 		this.file = file;
 		try {
@@ -120,84 +120,6 @@ public class DaxploreFile implements Closeable {
 			about.save();
 		} catch (SQLException e) {
 			throw new DaxploreException("Error creating about", e);
-		}
-	}
-	
-	public void openSPSS(File spssFile, Charset charset) throws FileNotFoundException, IOException, DaxploreException {
-		FileFormatInfo ffi = new FileFormatInfo();
-		ffi.namesOnFirstLine = false;
-		ffi.asciiFormat = ASCIIFormat.CSV;
-		ffi.compatibility = Compatibility.GENERIC;
-		try {
-			sf = new SPSSFile(spssFile,charset);
-			sf.logFlag = false;
-			sf.loadMetadata();
-		} catch (SPSSFileException e2) {
-			throw new DaxploreException("SPSSFileException", e2);
-		}
-	}
-	
-	public void importDataFromSPSS() throws DaxploreException {
-		if(sf == null) {
-			throw new DaxploreException("No SPSSfile loaded");
-		}
-		boolean autocommit = true;
-		try {
-			autocommit = connection.getAutoCommit();
-			connection.setAutoCommit(false);
-			int isolation = connection.getTransactionIsolation();
-			connection.setTransactionIsolation(Connection.TRANSACTION_READ_UNCOMMITTED);
-			
-			RawImport rawImport = new RawImport(connection);
-
-			rawImport.importSPSSData(sf);
-
-				
-			about.setImport(sf.file.getName());
-			
-			connection.commit();
-			connection.setTransactionIsolation(isolation);
-			connection.setAutoCommit(autocommit);
-		} catch (SQLException e) {
-			MyTools.printSQLExeption(e);
-			try {
-				connection.rollback();
-			} catch (SQLException e1) {
-				throw new DaxploreException("Import error. Could not rollback.", e);
-			}
-			throw new DaxploreException("Import error.", e);
-		}
-	}
-	
-	public void importMetaDataFromSPSS() throws DaxploreException {
-		if(sf == null) {
-			throw new DaxploreException("No SPSSfile loaded");
-		}
-		boolean autocommit = true;
-		try {
-			autocommit = connection.getAutoCommit();
-			connection.setAutoCommit(false);
-			int isolation = connection.getTransactionIsolation();
-			connection.setTransactionIsolation(Connection.TRANSACTION_READ_UNCOMMITTED);
-			
-			RawImport rawImport = new RawImport(connection);
-
-			rawImport.importSPSSMeta(sf);
-
-				
-			about.setImport(sf.file.getName());
-			
-			connection.commit();
-			connection.setTransactionIsolation(isolation);
-			connection.setAutoCommit(autocommit);
-		} catch (SQLException e) {
-			MyTools.printSQLExeption(e);
-			try {
-				connection.rollback();
-			} catch (SQLException e1) {
-				throw new DaxploreException("Import error. Could not rollback.", e);
-			}
-			throw new DaxploreException("Import error.", e);
 		}
 	}
 	
@@ -310,14 +232,6 @@ public class DaxploreFile implements Closeable {
 	
 	public File getFile() {
 		return file;
-	}
-	
-	protected List<DaxploreTable> getTables() {
-		List<DaxploreTable> list = new LinkedList<>();
-		list.add(About.table);
-		list.addAll(MetaData.getTables());
-		list.addAll(getImportedData().getTables());
-		return list;
 	}
 	
 	public void writeUploadFile(File outputFile) throws TransformerFactoryConfigurationError, TransformerException, SQLException, DaxploreException, SAXException, IOException, ParserConfigurationException {

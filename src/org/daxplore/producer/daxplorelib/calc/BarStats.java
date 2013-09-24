@@ -15,14 +15,14 @@ import com.google.gson.JsonPrimitive;
 
 public class BarStats {
 	
-	LinkedHashMap<MetaTimepointShort, BarGroups> data = new LinkedHashMap<>();
+	private LinkedHashMap<MetaTimepointShort, BarGroups> data = new LinkedHashMap<>();
 	private MetaQuestion question, perspective;
 	
-	public static class BarGroups {
-		List<int[]> bars;
-		int[] all;
+	private static class BarGroups {
+		private List<int[]> bars;
+		private int[] all;
 		
-		public BarGroups(int[][] barsData, int[] all) {
+		private BarGroups(int[][] barsData, int[] all) {
 			bars = new LinkedList<>();
 			for(int i = 0; i < barsData.length; i++) {
 				bars.add(barsData[i]);
@@ -50,12 +50,12 @@ public class BarStats {
 		}
 	}
 	
-	public BarStats(MetaQuestion question, MetaQuestion perspective) {
+	BarStats(MetaQuestion question, MetaQuestion perspective) {
 		this.question = question;
 		this.perspective = perspective;
 	}
 	
-	public void addTimePoint(MetaTimepointShort timepoint, int[][] crosstabs, int[] frequencies) {
+	void addTimePoint(MetaTimepointShort timepoint, int[][] crosstabs, int[] frequencies) {
 		data.put(timepoint, new BarGroups(crosstabs, frequencies));
 	}
 	

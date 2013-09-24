@@ -9,14 +9,9 @@ import org.daxplore.producer.gui.Settings;
 @SuppressWarnings("serial")
 public class GroupRenderer extends AbstractWidget<MetaGroup> {
 	
-	public MetaGroup metaGroup;
+	private MetaGroup metaGroup;
 	
 	private JLabel label;
-	
-	public GroupRenderer(MetaGroup mg) {
-		this();
-		setContent(mg);
-	}
 	
 	public GroupRenderer() {
 		label = new JLabel();

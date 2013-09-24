@@ -38,6 +38,7 @@ public class SQLTools {
 		}
 	}
 	
+	//TODO unused as of 2013-09-24, remove?
 	public static boolean compareTables(String table1, String table2, String idcolumn, Map<String,String> columns, Connection connection) throws SQLException{
 		try (Statement stmt = connection.createStatement()) {
 			stmt.execute("select * from " + table1);
