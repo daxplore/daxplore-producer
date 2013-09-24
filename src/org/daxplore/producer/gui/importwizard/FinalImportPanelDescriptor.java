@@ -85,7 +85,7 @@ public class FinalImportPanelDescriptor extends ImportWizardDescriptor {
 			return null;
 		}
 
-		try (FileInputStream fis = new FileInputStream(file);
+		try (FileInputStream fis = new FileInputStream(temp);
 				InputStreamReader isr = new InputStreamReader(fis, "UTF-8");
 				BufferedReader br = new BufferedReader(isr)) {
 			
