@@ -231,8 +231,7 @@ public class ImportWizardModel {
     }
     
     public void setBackButtonEnabled(Boolean newValue) {
-        
-        boolean oldValue = getBackButtonEnabled();        
+        Boolean oldValue = getBackButtonEnabled();        
         if (newValue != oldValue) {
             buttonEnabledHashmap.put(BACK_BUTTON_ENABLED_PROPERTY, newValue);
             firePropertyChange(BACK_BUTTON_ENABLED_PROPERTY, oldValue, newValue);
@@ -244,8 +243,7 @@ public class ImportWizardModel {
     }
     
     public void setNextFinishButtonEnabled(Boolean newValue) {
-        
-    	boolean oldValue = getNextFinishButtonEnabled();        
+    	Boolean oldValue = getNextFinishButtonEnabled();        
         if (newValue != oldValue) {
             buttonEnabledHashmap.put(NEXT_FINISH_BUTTON_ENABLED_PROPERTY, newValue);
             firePropertyChange(NEXT_FINISH_BUTTON_ENABLED_PROPERTY, oldValue, newValue);
@@ -257,8 +255,7 @@ public class ImportWizardModel {
     }
     
     public void setCancelButtonEnabled(Boolean newValue) {
-        
-    	boolean oldValue = getCancelButtonEnabled();        
+    	Boolean oldValue = getCancelButtonEnabled();        
         if (newValue != oldValue) {
             buttonEnabledHashmap.put(CANCEL_BUTTON_ENABLED_PROPERTY, newValue);
             firePropertyChange(CANCEL_BUTTON_ENABLED_PROPERTY, oldValue, newValue);
