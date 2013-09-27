@@ -18,6 +18,7 @@ import org.daxplore.producer.daxplorelib.metadata.MetaData.L10nFormat;
 import com.beust.jcommander.Parameter;
 import com.beust.jcommander.Parameters;
 import com.beust.jcommander.converters.FileConverter;
+import com.google.common.base.Charsets;
 
 public class ExportCommand {
 	
@@ -109,7 +110,7 @@ public class ExportCommand {
 				return;
 			}
 			try (FileOutputStream fos = new FileOutputStream(outfile);
-					OutputStreamWriter osw = new OutputStreamWriter(fos, "UTF-8");
+					OutputStreamWriter osw = new OutputStreamWriter(fos, Charsets.UTF_8);
 					Writer w = new BufferedWriter(osw);
 					DaxploreFile dax = DaxploreFile.createFromExistingFile(file)) {
 				MetaData metadata = dax.getMetaData();

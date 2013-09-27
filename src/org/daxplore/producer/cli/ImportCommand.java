@@ -21,6 +21,7 @@ import org.daxplore.producer.tools.SPSSTools;
 import com.beust.jcommander.Parameter;
 import com.beust.jcommander.Parameters;
 import com.beust.jcommander.converters.FileConverter;
+import com.google.common.base.Charsets;
 
 @Parameters(commandDescription = "Import data into project")
 public class ImportCommand {
@@ -157,7 +158,7 @@ public class ImportCommand {
 					return;
 				} 
 				try (FileInputStream fis = new FileInputStream(infile);
-						InputStreamReader isr = new InputStreamReader(fis, "UTF-8");
+						InputStreamReader isr = new InputStreamReader(fis, Charsets.UTF_8);
 						Reader r = new BufferedReader(isr)) {
  					MetaData metadata = dax.getMetaData();
 					metadata.importL10n(r, L10nFormat.PROPERTIES, locale);

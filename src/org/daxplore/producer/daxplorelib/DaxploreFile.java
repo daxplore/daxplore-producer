@@ -51,6 +51,7 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.xml.sax.SAXException;
 
+import com.google.common.base.Charsets;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonArray;
@@ -295,11 +296,10 @@ public class DaxploreFile implements Closeable {
 		Logger.getGlobal().log(Level.INFO, "Created file in " + ((System.nanoTime() -time)/Math.pow(10,9)) + "s");
 	}
 	
-	private static final Charset utf8charset = Charset.forName("UTF-8");
 	private static void writeZipString(ZipOutputStream zout, String filename, String dataString) throws IOException {
 		ZipEntry entry = new ZipEntry(filename);
 	    zout.putNextEntry(entry);
-	    ByteBuffer buffer = utf8charset.encode(dataString);
+	    ByteBuffer buffer = Charsets.UTF_8.encode(dataString);
 	    byte[] outbytes = new byte[buffer.limit()];
 	    buffer.get(outbytes);
 	    zout.write(outbytes);

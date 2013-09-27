@@ -17,6 +17,8 @@ import java.util.Random;
 
 import org.junit.Test;
 
+import com.google.common.base.Charsets;
+
 public class SortedPropertiesTest {
 
 	@Test
@@ -44,7 +46,7 @@ public class SortedPropertiesTest {
 		});
 		
 		try (FileInputStream fis = new FileInputStream(tempFile);
-				InputStreamReader isr = new InputStreamReader(fis, "UTF-8");
+				InputStreamReader isr = new InputStreamReader(fis, Charsets.UTF_8);
     			BufferedReader br = new BufferedReader(isr)) {
 			assertEquals("#sorted properties", br.readLine());
 			br.readLine(); // ignore date-comment line

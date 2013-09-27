@@ -28,6 +28,8 @@ import org.daxplore.producer.daxplorelib.metadata.textreference.TextTree;
 import org.daxplore.producer.gui.MainController;
 import org.daxplore.producer.gui.Settings;
 
+import com.google.common.base.Charsets;
+
 public class EditTextController implements ActionListener {
 
 	private Locale[] currentLocales = new Locale[2];
@@ -142,7 +144,7 @@ public class EditTextController implements ActionListener {
 				mainController.getDaxploreFile().getAbout().addLocale(locale);
 				try {
 					mainController.getDaxploreFile().getMetaData().importL10n(
-							Files.newBufferedReader(file.toPath(), Charset.forName("UTF-8")), format, locale);
+							Files.newBufferedReader(file.toPath(), Charsets.UTF_8), format, locale);
 				} catch (FileNotFoundException e1) {
 					throw new AssertionError("File exists but is not found");
 				} catch (IOException e1) {
@@ -175,13 +177,12 @@ public class EditTextController implements ActionListener {
 				}
 				Locale locale = editToolbar.getSelectedLocale();
 				
-				Charset cs = Charset.forName("UTF-8");
 				if(file.exists() && file.canWrite()) {
-					try (BufferedWriter writer = Files.newBufferedWriter(file.toPath(), cs, StandardOpenOption.WRITE, StandardOpenOption.TRUNCATE_EXISTING)) {
+					try (BufferedWriter writer = Files.newBufferedWriter(file.toPath(), Charsets.UTF_8, StandardOpenOption.WRITE, StandardOpenOption.TRUNCATE_EXISTING)) {
 						mainController.getDaxploreFile().getMetaData().exportL10n(writer, format, locale);
 					}
 				} else if (!file.exists()) {
-					try (BufferedWriter writer = Files.newBufferedWriter(file.toPath(), cs, StandardOpenOption.CREATE_NEW, StandardOpenOption.WRITE)) {
+					try (BufferedWriter writer = Files.newBufferedWriter(file.toPath(), Charsets.UTF_8, StandardOpenOption.CREATE_NEW, StandardOpenOption.WRITE)) {
 						mainController.getDaxploreFile().getMetaData().exportL10n(writer, format, locale);
 					}
 				} else {

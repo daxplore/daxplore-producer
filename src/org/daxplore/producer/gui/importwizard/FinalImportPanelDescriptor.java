@@ -17,6 +17,8 @@ import org.opendatafoundation.data.spss.SPSSFile;
 import org.opendatafoundation.data.spss.SPSSFileException;
 import org.opendatafoundation.data.spss.SPSSVariable;
 
+import com.google.common.base.Charsets;
+
 
 public class FinalImportPanelDescriptor extends ImportWizardDescriptor {
 
@@ -86,7 +88,7 @@ public class FinalImportPanelDescriptor extends ImportWizardDescriptor {
 		}
 
 		try (FileInputStream fis = new FileInputStream(temp);
-				InputStreamReader isr = new InputStreamReader(fis, "UTF-8");
+				InputStreamReader isr = new InputStreamReader(fis, Charsets.UTF_8);
 				BufferedReader br = new BufferedReader(isr)) {
 			
 			String line;
