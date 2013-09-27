@@ -18,5 +18,6 @@
 	<classpathentry kind="lib" path="lib/opencsv-2.3.jar"/>
 	<classpathentry kind="lib" path="lib/scottlogic-utils-1.4.jar" sourcepath="/home/axwi4586/Downloads/scottlogic-utils-mr-1.4/PatchWorkArray"/>
 	<classpathentry kind="lib" path="lib/gson-2.2.3.jar"/>
+	<classpathentry kind="lib" path="lib/guava-15.0.jar" sourcepath="lib/guava-15.0-sources.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
