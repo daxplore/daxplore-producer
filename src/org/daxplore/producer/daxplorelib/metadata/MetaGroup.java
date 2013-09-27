@@ -27,10 +27,10 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonPrimitive;
 
 public class MetaGroup implements Comparable<MetaGroup> {
-	static final DaxploreTable groupTable = new DaxploreTable(
+	private static final DaxploreTable groupTable = new DaxploreTable(
 			"CREATE TABLE metagroup (id INTEGER PRIMARY KEY, textref TEXT NOT NULL, ord INTEGER NOT NULL, type INTEGER NOT NULL)",
 			"metagroup");
-	static final DaxploreTable groupRelTable = new DaxploreTable(
+	private static final DaxploreTable groupRelTable = new DaxploreTable(
 			"CREATE TABLE metagrouprel (groupid INTEGER NOT NULL, questionid TEXT NOT NULL, ord INTEGER NOT NULL, FOREIGN KEY(questionid) REFERENCES metaquestion(id), FOREIGN KEY(groupid) REFERENCES metagroup(id))",
 			"metagrouprel");
 
@@ -294,14 +294,14 @@ public class MetaGroup implements Comparable<MetaGroup> {
 		}
 	}
 
-	protected int id, index;
-	protected List<MetaQuestion> qList;
-	protected GroupType type;
-	protected TextReference textref;
+	private int id, index;
+	private List<MetaQuestion> qList;
+	private GroupType type;
+	private TextReference textref;
 
-	protected boolean modified = false;
+	private boolean modified = false;
 
-	protected MetaGroup(int id, TextReference textref, int index,
+	private MetaGroup(int id, TextReference textref, int index,
 			GroupType type, List<MetaQuestion> qList) {
 		this.id = id;
 		this.index = index;

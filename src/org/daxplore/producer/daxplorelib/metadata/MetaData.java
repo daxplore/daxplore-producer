@@ -41,15 +41,15 @@ import au.com.bytecode.opencsv.CSVWriter;
 
 public class MetaData {
 	
-	Connection connection;
+	private Connection connection;
 
-	MetaQuestionManager metaQuestionManager;
-	MetaScaleManager metaScaleManager;
-	TextReferenceManager textsManager;
-	MetaGroupManager metaGroupManager;
-	MetaTimepointShortManager metaTimepointManager;
-	About about;
-	RawData rawData;
+	private MetaQuestionManager metaQuestionManager;
+	private MetaScaleManager metaScaleManager;
+	private TextReferenceManager textsManager;
+	private MetaGroupManager metaGroupManager;
+	private MetaTimepointShortManager metaTimepointManager;
+	private About about;
+	private RawData rawData;
 	
 	public enum Formats {
 		DATABASE,RESOURCE,JSON,RAW
@@ -398,27 +398,6 @@ public class MetaData {
 		} catch (SQLException e){
 			throw new DaxploreException("SQLException while trying to get locales", e);
 		}
-	}
-	
-	public static List<DaxploreTable> getTables() {
-		List<DaxploreTable> list = new LinkedList<>();
-		
-		list.add(MetaCalculation.table);
-		
-		list.add(MetaGroup.groupTable);
-		list.add(MetaGroup.groupRelTable);
-		
-		list.add(MetaQuestion.table);
-		list.add(MetaQuestion.timePointTable);
-		
-		list.add(MetaScale.maintable);
-		list.add(MetaScale.optiontable);
-		
-		list.add(MetaTimepointShort.pointTable);
-		
-		list.add(TextReferenceManager.table);
-
-		return list;
 	}
 	
 	public void saveAll() throws SQLException {

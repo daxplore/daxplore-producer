@@ -8,16 +8,17 @@ import java.sql.SQLException;
 import org.daxplore.producer.daxplorelib.DaxploreTable;
 
 public class MetaCalculation {
-	protected static final DaxploreTable table = new DaxploreTable("CREATE TABLE metacalc (id INTEGER NOT NULL, column TEXT)", "metacalc");
-	int id;
-	Connection connection;
+	//TODO make table private and let MetaCaluculation to create itself?
+	static final DaxploreTable table = new DaxploreTable("CREATE TABLE metacalc (id INTEGER NOT NULL, column TEXT)", "metacalc");
+	private int id;
+	private Connection connection;
 	
-	public MetaCalculation(int id, Connection connection) {
+	MetaCalculation(int id, Connection connection) {
 		this.id = id;
 		this.connection = connection;
 	}
 	
-	public MetaCalculation(String column, Connection connection) throws SQLException {
+	MetaCalculation(String column, Connection connection) throws SQLException {
 		try(PreparedStatement stmt = connection.prepareStatement("SELECT * FROM metacalc WHERE column = ?")) {
 			stmt.setString(1, column);
 			try (ResultSet rs = stmt.executeQuery()) {

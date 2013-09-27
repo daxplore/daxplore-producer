@@ -25,7 +25,7 @@ public class MetaTimepointShort implements Comparable<MetaTimepointShort> {
 	 * timeindex: the order of the timepoints
 	 * value: the timepoint's value as it is stored in the column (see above) //TODO support TEXT/REAL/INTEGER for value
 	 */
-	protected static final DaxploreTable pointTable = new DaxploreTable(
+	private static final DaxploreTable pointTable = new DaxploreTable(
 			"CREATE TABLE timepoints (id INTEGER PRIMARY KEY, textref TEXT NOT NULL, timeindex INTEGER UNIQUE NOT NULL, value REAL NOT NULL)", "timepoints"); 
 	
 	//TODO handle timeindexes (unique, swappable, etc.)

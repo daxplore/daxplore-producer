@@ -23,10 +23,10 @@ import org.daxplore.producer.tools.NumberlineCoverage.NumberlineCoverageExceptio
 
 public class MetaScale {
 	
-	protected static final DaxploreTable maintable = new DaxploreTable(
+	private static final DaxploreTable maintable = new DaxploreTable(
 			"CREATE TABLE metascale (id INTEGER PRIMARY KEY, ignore STRING NOT NULL)"
 			, "metascale");
-	protected static final DaxploreTable optiontable = new DaxploreTable(
+	private static final DaxploreTable optiontable = new DaxploreTable(
 			"CREATE TABLE metascaleoption (scaleid INTEGER NOT NULL, textref STRING NOT NULL, ord INTEGER NOT NULL, value REAL NOT NULL, transform STRING NOT NULL, FOREIGN KEY(scaleid) REFERENCES metascale(id))" /*, UNIQUE(scaleid, textref) ON CONFLICT REPLACE)" */
 			, "metascaleoption");
 	
@@ -278,14 +278,14 @@ public class MetaScale {
 	
 	
 	/** Each Option's position is defined by the order of this list */
-	protected List<Option> options;
-	protected NumberlineCoverage ignore;
+	private List<Option> options;
+	private NumberlineCoverage ignore;
 
-	protected int id;
-	protected boolean modified = false;
-	protected boolean structureChanged = false;
+	private int id;
+	private boolean modified = false;
+	private boolean structureChanged = false;
 	
-	public MetaScale(int id, List<Option> options, NumberlineCoverage ignore, boolean newScale) {
+	private MetaScale(int id, List<Option> options, NumberlineCoverage ignore, boolean newScale) {
 		this.id = id;
 		this.options = options;
 		this.ignore = ignore;

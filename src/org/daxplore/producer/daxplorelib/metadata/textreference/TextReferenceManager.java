@@ -22,14 +22,14 @@ import org.daxplore.producer.daxplorelib.SQLTools;
 import org.daxplore.producer.tools.SmallMap;
 
 public class TextReferenceManager {
-	public static final DaxploreTable table = new DaxploreTable("CREATE TABLE texts (ref TEXT NOT NULL, locale TEXT, text TEXT NOT NULL, UNIQUE ( ref, locale) )", "texts");
+	private static final DaxploreTable table = new DaxploreTable("CREATE TABLE texts (ref TEXT NOT NULL, locale TEXT, text TEXT NOT NULL, UNIQUE ( ref, locale) )", "texts");
 
-	Connection connection;
-	Map<String, TextReference> toBeRemoved = new HashMap<>();
+	private Connection connection;
+	private Map<String, TextReference> toBeRemoved = new HashMap<>();
 	
-	TextTree textTree = new TextTree();
+	private TextTree textTree = new TextTree();
 	
-	int nNew = 0;
+	private int nNew = 0;
 	
 	public TextReferenceManager(Connection connection) throws SQLException {
 		this.connection = connection;

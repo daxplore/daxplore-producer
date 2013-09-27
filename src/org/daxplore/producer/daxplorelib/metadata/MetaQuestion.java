@@ -31,10 +31,10 @@ import com.google.gson.JsonPrimitive;
 
 public class MetaQuestion {
 	
-	protected static final DaxploreTable table = new DaxploreTable(
+	private static final DaxploreTable table = new DaxploreTable(
 			"CREATE TABLE metaquestion (id TEXT PRIMARY KEY, scaleid INTEGER, fulltextref TEXT NOT NULL, shorttextref TEXT NOT NULL, calculation INTEGER, FOREIGN KEY(scaleid) REFERENCES metascale(id))",
 			"metaquestion");
-	protected static final DaxploreTable timePointTable = new DaxploreTable(
+	private static final DaxploreTable timePointTable = new DaxploreTable(
 			"CREATE TABLE questtimerel (qid TEXT NOT NULL, timeid INTEGER NOT NULL, FOREIGN KEY(qid) REFERENCES metaquestion(id), FOREIGN KEY(timeid) REFERENCES timepoints(id))", 
 			"questtimerel");
 	
@@ -46,7 +46,7 @@ public class MetaQuestion {
 		private MetaTimepointShortManager timePointManager;
 		private Map<String, MetaQuestion> questionMap = new HashMap<>();
 		private LinkedList<MetaQuestion> toBeAdded= new LinkedList<>();
-		protected Map<String, MetaQuestion> toBeRemoved = new HashMap<>();
+		private Map<String, MetaQuestion> toBeRemoved = new HashMap<>();
 		
 		public MetaQuestionManager(Connection connection, TextReferenceManager textsManager,
 				MetaScaleManager metaScaleManager, MetaTimepointShortManager timePointManager) throws SQLException {
@@ -222,17 +222,16 @@ public class MetaQuestion {
 		}
 	}
 	
-	protected String id;
-	protected TextReference shortTextRef, fullTextRef;
-	protected MetaScale scale;
-	protected MetaCalculation calculation;
-	protected List<MetaTimepointShort> timepoints;
+	private String id;
+	private TextReference shortTextRef, fullTextRef;
+	private MetaScale scale;
+	private MetaCalculation calculation;
+	private List<MetaTimepointShort> timepoints;
 	
-	protected boolean modified = false;
-	protected boolean timemodified = false;
+	private boolean modified = false;
+	private boolean timemodified = false;
 	
-	
-	protected MetaQuestion(String id, TextReference shortTextRef, TextReference fullTextRef, MetaScale scale, MetaCalculation calculation, List<MetaTimepointShort> timepoints) {
+	private MetaQuestion(String id, TextReference shortTextRef, TextReference fullTextRef, MetaScale scale, MetaCalculation calculation, List<MetaTimepointShort> timepoints) {
 		this.id = id;
 		this.shortTextRef = shortTextRef;
 		this.fullTextRef = fullTextRef;

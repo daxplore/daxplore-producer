@@ -7,9 +7,9 @@ import java.util.Locale;
 import java.util.Map;
 
 public class TextReference extends TextReferenceReference{
-	protected Map<Locale, String> localeMap;
+	Map<Locale, String> localeMap;
 	
-	protected boolean modified = false;
+	boolean modified = false;
 	
 	
 	protected TextReference(String refstring, Map<Locale,String> localeMap) {

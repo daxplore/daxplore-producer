@@ -2,7 +2,7 @@ package org.daxplore.producer.daxplorelib.metadata.textreference;
 
 class TextReferenceReference implements Comparable<TextReferenceReference> {
 
-	protected String reference;
+	String reference;
 
 	public TextReferenceReference(String reference) {
 		this.reference = reference;
