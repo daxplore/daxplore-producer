@@ -40,12 +40,10 @@ public class MetaScale {
 		private Map<Integer, MetaScale> toBeRemoved = new HashMap<>();
 //		private List<MetaScale> toBeRemoved = new LinkedList<MetaScale>();
 		
-		public MetaScaleManager(Connection connection, TextReferenceManager textsManager) {
+		public MetaScaleManager(Connection connection, TextReferenceManager textsManager) throws SQLException {
 			this.connection = connection;
 			this.textsManager = textsManager;
-		}
-		
-		protected void init() throws SQLException {
+
 			if(!SQLTools.tableExists(maintable.name, connection)) {
 				try (Statement stmt = connection.createStatement()) {
 					stmt.executeUpdate(maintable.sql);

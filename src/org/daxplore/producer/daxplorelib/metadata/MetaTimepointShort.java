@@ -38,12 +38,10 @@ public class MetaTimepointShort implements Comparable<MetaTimepointShort> {
 		private Connection connection;
 		private TextReferenceManager textReferenceManager;
 		
-		public MetaTimepointShortManager(Connection connection, TextReferenceManager textReferenceManager) {
+		public MetaTimepointShortManager(Connection connection, TextReferenceManager textReferenceManager) throws SQLException {
 			this.connection = connection;
 			this.textReferenceManager = textReferenceManager;
-		}
-		
-		public void init() throws SQLException {
+
 			SQLTools.createIfNotExists(pointTable, connection);
 		}
 		

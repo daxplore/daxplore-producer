@@ -94,9 +94,7 @@ public class About {
 				}
 			}
 		}
-	}
-	
-	void init() throws SQLException {
+
 		SQLTools.createIfNotExists(table, connection);
 		SQLTools.createIfNotExists(localeTable, connection);
 	}

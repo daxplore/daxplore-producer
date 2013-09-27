@@ -65,19 +65,14 @@ public class MetaData {
 		this.rawData = rawData;
 		
 		textsManager = new TextReferenceManager(connection);
-		textsManager.init();
 		
 		metaScaleManager = new MetaScaleManager(connection, textsManager);
-		metaScaleManager.init();
 		
 		metaTimepointManager = new MetaTimepointShortManager(connection, textsManager);
-		metaTimepointManager.init();
 		
 		metaQuestionManager = new MetaQuestionManager(connection, textsManager, metaScaleManager, metaTimepointManager);
-		metaQuestionManager.init();
 		
 		metaGroupManager = new MetaGroupManager(connection, textsManager, metaQuestionManager);
-		metaGroupManager.init();
 		
 		SQLTools.createIfNotExists(MetaCalculation.table, connection);
 	}

@@ -12,8 +12,6 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.util.Comparator;
-import java.util.LinkedList;
-import java.util.List;
 import java.util.Locale;
 import java.util.SortedSet;
 import java.util.TreeSet;
@@ -116,7 +114,6 @@ public class DaxploreFile implements Closeable {
 		this.file = file;
 		try {
 			about = new About(connection, createNew);
-			about.init();
 			about.save();
 		} catch (SQLException e) {
 			throw new DaxploreException("Error creating about", e);

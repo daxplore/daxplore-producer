@@ -31,11 +31,9 @@ public class TextReferenceManager {
 	
 	int nNew = 0;
 	
-	public TextReferenceManager(Connection connection) {
+	public TextReferenceManager(Connection connection) throws SQLException {
 		this.connection = connection;
-	}
-	
-	public void init() throws SQLException {
+		
 		SQLTools.createIfNotExists(TextReferenceManager.table, connection);
 		for(String property: DaxploreProperties.properties) {
 			get(property);

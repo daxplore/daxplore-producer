@@ -45,15 +45,12 @@ public class MetaGroup implements Comparable<MetaGroup> {
 		private TextReferenceManager textsManager;
 		private MetaQuestionManager questionManager;
 
-		public MetaGroupManager(Connection connection,
-				TextReferenceManager textsManager,
-				MetaQuestionManager questionManager) {
+		public MetaGroupManager(Connection connection, TextReferenceManager textsManager,
+				MetaQuestionManager questionManager) throws SQLException {
 			this.connection = connection;
 			this.textsManager = textsManager;
 			this.questionManager = questionManager;
-		}
 
-		public void init() throws SQLException {
 			SQLTools.createIfNotExists(groupTable, connection);
 			SQLTools.createIfNotExists(groupRelTable, connection);
 		}

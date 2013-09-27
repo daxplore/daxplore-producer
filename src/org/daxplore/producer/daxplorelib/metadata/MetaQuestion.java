@@ -48,14 +48,13 @@ public class MetaQuestion {
 		private LinkedList<MetaQuestion> toBeAdded= new LinkedList<>();
 		protected Map<String, MetaQuestion> toBeRemoved = new HashMap<>();
 		
-		public MetaQuestionManager(Connection connection, TextReferenceManager textsManager, MetaScaleManager metaScaleManager, MetaTimepointShortManager timePointManager) {
+		public MetaQuestionManager(Connection connection, TextReferenceManager textsManager,
+				MetaScaleManager metaScaleManager, MetaTimepointShortManager timePointManager) throws SQLException {
 			this.connection = connection;
 			this.metascaleManager = metaScaleManager;
 			this.textsManager = textsManager;
 			this.timePointManager = timePointManager;
-		}
-		
-		public void init() throws SQLException {
+
 			if(!SQLTools.tableExists(table.name, connection)) {
 				try(Statement stmt = connection.createStatement()) {
 					stmt.executeUpdate(table.sql);
