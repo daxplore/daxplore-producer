@@ -62,7 +62,6 @@ public class DaxploreFile implements Closeable {
 	private About about;
 	private File file = null;
 	private MetaData metadata;
-	private SPSSFile sf = null;
 	
 	public static DaxploreFile createFromExistingFile(File file) throws DaxploreException {
 		try {
@@ -93,21 +92,6 @@ public class DaxploreFile implements Closeable {
 			throw new DaxploreException("Could not create new sqlite database (No write access?)", e);
 		}
 	}
-	
-	/*public static DaxploreFile createInMemory() throws DaxploreException {
-		try {
-			Class.forName("org.sqlite.JDBC");
-		} catch (ClassNotFoundException e) {
-			throw new DaxploreException("Sqlite could not be found", e);
-		}
-		
-		try {
-			Connection connection = DriverManager.getConnection("jdbc:sqlite::memory:");
-			return new DaxploreFile(connection, true);
-		} catch (SQLException e) {
-			throw new DaxploreException("Could not create in mamory database");
-		}
-	}*/
 	
 	private DaxploreFile(Connection connection, boolean createNew, File file) throws DaxploreException {
 		this.connection = connection;
