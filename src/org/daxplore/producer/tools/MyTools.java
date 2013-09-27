@@ -6,8 +6,6 @@ import java.util.Iterator;
 
 public class MyTools {
 
-	private static boolean debugMode = true;
-
 	public static <T> String join(Iterable<T> iter, String seperator) {
 		Iterator<T> i = iter.iterator();
 		StringBuilder sb = new StringBuilder();
@@ -60,33 +58,6 @@ public class MyTools {
 	public static String join(boolean[] array, String seperator) {
 		return join(Arrays.asList(array), seperator);
 	}
-
-	/*
-	 * Experiment with map functions.
-	 * 
-	public static <S, T> S[] map(T array[], IndexedMapFunction<S, T> mapFunction) {
-        int size = array.length;
-        S t = new S();
-        S[] output = Array.newInstance(, size);
-        for (int i = 0; i < size; i++) {
-            mapFunction.map(i, array[i]);
-        }
-		return null;
-	}
-	
-	public static <S, T> List<S> map(List<T> list, IndexedMapFunction<S, T> mapFunction) {
-        int size = list.size();
-        List<S> output = new ArrayList<S>();
-        for (int i = 0; i < size; i++) {
-            output.add(mapFunction.map(i, list.get(i)));
-        }
-		return output;
-	}
-	
-	public interface IndexedMapFunction<S, T> {
-	    public S map(int i, T obj);
-	}
-	*/
 
 	/**
 	 * Code taken from http://www.rgagnon.com/javadetails/java-0013.html
@@ -162,27 +133,5 @@ public class MyTools {
 			t.printStackTrace();
 		}
 		System.err.println("------ End of SQLException -------");
-	}
-	
-	/**
-	 * Creates an array with the numbers from to to. Inclusive.
-	 * @param from
-	 * @param to
-	 * @return an int[]
-	 */
-	public static int[] range(int from, int to) {
-		int size = to - from;
-		int step = 1;
-		if(size < 0) {
-			size = -size;
-			step = -1;
-		}
-		int position = from;
-		int[] array = new int[size+1];
-		for(int i = 0; i < size; i++) {
-			array[i] = position;
-			position += step;
-		}
-		return array;
 	}
 }
