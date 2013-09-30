@@ -137,7 +137,7 @@ public class MetaTimepointShort implements Comparable<MetaTimepointShort> {
 			}
 		}
 		
-		public List<MetaTimepointShort> getAll() throws SQLException, DaxploreException {
+		public List<MetaTimepointShort> getAll() throws DaxploreException {
 			// make sure all timepoints are cached before returning the content of the map
 			try (Statement stmt = connection.createStatement();
 			ResultSet rs = stmt.executeQuery("SELECT id FROM timepoints ORDER BY timeindex ASC")) {
@@ -147,6 +147,8 @@ public class MetaTimepointShort implements Comparable<MetaTimepointShort> {
 						get(id);
 					}
 				}
+			} catch (SQLException e) {
+				throw new DaxploreException("Failed to load short timepoints", e);
 			}
 			List<MetaTimepointShort> pointList = new LinkedList<>(pointMap.values());
 			Collections.sort(pointList);

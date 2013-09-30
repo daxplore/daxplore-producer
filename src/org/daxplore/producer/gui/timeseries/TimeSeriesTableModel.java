@@ -25,7 +25,8 @@ public class TimeSeriesTableModel extends DefaultTableModel {
 	public int getRowCount() {
 		try {
 			return timeManager.getAll().size();
-		} catch (SQLException|DaxploreException|NullPointerException e) { //TODO figure out why this is needed. (Swing?)
+		} catch (DaxploreException | NullPointerException e) {
+			//TODO figure out why this NullPointerException is needed. (Swing?)
 			return 0;
 		}
 	}
