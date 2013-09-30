@@ -71,7 +71,7 @@ public class TimeSeriesTableModel extends DefaultTableModel {
 			try {
 				MetaTimepointShort tp = timeManager.getAll().get(row);
 				tp.setValue((Double)aValue);
-			} catch (SQLException | DaxploreException e) {
+			} catch (DaxploreException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
@@ -83,7 +83,7 @@ public class TimeSeriesTableModel extends DefaultTableModel {
 		MetaTimepointShort row;
 		try {
 			row = timeManager.getAll().get(rowIndex);
-		} catch (SQLException | DaxploreException e) {
+		} catch (DaxploreException e) {
 			e.printStackTrace();
 			return null;
 		}
@@ -105,7 +105,7 @@ public class TimeSeriesTableModel extends DefaultTableModel {
 			tp = timeManager.getAll().get(row);
 			timeManager.remove(tp.getId());
 			fireTableRowsDeleted(row, row);
-		} catch (SQLException | DaxploreException e) {
+		} catch (DaxploreException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
@@ -118,7 +118,7 @@ public class TimeSeriesTableModel extends DefaultTableModel {
 			List<MetaTimepointShort> timelist;
 			try {
 				timelist = timeManager.getAll();
-			} catch (SQLException | DaxploreException e) {
+			} catch (DaxploreException e) {
 				e.printStackTrace();
 				return;
 			}
@@ -141,7 +141,7 @@ public class TimeSeriesTableModel extends DefaultTableModel {
 		List<MetaTimepointShort> moveList = new LinkedList<>();
 		try {
 			timeList = timeManager.getAll();
-		} catch (SQLException | DaxploreException e) {
+		} catch (DaxploreException e) {
 			e.printStackTrace();
 			return;
 		}
