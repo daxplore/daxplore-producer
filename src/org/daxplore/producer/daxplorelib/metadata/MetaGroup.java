@@ -201,7 +201,7 @@ public class MetaGroup implements Comparable<MetaGroup> {
 			}
 		}
 
-		public List<MetaGroup> getAll() throws SQLException, DaxploreException {
+		public List<MetaGroup> getAll() throws DaxploreException {
 			// make sure all groups are cached before returning the content of
 			// the map
 			try (Statement stmt = connection.createStatement();
@@ -212,6 +212,8 @@ public class MetaGroup implements Comparable<MetaGroup> {
 						get(id);
 					}
 				}
+			} catch (SQLException e) {
+				throw new DaxploreException("Failed to load the groups", e);
 			}
 			List<MetaGroup> groupList = new LinkedList<>(groupMap.values());
 			Collections.sort(groupList);

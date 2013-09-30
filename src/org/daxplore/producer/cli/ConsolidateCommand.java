@@ -6,7 +6,6 @@ import java.util.Locale;
 
 import org.daxplore.producer.daxplorelib.DaxploreException;
 import org.daxplore.producer.daxplorelib.DaxploreFile;
-import org.daxplore.producer.daxplorelib.metadata.MetaData;
 
 import com.beust.jcommander.Parameter;
 import com.beust.jcommander.Parameters;
@@ -26,8 +25,7 @@ public class ConsolidateCommand {
 			return;
 		}
 		try (DaxploreFile dax = DaxploreFile.createFromExistingFile(file)) {
-			MetaData metadata = dax.getMetaData();
-			metadata.consolidateScales(locale);
+			dax.consolidateScales(locale);
 		} catch (DaxploreException | IOException e) {
 			System.out.println("Consolidate command failed");
 			System.out.println(e.getMessage());

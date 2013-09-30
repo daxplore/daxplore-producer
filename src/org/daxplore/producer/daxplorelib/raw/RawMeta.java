@@ -5,6 +5,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
@@ -12,6 +13,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.daxplore.producer.daxplorelib.DaxploreException;
 import org.daxplore.producer.daxplorelib.DaxploreTable;
 import org.daxplore.producer.daxplorelib.SQLTools;
 import org.daxplore.producer.tools.MyTools;
@@ -43,13 +45,15 @@ public class RawMeta {
 		SQLTools.createIfNotExists(table, connection);
 	}
 	
-	public List<String> getColumns() throws SQLException{
+	public List<String> getColumns() throws DaxploreException {
 		List<String> list = new LinkedList<>();
 		try (Statement stmt = connection.createStatement();
 				ResultSet rs = stmt.executeQuery("SELECT column FROM rawmeta")) {
 			while(rs.next()){
 				list.add(rs.getString("column"));
 			}
+		} catch (SQLException e) {
+			throw new DaxploreException("Failed to read columns in RawMeta", e);
 		}
 		return list;
 	}
@@ -233,8 +237,33 @@ public class RawMeta {
 		}
 		try {
 			return getColumns().size() > 0;
-		} catch (SQLException e) {
+		} catch (DaxploreException e) {
 			return false;
 		}
+	}
+	
+	/**
+	 * Compare the columns of two different versions.
+	 * 
+	 * @param other ImportedData to compare to.
+	 * @return Map of all columns with the values 0 if they exist in both, -1 if it only exists in other and 1 if it only exists in this
+	 */
+	public Map<String, Integer> compareColumns(RawMeta other) throws DaxploreException {
+		Map<String, Integer> columnMap = new HashMap<>();
+		List<String> columnsthis = getColumns();
+		List<String> columnsother = other.getColumns();
+		for(String s: columnsthis){
+			if(columnsother.contains(s)) {
+				columnMap.put(s, 0);
+			} else {
+				columnMap.put(s, 1);
+			}
+		}
+		for(String s: columnsother){
+			if(!columnsthis.contains(s)){
+				columnMap.put(s, -1);
+			}
+		}
+		return columnMap;
 	}
 }

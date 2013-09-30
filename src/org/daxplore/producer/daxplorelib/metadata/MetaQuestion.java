@@ -207,7 +207,7 @@ public class MetaQuestion {
 			}
 		}
 		
-		public List<MetaQuestion> getAll() throws SQLException, DaxploreException{
+		public List<MetaQuestion> getAll() throws DaxploreException {
 			// make sure all questions are cached before returning the content of the map
 			try (Statement stmt = connection.createStatement();
 					ResultSet rs = stmt.executeQuery("SELECT id FROM metaquestion")) {
@@ -217,6 +217,8 @@ public class MetaQuestion {
 						get(id);
 					}
 				}
+			} catch (SQLException e) {
+				throw new DaxploreException("Failed to load questions", e);
 			}
 			return new LinkedList<>(questionMap.values());
 		}

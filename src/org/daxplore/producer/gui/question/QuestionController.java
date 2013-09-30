@@ -57,7 +57,7 @@ public class QuestionController implements TableModelListener, ActionListener  {
 		view.getScaleScrollPane().setViewportView(scaleTable);
 		
 		try {
-			values = mainController.getDaxploreFile().getImportedData().getRawData().getColumnValueCount(metaQuestion.getId());
+			values = mainController.getDaxploreFile().getRawData().getColumnValueCount(metaQuestion.getId());
 			view.getBeforeScrollPane().setViewportView(new JTable(new ColumnTableModel(values)));
 		} catch (SQLException e) {
 			// TODO Auto-generated catch block
@@ -70,8 +70,8 @@ public class QuestionController implements TableModelListener, ActionListener  {
 		
 		try {
 			TimePointTableModel timePointTableModel = new TimePointTableModel(
-					mainController.getDaxploreFile().getMetaData().getMetaTimepointManager(),
-					mainController.getDaxploreFile().getImportedData().getRawData(),
+					mainController.getDaxploreFile().getMetaTimepointShortManager(),
+					mainController.getDaxploreFile().getRawData(),
 					mainController.getDaxploreFile().getAbout(),
 					metaQuestion);
 			
@@ -146,7 +146,7 @@ public class QuestionController implements TableModelListener, ActionListener  {
 			//TODO add even if there are no unused o.getTransformation().contains(p.getKey())
 			try {
 				if(mq.getScale()==null){
-					mq.setScale(mainController.getDaxploreFile().getMetaData().getMetaScaleManager().create(new LinkedList<Option>(), new NumberlineCoverage()));
+					mq.setScale(mainController.getDaxploreFile().getMetaScaleManager().create(new LinkedList<Option>(), new NumberlineCoverage()));
 					scaleTableModel = new ScaleTableModel(mq.getScale());
 					scaleTable = new ScaleTable(scaleTableModel);
 					view.getScaleScrollPane().setViewportView(scaleTable);
@@ -174,7 +174,7 @@ public class QuestionController implements TableModelListener, ActionListener  {
 					addOption(pKey+1);
 					scaleTableModel.fireTableStructureChanged();
 				}
-			} catch (SQLException | DaxploreException e1) {
+			} catch (SQLException e1) {
 				// TODO Auto-generated catch block
 				e1.printStackTrace();
 			}
@@ -224,7 +224,7 @@ public class QuestionController implements TableModelListener, ActionListener  {
 		
 	}
 	
-	private void addOption(double value) throws SQLException, DaxploreException {
+	private void addOption(double value) throws SQLException {
 		int i = -1;
 		for(Option optionText : mq.getScale().getOptions()){
 			String ref = optionText.getTextRef().getRef();
@@ -232,7 +232,7 @@ public class QuestionController implements TableModelListener, ActionListener  {
 			i = i<j ? j : i;
 		}
 		TextReference textRef;
-		textRef = mainController.getDaxploreFile().getMetaData().getTextsManager().get(mq.getId() + "_option_" + (i+1));
+		textRef = mainController.getDaxploreFile().getTextReferenceManager().get(mq.getId() + "_option_" + (i+1));
 		
 		NumberlineCoverage transformation = new NumberlineCoverage(value);
 		boolean setNew = true;

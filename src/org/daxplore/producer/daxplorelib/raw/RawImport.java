@@ -3,14 +3,9 @@ package org.daxplore.producer.daxplorelib.raw;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.Date;
-import java.util.HashMap;
-import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
 
 import org.daxplore.producer.daxplorelib.DaxploreException;
-import org.daxplore.producer.daxplorelib.DaxploreTable;
-import org.daxplore.producer.daxplorelib.SQLTools;
 import org.opendatafoundation.data.spss.SPSSFile;
 
 public class RawImport {
@@ -33,47 +28,6 @@ public class RawImport {
 		rawdata.importSPSS(spssFile);
 	}
 	
-	public void importSPSSData(SPSSFile spssFile) throws SQLException, DaxploreException {
-		rawdata.importSPSS(spssFile);
-	}
-	
-	public void importSPSSMeta(SPSSFile spssFile) throws SQLException {
-		rawmeta.importSPSS(spssFile);
-	}
-	
-	/**
-	 * Compare the columns of two different versions.
-	 * 
-	 * @param other ImportedData to compare to.
-	 * @return Map of all columns with the values 0 if they exist in both, -1 if it only exists in other and 1 if it only exists in this
-	 */
-	public Map<String, Integer> compareColumns(RawImport other){
-		try {
-			Map<String, Integer> columnMap = new HashMap<>();
-			List<String> columnsthis = rawmeta.getColumns();
-			List<String> columnsother = other.rawmeta.getColumns();
-			for(String s: columnsthis){
-				if(columnsother.contains(s)) {
-					columnMap.put(s, 0);
-				} else {
-					columnMap.put(s, 1);
-				}
-			}
-			for(String s: columnsother){
-				if(!columnsthis.contains(s)){
-					columnMap.put(s, -1);
-				}
-			}
-			return columnMap;
-		} catch (SQLException e){
-			return null;
-		}
-	}
-	
-	RawMeta getRawMeta(){
-		return rawmeta;
-	}
-	
 	public RawData getRawData(){
 		return rawdata;
 	}
@@ -82,7 +36,7 @@ public class RawImport {
 		try {
 			List<String> list = rawmeta.getColumns();
 			return list;
-		} catch (SQLException e) {
+		} catch (DaxploreException e) {
 			return null;
 		}
 	}
@@ -91,22 +45,9 @@ public class RawImport {
 		try {
 			int no = rawdata.getNumberOfRows();
 			return no;
-		} catch (SQLException e) {
+		} catch (DaxploreException e) {
 			e.printStackTrace();
 			return null;
 		}
-	}
-	
-	public boolean hasData() {
-		return rawmeta.hasData() && rawdata.hasData();
-	}
-	
-	public List<DaxploreTable> getTables() {
-		List<DaxploreTable> list = new LinkedList<>();
-		if(SQLTools.tableExists("rawdata", connection)){
-			list.add(RawMeta.table);
-			list.add(rawdata.table);
-		}
-		return list;
 	}
 }

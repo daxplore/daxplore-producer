@@ -2,7 +2,7 @@ package org.daxplore.producer.cli;
 
 import java.io.File;
 
-import org.daxplore.producer.daxplorelib.metadata.MetaData.Formats;
+import org.daxplore.producer.daxplorelib.ImportExportManager.Formats;
 import org.daxplore.producer.tools.MyTools;
 
 import com.beust.jcommander.IStringConverter;

@@ -13,9 +13,10 @@ import javax.swing.tree.TreeModel;
 import javax.swing.tree.TreePath;
 
 import org.daxplore.producer.daxplorelib.DaxploreException;
-import org.daxplore.producer.daxplorelib.metadata.MetaData;
+import org.daxplore.producer.daxplorelib.DaxploreFile;
 import org.daxplore.producer.daxplorelib.metadata.MetaGroup;
 import org.daxplore.producer.daxplorelib.metadata.MetaGroup.GroupType;
+import org.daxplore.producer.daxplorelib.metadata.MetaGroup.MetaGroupManager;
 import org.daxplore.producer.daxplorelib.metadata.MetaQuestion;
 
 class GroupTreeModel implements TreeModel {
@@ -27,9 +28,9 @@ class GroupTreeModel implements TreeModel {
 	private EventListenerList listeners = new EventListenerList();
 	//private Vector<TreeModelListener> listeners = new Vector<TreeModelListener>(); // Declare the listeners vector
 	
-	public GroupTreeModel(MetaData md) throws DaxploreException {
+	public GroupTreeModel(MetaGroupManager metaGroupManager) throws DaxploreException {
 		root.add(new JLabel("root object"));
-		List<MetaGroup> allGroups = md.getAllGroups();
+		List<MetaGroup> allGroups = metaGroupManager.getAll();
 		for(MetaGroup mg: allGroups) {
 			if(mg.getType() == GroupType.QUESTIONS) {
 				groups.add(mg);

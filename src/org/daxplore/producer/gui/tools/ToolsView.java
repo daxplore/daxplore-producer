@@ -51,7 +51,7 @@ public class ToolsView extends JPanel {
 					Locale loc = new Locale(localeText);
 					if(!"und".equals(loc.toLanguageTag())){
 						try {
-							mainController.getDaxploreFile().getMetaData().importFromRaw(mainController.getDaxploreFile(), loc);
+							mainController.getDaxploreFile().importFromRaw(loc);
 						} catch (DaxploreException e1) {
 							// TODO Auto-generated catch block
 							e1.printStackTrace();
@@ -78,7 +78,7 @@ public class ToolsView extends JPanel {
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				try {
-					mainController.getDaxploreFile().getMetaData().replaceAllTimepointsInQuestions();
+					mainController.getDaxploreFile().replaceAllTimepointsInQuestions();
 				} catch (DaxploreException|SQLException e1) {
 					// TODO Auto-generated catch block
 					e1.printStackTrace();
@@ -100,8 +100,8 @@ public class ToolsView extends JPanel {
 				
 				try {
 					mainController.getDaxploreFile().writeUploadFile(uploadFile);
-				} catch (TransformerFactoryConfigurationError | TransformerException | SQLException | DaxploreException | SAXException | IOException | ParserConfigurationException e1) {
-					// TODO HAHAHAHAHAHA
+				} catch (DaxploreException e1) {
+					//TODO communicate error to user
 					e1.printStackTrace();
 				}
 			}

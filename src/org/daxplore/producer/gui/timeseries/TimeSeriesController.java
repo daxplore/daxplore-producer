@@ -9,7 +9,6 @@ import java.util.List;
 import javax.swing.JTable;
 
 import org.daxplore.producer.daxplorelib.DaxploreException;
-import org.daxplore.producer.daxplorelib.metadata.MetaData;
 import org.daxplore.producer.daxplorelib.metadata.MetaTimepointShort;
 import org.daxplore.producer.daxplorelib.metadata.MetaTimepointShort.MetaTimepointShortManager;
 import org.daxplore.producer.daxplorelib.metadata.textreference.TextReference;
@@ -43,10 +42,10 @@ public class TimeSeriesController implements ActionListener {
 		switch(arg0.getActionCommand()) {
 		case TIMEPOINT_ADD_ACTION_COMMAND:
 			try {
-				MetaTimepointShortManager timeManager = mainController.getDaxploreFile().getMetaData().getMetaTimepointManager();
+				MetaTimepointShortManager timeManager = mainController.getDaxploreFile().getMetaTimepointShortManager();
 				List<MetaTimepointShort> timeList = timeManager.getAll();
 				
-				TextReferenceManager textManager = mainController.getDaxploreFile().getMetaData().getTextsManager();
+				TextReferenceManager textManager = mainController.getDaxploreFile().getTextReferenceManager();
 				TextReference textref = textManager.get("tp"+(timeManager.getHighestId()+1));
 				
 				int timeindex = 0;
@@ -55,7 +54,7 @@ public class TimeSeriesController implements ActionListener {
 				}
 				
 				Double value = 0.0;
-				RawData rawData = mainController.getDaxploreFile().getImportedData().getRawData();
+				RawData rawData = mainController.getDaxploreFile().getRawData();
 				String column = mainController.getDaxploreFile().getAbout().getTimeSeriesShortColumn();
 				List<Pair<Double, Integer>> columnValueCounts= rawData.getColumnValueCount(column);
 				L: for(Pair<Double, Integer> valuePair: columnValueCounts) {
@@ -116,7 +115,7 @@ public class TimeSeriesController implements ActionListener {
 				if(hasColumn) {
 					mainController.getDaxploreFile().getAbout().setTimeSeriesShortColumn(column);
 				}
-			} catch (SQLException | DaxploreException e) {
+			} catch (SQLException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
@@ -152,22 +151,16 @@ public class TimeSeriesController implements ActionListener {
 	
 	public void loadData() {
 		if(mainController.fileIsSet()) {
-			try {
-				MetaData md = mainController.getDaxploreFile().getMetaData();
-				timeSeriesTableModel = new TimeSeriesTableModel(md.getMetaTimepointManager());
-				timeSeriesTable = new TimeSeriesTable(timeSeriesTableModel);
-				view.getTimeSeriesScrollPane().setViewportView(timeSeriesTable);
-				view.setTimeSeriesColumn(mainController.getDaxploreFile().getAbout().getTimeSeriesShortColumn());
-			} catch (DaxploreException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
+			timeSeriesTableModel = new TimeSeriesTableModel(mainController.getDaxploreFile().getMetaTimepointShortManager());
+			timeSeriesTable = new TimeSeriesTable(timeSeriesTableModel);
+			view.getTimeSeriesScrollPane().setViewportView(timeSeriesTable);
+			view.setTimeSeriesColumn(mainController.getDaxploreFile().getAbout().getTimeSeriesShortColumn());
 		}
 	}
 
 	public void filter(String text) { //TODO rename method
 		try {
-			RawData rawData = mainController.getDaxploreFile().getImportedData().getRawData();
+			RawData rawData = mainController.getDaxploreFile().getRawData();
 			RawMeta rawMeta = mainController.getDaxploreFile().getRawMeta();
 			if(rawMeta.hasColumn(text)) {
 				LinkedList<Pair<Double, Integer>> columnValueList = rawData.getColumnValueCount(text);
@@ -175,7 +168,7 @@ public class TimeSeriesController implements ActionListener {
 				JTable columnValueTable = new JTable(model);
 				view.getColumnValueCountPane().setViewportView(columnValueTable);
 			}
-		} catch (SQLException | DaxploreException e) {
+		} catch (SQLException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}

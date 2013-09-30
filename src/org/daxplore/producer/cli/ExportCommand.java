@@ -12,8 +12,7 @@ import java.util.Locale;
 
 import org.daxplore.producer.daxplorelib.DaxploreException;
 import org.daxplore.producer.daxplorelib.DaxploreFile;
-import org.daxplore.producer.daxplorelib.metadata.MetaData;
-import org.daxplore.producer.daxplorelib.metadata.MetaData.L10nFormat;
+import org.daxplore.producer.daxplorelib.ImportExportManager.L10nFormat;
 
 import com.beust.jcommander.Parameter;
 import com.beust.jcommander.Parameters;
@@ -66,10 +65,10 @@ public class ExportCommand {
 
 				try (FileWriter fw = new FileWriter(outfile);
 						Writer w = new BufferedWriter(fw)) {
-					MetaData metadata = dax.getMetaData();
-					metadata.exportStructure(w);
+//					MetaData metadata = dax.getMetaData();
+//					metadata.exportStructure(w);
 					w.flush();
-				} catch (DaxploreException | IOException e) {
+				} catch (IOException e) {
 					//TODO handle exception
 					System.out.println("Error exporting structure");
 					e.printStackTrace();
@@ -110,11 +109,10 @@ public class ExportCommand {
 				return;
 			}
 			try (FileOutputStream fos = new FileOutputStream(outfile);
-					OutputStreamWriter osw = new OutputStreamWriter(fos, Charsets.UTF_8);
-					Writer w = new BufferedWriter(osw);
-					DaxploreFile dax = DaxploreFile.createFromExistingFile(file)) {
-				MetaData metadata = dax.getMetaData();
-				metadata.exportL10n(w, L10nFormat.PROPERTIES, locale);
+				OutputStreamWriter osw = new OutputStreamWriter(fos, Charsets.UTF_8);
+				Writer w = new BufferedWriter(osw);
+				DaxploreFile dax = DaxploreFile.createFromExistingFile(file)) {
+				dax.exportL10n(w, L10nFormat.PROPERTIES, locale);
 				w.flush();
 			} catch (DaxploreException | IOException e) {
 				//TODO handle exception

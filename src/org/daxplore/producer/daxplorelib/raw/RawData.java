@@ -150,13 +150,15 @@ public class RawData {
 		//don't close statement
 	}
 	
-	int getNumberOfRows() throws SQLException {
+	public int getNumberOfRows() throws DaxploreException {
 		int ret;
 		try (Statement stmt = connection.createStatement()) {
 			try (ResultSet rs = stmt.executeQuery("SELECT count(*) FROM " + tablename)) {
 				rs.next();
 				ret = rs.getInt(1);
 			}
+		} catch (SQLException e) {
+			throw new DaxploreException("Failed to get row count in RawData", e);
 		}
 		return ret;
 	}
@@ -167,7 +169,7 @@ public class RawData {
 		}
 		try {
 			return getNumberOfRows() > 0;
-		} catch (SQLException e) {
+		} catch (DaxploreException e) {
 			return false;
 		}
 	}

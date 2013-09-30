@@ -7,16 +7,16 @@ import java.util.List;
 import javax.swing.table.DefaultTableModel;
 
 import org.daxplore.producer.daxplorelib.DaxploreException;
-import org.daxplore.producer.daxplorelib.metadata.MetaData;
 import org.daxplore.producer.daxplorelib.metadata.MetaQuestion;
+import org.daxplore.producer.daxplorelib.metadata.MetaQuestion.MetaQuestionManager;
 
 @SuppressWarnings("serial") 
 class QuestionTableModel extends DefaultTableModel {
 
 	List<MetaQuestion> questionList;
 	
-	public QuestionTableModel(MetaData md) throws DaxploreException {
-		questionList = md.getAllQuestions();
+	public QuestionTableModel(MetaQuestionManager metaQuestionManager) throws DaxploreException {
+		questionList = metaQuestionManager.getAll();
 		Collections.sort(questionList, new Comparator<MetaQuestion>() {
 			@Override
 			public int compare(MetaQuestion o1, MetaQuestion o2) {

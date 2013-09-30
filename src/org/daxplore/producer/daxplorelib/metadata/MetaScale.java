@@ -239,10 +239,10 @@ public class MetaScale {
 	}
 	
 	public static class Option {
-		TextReference textRef;
-		double value;
-		NumberlineCoverage transformation;
-		boolean modified = false; //TODO remove modified tag as it's never read and Options are overwritten in saveall anyway?
+		private TextReference textRef;
+		private double value;
+		private NumberlineCoverage transformation;
+		private boolean modified = false; //TODO remove modified tag as it's never read and Options are overwritten in saveall anyway?
 		
 		public Option(TextReference textRef, double value, NumberlineCoverage transformation, boolean setNew) {
 			this.textRef = textRef; this.value = value; this.transformation = transformation; this.modified = setNew;

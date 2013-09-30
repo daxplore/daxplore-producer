@@ -8,7 +8,6 @@ import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.StandardOpenOption;
 import java.sql.SQLException;
@@ -21,7 +20,7 @@ import javax.swing.RowFilter;
 import javax.swing.table.TableRowSorter;
 
 import org.daxplore.producer.daxplorelib.DaxploreException;
-import org.daxplore.producer.daxplorelib.metadata.MetaData.L10nFormat;
+import org.daxplore.producer.daxplorelib.ImportExportManager.L10nFormat;
 import org.daxplore.producer.daxplorelib.metadata.textreference.TextReference;
 import org.daxplore.producer.daxplorelib.metadata.textreference.TextReferenceManager;
 import org.daxplore.producer.daxplorelib.metadata.textreference.TextTree;
@@ -69,7 +68,7 @@ public class EditTextController implements ActionListener {
 		System.out.println("EditPanelView.updateStuff()");
 		if(mainController.fileIsSet()) {
 			try {
-				TextReferenceManager trm = mainController.getDaxploreFile().getMetaData().getTextsManager();
+				TextReferenceManager trm = mainController.getDaxploreFile().getTextReferenceManager();
 				List<Locale> localeList = mainController.getDaxploreFile().getAbout().getLocales();
 				if(localeList.size()==0) {
 					return;
@@ -78,9 +77,6 @@ public class EditTextController implements ActionListener {
 				textsList = trm.getAll();
 				loadTable();
 			} catch (DaxploreException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			} catch (SQLException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
@@ -143,7 +139,7 @@ public class EditTextController implements ActionListener {
 				
 				mainController.getDaxploreFile().getAbout().addLocale(locale);
 				try {
-					mainController.getDaxploreFile().getMetaData().importL10n(
+					mainController.getDaxploreFile().importL10n(
 							Files.newBufferedReader(file.toPath(), Charsets.UTF_8), format, locale);
 				} catch (FileNotFoundException e1) {
 					throw new AssertionError("File exists but is not found");
@@ -157,7 +153,7 @@ public class EditTextController implements ActionListener {
 		case "export":
 			try {
 				
-				localeList = mainController.getDaxploreFile().getMetaData().getAllLocales();
+				localeList = mainController.getDaxploreFile().getTextReferenceManager().getAllLocales();
 				file = editToolbar.showExportDialog(localeList);
 				if(file == null) {
 					System.out.println("File is null");
@@ -179,11 +175,11 @@ public class EditTextController implements ActionListener {
 				
 				if(file.exists() && file.canWrite()) {
 					try (BufferedWriter writer = Files.newBufferedWriter(file.toPath(), Charsets.UTF_8, StandardOpenOption.WRITE, StandardOpenOption.TRUNCATE_EXISTING)) {
-						mainController.getDaxploreFile().getMetaData().exportL10n(writer, format, locale);
+						mainController.getDaxploreFile().exportL10n(writer, format, locale);
 					}
 				} else if (!file.exists()) {
 					try (BufferedWriter writer = Files.newBufferedWriter(file.toPath(), Charsets.UTF_8, StandardOpenOption.CREATE_NEW, StandardOpenOption.WRITE)) {
-						mainController.getDaxploreFile().getMetaData().exportL10n(writer, format, locale);
+						mainController.getDaxploreFile().exportL10n(writer, format, locale);
 					}
 				} else {
 					System.out.println("File is write protected");

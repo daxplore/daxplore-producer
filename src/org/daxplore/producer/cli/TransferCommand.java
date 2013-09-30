@@ -6,7 +6,6 @@ import java.util.Locale;
 
 import org.daxplore.producer.daxplorelib.DaxploreException;
 import org.daxplore.producer.daxplorelib.DaxploreFile;
-import org.daxplore.producer.daxplorelib.metadata.MetaData;
 
 import com.beust.jcommander.Parameter;
 import com.beust.jcommander.Parameters;
@@ -27,23 +26,8 @@ public class TransferCommand {
 		}
 		
 		try (DaxploreFile dax = DaxploreFile.createFromExistingFile(file)) {
-			
-			MetaData metadata;
 			try {
-				metadata = dax.getMetaData();
-			} catch (DaxploreException e) {
-				System.out.println("Could not get metadata");
-				System.out.println(e.getMessage());
-				Throwable e2 = e.getCause();
-				if(e2 != null) {
-					e2.printStackTrace();
-				}
-				e.printStackTrace();
-				return;
-			}
-			
-			try {
-				metadata.importFromRaw(dax, locale);
+				dax.importFromRaw(locale);
 			} catch (DaxploreException e) {
 				System.out.println("Could not transfer metadata");
 				System.out.println(e.getMessage());

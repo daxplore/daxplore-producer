@@ -14,8 +14,7 @@ import java.util.Set;
 
 import org.daxplore.producer.daxplorelib.DaxploreException;
 import org.daxplore.producer.daxplorelib.DaxploreFile;
-import org.daxplore.producer.daxplorelib.metadata.MetaData;
-import org.daxplore.producer.daxplorelib.metadata.MetaData.L10nFormat;
+import org.daxplore.producer.daxplorelib.ImportExportManager.L10nFormat;
 import org.daxplore.producer.tools.SPSSTools;
 
 import com.beust.jcommander.Parameter;
@@ -160,8 +159,7 @@ public class ImportCommand {
 				try (FileInputStream fis = new FileInputStream(infile);
 						InputStreamReader isr = new InputStreamReader(fis, Charsets.UTF_8);
 						Reader r = new BufferedReader(isr)) {
- 					MetaData metadata = dax.getMetaData();
-					metadata.importL10n(r, L10nFormat.PROPERTIES, locale);
+					dax.importL10n(r, L10nFormat.PROPERTIES, locale);
 				} catch (DaxploreException | IOException e) {
 					//TODO handle exception
 					System.out.println("Error exporting texts");

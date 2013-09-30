@@ -5,64 +5,54 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
-import java.nio.ByteBuffer;
+import java.io.OutputStream;
+import java.io.Reader;
+import java.io.Writer;
 import java.nio.charset.Charset;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
-import java.util.Comparator;
+import java.util.LinkedHashMap;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Locale;
-import java.util.SortedSet;
-import java.util.TreeSet;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import java.util.zip.ZipEntry;
-import java.util.zip.ZipOutputStream;
 
-import javax.xml.XMLConstants;
-import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
-import javax.xml.transform.OutputKeys;
-import javax.xml.transform.Transformer;
 import javax.xml.transform.TransformerException;
-import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.TransformerFactoryConfigurationError;
-import javax.xml.transform.dom.DOMSource;
-import javax.xml.transform.stream.StreamResult;
-import javax.xml.transform.stream.StreamSource;
-import javax.xml.validation.Schema;
-import javax.xml.validation.SchemaFactory;
 
-import org.daxplore.producer.daxplorelib.calc.Crosstabs;
-import org.daxplore.producer.daxplorelib.metadata.MetaData;
-import org.daxplore.producer.daxplorelib.metadata.MetaGroup;
+import org.daxplore.producer.daxplorelib.ImportExportManager.L10nFormat;
 import org.daxplore.producer.daxplorelib.metadata.MetaQuestion;
+import org.daxplore.producer.daxplorelib.metadata.MetaScale;
 import org.daxplore.producer.daxplorelib.metadata.MetaTimepointShort;
-import org.daxplore.producer.daxplorelib.raw.RawImport;
+import org.daxplore.producer.daxplorelib.metadata.MetaGroup.MetaGroupManager;
+import org.daxplore.producer.daxplorelib.metadata.MetaQuestion.MetaQuestionManager;
+import org.daxplore.producer.daxplorelib.metadata.MetaScale.MetaScaleManager;
+import org.daxplore.producer.daxplorelib.metadata.MetaTimepointShort.MetaTimepointShortManager;
+import org.daxplore.producer.daxplorelib.metadata.textreference.TextReference;
+import org.daxplore.producer.daxplorelib.metadata.textreference.TextReferenceManager;
+import org.daxplore.producer.daxplorelib.raw.RawData;
 import org.daxplore.producer.daxplorelib.raw.RawMeta;
 import org.daxplore.producer.tools.MyTools;
-import org.opendatafoundation.data.FileFormatInfo;
-import org.opendatafoundation.data.FileFormatInfo.ASCIIFormat;
-import org.opendatafoundation.data.FileFormatInfo.Compatibility;
-import org.opendatafoundation.data.spss.SPSSFile;
-import org.opendatafoundation.data.spss.SPSSFileException;
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
+import org.daxplore.producer.tools.NumberlineCoverage;
+import org.daxplore.producer.tools.Pair;
 import org.xml.sax.SAXException;
-
-import com.google.common.base.Charsets;
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-import com.google.gson.JsonArray;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
 
 public class DaxploreFile implements Closeable {
 	private Connection connection;
 	private About about;
 	private File file = null;
-	private MetaData metadata;
+	private RawMeta rawMeta;
+	private RawData rawData;
+	private ImportExportManager importExport;
+	
+	private TextReferenceManager textReferenceManager;
+	private MetaScaleManager metaScaleManager;
+	private MetaTimepointShortManager metaTimepointShortManager;
+	private MetaQuestionManager metaQuestionManager;
+	private MetaGroupManager metaGroupManager;
 	
 	public static DaxploreFile createFromExistingFile(File file) throws DaxploreException {
 		try {
@@ -100,88 +90,76 @@ public class DaxploreFile implements Closeable {
 		try {
 			about = new About(connection, createNew);
 			about.save();
+			rawMeta = new RawMeta(connection);
+			rawData = new RawData(connection);
+			
+			textReferenceManager = new TextReferenceManager(connection);
+			metaScaleManager = new MetaScaleManager(connection, textReferenceManager);
+			metaTimepointShortManager = new MetaTimepointShortManager(connection, textReferenceManager);
+			metaQuestionManager = new MetaQuestionManager(connection, textReferenceManager, metaScaleManager, metaTimepointShortManager);
+			metaGroupManager = new MetaGroupManager(connection, textReferenceManager, metaQuestionManager);
+			
+			importExport = new ImportExportManager(connection, this);
 		} catch (SQLException e) {
-			throw new DaxploreException("Error creating about", e);
+			throw new DaxploreException("Failed to construct DaxploreFile", e);
 		}
 	}
 	
-	public void importSPSS(File spssFile, Charset charset) throws FileNotFoundException, IOException, DaxploreException{
-		FileFormatInfo ffi = new FileFormatInfo();
-		ffi.namesOnFirstLine = false;
-		ffi.asciiFormat = ASCIIFormat.CSV;
-		ffi.compatibility = Compatibility.GENERIC;
-		
-		try (SPSSFile importSPSSFile = new SPSSFile(spssFile,charset)) {
-			importSPSSFile.logFlag = false;
-			importSPSSFile.loadMetadata();
-		
-			boolean autocommit = false;
-			try {
-				autocommit = connection.getAutoCommit();
-				connection.setAutoCommit(false);
-				int isolation = connection.getTransactionIsolation();
-				connection.setTransactionIsolation(Connection.TRANSACTION_READ_UNCOMMITTED);
-				
-				RawImport rawImport = new RawImport(connection);
-				rawImport.importSPSS(importSPSSFile);
-					
-				about.setImport(importSPSSFile.file.getName());
-				
-				connection.commit();
-				connection.setTransactionIsolation(isolation);
-				connection.setAutoCommit(autocommit);
-			} catch (SQLException e) {
-				MyTools.printSQLExeption(e);
-				try {
-					connection.rollback();
-					connection.setAutoCommit(autocommit);
-				} catch (SQLException e1) {
-					throw new DaxploreException("Import error. Could not rollback.", e);
-				}
-				throw new DaxploreException("Import error.", e);
-			}
-		} catch (SPSSFileException e2) {
-			throw new DaxploreException("SPSSFileException", e2);
-		}
+	public void importFromRaw(Locale locale) throws DaxploreException {
+		importExport.importFromRaw(locale);
 	}
 	
 	public About getAbout(){
 		return about;
 	}
 	
-	public RawImport getImportedData(){
-		try {
-			RawImport id = new RawImport(connection);
-			return id;
-		} catch (SQLException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-			return null;
+	public RawMeta getRawMeta() {
+		return rawMeta;
+	}
+	
+	public RawData getRawData() {
+		return rawData;
+	}
+	
+	public MetaGroupManager getMetaGroupManager() {
+		return metaGroupManager;
+	}
+	
+	public MetaQuestionManager getMetaQuestionManager() {
+		return metaQuestionManager;
+	}
+
+	public MetaScaleManager getMetaScaleManager() {
+		return metaScaleManager;
+	}
+
+	public MetaTimepointShortManager getMetaTimepointShortManager() {
+		return metaTimepointShortManager;
+	}
+
+	public TextReferenceManager getTextReferenceManager() {
+		return textReferenceManager;
+	}
+	
+	public void writeUploadFile(File outputFile) throws DaxploreException {
+		try (OutputStream os = new FileOutputStream(outputFile)) {
+			importExport.writeUploadFile(os);
+		} catch (TransformerFactoryConfigurationError | TransformerException | SQLException | DaxploreException
+				| SAXException | IOException | ParserConfigurationException e) {
+			throw new DaxploreException("Failed to write output file", e);
 		}
 	}
 	
-	public MetaData getMetaData() throws DaxploreException {
-		if(metadata != null) {
-			return metadata;
-		}
-		try {
-			metadata = new MetaData(connection, getAbout(), getImportedData().getRawData());
-			return metadata;
-		} catch (SQLException e) {
-			throw new DaxploreException("Couldn't get metadata", e);
-		}
+	public void importSPSS(File spssFile, Charset charset) throws FileNotFoundException, IOException, DaxploreException {
+		importExport.importSPSS(spssFile, charset);
 	}
 	
-	public RawMeta getRawMeta() throws DaxploreException {
-		try {
-			return new RawMeta(connection);
-		} catch (SQLException e) {
-			throw new DaxploreException("Could't get RawMeta", e);
-		}
+	public void importL10n(Reader reader, L10nFormat format, Locale locale) throws IOException, DaxploreException {
+		importExport.importL10n(reader, format, locale);
 	}
 	
-	public Crosstabs getCrosstabs() {
-		return new Crosstabs(connection, about);
+	public void exportL10n(Writer writer, L10nFormat format, Locale locale) throws IOException, DaxploreException {
+		importExport.exportL10n(writer, format, locale);
 	}
 	
 	public void saveAll() throws DaxploreException { //TODO: return boolean instead of throwing exception?
@@ -192,7 +170,11 @@ public class DaxploreFile implements Closeable {
 			
 			Logger.getGlobal().log(Level.INFO, "Save initiated");
 			about.save();
-			metadata.saveAll();
+			textReferenceManager.saveAll();
+			metaScaleManager.saveAll();
+			metaQuestionManager.saveAll();
+			metaGroupManager.saveAll();
+			metaTimepointShortManager.saveAll();
 			
 			connection.commit();
 			connection.setAutoCommit(autocommit);
@@ -216,151 +198,111 @@ public class DaxploreFile implements Closeable {
 		return file;
 	}
 	
-	public void writeUploadFile(File outputFile) throws TransformerFactoryConfigurationError, TransformerException, SQLException, DaxploreException, SAXException, IOException, ParserConfigurationException {
-		long time = System.nanoTime();
-		Logger.getGlobal().log(Level.INFO, "Starting to generate json data");
-		
-		Crosstabs crosstabs = getCrosstabs();
-		crosstabs.loadRawToMem();
-		
-
-		MetaGroup perspectives = getMetaData().getMetaGroupManager().getPerspectiveGroup();
-		SortedSet<MetaQuestion> selectedQuestions = new TreeSet<>(new Comparator<MetaQuestion>() {
-			@Override
-			public int compare(MetaQuestion o1, MetaQuestion o2) {
-				return o1.getId().compareTo(o2.getId());
-			}
-		});
-		for(MetaQuestion perspective : perspectives.getQuestions()) {
-			selectedQuestions.add(perspective);
+	//TODO move to a helper file?
+	public void consolidateScales(Locale bylocale) throws DaxploreException {
+		boolean autocommit = true;
+		try {
+			autocommit = connection.getAutoCommit();
+			connection.setAutoCommit(false);
+			connection.setTransactionIsolation(Connection.TRANSACTION_READ_UNCOMMITTED);
+		} catch (SQLException e) {
+			MyTools.printSQLExeption(e);
+			throw new DaxploreException("Failed to disable autocommit", e);
 		}
-		JsonArray dataJSON = new JsonArray();
-		for(MetaGroup group : getMetaData().getMetaGroupManager().getQuestionGroups()) {
-			for(MetaQuestion question : group.getQuestions()) {
-				selectedQuestions.add(question);
-				for(MetaQuestion perspective : perspectives.getQuestions()) {
-					dataJSON.add(crosstabs.crosstabs2(question, perspective, 10).toJSONObject());
+		
+		try {
+			List<MetaScale> scaleList = metaScaleManager.getAll();
+			List<MetaScale> uniqueScales = new LinkedList<>();
+			List<MetaScale> genericScales = new LinkedList<>();
+			LinkedHashMap<MetaScale, MetaScale> scaleMap = new LinkedHashMap<>();
+			NextScale: for(MetaScale s: scaleList) {
+				//System.out.print("\n.");
+				for(MetaScale us: uniqueScales) {
+					//System.out.print(",");
+					if(us.equalsLocale(s, bylocale)) {
+						//System.out.print("+");
+						//If scale exists previously, create new generic scale 
+						List<MetaScale.Option> oldrefs = us.getOptions();
+						List<MetaScale.Option> newrefs = new LinkedList<>();
+						for(int i = 0; i < oldrefs.size(); i++) {
+							TextReference tr = textReferenceManager.get("generic" + (genericScales.size() +1) + "_option_" + i);
+							TextReference oldtr = oldrefs.get(i).getTextRef();
+							List<Locale> locs = oldtr.getLocales();
+							for(Locale loc: locs) {
+								tr.put(oldtr.get(loc), loc);
+							}
+							newrefs.add(new MetaScale.Option(tr, oldrefs.get(i).getValue(), oldrefs.get(i).getTransformation(), true));
+						}
+						MetaScale gs = metaScaleManager.create(newrefs, new NumberlineCoverage());
+						//System.out.println("\n" + us.toJSONString() +" -> " + gs.toJSONString());
+						genericScales.add(gs);
+						scaleMap.put(s, gs);
+						uniqueScales.remove(us);
+						continue NextScale;
+					}
+				}
+				for(MetaScale gs: genericScales) {
+					if(gs.equalsLocale(s, bylocale)) {
+						scaleMap.put(s, gs);
+						continue NextScale;
+					}
+				}
+				uniqueScales.add(s);
+			}
+			
+			//Change all questions to use new generic scales
+			List<MetaQuestion> allquestions = metaQuestionManager.getAll();
+			for(MetaQuestion q: allquestions) {
+				if(scaleMap.containsKey(q.getScale())) {
+					q.setScale(scaleMap.get(q.getScale()));
 				}
 			}
-		}
-		
-		Logger.getGlobal().log(Level.INFO, "Generated data in " + ((System.nanoTime() -time)/Math.pow(10,9)) + "s");
-		time = System.nanoTime();
-		
-		try (ZipOutputStream zout = new ZipOutputStream(new FileOutputStream(outputFile))) {
-			//manifest
-			Document manifest = getUploadManifest();
-			Transformer transformer = TransformerFactory.newInstance().newTransformer();
-			transformer.setOutputProperty(OutputKeys.INDENT, "yes");
-			transformer.setOutputProperty("{http://xml.apache.org/xslt}indent-amount", "4");
-			DOMSource xmlSource = new DOMSource(manifest);
-			ZipEntry entry = new ZipEntry("manifest.xml");
-		    zout.putNextEntry(entry);
-			StreamResult streamResult = new StreamResult(zout);
-			transformer.transform(xmlSource, streamResult);
-			zout.flush();
-			zout.closeEntry();
-
-			StreamResult streamResultSystem = new StreamResult(System.out);
-			transformer.transform(xmlSource, streamResultSystem);
 			
-			Gson plainGson = new Gson();
-			Gson prettyGson = new GsonBuilder().setPrettyPrinting().create();
-			
-			// Generate a single json string and replace "}}},{" with "}}},\n{" to create rows in the file
-			writeZipString(zout, "data/data.json", plainGson.toJson(dataJSON).replaceAll("(}}},\\{)", "}}},\n{")); 
-			
-			for(Locale locale : getAbout().getLocales()) {
-				JsonArray questionJSON = new JsonArray();
-				for(MetaQuestion q : selectedQuestions) {
-					questionJSON.add(q.toJSONObject(locale));
+			System.out.print("Removing old scales");
+			//remove old unused scales
+			for(MetaScale s: scaleMap.keySet()) {
+				List<MetaScale.Option> refs = s.getOptions();
+				for(MetaScale.Option o: refs) {
+					textReferenceManager.remove(o.getTextRef().getRef());
 				}
-				
-				String propertiesJSONString = prettyGson.toJson(getPropertiesJson(locale));
-				writeZipString(zout, "properties/usertexts_"+locale.toLanguageTag()+".json", propertiesJSONString);
-				
-				writeZipString(zout, "meta/questions_"+locale.toLanguageTag()+".json", prettyGson.toJson(questionJSON));
-			    
-			    String groupJSONString = prettyGson.toJson(getMetaData().getMetaGroupManager().getQuestionGroupsJSON(locale));
-			    writeZipString(zout, "meta/groups_"+locale.toLanguageTag()+".json", groupJSONString);
-			    
-			    writeZipString(zout, "meta/perspectives_"+locale.toLanguageTag()+".json", prettyGson.toJson(perspectives.toJSONObject(locale)));
-			    
+				metaScaleManager.remove(s.getId());
 			}
-	
-			zout.flush();
+		} catch (SQLException e) {
+			throw new DaxploreException("Failed to consolidate scales", e);
 		}
 		
-		crosstabs.dropRawFromMem();
+		try {
+			connection.setAutoCommit(autocommit);
+		} catch (SQLException e) {
+			MyTools.printSQLExeption(e);
+			throw new DaxploreException("Failed to reenable autocommit", e);
+		}
 		
-		Logger.getGlobal().log(Level.INFO, "Created file in " + ((System.nanoTime() -time)/Math.pow(10,9)) + "s");
 	}
 	
-	private static void writeZipString(ZipOutputStream zout, String filename, String dataString) throws IOException {
-		ZipEntry entry = new ZipEntry(filename);
-	    zout.putNextEntry(entry);
-	    ByteBuffer buffer = Charsets.UTF_8.encode(dataString);
-	    byte[] outbytes = new byte[buffer.limit()];
-	    buffer.get(outbytes);
-	    zout.write(outbytes);
-	    zout.flush();
-	    zout.closeEntry();
-	}
-	
-	public Document getUploadManifest() throws SAXException, IOException, ParserConfigurationException {
-		DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
-		dbf.setSchema(getUploadFileManifestSchema());
-		Document doc = dbf.newDocumentBuilder().newDocument();
-		doc.setXmlStandalone(true);
-		
-		Element root = doc.createElement("daxploreUploadFileManifest");
-		doc.appendChild(root);
-		root.setAttribute("xmlns:xsi", "http://www.w3.org/2001/XMLSchema-instance");
-		root.setAttribute("xsi:noNamespaceSchemaLocation", "UploadFileManifest.xsd");
-		
-		Element version = doc.createElement("fileVersion");
-		root.appendChild(version);
-		Element major = doc.createElement("major");
-		version.appendChild(major);
-		major.appendChild(doc.createTextNode(""+DaxploreProperties.filetypeversionmajor));
-		Element minor = doc.createElement("minor");
-		version.appendChild(minor);
-		minor.appendChild(doc.createTextNode(""+DaxploreProperties.filetypeversionminor));
-		
-		Element supportedLocales = doc.createElement("supportedLocales");
-		root.appendChild(supportedLocales);
-		for(Locale locale : about.getLocales()) {
-			Element localeElement = doc.createElement("language-BCP47");
-			supportedLocales.appendChild(localeElement);
-			localeElement.appendChild(doc.createTextNode(locale.toLanguageTag()));
+	//TODO move to a helper file?
+	public void replaceAllTimepointsInQuestions() throws DaxploreException, SQLException {
+		List<MetaTimepointShort> timepoints = metaTimepointShortManager.getAll();
+		int tpAdded = 0, questionsModified = 0;
+		for(MetaQuestion question : metaQuestionManager.getAll()) {
+			List<MetaTimepointShort> questionTp = new LinkedList<>();
+			LinkedList<Pair<Double, Integer>> valueCounts = rawData.getColumnValueCountWhere(about.getTimeSeriesShortColumn(), question.getId());
+			questionTp.clear();
+			for(Pair<Double, Integer> pair : valueCounts) {
+				for(MetaTimepointShort tp : timepoints) {
+					if(pair.getKey()!=null && tp.getValue() == pair.getKey() && pair.getValue()>0) {
+						questionTp.add(tp);
+					}
+				}
+			}
+			if(questionTp.size()>0) {
+				questionsModified++;
+				tpAdded += questionTp.size();
+				question.setTimepoints(questionTp);
+			}
 		}
-		
-		Element defaultLocale = doc.createElement("defaultLocale");
-		root.appendChild(defaultLocale);
-		Element localeElement = doc.createElement("language-BCP47");
-		defaultLocale.appendChild(localeElement);
-		localeElement.appendChild(doc.createTextNode(about.getLocales().get(0).toLanguageTag())); // TODO pick default locale properly
-		
-		return doc;
-	}
-	
-	private static Schema getUploadFileManifestSchema() throws SAXException, IOException {
-		try (InputStream stream = DaxploreFile.class.getResourceAsStream("UploadFileManifest.xsd")) {
-			SchemaFactory sf = SchemaFactory.newInstance(XMLConstants.W3C_XML_SCHEMA_NS_URI);
-			Schema schema = sf.newSchema(new StreamSource(stream));
-			return schema;
-		}
-	}
-	
-	private JsonElement getPropertiesJson(Locale locale) throws SQLException, DaxploreException {
-		JsonObject json = new JsonObject();
-		for(String property: DaxploreProperties.properties) {
-			json.addProperty(property, metadata.getTextsManager().get(property).get(locale));
-		}
-		for(MetaTimepointShort mtp: metadata.getMetaTimepointManager().getAll()) {
-			json.addProperty("timepoint_" + mtp.getTimeindex(), mtp.getTextRef().get(locale));
-		}
-		return json;
+		String logString = String.format("replaceAllTimepointsInQuestions: %d questions affected, %d timepoints added", questionsModified, tpAdded);
+		Logger.getGlobal().log(Level.INFO, logString);
 	}
 
 }

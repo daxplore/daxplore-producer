@@ -16,6 +16,7 @@ import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import org.daxplore.producer.daxplorelib.DaxploreException;
 import org.daxplore.producer.daxplorelib.DaxploreProperties;
 import org.daxplore.producer.daxplorelib.DaxploreTable;
 import org.daxplore.producer.daxplorelib.SQLTools;
@@ -154,7 +155,7 @@ public class TextReferenceManager {
 	}
 	
 
-	public List<Locale> getAllLocales() throws SQLException { //TODO read from local data, load from databse
+	public List<Locale> getAllLocales() throws DaxploreException { //TODO read from local data, load from databse
 		List<Locale> list = new LinkedList<>();
 		try (Statement stmt = connection.createStatement();
 				ResultSet rs = stmt.executeQuery("SELECT DISTINCT locale FROM texts ORDER BY locale");
@@ -165,11 +166,13 @@ public class TextReferenceManager {
 					list.add(new Locale(loc));
 				}
 			}
+		} catch (SQLException e) {
+			throw new DaxploreException("Failed to load locales", e);
 		}
 		return list;
 	}
 
-	public TextTree getAll() throws SQLException {
+	public TextTree getAll() throws DaxploreException {
 		// make sure all references are cached before returning the content of the tree
 		try (Statement stmt = connection.createStatement();
 				ResultSet rs = stmt.executeQuery("SELECT ref FROM texts")) {
@@ -179,6 +182,8 @@ public class TextReferenceManager {
 					get(rs.getString("ref"));
 				}
 			}
+		} catch (SQLException e) {
+			throw new DaxploreException("Failed to load text references", e);
 		}
 		return textTree;
 	}

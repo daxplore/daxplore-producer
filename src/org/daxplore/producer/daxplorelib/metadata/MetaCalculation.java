@@ -6,19 +6,22 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 
 import org.daxplore.producer.daxplorelib.DaxploreTable;
+import org.daxplore.producer.daxplorelib.SQLTools;
 
 public class MetaCalculation {
 	//TODO make table private and let MetaCaluculation to create itself?
-	static final DaxploreTable table = new DaxploreTable("CREATE TABLE metacalc (id INTEGER NOT NULL, column TEXT)", "metacalc");
+	private static final DaxploreTable table = new DaxploreTable("CREATE TABLE metacalc (id INTEGER NOT NULL, column TEXT)", "metacalc");
 	private int id;
 	private Connection connection;
 	
-	MetaCalculation(int id, Connection connection) {
+	MetaCalculation(int id, Connection connection) throws SQLException {
 		this.id = id;
 		this.connection = connection;
+		SQLTools.createIfNotExists(MetaCalculation.table, connection);
 	}
 	
-	MetaCalculation(String column, Connection connection) throws SQLException {
+	public MetaCalculation(String column, Connection connection) throws SQLException {
+		SQLTools.createIfNotExists(MetaCalculation.table, connection);
 		try(PreparedStatement stmt = connection.prepareStatement("SELECT * FROM metacalc WHERE column = ?")) {
 			stmt.setString(1, column);
 			try (ResultSet rs = stmt.executeQuery()) {
@@ -29,7 +32,7 @@ public class MetaCalculation {
 		}
 	}
 	
-	public String getColumn() throws SQLException{
+	public String getColumn() throws SQLException {
 		try (PreparedStatement stmt = connection.prepareStatement("SELECT column FROM metacalc WHERE id = ?")) {
 			stmt.setInt(1, id);
 			try(ResultSet rs = stmt.executeQuery()) {

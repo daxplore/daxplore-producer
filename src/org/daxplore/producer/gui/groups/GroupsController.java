@@ -9,7 +9,7 @@ import javax.swing.JOptionPane;
 import javax.swing.tree.TreePath;
 
 import org.daxplore.producer.daxplorelib.DaxploreException;
-import org.daxplore.producer.daxplorelib.metadata.MetaData;
+import org.daxplore.producer.daxplorelib.DaxploreFile;
 import org.daxplore.producer.daxplorelib.metadata.MetaGroup;
 import org.daxplore.producer.daxplorelib.metadata.MetaGroup.GroupType;
 import org.daxplore.producer.daxplorelib.metadata.MetaGroup.MetaGroupManager;
@@ -66,9 +66,9 @@ public class GroupsController implements ActionListener {
 			String groupName = (String)JOptionPane.showInputDialog(mainController.getMainFrame(), "Name:", "Create new group", JOptionPane.PLAIN_MESSAGE, null, null, "");
 			if(groupName != null && !groupName.equals("")) {
 				try {
-					MetaGroupManager metaGroupManager = mainController.getDaxploreFile().getMetaData().getMetaGroupManager();
+					MetaGroupManager metaGroupManager = mainController.getDaxploreFile().getMetaGroupManager();
 					int nextid = metaGroupManager.getHighestId(); // Assumes perspective group is at index 0, standard groups are 1-indexed
-					TextReferenceManager textReferenceManager = mainController.getDaxploreFile().getMetaData().getTextsManager();
+					TextReferenceManager textReferenceManager = mainController.getDaxploreFile().getTextReferenceManager();
 					TextReference tr = textReferenceManager.get("group_" + nextid);
 					tr.put(groupName, Settings.getDefaultLocale());
 					MetaGroup mg = metaGroupManager.create(tr, Integer.MAX_VALUE, GroupType.QUESTIONS, new LinkedList<MetaQuestion>());
@@ -244,19 +244,19 @@ public class GroupsController implements ActionListener {
 	public void loadData() {
 		if(mainController.fileIsSet()) {
 			try {
-				MetaData md = mainController.getDaxploreFile().getMetaData();
-				
-				questionTableModel = new QuestionTableModel(md);
+				DaxploreFile daxploreFile = mainController.getDaxploreFile();
+
+				questionTableModel = new QuestionTableModel(daxploreFile.getMetaQuestionManager());
 				questionJTable = new QuestionTable(questionTableModel);
 				groupsView.getQuestionsScrollPane().setViewportView(questionJTable);
 				
 				//get groups and perspectives
-				groupTreeModel = new GroupTreeModel(md);
+				groupTreeModel = new GroupTreeModel(daxploreFile.getMetaGroupManager());
 				groupTree = new GroupTree(groupTreeModel);
 				groupsView.getGroupsScollPane().setViewportView(groupTree);
 				
 				MetaGroup perspectives = null;
-				for(MetaGroup mg : md.getMetaGroupManager().getAll()) {
+				for(MetaGroup mg : daxploreFile.getMetaGroupManager().getAll()) {
 					if(mg.getType() == GroupType.PERSPECTIVE) {
 						perspectives = mg;
 						break;
@@ -264,14 +264,13 @@ public class GroupsController implements ActionListener {
 				}
 				if(perspectives == null) {
 					System.out.println("Create perspectives group");
-					TextReference textref = md.getTextsManager().get("PERSPECTIVESGROUP");
-					perspectives = md.getMetaGroupManager().create(textref, 999, GroupType.PERSPECTIVE, new LinkedList<MetaQuestion>());
+					TextReference textref = daxploreFile.getTextReferenceManager().get("PERSPECTIVESGROUP");
+					perspectives = daxploreFile.getMetaGroupManager().create(textref, 999, GroupType.PERSPECTIVE, new LinkedList<MetaQuestion>());
 				}
 				
 				perspectivesTableModel = new PerspectivesTableModel(perspectives);
 				perspectivesTable = new QuestionTable(perspectivesTableModel);
 				groupsView.getPerspectiveScrollPane().setViewportView(perspectivesTable);
-				
 				
 			} catch (DaxploreException | SQLException e) {
 				// TODO Auto-generated catch block
