@@ -63,7 +63,7 @@ public class GroupsController implements ActionListener {
 		int[] selectedRows;
 		switch(e.getActionCommand()) {
 		case GROUPS_ADD_ACTION_COMMAND:
-			String groupName = (String)JOptionPane.showInputDialog(mainController.getMainFrame(), "Name:", "Create new group", JOptionPane.PLAIN_MESSAGE, null, null, "");
+			String groupName = (String)JOptionPane.showInputDialog(mainController.getMainWindow(), "Name:", "Create new group", JOptionPane.PLAIN_MESSAGE, null, null, "");
 			if(groupName != null && !groupName.equals("")) {
 				try {
 					MetaGroupManager metaGroupManager = mainController.getDaxploreFile().getMetaGroupManager();
@@ -75,14 +75,14 @@ public class GroupsController implements ActionListener {
 					TreePath treepath = groupTreeModel.addGroup(mg, groupTreeModel.getChildCount(groupTreeModel.getRoot()));
 					groupTree.setSelectionPath(treepath);
 				} catch (Exception e1) { //TODO: fix proper exception handling
-					JOptionPane.showMessageDialog(mainController.getMainFrame(),
+					JOptionPane.showMessageDialog(mainController.getMainWindow(),
 						    "Something went wrong while creating new group",
 						    "Group creation error",
 						    JOptionPane.ERROR_MESSAGE);
 					e1.printStackTrace();
 				}
 			} else {
-				JOptionPane.showMessageDialog(mainController.getMainFrame(),
+				JOptionPane.showMessageDialog(mainController.getMainWindow(),
 					    "Group has to have a name",
 					    "Group creation error",
 					    JOptionPane.ERROR_MESSAGE);

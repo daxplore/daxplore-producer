@@ -13,7 +13,7 @@ import org.daxplore.producer.daxplorelib.metadata.textreference.TextReference;
 import org.daxplore.producer.gui.edit.EditTextView;
 import org.daxplore.producer.gui.groups.GroupsView;
 import org.daxplore.producer.gui.navigation.NavigationView;
-import org.daxplore.producer.gui.open.OpenFileView;
+import org.daxplore.producer.gui.open.OpenFileController;
 import org.daxplore.producer.gui.question.QuestionView;
 import org.daxplore.producer.gui.timeseries.TimeSeriesView;
 import org.daxplore.producer.gui.tools.ToolsView;
@@ -30,7 +30,7 @@ public class MainController implements ActionListener {
 	
 	private MainView mainView;
 
-	private OpenFileView openFileView;
+	private OpenFileController openFileController;
 	private GroupsView groupsView;
 	private EditTextView editTextView;
 	private ButtonPanelView buttonPanelView;
@@ -68,7 +68,7 @@ public class MainController implements ActionListener {
 		QuestionWidget.mainController = this;
 		TextWidget.mainController = this;
 		
-		openFileView = new OpenFileView(this);
+		openFileController = new OpenFileController(this);
 		groupsView = new GroupsView(this);
 		editTextView = new EditTextView(this);
 		buttonPanelView = new ButtonPanelView(this);
@@ -78,7 +78,7 @@ public class MainController implements ActionListener {
 		timeSeriesView = new TimeSeriesView(this);
 
 		mainView = new MainView(buttonPanelView);
-		mainView.addView(openFileView, Views.OPENFILEVIEW);
+		mainView.addView(openFileController.getView(), Views.OPENFILEVIEW);
 		mainView.addView(groupsView, Views.GROUPSVIEW);
 		mainView.addView(editTextView, Views.EDITTEXTVIEW);
 		mainView.addView(toolsView, Views.TOOLSVIEW);
@@ -187,7 +187,7 @@ public class MainController implements ActionListener {
 	}
 
 	//TODO decouple more
-	public JFrame getMainFrame() {
+	public JFrame getMainWindow() {
 		return mainView.getMainFrame();
 	}
 	
@@ -195,8 +195,8 @@ public class MainController implements ActionListener {
 		return buttonPanelView;
 	}
 
-	public OpenFileView getOpenFileView() {
-		return openFileView;
+	public OpenFileController getOpenFileController() {
+		return openFileController;
 	}
 
 	public GroupsView getGroupsView() {

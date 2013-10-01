@@ -2,14 +2,12 @@ package org.daxplore.producer.gui.open;
 
 import java.awt.BorderLayout;
 import java.awt.Dimension;
-import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
 import javax.swing.GroupLayout;
 import javax.swing.GroupLayout.Alignment;
 import javax.swing.JButton;
 import javax.swing.JLabel;
-import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTextField;
@@ -17,19 +15,10 @@ import javax.swing.JTextPane;
 import javax.swing.LayoutStyle.ComponentPlacement;
 import javax.swing.border.TitledBorder;
 
-import org.daxplore.producer.gui.MainController;
-import org.daxplore.producer.gui.importwizard.CharsetPanelDescriptor;
-import org.daxplore.producer.gui.importwizard.FinalImportPanelDescriptor;
-import org.daxplore.producer.gui.importwizard.ImportWizardDescriptor;
-import org.daxplore.producer.gui.importwizard.ImportWizardDialog;
-import org.daxplore.producer.gui.importwizard.OpenFilePanelDescriptor;
-
 /**
  * Open panel view, displays the open and create daxplore file function as well as the import
  * SPSS file wizard button and information panel. If a file is loaded, the panels will show
  * file information.
- * @author hkfs89
- *
  */
 @SuppressWarnings("serial")
 public class OpenFileView extends JPanel {
@@ -38,65 +27,20 @@ public class OpenFileView extends JPanel {
 	private JTextField importDateField = new JTextField();
 	private JTextField creationDateField = new JTextField();
 	private JTextField lastImportFileNameField = new JTextField();
-	public JTextPane spssFileInfoText = new JTextPane();
+	private JTextPane spssFileInfoText = new JTextPane();
 	private JButton openFileButton;
 	private JButton createNewFileButton;
 	private JButton importWizardButton;
-	
-	private OpenController openController;
 
 	public static final String OPEN_BUTTON_ACTION_COMMAND = "OpenButtonActionCommand";
 	public static final String CREATE_BUTTON_ACTION_COMMAND = "CreateButtonActionCommand";
 	public static final String IMPORT_BUTTON_ACTION_COMMAND = "ImportButtonActionCommand";
 	
-	// getters and setters.
-	public OpenController getOpenController() {
-		return openController;
-	}
-
-	public void setOpenController(OpenController openController) {
-		this.openController = openController;
-	}
-	
-	public JTextField getFileNameField() {
-		return fileNameField;
-	}
-
-	public void setFileNameField(JTextField fileNameField) {
-		this.fileNameField = fileNameField;
-	}
-
-	public JTextField getLastImportFileNameField() {
-		return lastImportFileNameField;
-	}
-
-	public void setLastImportFileNameField(JTextField lastImportFileNameField) {
-		this.lastImportFileNameField = lastImportFileNameField;
-	}
-
-	public JTextField getImportDateField() {
-		return importDateField;
-	}
-
-	public void setImportDateField(JTextField importDateField) {
-		this.importDateField = importDateField;
-	}
-
-	public JTextField getCreationDateField() {
-		return creationDateField;
-	}
-
-	public void setCreationDateField(JTextField creationDateField) {
-		this.creationDateField = creationDateField;
-	}
-	
 	/**
 	 * OpenPanelView constructor.
 	 * @param mainController
 	 */
-	public OpenFileView(final MainController mainController) {
-		
-		openController = new OpenController(mainController, this);
+	public OpenFileView() {
 		getFileNameField().setEditable(false);
 		getFileNameField().setBounds(166, 75, 240, 27);
 		getFileNameField().setColumns(10);
@@ -150,36 +94,7 @@ public class OpenFileView extends JPanel {
 		importWizardButton.setActionCommand(IMPORT_BUTTON_ACTION_COMMAND);
 		importSPSSPanel.add(importWizardButton, BorderLayout.SOUTH);
 		importWizardButton.setPreferredSize(new Dimension(84, 28));
-		importWizardButton.addActionListener(new ActionListener() {
-			
-			@Override
-			public void actionPerformed(ActionEvent e) {
-
-				if (mainController.getDaxploreFile() == null) {
-					JOptionPane
-							.showMessageDialog(
-									mainController.getMainFrame(),
-									"Create or open a daxplore project file before you import an SPSS file.",
-									"Daxplore file warning", JOptionPane.ERROR_MESSAGE);
-					return;
-				}
-				
-				ImportWizardDialog importWizardDialog = new ImportWizardDialog(mainController);
-				
-				ImportWizardDescriptor openFilePanelDescriptor = new OpenFilePanelDescriptor();
-		        importWizardDialog.registerWizardPanel(OpenFilePanelDescriptor.IDENTIFIER, openFilePanelDescriptor);
-		        
-				ImportWizardDescriptor charsetPanelDescriptor = new CharsetPanelDescriptor();
-		        importWizardDialog.registerWizardPanel(CharsetPanelDescriptor.IDENTIFIER, charsetPanelDescriptor);
-		        
-				ImportWizardDescriptor finalImportPanelDescriptor = new FinalImportPanelDescriptor();
-		        importWizardDialog.registerWizardPanel(FinalImportPanelDescriptor.IDENTIFIER, finalImportPanelDescriptor);
-		        
-		        importWizardDialog.setCurrentPanel(OpenFilePanelDescriptor.IDENTIFIER);
-		        
-				importWizardDialog.setVisible(true);
-			}
-		});
+		
 		
 		JLabel fileNameLabel = new JLabel("Filename:");
 		fileNameLabel.setBounds(19, 81, 115, 15);
@@ -200,13 +115,11 @@ public class OpenFileView extends JPanel {
 		openFileButton.setActionCommand(OPEN_BUTTON_ACTION_COMMAND);
 		guiFilePanel.add(openFileButton);
 		openFileButton.setToolTipText("Opens a daxplore file");
-		openFileButton.addActionListener(openController);
 		
 		createNewFileButton = new JButton("Create new file...");
 		createNewFileButton.setBounds(168, 35, 135, 27);
 		createNewFileButton.setActionCommand(CREATE_BUTTON_ACTION_COMMAND);
 		guiFilePanel.add(createNewFileButton);
-		createNewFileButton.addActionListener(openController);
 		createNewFileButton.setToolTipText("Creates a new daxplore project file");
 		guiFilePanel.add(fileNameLabel);
 		guiFilePanel.add(getFileNameField());
@@ -218,5 +131,47 @@ public class OpenFileView extends JPanel {
 		guiFilePanel.add(getLastImportFileNameField());
 		
 		setLayout(gl_openPanel);
+	}
+	
+	public void addActionListener(ActionListener actionListener) {
+		createNewFileButton.addActionListener(actionListener);
+		openFileButton.addActionListener(actionListener);
+		importWizardButton.addActionListener(actionListener);
+	}
+	
+	public JTextField getFileNameField() {
+		return fileNameField;
+	}
+
+	public void setFileNameField(JTextField fileNameField) {
+		this.fileNameField = fileNameField;
+	}
+
+	public JTextField getLastImportFileNameField() {
+		return lastImportFileNameField;
+	}
+
+	public void setLastImportFileNameField(JTextField lastImportFileNameField) {
+		this.lastImportFileNameField = lastImportFileNameField;
+	}
+
+	public JTextField getImportDateField() {
+		return importDateField;
+	}
+
+	public void setImportDateField(JTextField importDateField) {
+		this.importDateField = importDateField;
+	}
+
+	public JTextField getCreationDateField() {
+		return creationDateField;
+	}
+
+	public void setCreationDateField(JTextField creationDateField) {
+		this.creationDateField = creationDateField;
+	}
+	
+	public void setSpssFileInfoText(String text) {
+		spssFileInfoText.setText(text);
 	}
 }

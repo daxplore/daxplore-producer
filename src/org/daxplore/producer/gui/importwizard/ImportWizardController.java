@@ -143,7 +143,7 @@ public class ImportWizardController implements ActionListener {
 
 		// this should never happen the way the dialog is designed. But we keep this for safety.
 		if (hostPanel.getmainController().getSpssFile() == null) {
-			JOptionPane.showMessageDialog(this.hostPanel.getmainController().getMainFrame(),
+			JOptionPane.showMessageDialog(this.hostPanel.getmainController().getMainWindow(),
 					"You must open an SPSS file before you can import it.",
 					"Daxplore file warning", JOptionPane.ERROR_MESSAGE);
 			return;
@@ -153,7 +153,7 @@ public class ImportWizardController implements ActionListener {
 		if (hostPanel.getmainController().getDaxploreFile() == null) {
 			JOptionPane
 					.showMessageDialog(
-							this.hostPanel.getmainController().getMainFrame(),
+							this.hostPanel.getmainController().getMainWindow(),
 							"Create or open a daxplore project file before you import an SPSS file.",
 							"Daxplore file warning", JOptionPane.ERROR_MESSAGE);
 			return;
@@ -164,7 +164,7 @@ public class ImportWizardController implements ActionListener {
 		try {
 			charset = Charset.forName(hostPanel.getModel().getCharsetName());
 		} catch (Exception e1) {
-			JOptionPane.showMessageDialog(this.hostPanel.getmainController().getMainFrame(),
+			JOptionPane.showMessageDialog(this.hostPanel.getmainController().getMainWindow(),
 					"Unable to create charset, aborting import.",
 					"Daxplore file warning", JOptionPane.ERROR_MESSAGE);
 			return;
@@ -181,19 +181,19 @@ public class ImportWizardController implements ActionListener {
 			// NOTE: Information on successful file import is updated elsewhere.
 
 		} catch (FileNotFoundException e2) {
-			JOptionPane.showMessageDialog(this.hostPanel.getmainController().getMainFrame(),
+			JOptionPane.showMessageDialog(this.hostPanel.getmainController().getMainWindow(),
 					"Unable to find the SPSS file.", "Daxplore file warning",
 					JOptionPane.ERROR_MESSAGE);
 			e2.printStackTrace();
 			return;
 		} catch (IOException e2) {
-			JOptionPane.showMessageDialog(this.hostPanel.getmainController().getMainFrame(),
+			JOptionPane.showMessageDialog(this.hostPanel.getmainController().getMainWindow(),
 					"File import error.", "Daxplore file warning",
 					JOptionPane.ERROR_MESSAGE);
 			e2.printStackTrace();
 			return;
 		} catch (DaxploreException e2) {
-			JOptionPane.showMessageDialog(this.hostPanel.getmainController().getMainFrame(),
+			JOptionPane.showMessageDialog(this.hostPanel.getmainController().getMainWindow(),
 					"Unable to import file, aborting operation.",
 					"Daxplore file warning", JOptionPane.ERROR_MESSAGE);
 			e2.printStackTrace();

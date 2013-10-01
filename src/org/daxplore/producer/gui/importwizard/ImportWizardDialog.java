@@ -214,8 +214,8 @@ public class ImportWizardDialog extends JDialog implements PropertyChangeListene
         // finish the import if the import button is pressed.
         if (returnCode == FINISH_RETURN_CODE) {
         	importWizardController.importSpssFileAction();
-        	getmainController().getOpenFileView().getOpenController().updateSpssFileInfoText();
-        	getmainController().getOpenFileView().getOpenController().updateTextFields();
+        	getmainController().getOpenFileController().updateSpssFileInfoText();
+        	getmainController().getOpenFileController().updateTextFields();
         }
         
         importWizardDialog.dispose();
@@ -239,7 +239,7 @@ public class ImportWizardDialog extends JDialog implements PropertyChangeListene
 		setTitle("SPSS File Wizard");
 		setBounds(100, 100, 762, 622);
 		getContentPane().setLayout(new BorderLayout());
-		contentPanel.setLayout(mainController.getMainFrame().getLayout());
+		contentPanel.setLayout(mainController.getMainWindow().getLayout());
 		contentPanel.setBorder(new EmptyBorder(5, 5, 5, 5));
 		getContentPane().add(contentPanel, BorderLayout.CENTER);
 		contentPanel.setLayout(cardLayout);

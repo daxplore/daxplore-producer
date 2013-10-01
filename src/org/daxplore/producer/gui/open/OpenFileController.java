@@ -1,5 +1,6 @@
 package org.daxplore.producer.gui.open;
 
+import java.awt.Component;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
@@ -14,28 +15,41 @@ import org.daxplore.producer.daxplorelib.DaxploreException;
 import org.daxplore.producer.daxplorelib.DaxploreFile;
 import org.daxplore.producer.gui.MainController;
 import org.daxplore.producer.gui.Settings;
+import org.daxplore.producer.gui.importwizard.CharsetPanelDescriptor;
+import org.daxplore.producer.gui.importwizard.FinalImportPanelDescriptor;
+import org.daxplore.producer.gui.importwizard.ImportWizardDescriptor;
+import org.daxplore.producer.gui.importwizard.ImportWizardDialog;
+import org.daxplore.producer.gui.importwizard.OpenFilePanelDescriptor;
 
 /**
  * Daxplore file creation controller. Controls all action logic in the open panel view.
- * @author hkfs89
- *
  */
-public final class OpenController implements ActionListener {
+public final class OpenFileController implements ActionListener {
 
 	private final MainController mainController;
 	private final OpenFileView openFileView;
 
-	public OpenController(MainController mainController, OpenFileView openFileView) {
+	public OpenFileController(MainController mainController) {
 		this.mainController = mainController;
-		this.openFileView = openFileView;
+		this.openFileView = new OpenFileView();
+		openFileView.addActionListener(this);
 	}
 	
 	@Override
 	public void actionPerformed(ActionEvent e) {
-		if (e.getActionCommand().equals(OpenFileView.CREATE_BUTTON_ACTION_COMMAND))
+		switch(e.getActionCommand()) {
+		case OpenFileView.CREATE_BUTTON_ACTION_COMMAND:
             createButtonPressed();
-        else if (e.getActionCommand().equals(OpenFileView.OPEN_BUTTON_ACTION_COMMAND))
+            break;
+		case OpenFileView.OPEN_BUTTON_ACTION_COMMAND:
             openButtonPressed();
+            break;
+		case OpenFileView.IMPORT_BUTTON_ACTION_COMMAND:
+			importButtonPressed();
+			break;
+		default:
+			throw new AssertionError("Undefined action command: '" + e.getActionCommand() + "'");
+		}
 	}
 
 	/**
@@ -44,9 +58,7 @@ public final class OpenController implements ActionListener {
 	 */
 	@SuppressWarnings("serial")
 	public void createButtonPressed() {
-		
 		final JFileChooser fc = new JFileChooser(Settings.getWorkingDirectory()) {
-	        
 	        // override default operation of approveSelection() so it can handle overwriting files.
 	        @Override
 			public void approveSelection() {
@@ -74,7 +86,7 @@ public final class OpenController implements ActionListener {
 				"Daxplore Files", "daxplore");
 		fc.setFileFilter(filter);
 
-		int returnVal = fc.showSaveDialog(this.mainController.getMainFrame());
+		int returnVal = fc.showSaveDialog(this.mainController.getMainWindow());
 
 		if (returnVal == JFileChooser.APPROVE_OPTION) {
 			try {
@@ -121,7 +133,7 @@ public final class OpenController implements ActionListener {
 				"Daxplore Files", "daxplore");
 		fc.setFileFilter(filter);
 
-		int returnVal = fc.showOpenDialog(this.mainController.getMainFrame());
+		int returnVal = fc.showOpenDialog(mainController.getMainWindow());
 
 		if (returnVal == JFileChooser.APPROVE_OPTION) {
 			Settings.setWorkingDirectory(fc.getCurrentDirectory());
@@ -154,7 +166,7 @@ public final class OpenController implements ActionListener {
 				mainController.updateStuff();
 
 			} catch (DaxploreException e1) {
-				JOptionPane.showMessageDialog(this.mainController.getMainFrame(),
+				JOptionPane.showMessageDialog(mainController.getMainWindow(),
 						"You must select a valid daxplore file.",
 						"Daxplore file warning", JOptionPane.ERROR_MESSAGE);
 				e1.printStackTrace();
@@ -164,16 +176,40 @@ public final class OpenController implements ActionListener {
 		}
 	}
 	
+	public void importButtonPressed() {
+		if (mainController.getDaxploreFile() == null) {
+			JOptionPane
+					.showMessageDialog(
+							mainController.getMainWindow(),
+							"Create or open a daxplore project file before you import an SPSS file.",
+							"Daxplore file warning", JOptionPane.ERROR_MESSAGE);
+			return;
+		}
+		
+		ImportWizardDialog importWizardDialog = new ImportWizardDialog(mainController);
+		
+		ImportWizardDescriptor openFilePanelDescriptor = new OpenFilePanelDescriptor();
+        importWizardDialog.registerWizardPanel(OpenFilePanelDescriptor.IDENTIFIER, openFilePanelDescriptor);
+        
+		ImportWizardDescriptor charsetPanelDescriptor = new CharsetPanelDescriptor();
+        importWizardDialog.registerWizardPanel(CharsetPanelDescriptor.IDENTIFIER, charsetPanelDescriptor);
+        
+		ImportWizardDescriptor finalImportPanelDescriptor = new FinalImportPanelDescriptor();
+        importWizardDialog.registerWizardPanel(FinalImportPanelDescriptor.IDENTIFIER, finalImportPanelDescriptor);
+        
+        importWizardDialog.setCurrentPanel(OpenFilePanelDescriptor.IDENTIFIER);
+        
+		importWizardDialog.setVisible(true);
+	}
+	
 	/**
 	 * Updates text field for the SPSS file information in the open panel dialog.
 	 * @param mainController
 	 */
 	public void updateSpssFileInfoText() {
 		if (mainController.getSpssFile() != null) {
-			openFileView.spssFileInfoText.setText(
-					"SPSS file successfully imported!\n" +
-						mainController.getSpssFile().getName() + "\n" +
-						mainController.getSpssFile().getAbsolutePath());
+			openFileView.setSpssFileInfoText("SPSS file successfully imported!\n"
+					+ mainController.getSpssFile().getName() + "\n" + mainController.getSpssFile().getAbsolutePath());
 		}
 	}
 
@@ -182,7 +218,6 @@ public final class OpenController implements ActionListener {
 	 * @param mainController
 	 */
 	public void updateTextFields() {
-		
 		SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd");
 		
 		// set the text fields if we have a daxplore file loaded.
@@ -208,5 +243,9 @@ public final class OpenController implements ActionListener {
 			openFileView.getCreationDateField().setText(
 			formatter.format(mainController.getDaxploreFile().getAbout().getCreationDate()));
 		}
+	}
+
+	public Component getView() {
+		return openFileView;
 	}
 }
