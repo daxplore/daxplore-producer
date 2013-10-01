@@ -1,5 +1,6 @@
 package org.daxplore.producer.gui.groups;
 
+import java.awt.Component;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.sql.SQLException;
@@ -47,10 +48,10 @@ public class GroupsController implements ActionListener {
 	private PerspectivesTableModel perspectivesTableModel;
 	private QuestionTable perspectivesTable;
 	
-	public GroupsController(GroupsView groupView, MainController mainController) {
+	public GroupsController(MainController mainController) {
 		this.mainController = mainController;
-		this.groupsView = groupView;
-		this.toolbar = new GroupsToolbar(this);
+		groupsView = new GroupsView(this);
+		toolbar = new GroupsToolbar(this);
 	}
 	
 	public GroupsToolbar getToolbar() {
@@ -279,7 +280,10 @@ public class GroupsController implements ActionListener {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
-			
 		}
+	}
+
+	public Component getView() {
+		return groupsView;
 	}
 }

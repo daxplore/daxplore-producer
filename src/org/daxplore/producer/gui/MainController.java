@@ -11,7 +11,7 @@ import org.daxplore.producer.daxplorelib.DaxploreFile;
 import org.daxplore.producer.daxplorelib.metadata.MetaQuestion;
 import org.daxplore.producer.daxplorelib.metadata.textreference.TextReference;
 import org.daxplore.producer.gui.edit.EditTextView;
-import org.daxplore.producer.gui.groups.GroupsView;
+import org.daxplore.producer.gui.groups.GroupsController;
 import org.daxplore.producer.gui.navigation.NavigationView;
 import org.daxplore.producer.gui.open.OpenFileController;
 import org.daxplore.producer.gui.question.QuestionView;
@@ -31,7 +31,7 @@ public class MainController implements ActionListener {
 	private MainView mainView;
 
 	private OpenFileController openFileController;
-	private GroupsView groupsView;
+	private GroupsController groupsController;
 	private EditTextView editTextView;
 	private ButtonPanelView buttonPanelView;
 	private ToolsView toolsView;
@@ -69,7 +69,7 @@ public class MainController implements ActionListener {
 		TextWidget.mainController = this;
 		
 		openFileController = new OpenFileController(this);
-		groupsView = new GroupsView(this);
+		groupsController = new GroupsController(this);
 		editTextView = new EditTextView(this);
 		buttonPanelView = new ButtonPanelView(this);
 		toolsView = new ToolsView(this);
@@ -79,7 +79,7 @@ public class MainController implements ActionListener {
 
 		mainView = new MainView(buttonPanelView);
 		mainView.addView(openFileController.getView(), Views.OPENFILEVIEW);
-		mainView.addView(groupsView, Views.GROUPSVIEW);
+		mainView.addView(groupsController.getView(), Views.GROUPSVIEW);
 		mainView.addView(editTextView, Views.EDITTEXTVIEW);
 		mainView.addView(toolsView, Views.TOOLSVIEW);
 		mainView.addView(questionView, Views.QUESTIONVIEW);
@@ -156,7 +156,7 @@ public class MainController implements ActionListener {
 			navigationView.setToolbar(editTextView.getController().getToolbar());
 			return;
 		case GROUPSVIEW:
-			navigationView.setToolbar(groupsView.getController().getToolbar());
+			navigationView.setToolbar(groupsController.getToolbar());
 			return;
 		case OPENFILEVIEW:
 		case QUESTIONVIEW:
@@ -181,7 +181,7 @@ public class MainController implements ActionListener {
 	public void updateStuff() {
 		buttonPanelView.updateButtonPanel();
 		toolsView.loadData();
-		groupsView.getController().loadData();
+		groupsController.loadData();
 		editTextView.getController().loadData();
 		timeSeriesView.getController().loadData();
 	}
@@ -197,10 +197,6 @@ public class MainController implements ActionListener {
 
 	public OpenFileController getOpenFileController() {
 		return openFileController;
-	}
-
-	public GroupsView getGroupsView() {
-		return groupsView;
 	}
 
 	public EditTextView getEditTextView() {
