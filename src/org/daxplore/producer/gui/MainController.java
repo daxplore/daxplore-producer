@@ -22,11 +22,14 @@ import org.daxplore.producer.gui.widget.TextWidget;
 
 /**
  * Main window handler class. Initialization of application goes here.
+ * 
+ * Singleton.
  */
 public class MainController implements ActionListener {
 	// data fields for main class.
 	
-	private JFrame mainFrame;
+	private MainView mainView;
+
 	private OpenFileView openFileView;
 	private GroupsView groupsView;
 	private EditTextView editTextView;
@@ -34,7 +37,6 @@ public class MainController implements ActionListener {
 	private ToolsView toolsView;
 	private NavigationView navigationView;
 	private QuestionView questionView;
-	private MainView mainView;
 	private TimeSeriesView timeSeriesView;
 	
 	private Stack<HistoryItem> history = new Stack<>();
@@ -62,15 +64,34 @@ public class MainController implements ActionListener {
 		}
 	}
 	
-	
-	public MainController(MainView mainView) {
-		this.mainView = mainView;
+	public MainController() {
 		QuestionWidget.mainController = this;
 		TextWidget.mainController = this;
+		
+		openFileView = new OpenFileView(this);
+		groupsView = new GroupsView(this);
+		editTextView = new EditTextView(this);
+		buttonPanelView = new ButtonPanelView(this);
+		toolsView = new ToolsView(this);
+		navigationView = new NavigationView(this);
+		questionView = new QuestionView(this);
+		timeSeriesView = new TimeSeriesView(this);
+
+		mainView = new MainView(buttonPanelView);
+		mainView.addView(openFileView, Views.OPENFILEVIEW);
+		mainView.addView(groupsView, Views.GROUPSVIEW);
+		mainView.addView(editTextView, Views.EDITTEXTVIEW);
+		mainView.addView(toolsView, Views.TOOLSVIEW);
+		mainView.addView(questionView, Views.QUESTIONVIEW);
+		mainView.addView(timeSeriesView, Views.TIMESERIESVIEW);
 	}
 	
+	public void showWindow(boolean show) {
+		mainView.showWindow(show);
+	}
+
 	public void switchTo(Views view) {
-		mainView.showInMain(view);
+		mainView.switchTo(view);
 		setToolbar(view);
 		history.clear();
 		currentCommand = new HistoryItem(view, null);
@@ -82,17 +103,16 @@ public class MainController implements ActionListener {
 		currentCommand = hi;
 		doCommand(hi);
 		buttonPanelView.setActiveButton(hi.view);
-		mainView.showInMain(hi.view);
+		mainView.switchTo(hi.view);
 		setToolbar(hi.view);
 		navigationView.getController().setHistoryAvailible(true);
 	}
-
 	
 	public void historyBack(){
 		HistoryItem hi = history.pop();
 		doCommand(hi);
 		buttonPanelView.setActiveButton(hi.view);
-		mainView.showInMain(hi.view);
+		mainView.switchTo(hi.view);
 		setToolbar(hi.view);
 		currentCommand = hi;
 		if(history.empty()) {
@@ -166,82 +186,45 @@ public class MainController implements ActionListener {
 		timeSeriesView.getController().loadData();
 	}
 
-	
-	// getters and setters.
+	//TODO decouple more
 	public JFrame getMainFrame() {
-		return mainFrame;
-	}
-	
-	public void setMainFrame(JFrame panel) {
-		this.mainFrame = panel;
+		return mainView.getMainFrame();
 	}
 	
 	public ButtonPanelView getButtonPanelView() {
 		return buttonPanelView;
 	}
 
-	public void setButtonPanelView(ButtonPanelView buttonPanelView) {
-		this.buttonPanelView = buttonPanelView;
-	}
-
 	public OpenFileView getOpenFileView() {
 		return openFileView;
-	}
-
-	public void setOpenFileView(OpenFileView openFileView) {
-		this.openFileView = openFileView;
 	}
 
 	public GroupsView getGroupsView() {
 		return groupsView;
 	}
 
-	public void setGroupsView(GroupsView groupsPanelView) {
-		this.groupsView = groupsPanelView;
-	}
-
 	public EditTextView getEditTextView() {
 		return editTextView;
 	}
 
-	public void setEditTextView(EditTextView editTextView) {
-		this.editTextView = editTextView;
-	}
-	
 	public NavigationView getNavigationView() {
 		return navigationView;
 	}
 	
-	public void setNavigationView(NavigationView navigationView){
-		this.navigationView = navigationView;
-	}
-
 	public QuestionView getQuestionView() {
 		return questionView;
-	}
-
-	public void setQuestionView(QuestionView questionView) {
-		this.questionView = questionView;
 	}
 
 	public ToolsView getToolsView() {
 		return toolsView;
 	}
 
-	public void setToolsView(ToolsView toolsView) {
-		this.toolsView = toolsView;
-	}
-
 	public TimeSeriesView getTimeSeriesView() {
 		return timeSeriesView;
 	}
 	
-	public void setTimeSeriesView(TimeSeriesView timeSeriesView) {
-		this.timeSeriesView = timeSeriesView;
-	}
-
-	/* Files and stuff */
 	
+	/* Files and stuff */
 
 	public DaxploreFile getDaxploreFile() {
 		return daxploreFile;
@@ -273,6 +256,4 @@ public class MainController implements ActionListener {
 	public boolean fileIsSet() {
 		return daxploreFile != null;
 	}
-
-
 }

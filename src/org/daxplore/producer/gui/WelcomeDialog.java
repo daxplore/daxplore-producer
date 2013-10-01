@@ -17,8 +17,6 @@ import javax.swing.UIManager.LookAndFeelInfo;
 import javax.swing.UnsupportedLookAndFeelException;
 import javax.swing.filechooser.FileNameExtensionFilter;
 
-import org.daxplore.producer.daxplorelib.DaxploreFile;
-
 public class WelcomeDialog {
 
 	private JFrame welcomeFrame;
@@ -109,12 +107,14 @@ public class WelcomeDialog {
 						@Override
 						public void run() {
 							try {
-								MainView window = new MainView();
-								window.mainControllerFrame.setVisible(true);
-								window.mainController.setDaxploreFile(DaxploreFile.createFromExistingFile(file));
-								window.mainController.updateStuff();
-								welcomeFrame.setVisible(false);
-								welcomeFrame.dispose();
+								MainController mainController = new MainController();
+								mainController.showWindow(true);
+								//TODO WIP: welcome dialog is being worked on
+								//window.mainControllerFrame.setVisible(true);
+								//window.mainController.setDaxploreFile(DaxploreFile.createFromExistingFile(file));
+								//window.mainController.updateStuff();
+								//welcomeFrame.setVisible(false);
+								//welcomeFrame.dispose();
 							} catch (Exception e1) {
 								e1.printStackTrace();
 							}

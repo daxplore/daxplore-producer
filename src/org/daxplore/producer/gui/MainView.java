@@ -3,6 +3,7 @@ package org.daxplore.producer.gui;
 import java.awt.BorderLayout;
 import java.awt.CardLayout;
 import java.awt.Color;
+import java.awt.Component;
 import java.awt.EventQueue;
 import java.awt.Toolkit;
 import java.io.IOException;
@@ -16,30 +17,24 @@ import javax.swing.UnsupportedLookAndFeelException;
 import javax.swing.border.MatteBorder;
 
 import org.daxplore.producer.gui.MainController.Views;
-import org.daxplore.producer.gui.edit.EditTextView;
-import org.daxplore.producer.gui.groups.GroupsView;
-import org.daxplore.producer.gui.navigation.NavigationView;
-import org.daxplore.producer.gui.open.OpenFileView;
-import org.daxplore.producer.gui.question.QuestionView;
-import org.daxplore.producer.gui.timeseries.TimeSeriesView;
-import org.daxplore.producer.gui.tools.ToolsView;
 
 public class MainView {
 
-	public JFrame mainControllerFrame;
-	final JPanel mainPanel = new JPanel();
+	private JFrame mainControllerFrame;
+	private final JPanel mainPanel = new JPanel();
 	private JPanel panel;
 	
-	MainController mainController;
 	private CardLayout mainLayout;
 	
+	//TODO figure out if we can move the main method to somewhere else?
 	/**
 	 * Main execution loop, includes the thread handler, required for swing
-	 * applications. Do not move the main() method from this file as it will
+	 * applications.
+	 * 
+	 * Do not move the main() method from this file as it will
 	 * break windowbuilder parsing.
 	 */
 	public static void main(String[] args) {
-		
 		try {
 			DaxploreLogger.setup();
 		} catch (IOException e2) {
@@ -79,36 +74,22 @@ public class MainView {
 		EventQueue.invokeLater(new Runnable() {
 			@Override
 			public void run() {
-				try {
-					MainView window = new MainView();
-					window.mainControllerFrame.setVisible(true);
-				} catch (Exception e) {
-					e.printStackTrace();
-				}
+				MainController mainController = new MainController();
+				mainController.showWindow(true);
 			}
 		});
 	}
 	
-	/**
-	 * Create the application.
-	 * @return 
-	 */
-	public MainView() {
-		mainController = new MainController(this);
-		
+	MainView(ButtonPanelView buttonPanelView) {
 		mainControllerFrame = new JFrame();
-		mainController.setMainFrame(mainControllerFrame);
 		mainControllerFrame.setIconImage(Toolkit.getDefaultToolkit().getImage(MainController.class.getResource("/org/daxplore/producer/gui/resources/Colorful_Chart_Icon_vol2.png")));
 		mainControllerFrame.setTitle("Daxplore Producer Developer Version");
 		mainControllerFrame.setBounds(100, 100, 900, 787);
 		mainControllerFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		mainControllerFrame.getContentPane().setLayout(new BorderLayout(0, 0));
 		
-
-		
 		// panel views. TODO: Remake the controller interface.
-		mainController.setButtonPanelView(new ButtonPanelView(mainController));
-		mainControllerFrame.getContentPane().add(mainController.getButtonPanelView(), BorderLayout.WEST);
+		mainControllerFrame.getContentPane().add(buttonPanelView, BorderLayout.WEST);
 		
 		panel = new JPanel();
 		mainControllerFrame.getContentPane().add(panel, BorderLayout.CENTER);
@@ -119,32 +100,24 @@ public class MainView {
 		mainPanel.setBorder(new MatteBorder(0, 1, 0, 0, Color.GRAY));
 		mainLayout = new CardLayout(0,0);
 		mainPanel.setLayout(mainLayout);
-		
-		mainController.setOpenFileView(new OpenFileView(mainController));
-		mainPanel.add(mainController.getOpenFileView(), Views.OPENFILEVIEW.toString());
-		
-		mainController.setGroupsView(new GroupsView(mainController));
-		mainPanel.add(mainController.getGroupsView(), Views.GROUPSVIEW.toString());
-		
-		mainController.setEditTextView(new EditTextView(mainController));
-		mainPanel.add(mainController.getEditTextView(), Views.EDITTEXTVIEW.toString());
-		
-		mainController.setToolsView(new ToolsView(mainController));
-		mainPanel.add(mainController.getToolsView(), Views.TOOLSVIEW.toString());
-		
-		mainController.setQuestionView(new QuestionView(mainController));
-		mainPanel.add(mainController.getQuestionView(), Views.QUESTIONVIEW.toString());
 
-		mainController.setTimeSeriesView(new TimeSeriesView(mainController));
-		mainPanel.add(mainController.getTimeSeriesView(), Views.TIMESERIESVIEW.toString());
-		
 		mainPanel.setRequestFocusEnabled(true);
-		
-		mainController.setNavigationView(new NavigationView(mainController));
-		panel.add(mainController.getNavigationView(), BorderLayout.SOUTH);
+		mainControllerFrame.setVisible(true);
 	}
 	
-	public void showInMain(Views view) {
+	void showWindow(boolean show) {
+		mainControllerFrame.setVisible(show);
+	}
+	
+	void addView(Component component, Views view) {
+		mainPanel.add(component, view.toString());
+	}
+	
+	void switchTo(Views view) {
 	    mainLayout.show(mainPanel, view.toString());
+	}
+	
+	JFrame getMainFrame() {
+		return mainControllerFrame;
 	}
 }
