@@ -6,22 +6,20 @@ package org.daxplore.producer.gui.tools;
 import javax.swing.table.DefaultTableModel;
 
 import org.daxplore.producer.daxplorelib.About;
-import org.daxplore.producer.gui.MainController;
 import org.daxplore.producer.gui.Settings;
+import org.daxplore.producer.gui.event.LocaleUpdateEvent;
 
-/**
- * @author ladu5359
- *
- */
+import com.google.common.eventbus.EventBus;
+
 @SuppressWarnings("serial")
 public class LocalesTableModel extends DefaultTableModel {
 
-	About about;
-	MainController mainController;
+	private EventBus eventBus;
+	private About about;
 	
-	public LocalesTableModel(About about, MainController mainController) {
+	public LocalesTableModel(EventBus eventBus, About about) {
+		this.eventBus = eventBus;
 		this.about = about;
-		this.mainController = mainController;
 	}
 	
 	@Override
@@ -84,7 +82,7 @@ public class LocalesTableModel extends DefaultTableModel {
 			} else {
 				about.removeLocale(Settings.availableLocales().get(row));
 			}
-			mainController.updateStuff(); //TODO should use event system
+			eventBus.post(new LocaleUpdateEvent());
 		}
 	}
 }

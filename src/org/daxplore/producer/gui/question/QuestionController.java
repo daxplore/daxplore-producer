@@ -16,32 +16,43 @@ import javax.swing.event.TableModelEvent;
 import javax.swing.event.TableModelListener;
 
 import org.daxplore.producer.daxplorelib.DaxploreException;
+import org.daxplore.producer.daxplorelib.DaxploreFile;
 import org.daxplore.producer.daxplorelib.metadata.MetaQuestion;
 import org.daxplore.producer.daxplorelib.metadata.MetaScale;
 import org.daxplore.producer.daxplorelib.metadata.MetaScale.Option;
 import org.daxplore.producer.daxplorelib.metadata.textreference.TextReference;
-import org.daxplore.producer.gui.MainController;
+import org.daxplore.producer.gui.event.DaxploreFileUpdateEvent;
 import org.daxplore.producer.gui.widget.ColumnTableModel;
 import org.daxplore.producer.tools.NumberlineCoverage;
 import org.daxplore.producer.tools.Pair;
+
+import com.google.common.eventbus.EventBus;
+import com.google.common.eventbus.Subscribe;
 
 public class QuestionController implements TableModelListener, ActionListener  {
 	
 	enum QuestionCommand {
 		ADD, REMOVE, UP, DOWN, INVERT
 	}
+
+	private DaxploreFile daxploreFile;
 	
 	private QuestionView questionView;
-	private MainController mainController;
 	private LinkedList<Pair<Double, Integer>> values;
 	private MetaQuestion mq;
 	private ColumnTableModel afterTableModel;
 	private ScaleTable scaleTable;
 	private ScaleTableModel scaleTableModel;
 	
-	public QuestionController(MainController mainController) {
-		this.mainController = mainController;
+	public QuestionController(EventBus eventBus) {
+		eventBus.register(this);
 		questionView = new QuestionView(this);
+	}
+	
+	@Subscribe
+	public void daxploreFileUpdate(DaxploreFileUpdateEvent e) {
+		this.daxploreFile = e.getDaxploreFile();
+		updateCalculatedValues();
 	}
 
 	//TODO handle null scales properly
@@ -54,7 +65,7 @@ public class QuestionController implements TableModelListener, ActionListener  {
 		questionView.getScaleScrollPane().setViewportView(scaleTable);
 		
 		try {
-			values = mainController.getDaxploreFile().getRawData().getColumnValueCount(metaQuestion.getId());
+			values = daxploreFile.getRawData().getColumnValueCount(metaQuestion.getId());
 			questionView.getBeforeScrollPane().setViewportView(new JTable(new ColumnTableModel(values)));
 		} catch (SQLException e) {
 			// TODO Auto-generated catch block
@@ -67,9 +78,9 @@ public class QuestionController implements TableModelListener, ActionListener  {
 		
 		try {
 			TimePointTableModel timePointTableModel = new TimePointTableModel(
-					mainController.getDaxploreFile().getMetaTimepointShortManager(),
-					mainController.getDaxploreFile().getRawData(),
-					mainController.getDaxploreFile().getAbout(),
+					daxploreFile.getMetaTimepointShortManager(),
+					daxploreFile.getRawData(),
+					daxploreFile.getAbout(),
 					metaQuestion);
 			
 			TimePointTable timePointTable = new TimePointTable(timePointTableModel);
@@ -92,7 +103,7 @@ public class QuestionController implements TableModelListener, ActionListener  {
 	}
 	
 	LinkedList<Pair<Double, Integer>> calculateAfter() {
-		if(mq.getScale()==null) {
+		if(mq==null || mq.getScale()==null) {
 			return new LinkedList<>();
 		}
 		TreeMap<Double, Integer> valueMap = new TreeMap<>();
@@ -143,7 +154,7 @@ public class QuestionController implements TableModelListener, ActionListener  {
 			//TODO add even if there are no unused o.getTransformation().contains(p.getKey())
 			try {
 				if(mq.getScale()==null){
-					mq.setScale(mainController.getDaxploreFile().getMetaScaleManager().create(new LinkedList<Option>(), new NumberlineCoverage()));
+					mq.setScale(daxploreFile.getMetaScaleManager().create(new LinkedList<Option>(), new NumberlineCoverage()));
 					scaleTableModel = new ScaleTableModel(mq.getScale());
 					scaleTable = new ScaleTable(scaleTableModel);
 					questionView.getScaleScrollPane().setViewportView(scaleTable);
@@ -229,7 +240,7 @@ public class QuestionController implements TableModelListener, ActionListener  {
 			i = i<j ? j : i;
 		}
 		TextReference textRef;
-		textRef = mainController.getDaxploreFile().getTextReferenceManager().get(mq.getId() + "_option_" + (i+1));
+		textRef = daxploreFile.getTextReferenceManager().get(mq.getId() + "_option_" + (i+1));
 		
 		NumberlineCoverage transformation = new NumberlineCoverage(value);
 		boolean setNew = true;

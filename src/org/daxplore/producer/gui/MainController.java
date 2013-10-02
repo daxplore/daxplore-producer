@@ -12,6 +12,7 @@ import org.daxplore.producer.daxplorelib.metadata.MetaQuestion;
 import org.daxplore.producer.daxplorelib.metadata.textreference.TextReference;
 import org.daxplore.producer.gui.edit.EditTextController;
 import org.daxplore.producer.gui.event.DaxploreFileUpdateEvent;
+import org.daxplore.producer.gui.event.HistoryGoBackEvent;
 import org.daxplore.producer.gui.groups.GroupsController;
 import org.daxplore.producer.gui.navigation.NavigationController;
 import org.daxplore.producer.gui.open.OpenFileController;
@@ -80,13 +81,13 @@ public class MainController implements ActionListener {
 		eventBus.register(this);
 
 		//TODO remove *this* as an argument, only needed for old import wizard
-		openFileController = new OpenFileController(this, mainWindow, eventBus);
-		groupsController = new GroupsController(mainWindow, eventBus);
-		editTextController = new EditTextController(this);
-		toolsController = new ToolsController(this);
-		navigationController = new NavigationController(this);
-		questionController = new QuestionController(this);
-		timeSeriesController = new TimeSeriesController(this);
+		openFileController = new OpenFileController(eventBus, mainWindow, this);
+		groupsController = new GroupsController(eventBus, mainWindow);
+		editTextController = new EditTextController(eventBus);
+		toolsController = new ToolsController(eventBus);
+		navigationController = new NavigationController(eventBus);
+		questionController = new QuestionController(eventBus);
+		timeSeriesController = new TimeSeriesController(eventBus);
 
 		buttonPanelView = new ButtonPanelView(this);
 
@@ -103,6 +104,25 @@ public class MainController implements ActionListener {
 		mainView.setNavigationView(navigationController.getView());
 	}
 	
+	@Subscribe
+	public void daxploreFileUpdate(DaxploreFileUpdateEvent e) {
+		this.daxploreFile = e.getDaxploreFile();
+		buttonPanelView.setActive(daxploreFile != null);
+	}
+	
+	@Subscribe
+	public void historyGoBack(HistoryGoBackEvent e) {
+		HistoryItem hi = history.pop();
+		doCommand(hi);
+		buttonPanelView.setActiveButton(hi.view);
+		mainView.switchTo(hi.view);
+		setToolbar(hi.view);
+		currentCommand = hi;
+		if(history.empty()) {
+			navigationController.setHistoryAvailible(false);
+		}
+	}
+
 	public void switchTo(Views view) {
 		mainView.switchTo(view);
 		setToolbar(view);
@@ -119,18 +139,6 @@ public class MainController implements ActionListener {
 		mainView.switchTo(hi.view);
 		setToolbar(hi.view);
 		navigationController.setHistoryAvailible(true);
-	}
-	
-	public void historyBack(){
-		HistoryItem hi = history.pop();
-		doCommand(hi);
-		buttonPanelView.setActiveButton(hi.view);
-		mainView.switchTo(hi.view);
-		setToolbar(hi.view);
-		currentCommand = hi;
-		if(history.empty()) {
-			navigationController.setHistoryAvailible(false);
-		}
 	}
 	
 	public boolean hasHistory() {
@@ -190,13 +198,6 @@ public class MainController implements ActionListener {
 			//place for other types of buttons
 		}
 	}
-	
-	//TODO let them update themselves via events
-	public void updateStuff() {
-		toolsController.loadData();
-		editTextController.loadData();
-		timeSeriesController.loadData();
-	}
 
 	//TODO decouple more
 	public JFrame getMainWindow() {
@@ -216,13 +217,6 @@ public class MainController implements ActionListener {
 
 	public DaxploreFile getDaxploreFile() {
 		return daxploreFile;
-	}
-	
-	@Subscribe
-	public void daxploreFileUpdate(DaxploreFileUpdateEvent e) {
-		this.daxploreFile = e.getDaxploreFile();
-		buttonPanelView.setActive(daxploreFile != null);
-		updateStuff(); //TODO let them update themselves via event
 	}
 
 	// TODO replace with daxploreFileUpdate

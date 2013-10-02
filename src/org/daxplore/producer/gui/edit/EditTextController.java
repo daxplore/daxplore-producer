@@ -22,19 +22,24 @@ import javax.swing.event.DocumentListener;
 import javax.swing.table.TableRowSorter;
 
 import org.daxplore.producer.daxplorelib.DaxploreException;
+import org.daxplore.producer.daxplorelib.DaxploreFile;
 import org.daxplore.producer.daxplorelib.ImportExportManager.L10nFormat;
 import org.daxplore.producer.daxplorelib.metadata.textreference.TextReference;
 import org.daxplore.producer.daxplorelib.metadata.textreference.TextReferenceManager;
 import org.daxplore.producer.daxplorelib.metadata.textreference.TextTree;
-import org.daxplore.producer.gui.MainController;
 import org.daxplore.producer.gui.Settings;
+import org.daxplore.producer.gui.event.DaxploreFileUpdateEvent;
+import org.daxplore.producer.gui.event.LocaleUpdateEvent;
 
 import com.google.common.base.Charsets;
+import com.google.common.eventbus.EventBus;
+import com.google.common.eventbus.Subscribe;
 
 public class EditTextController implements ActionListener, DocumentListener {
 
+	private DaxploreFile daxploreFile;
+	
 	private Locale[] currentLocales = new Locale[2];
-	private MainController mainController;
 	private TableRowSorter<TextsTableModel> sorter;
 	private EditTextView editTextView;
 	private TextTree textsList;
@@ -46,10 +51,22 @@ public class EditTextController implements ActionListener, DocumentListener {
 		IMPORT, EXPORT, UPDATE_COLUMN_1, UPDATE_COLUMN_2
 	}
 	
-	public EditTextController(MainController mainController) {
-		this.mainController = mainController;
+	public EditTextController(EventBus eventBus) {
+		eventBus.register(this);
+		
 		editTextView = new EditTextView(this);
 		editToolbar = new EditToolbarView(this);
+	}
+	
+	@Subscribe
+	public void daxploreFileUpdate(DaxploreFileUpdateEvent e) {
+		this.daxploreFile = e.getDaxploreFile();
+		loadData();
+	}
+	
+	@Subscribe
+	public void localeUpdate(LocaleUpdateEvent e) {
+		loadData();
 	}
 	
 	/**
@@ -72,10 +89,10 @@ public class EditTextController implements ActionListener, DocumentListener {
 	
 	public void loadData() {
 		System.out.println("EditPanelView.updateStuff()");
-		if(mainController.fileIsSet()) {
+		if(daxploreFile != null) {
 			try {
-				TextReferenceManager trm = mainController.getDaxploreFile().getTextReferenceManager();
-				List<Locale> localeList = mainController.getDaxploreFile().getAbout().getLocales();
+				TextReferenceManager trm = daxploreFile.getTextReferenceManager();
+				List<Locale> localeList = daxploreFile.getAbout().getLocales();
 				if(localeList.size()==0) {
 					return;
 				}
@@ -147,9 +164,9 @@ public class EditTextController implements ActionListener, DocumentListener {
 					return;
 				}
 				
-				mainController.getDaxploreFile().getAbout().addLocale(locale);
+				daxploreFile.getAbout().addLocale(locale);
 				try {
-					mainController.getDaxploreFile().importL10n(
+					daxploreFile.importL10n(
 							Files.newBufferedReader(file.toPath(), Charsets.UTF_8), format, locale);
 				} catch (FileNotFoundException e1) {
 					throw new AssertionError("File exists but is not found");
@@ -162,7 +179,7 @@ public class EditTextController implements ActionListener, DocumentListener {
 			break;
 		case EXPORT:
 			try {
-				localeList = mainController.getDaxploreFile().getTextReferenceManager().getAllLocales();
+				localeList = daxploreFile.getTextReferenceManager().getAllLocales();
 				file = editToolbar.showExportDialog(localeList);
 				if(file == null) {
 					System.out.println("File is null");
@@ -184,11 +201,11 @@ public class EditTextController implements ActionListener, DocumentListener {
 				
 				if(file.exists() && file.canWrite()) {
 					try (BufferedWriter writer = Files.newBufferedWriter(file.toPath(), Charsets.UTF_8, StandardOpenOption.WRITE, StandardOpenOption.TRUNCATE_EXISTING)) {
-						mainController.getDaxploreFile().exportL10n(writer, format, locale);
+						daxploreFile.exportL10n(writer, format, locale);
 					}
 				} else if (!file.exists()) {
 					try (BufferedWriter writer = Files.newBufferedWriter(file.toPath(), Charsets.UTF_8, StandardOpenOption.CREATE_NEW, StandardOpenOption.WRITE)) {
-						mainController.getDaxploreFile().exportL10n(writer, format, locale);
+						daxploreFile.exportL10n(writer, format, locale);
 					}
 				} else {
 					System.out.println("File is write protected");

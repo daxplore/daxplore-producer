@@ -8,9 +8,12 @@ import java.sql.SQLException;
 import java.util.Locale;
 
 import org.daxplore.producer.daxplorelib.DaxploreException;
-import org.daxplore.producer.gui.MainController;
+import org.daxplore.producer.daxplorelib.DaxploreFile;
+import org.daxplore.producer.gui.event.DaxploreFileUpdateEvent;
 
 import com.google.common.base.Strings;
+import com.google.common.eventbus.EventBus;
+import com.google.common.eventbus.Subscribe;
 
 public class ToolsController implements ActionListener {
 
@@ -18,12 +21,22 @@ public class ToolsController implements ActionListener {
 		IMPORT, REPLACE_TIMEPOINTS, GENERATE_DATA
 	}
 	
-	private MainController mainController;
+	private EventBus eventBus;
+	
+	private DaxploreFile daxploreFile;
 	private ToolsView toolsView;
 	
-	public ToolsController(MainController mainController) {
-		this.mainController = mainController;
+	public ToolsController(EventBus eventBus) {
+		this.eventBus = eventBus;
+		eventBus.register(this);
+		
 		toolsView = new ToolsView(this);
+	}
+	
+	@Subscribe
+	public void daxploreFileUpdate(DaxploreFileUpdateEvent e) {
+		this.daxploreFile = e.getDaxploreFile();
+		loadData();
 	}
 	
 	@Override
@@ -35,7 +48,7 @@ public class ToolsController implements ActionListener {
 				Locale locale = new Locale(localeText);
 				if(!locale.toLanguageTag().equals("und")) {
 					try {
-						mainController.getDaxploreFile().importFromRaw(locale);
+						daxploreFile.importFromRaw(locale);
 					} catch (DaxploreException e1) {
 						// TODO Auto-generated catch block
 						e1.printStackTrace();
@@ -45,7 +58,7 @@ public class ToolsController implements ActionListener {
 			break;
 		case REPLACE_TIMEPOINTS:
 			try {
-				mainController.getDaxploreFile().replaceAllTimepointsInQuestions();
+				daxploreFile.replaceAllTimepointsInQuestions();
 			} catch (DaxploreException|SQLException e1) {
 				// TODO Auto-generated catch block
 				e1.printStackTrace();
@@ -58,7 +71,7 @@ public class ToolsController implements ActionListener {
 			}
 			
 			try {
-				mainController.getDaxploreFile().writeUploadFile(uploadFile);
+				daxploreFile.writeUploadFile(uploadFile);
 			} catch (DaxploreException e1) {
 				//TODO communicate error to user
 				e1.printStackTrace();
@@ -70,8 +83,8 @@ public class ToolsController implements ActionListener {
 	}
 	
 	public void loadData() {
-		if(mainController.fileIsSet()) {
-			LocalesTableModel localeTableModel = new LocalesTableModel(mainController.getDaxploreFile().getAbout(), mainController);
+		if(daxploreFile != null) {
+			LocalesTableModel localeTableModel = new LocalesTableModel(eventBus, daxploreFile.getAbout());
 			toolsView.setLocaleTable(localeTableModel);
 		}
 	}

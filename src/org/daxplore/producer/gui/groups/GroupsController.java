@@ -32,7 +32,6 @@ public class GroupsController implements ActionListener {
 	}
 	
 	private Component parentComponent;
-	private EventBus eventBus;
 	
 	private DaxploreFile daxploreFile;
 	
@@ -46,9 +45,8 @@ public class GroupsController implements ActionListener {
 	private PerspectivesTableModel perspectivesTableModel;
 	private QuestionTable perspectivesTable;
 	
-	public GroupsController(Component parentComponent, EventBus eventBus) {
+	public GroupsController(EventBus eventBus, Component parentComponent) {
 		this.parentComponent = parentComponent;
-		this.eventBus = eventBus;
 		eventBus.register(this);
 		
 		groupsView = new GroupsView(this);
@@ -268,7 +266,7 @@ public class GroupsController implements ActionListener {
 				}
 				if(perspectives == null) {
 					System.out.println("Create perspectives group");
-					TextReference textref = daxploreFile.getTextReferenceManager().get("PERSPECTIVESGROUP");
+					TextReference textref = daxploreFile.getTextReferenceManager().get(GroupsCommand.PERSPECTIVE_ADD_ITEM.toString());
 					perspectives = daxploreFile.getMetaGroupManager().create(textref, 999, GroupType.PERSPECTIVE, new LinkedList<MetaQuestion>());
 				}
 				

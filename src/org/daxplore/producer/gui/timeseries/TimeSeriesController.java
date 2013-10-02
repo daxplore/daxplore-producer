@@ -12,15 +12,19 @@ import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 
 import org.daxplore.producer.daxplorelib.DaxploreException;
+import org.daxplore.producer.daxplorelib.DaxploreFile;
 import org.daxplore.producer.daxplorelib.metadata.MetaTimepointShort;
 import org.daxplore.producer.daxplorelib.metadata.MetaTimepointShort.MetaTimepointShortManager;
 import org.daxplore.producer.daxplorelib.metadata.textreference.TextReference;
 import org.daxplore.producer.daxplorelib.metadata.textreference.TextReferenceManager;
 import org.daxplore.producer.daxplorelib.raw.RawData;
 import org.daxplore.producer.daxplorelib.raw.RawMeta;
-import org.daxplore.producer.gui.MainController;
+import org.daxplore.producer.gui.event.DaxploreFileUpdateEvent;
 import org.daxplore.producer.gui.widget.ColumnTableModel;
 import org.daxplore.producer.tools.Pair;
+
+import com.google.common.eventbus.EventBus;
+import com.google.common.eventbus.Subscribe;
 
 public class TimeSeriesController implements ActionListener, DocumentListener {
 	
@@ -28,14 +32,21 @@ public class TimeSeriesController implements ActionListener, DocumentListener {
 		ADD, UP, DOWN, REMOVE, SET_COLUMN
 	}
 	
-	private MainController mainController;
+	private DaxploreFile daxploreFile;
+	
 	private TimeSeriesTableModel timeSeriesTableModel;
 	private TimeSeriesTable timeSeriesTable;
 	private TimeSeriesView timeSeriesView;
 	
-	public TimeSeriesController(MainController mainController) {
-		this.mainController = mainController;
+	public TimeSeriesController(EventBus eventBus) {
+		eventBus.register(this);
 		timeSeriesView = new TimeSeriesView(this);
+	}
+	
+	@Subscribe
+	public void daxploreFileUpdate(DaxploreFileUpdateEvent e) {
+		this.daxploreFile = e.getDaxploreFile();
+		loadData();
 	}
 	
 	@Override
@@ -44,10 +55,10 @@ public class TimeSeriesController implements ActionListener, DocumentListener {
 		switch(TimeSeriesCommand.valueOf(event.getActionCommand())) {
 		case ADD:
 			try {
-				MetaTimepointShortManager timeManager = mainController.getDaxploreFile().getMetaTimepointShortManager();
+				MetaTimepointShortManager timeManager = daxploreFile.getMetaTimepointShortManager();
 				List<MetaTimepointShort> timeList = timeManager.getAll();
 				
-				TextReferenceManager textManager = mainController.getDaxploreFile().getTextReferenceManager();
+				TextReferenceManager textManager = daxploreFile.getTextReferenceManager();
 				TextReference textref = textManager.get("tp"+(timeManager.getHighestId()+1));
 				
 				int timeindex = 0;
@@ -56,8 +67,8 @@ public class TimeSeriesController implements ActionListener, DocumentListener {
 				}
 				
 				Double value = 0.0;
-				RawData rawData = mainController.getDaxploreFile().getRawData();
-				String column = mainController.getDaxploreFile().getAbout().getTimeSeriesShortColumn();
+				RawData rawData = daxploreFile.getRawData();
+				String column = daxploreFile.getAbout().getTimeSeriesShortColumn();
 				List<Pair<Double, Integer>> columnValueCounts= rawData.getColumnValueCount(column);
 				L: for(Pair<Double, Integer> valuePair: columnValueCounts) {
 					if(valuePair.getKey() == null) {
@@ -113,9 +124,9 @@ public class TimeSeriesController implements ActionListener, DocumentListener {
 		case SET_COLUMN:
 			String column = timeSeriesView.getTimeSeriesColumn();
 			try {
-				boolean hasColumn = mainController.getDaxploreFile().getRawMeta().hasColumn(column);
+				boolean hasColumn = daxploreFile.getRawMeta().hasColumn(column);
 				if(hasColumn) {
-					mainController.getDaxploreFile().getAbout().setTimeSeriesShortColumn(column);
+					daxploreFile.getAbout().setTimeSeriesShortColumn(column);
 				}
 			} catch (SQLException e) {
 				// TODO Auto-generated catch block
@@ -152,18 +163,18 @@ public class TimeSeriesController implements ActionListener, DocumentListener {
 	}
 	
 	public void loadData() {
-		if(mainController.fileIsSet()) {
-			timeSeriesTableModel = new TimeSeriesTableModel(mainController.getDaxploreFile().getMetaTimepointShortManager());
+		if(daxploreFile != null) {
+			timeSeriesTableModel = new TimeSeriesTableModel(daxploreFile.getMetaTimepointShortManager());
 			timeSeriesTable = new TimeSeriesTable(timeSeriesTableModel);
 			timeSeriesView.getTimeSeriesScrollPane().setViewportView(timeSeriesTable);
-			timeSeriesView.setTimeSeriesColumn(mainController.getDaxploreFile().getAbout().getTimeSeriesShortColumn());
+			timeSeriesView.setTimeSeriesColumn(daxploreFile.getAbout().getTimeSeriesShortColumn());
 		}
 	}
 
 	public void filter(String text) { //TODO rename method
 		try {
-			RawData rawData = mainController.getDaxploreFile().getRawData();
-			RawMeta rawMeta = mainController.getDaxploreFile().getRawMeta();
+			RawData rawData = daxploreFile.getRawData();
+			RawMeta rawMeta = daxploreFile.getRawMeta();
 			if(rawMeta.hasColumn(text)) {
 				LinkedList<Pair<Double, Integer>> columnValueList = rawData.getColumnValueCount(text);
 				ColumnTableModel model = new ColumnTableModel(columnValueList);

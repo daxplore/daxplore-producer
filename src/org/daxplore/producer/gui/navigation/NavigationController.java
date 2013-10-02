@@ -5,31 +5,46 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
 import org.daxplore.producer.daxplorelib.DaxploreException;
-import org.daxplore.producer.gui.MainController;
+import org.daxplore.producer.daxplorelib.DaxploreFile;
+import org.daxplore.producer.gui.event.DaxploreFileUpdateEvent;
+import org.daxplore.producer.gui.event.HistoryGoBackEvent;
+
+import com.google.common.eventbus.EventBus;
+import com.google.common.eventbus.Subscribe;
 
 public class NavigationController implements ActionListener {
 
+	private EventBus eventBus;
 	private NavigationView navigationView;
-	private MainController mainController;
+	
+	private DaxploreFile daxploreFile;
 	
 	enum NavigationCommand {
 		BACK, SAVE
 	}
 	
-	public NavigationController(MainController mainController) {
-		this.mainController = mainController;
+	public NavigationController(EventBus eventBus) {
+		this.eventBus = eventBus;
+		eventBus.register(this);
 		navigationView = new NavigationView(this);
+	}
+	
+	@Subscribe
+	public void daxploreFileUpdate(DaxploreFileUpdateEvent e) {
+		this.daxploreFile = e.getDaxploreFile();
 	}
 
 	@Override
 	public void actionPerformed(ActionEvent e) {
 		switch(NavigationCommand.valueOf(e.getActionCommand())) {
 		case BACK:
-			mainController.historyBack();
+			eventBus.post(new HistoryGoBackEvent());
 			break;
 		case SAVE:
 			try {
-				mainController.getDaxploreFile().saveAll();
+				if(daxploreFile != null) {
+					daxploreFile.saveAll();
+				}
 			} catch (DaxploreException e1) {
 				// TODO Auto-generated catch block
 				e1.printStackTrace();

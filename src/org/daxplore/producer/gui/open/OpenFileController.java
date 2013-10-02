@@ -8,7 +8,6 @@ import java.io.IOException;
 import java.text.SimpleDateFormat;
 
 import javax.swing.JFileChooser;
-import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 import javax.swing.filechooser.FileNameExtensionFilter;
 
@@ -39,8 +38,8 @@ public final class OpenFileController implements ActionListener {
 	
 	private final OpenFileView openFileView;
 
-	public OpenFileController(MainController mainController,
-			Component parentComponent, EventBus eventBus) {
+	public OpenFileController(EventBus eventBus, Component parentComponent,
+			MainController mainController) {
 		this.mainController = mainController;
 		this.parentComponent = parentComponent;
 		this.eventBus = eventBus;
@@ -71,7 +70,6 @@ public final class OpenFileController implements ActionListener {
 	@Subscribe
 	public void daxploreFileUpdated(DaxploreFileUpdateEvent e) {
 		daxploreFile = e.getDaxploreFile();
-		// update text fields so that file information is properly shown
 		updateTextFields();
 	}
 
