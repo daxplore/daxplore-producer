@@ -4,6 +4,7 @@ import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.Dimension;
+import java.awt.event.ActionListener;
 
 import javax.swing.BoxLayout;
 import javax.swing.JButton;
@@ -18,15 +19,12 @@ import javax.swing.border.TitledBorder;
 import org.daxplore.producer.daxplorelib.metadata.MetaQuestion;
 import org.daxplore.producer.daxplorelib.metadata.MetaScale;
 import org.daxplore.producer.daxplorelib.metadata.MetaScale.Option;
-import org.daxplore.producer.gui.MainController;
-import org.daxplore.producer.gui.question.QuestionController.Command;
+import org.daxplore.producer.gui.question.QuestionController.QuestionCommand;
 import org.daxplore.producer.gui.widget.TextWidget;
 
 @SuppressWarnings("serial")
 public class QuestionView extends JPanel {
 	
-	private QuestionController controller;
-	private MainController mainController;
 	private JLabel questionID;
 	private JPanel fullTextRefHolder;
 	private JPanel shortTextRefHolder;
@@ -48,17 +46,13 @@ public class QuestionView extends JPanel {
 	private JPanel panel_5;
 	
 	class OptionListRenderer implements ListCellRenderer<MetaScale.Option> {
-
 		@Override
 		public Component getListCellRendererComponent(JList<? extends Option> list, Option value, int index, boolean isSelected, boolean cellHasFocus) {
 			return null;
 		}
-		
 	}
 	
-	public QuestionView(MainController mainController) {
-		this.mainController = mainController;
-		this.controller = new QuestionController(this.mainController, this);
+	public QuestionView(ActionListener actionListener) {
 		setLayout(new BorderLayout(0, 0));
 		
 		JPanel panel = new JPanel();
@@ -107,28 +101,28 @@ public class QuestionView extends JPanel {
 		panel_2.add(panel_3, BorderLayout.SOUTH);
 		
 		addButton = new JButton("Add");
-		addButton.setActionCommand(Command.ADD);
-		addButton.addActionListener(controller);
+		addButton.setActionCommand(QuestionCommand.ADD.toString());
+		addButton.addActionListener(actionListener);
 		panel_3.add(addButton);
 		
 		upButton = new JButton("Up");
-		upButton.setActionCommand(Command.UP);
-		upButton.addActionListener(controller);
+		upButton.setActionCommand(QuestionCommand.UP.toString());
+		upButton.addActionListener(actionListener);
 		panel_3.add(upButton);
 		
 		downButton = new JButton("Down");
-		downButton.setActionCommand(Command.DOWN);
-		downButton.addActionListener(controller);
+		downButton.setActionCommand(QuestionCommand.DOWN.toString());
+		downButton.addActionListener(actionListener);
 		panel_3.add(downButton);
 		
 		removeButton = new JButton("Remove");
-		removeButton.setActionCommand(Command.REMOVE);
-		removeButton.addActionListener(controller);
+		removeButton.setActionCommand(QuestionCommand.REMOVE.toString());
+		removeButton.addActionListener(actionListener);
 		panel_3.add(removeButton);
 		
 		invertButton = new JButton("Invert");
-		invertButton.setActionCommand(Command.INVERT);
-		invertButton.addActionListener(controller);
+		invertButton.setActionCommand(QuestionCommand.INVERT.toString());
+		invertButton.addActionListener(actionListener);
 		panel_3.add(invertButton);
 		
 		afterScrollPane = new JScrollPane();
@@ -136,16 +130,12 @@ public class QuestionView extends JPanel {
 		panel_1.add(afterScrollPane);
 	}
 
-	public QuestionController getController() {
-		return controller;
-	}
-	
 	void setMetaQuestion(MetaQuestion mq) {
 		questionID.setText(mq.getId());
 		fullText.setContent(mq.getFullTextRef());
 		shortText.setContent(mq.getShortTextRef());
-	    this.validate();
-	    this.repaint();
+	    validate();
+	    repaint();
 	}
 	
 	JScrollPane getScaleScrollPane() {

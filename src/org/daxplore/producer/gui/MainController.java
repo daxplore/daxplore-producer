@@ -14,7 +14,7 @@ import org.daxplore.producer.gui.edit.EditTextController;
 import org.daxplore.producer.gui.groups.GroupsController;
 import org.daxplore.producer.gui.navigation.NavigationView;
 import org.daxplore.producer.gui.open.OpenFileController;
-import org.daxplore.producer.gui.question.QuestionView;
+import org.daxplore.producer.gui.question.QuestionController;
 import org.daxplore.producer.gui.timeseries.TimeSeriesView;
 import org.daxplore.producer.gui.tools.ToolsView;
 import org.daxplore.producer.gui.widget.QuestionWidget;
@@ -36,7 +36,7 @@ public class MainController implements ActionListener {
 	private ButtonPanelView buttonPanelView;
 	private ToolsView toolsView;
 	private NavigationView navigationView;
-	private QuestionView questionView;
+	private QuestionController questionController;
 	private TimeSeriesView timeSeriesView;
 	
 	private Stack<HistoryItem> history = new Stack<>();
@@ -74,7 +74,7 @@ public class MainController implements ActionListener {
 		buttonPanelView = new ButtonPanelView(this);
 		toolsView = new ToolsView(this);
 		navigationView = new NavigationView(this);
-		questionView = new QuestionView(this);
+		questionController = new QuestionController(this);
 		timeSeriesView = new TimeSeriesView(this);
 
 		mainView = new MainView(buttonPanelView);
@@ -82,7 +82,7 @@ public class MainController implements ActionListener {
 		mainView.addView(groupsController.getView(), Views.GROUPSVIEW);
 		mainView.addView(editTextController.getView(), Views.EDITTEXTVIEW);
 		mainView.addView(toolsView, Views.TOOLSVIEW);
-		mainView.addView(questionView, Views.QUESTIONVIEW);
+		mainView.addView(questionController.getView(), Views.QUESTIONVIEW);
 		mainView.addView(timeSeriesView, Views.TIMESERIESVIEW);
 		
 		mainView.setNavigationView(navigationView);
@@ -142,7 +142,7 @@ public class MainController implements ActionListener {
 				break;
 			case QUESTIONVIEW:
 				if(hi.command instanceof MetaQuestion) {
-					questionView.getController().openMetaQuestion((MetaQuestion)hi.command);
+					questionController.openMetaQuestion((MetaQuestion)hi.command);
 				}
 				break;
 			case TIMESERIESVIEW:
@@ -205,10 +205,6 @@ public class MainController implements ActionListener {
 		return navigationView;
 	}
 	
-	public QuestionView getQuestionView() {
-		return questionView;
-	}
-
 	public ToolsView getToolsView() {
 		return toolsView;
 	}

@@ -1,5 +1,6 @@
 package org.daxplore.producer.gui.question;
 
+import java.awt.Component;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.sql.SQLException;
@@ -26,25 +27,21 @@ import org.daxplore.producer.tools.Pair;
 
 public class QuestionController implements TableModelListener, ActionListener  {
 	
-	static class Command {
-		static final String ADD = "ADD";
-		static final String REMOVE = "REMOVE";
-		static final String UP = "UP"; 
-		static final String DOWN = "DOWN"; 
-		static final String INVERT = "INVERT"; 
+	enum QuestionCommand {
+		ADD, REMOVE, UP, DOWN, INVERT
 	}
 	
-	QuestionView view;
+	private QuestionView questionView;
 	private MainController mainController;
 	private LinkedList<Pair<Double, Integer>> values;
-	MetaQuestion mq;
-	ColumnTableModel afterTableModel;
+	private MetaQuestion mq;
+	private ColumnTableModel afterTableModel;
 	private ScaleTable scaleTable;
 	private ScaleTableModel scaleTableModel;
 	
-	public QuestionController(MainController mainController, QuestionView view) {
-		this.view = view;
+	public QuestionController(MainController mainController) {
 		this.mainController = mainController;
+		questionView = new QuestionView(this);
 	}
 
 	//TODO handle null scales properly
@@ -54,11 +51,11 @@ public class QuestionController implements TableModelListener, ActionListener  {
 		scaleTableModel = new ScaleTableModel(metaQuestion.getScale());
 		scaleTableModel.addTableModelListener(this);
 		scaleTable = new ScaleTable(scaleTableModel);
-		view.getScaleScrollPane().setViewportView(scaleTable);
+		questionView.getScaleScrollPane().setViewportView(scaleTable);
 		
 		try {
 			values = mainController.getDaxploreFile().getRawData().getColumnValueCount(metaQuestion.getId());
-			view.getBeforeScrollPane().setViewportView(new JTable(new ColumnTableModel(values)));
+			questionView.getBeforeScrollPane().setViewportView(new JTable(new ColumnTableModel(values)));
 		} catch (SQLException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -66,7 +63,7 @@ public class QuestionController implements TableModelListener, ActionListener  {
 		
 		updateCalculatedValues();
 		
-		view.getAfterScrollPane().setViewportView(new JTable(afterTableModel));
+		questionView.getAfterScrollPane().setViewportView(new JTable(afterTableModel));
 		
 		try {
 			TimePointTableModel timePointTableModel = new TimePointTableModel(
@@ -76,7 +73,7 @@ public class QuestionController implements TableModelListener, ActionListener  {
 					metaQuestion);
 			
 			TimePointTable timePointTable = new TimePointTable(timePointTableModel);
-			view.getTimePointScrollPane().setViewportView(timePointTable);
+			questionView.getTimePointScrollPane().setViewportView(timePointTable);
 			
 		} catch (SQLException | DaxploreException e) {
 			// TODO Auto-generated catch block
@@ -141,17 +138,17 @@ public class QuestionController implements TableModelListener, ActionListener  {
 	 */
 	@Override
 	public void actionPerformed(ActionEvent e) {
-		switch(e.getActionCommand()) {
-		case Command.ADD:
+		switch(QuestionCommand.valueOf(e.getActionCommand())) {
+		case ADD:
 			//TODO add even if there are no unused o.getTransformation().contains(p.getKey())
 			try {
 				if(mq.getScale()==null){
 					mq.setScale(mainController.getDaxploreFile().getMetaScaleManager().create(new LinkedList<Option>(), new NumberlineCoverage()));
 					scaleTableModel = new ScaleTableModel(mq.getScale());
 					scaleTable = new ScaleTable(scaleTableModel);
-					view.getScaleScrollPane().setViewportView(scaleTable);
-					view.validate();
-				    view.repaint();
+					questionView.getScaleScrollPane().setViewportView(scaleTable);
+					questionView.validate();
+				    questionView.repaint();
 					scaleTableModel.fireTableStructureChanged();
 				}
 				boolean added = false;
@@ -179,7 +176,7 @@ public class QuestionController implements TableModelListener, ActionListener  {
 				e1.printStackTrace();
 			}
 			break;
-		case Command.REMOVE:
+		case REMOVE:
 			int[] selectedRows = scaleTable.getSelectedRows();
 			List<Option> options = mq.getScale().getOptions();
 			for(int i = selectedRows.length-1; i>=0; i--) {
@@ -188,7 +185,7 @@ public class QuestionController implements TableModelListener, ActionListener  {
 			mq.getScale().setOptions(options);
 			scaleTableModel.fireTableStructureChanged();
 			break;
-		case Command.UP:
+		case UP:
 			selectedRows = scaleTable.getSelectedRows();
 			if(selectedRows.length < 1 || selectedRows[0] == 0) break;
 			scaleTable.clearSelection();
@@ -198,7 +195,7 @@ public class QuestionController implements TableModelListener, ActionListener  {
 				scaleTable.getSelectionModel().addSelectionInterval(selectedRows[i]-1, selectedRows[i]-1);
 			}
 			break;
-		case Command.DOWN:
+		case DOWN:
 			selectedRows = scaleTable.getSelectedRows();
 			if(selectedRows.length < 1 || selectedRows[selectedRows.length-1] == scaleTableModel.getRowCount() -1) break;
 			scaleTable.clearSelection();
@@ -209,7 +206,7 @@ public class QuestionController implements TableModelListener, ActionListener  {
 				scaleTable.getSelectionModel().addSelectionInterval(selectedRows[i]+1, selectedRows[i]+1);
 			}
 			break;
-		case Command.INVERT:
+		case INVERT:
 			options = mq.getScale().getOptions();
 			List<Option> invertedOptions = new LinkedList<>();
 			for(Option option : options) {
@@ -240,6 +237,10 @@ public class QuestionController implements TableModelListener, ActionListener  {
 		scale.add(new Option(textRef, value, transformation, setNew));
 		mq.getScale().setOptions(scale);
 		scaleTableModel.fireTableStructureChanged();
+	}
+
+	public Component getView() {
+		return questionView;
 	}
 	
 }
