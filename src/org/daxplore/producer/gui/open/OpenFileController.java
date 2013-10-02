@@ -8,6 +8,7 @@ import java.io.IOException;
 import java.text.SimpleDateFormat;
 
 import javax.swing.JFileChooser;
+import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 import javax.swing.filechooser.FileNameExtensionFilter;
 
@@ -15,23 +16,37 @@ import org.daxplore.producer.daxplorelib.DaxploreException;
 import org.daxplore.producer.daxplorelib.DaxploreFile;
 import org.daxplore.producer.gui.MainController;
 import org.daxplore.producer.gui.Settings;
+import org.daxplore.producer.gui.event.DaxploreFileUpdateEvent;
 import org.daxplore.producer.gui.importwizard.CharsetPanelDescriptor;
 import org.daxplore.producer.gui.importwizard.FinalImportPanelDescriptor;
 import org.daxplore.producer.gui.importwizard.ImportWizardDescriptor;
 import org.daxplore.producer.gui.importwizard.ImportWizardDialog;
 import org.daxplore.producer.gui.importwizard.OpenFilePanelDescriptor;
 
+import com.google.common.eventbus.EventBus;
+import com.google.common.eventbus.Subscribe;
+
 /**
  * Daxplore file creation controller. Controls all action logic in the open panel view.
  */
 public final class OpenFileController implements ActionListener {
 
-	private final MainController mainController;
+	//TODO remove direct main controller
+	private MainController mainController;
+	private DaxploreFile daxploreFile;
+	private JFrame mainWindow;
+	private EventBus eventBus;
+	
 	private final OpenFileView openFileView;
 
-	public OpenFileController(MainController mainController) {
+	public OpenFileController(MainController mainController, JFrame mainWindow, EventBus eventBus) {
 		this.mainController = mainController;
-		this.openFileView = new OpenFileView();
+		this.mainWindow = mainWindow;
+		this.eventBus = eventBus;
+		
+		eventBus.register(this);
+		
+		openFileView = new OpenFileView();
 		openFileView.addActionListener(this);
 	}
 	
@@ -50,6 +65,13 @@ public final class OpenFileController implements ActionListener {
 		default:
 			throw new AssertionError("Undefined action command: '" + e.getActionCommand() + "'");
 		}
+	}
+
+	@Subscribe
+	public void daxploreFileUpdated(DaxploreFileUpdateEvent e) {
+		daxploreFile = e.getDaxploreFile();
+		// update text fields so that file information is properly shown
+		updateTextFields();
 	}
 
 	/**
@@ -86,13 +108,13 @@ public final class OpenFileController implements ActionListener {
 				"Daxplore Files", "daxplore");
 		fc.setFileFilter(filter);
 
-		int returnVal = fc.showSaveDialog(this.mainController.getMainWindow());
+		int returnVal = fc.showSaveDialog(mainWindow);
 
 		if (returnVal == JFileChooser.APPROVE_OPTION) {
 			try {
 				Settings.setWorkingDirectory(fc.getCurrentDirectory());
-				if (mainController.getDaxploreFile() != null) {
-					mainController.getDaxploreFile().close();
+				if (daxploreFile != null) {
+					daxploreFile.close();
 				}
 			} catch (IOException e) {
 				System.out.println("Failed to close old daxplore file");
@@ -110,10 +132,9 @@ public final class OpenFileController implements ActionListener {
 			}
 
 			try {
-				mainController.setDaxploreFile(DaxploreFile.createWithNewFile(file));
+				DaxploreFile daxploreFile = DaxploreFile.createWithNewFile(file);
+				eventBus.post(new DaxploreFileUpdateEvent(daxploreFile));
 				updateTextFields();
-				// activate the button panel.
-				mainController.updateStuff();
 			} catch (DaxploreException e1) {
 				System.out.println("Saving daxplore file failure.");
 				e1.printStackTrace();
@@ -133,14 +154,14 @@ public final class OpenFileController implements ActionListener {
 				"Daxplore Files", "daxplore");
 		fc.setFileFilter(filter);
 
-		int returnVal = fc.showOpenDialog(mainController.getMainWindow());
+		int returnVal = fc.showOpenDialog(mainWindow);
 
 		if (returnVal == JFileChooser.APPROVE_OPTION) {
 			Settings.setWorkingDirectory(fc.getCurrentDirectory());
 			try {
 				Settings.setWorkingDirectory(fc.getCurrentDirectory());
-				if (mainController.getDaxploreFile() != null) {
-					mainController.getDaxploreFile().close();
+				if (daxploreFile != null) {
+					daxploreFile.close();
 				}
 			} catch (IOException e) {
 				System.out.println("Failed to close old daxplore file");
@@ -152,21 +173,13 @@ public final class OpenFileController implements ActionListener {
 			File file = fc.getSelectedFile();
 			System.out.println("Opening: " + file.getName() + ".");
 			try {
-				mainController.setDaxploreFile(DaxploreFile
-						.createFromExistingFile(file));
+				DaxploreFile daxploreFile = DaxploreFile.createFromExistingFile(file);
+				eventBus.post(new DaxploreFileUpdateEvent(daxploreFile));
 
-				// print the contents of daxplore file about section, just for
-				// testing.
-				System.out.println("Daxplore file content: "
-						+ mainController.getDaxploreFile().getAbout());
-
-				// update text fields so that file information is properly
-				// shown.
-				updateTextFields();
-				mainController.updateStuff();
-
+				// print the contents of daxplore file about section, just for testing.
+				System.out.println("Daxplore file content: " + daxploreFile.getAbout());
 			} catch (DaxploreException e1) {
-				JOptionPane.showMessageDialog(mainController.getMainWindow(),
+				JOptionPane.showMessageDialog(mainWindow,
 						"You must select a valid daxplore file.",
 						"Daxplore file warning", JOptionPane.ERROR_MESSAGE);
 				e1.printStackTrace();
@@ -177,12 +190,10 @@ public final class OpenFileController implements ActionListener {
 	}
 	
 	public void importButtonPressed() {
-		if (mainController.getDaxploreFile() == null) {
-			JOptionPane
-					.showMessageDialog(
-							mainController.getMainWindow(),
-							"Create or open a daxplore project file before you import an SPSS file.",
-							"Daxplore file warning", JOptionPane.ERROR_MESSAGE);
+		if (daxploreFile == null) {
+			JOptionPane.showMessageDialog(mainWindow,
+					"Create or open a daxplore project file before you import an SPSS file.",
+					"Daxplore file warning", JOptionPane.ERROR_MESSAGE);
 			return;
 		}
 		
@@ -207,10 +218,8 @@ public final class OpenFileController implements ActionListener {
 	 * @param mainController
 	 */
 	public void updateSpssFileInfoText() {
-		if (mainController.getSpssFile() != null) {
-			openFileView.setSpssFileInfoText("SPSS file successfully imported!\n"
-					+ mainController.getSpssFile().getName() + "\n" + mainController.getSpssFile().getAbsolutePath());
-		}
+		//TODO communicate properly? Remove stuff?
+		openFileView.setSpssFileInfoText("SPSS file possibly imported!\n");
 	}
 
 	/**
@@ -221,17 +230,17 @@ public final class OpenFileController implements ActionListener {
 		SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd");
 		
 		// set the text fields if we have a daxplore file loaded.
-		if (mainController.getDaxploreFile() != null) {
+		if (daxploreFile != null) {
 			// update text fields with appropriate data.
-			openFileView.getFileNameField().setText(mainController.getDaxploreFile().getFile().getName());
+			openFileView.getFileNameField().setText(daxploreFile.getFile().getName());
 			
 			// check if it's a newly created file, if so, it doesn't contain certain fields.
-			String importFilename = mainController.getDaxploreFile().getAbout().getImportFilename();
+			String importFilename = daxploreFile.getAbout().getImportFilename();
 			if (importFilename != null && !"".equals(importFilename)) {
-				openFileView.getLastImportFileNameField().setText(mainController.getDaxploreFile().getAbout().getImportFilename());
+				openFileView.getLastImportFileNameField().setText(daxploreFile.getAbout().getImportFilename());
 				// date must first be converted to the appropriate format before returned as string.
-				if (mainController.getDaxploreFile().getAbout().getImportDate() != null) {
-				openFileView.getImportDateField().setText(formatter.format(mainController.getDaxploreFile().getAbout().getImportDate()));
+				if (daxploreFile.getAbout().getImportDate() != null) {
+				openFileView.getImportDateField().setText(formatter.format(daxploreFile.getAbout().getImportDate()));
 				} else {
 					openFileView.getImportDateField().setText("");
 				}
@@ -241,7 +250,7 @@ public final class OpenFileController implements ActionListener {
 			}
 			
 			openFileView.getCreationDateField().setText(
-			formatter.format(mainController.getDaxploreFile().getAbout().getCreationDate()));
+			formatter.format(daxploreFile.getAbout().getCreationDate()));
 		}
 	}
 

@@ -11,6 +11,7 @@ import org.daxplore.producer.daxplorelib.DaxploreFile;
 import org.daxplore.producer.daxplorelib.metadata.MetaQuestion;
 import org.daxplore.producer.daxplorelib.metadata.textreference.TextReference;
 import org.daxplore.producer.gui.edit.EditTextController;
+import org.daxplore.producer.gui.event.DaxploreFileUpdateEvent;
 import org.daxplore.producer.gui.groups.GroupsController;
 import org.daxplore.producer.gui.navigation.NavigationController;
 import org.daxplore.producer.gui.open.OpenFileController;
@@ -20,6 +21,9 @@ import org.daxplore.producer.gui.tools.ToolsController;
 import org.daxplore.producer.gui.widget.QuestionWidget;
 import org.daxplore.producer.gui.widget.TextWidget;
 
+import com.google.common.eventbus.EventBus;
+import com.google.common.eventbus.Subscribe;
+
 /**
  * Main window handler class. Initialization of application goes here.
  * 
@@ -28,6 +32,9 @@ import org.daxplore.producer.gui.widget.TextWidget;
 public class MainController implements ActionListener {
 	// data fields for main class.
 	
+	private EventBus eventBus;
+	private DaxploreFile daxploreFile = null;
+
 	private MainView mainView;
 	private ButtonPanelView buttonPanelView;
 
@@ -42,8 +49,8 @@ public class MainController implements ActionListener {
 	private Stack<HistoryItem> history = new Stack<>();
 	private HistoryItem currentCommand;
 	
-	private DaxploreFile daxploreFile = null;
-	private File spssFile = null;
+	//TODO remove direct spss file reference
+	private File spssFile;
 
 	public enum Views {
 		OPENFILEVIEW,
@@ -64,14 +71,16 @@ public class MainController implements ActionListener {
 		}
 	}
 	
-	public MainController() {
+	public MainController(JFrame mainWindow) {
 		//TODO: ugly hack, replace with eventbus
 		QuestionWidget.mainController = this;
 		TextWidget.mainController = this;
-
-		buttonPanelView = new ButtonPanelView(this);
 		
-		openFileController = new OpenFileController(this);
+		eventBus = new EventBus();
+		eventBus.register(this);
+
+		//TODO remove *this* as an argument, only needed for old import wizard
+		openFileController = new OpenFileController(this, mainWindow, eventBus);
 		groupsController = new GroupsController(this);
 		editTextController = new EditTextController(this);
 		toolsController = new ToolsController(this);
@@ -79,7 +88,10 @@ public class MainController implements ActionListener {
 		questionController = new QuestionController(this);
 		timeSeriesController = new TimeSeriesController(this);
 
-		mainView = new MainView(buttonPanelView);
+		buttonPanelView = new ButtonPanelView(this);
+
+		mainView = new MainView(mainWindow);
+
 		mainView.addView(openFileController.getView(), Views.OPENFILEVIEW);
 		mainView.addView(groupsController.getView(), Views.GROUPSVIEW);
 		mainView.addView(editTextController.getView(), Views.EDITTEXTVIEW);
@@ -87,13 +99,10 @@ public class MainController implements ActionListener {
 		mainView.addView(questionController.getView(), Views.QUESTIONVIEW);
 		mainView.addView(timeSeriesController.getView(), Views.TIMESERIESVIEW);
 		
+		mainView.setButtonPanelView(buttonPanelView);
 		mainView.setNavigationView(navigationController.getView());
 	}
 	
-	public void showWindow(boolean show) {
-		mainView.showWindow(show);
-	}
-
 	public void switchTo(Views view) {
 		mainView.switchTo(view);
 		setToolbar(view);
@@ -182,6 +191,7 @@ public class MainController implements ActionListener {
 		}
 	}
 	
+	//TODO let them update themselves via events
 	public void updateStuff() {
 		buttonPanelView.setActive(fileIsSet());
 		toolsController.loadData();
@@ -209,7 +219,14 @@ public class MainController implements ActionListener {
 	public DaxploreFile getDaxploreFile() {
 		return daxploreFile;
 	}
+	
+	@Subscribe
+	public void daxploreFileUpdate(DaxploreFileUpdateEvent e) {
+		this.daxploreFile = e.getDaxploreFile();
+		updateStuff(); //TODO let them update themselves via event
+	}
 
+	// TODO replace with daxploreFileUpdate
 	public void setDaxploreFile(DaxploreFile daxploreFile) {
 		this.daxploreFile = daxploreFile;
 	}
@@ -221,14 +238,15 @@ public class MainController implements ActionListener {
 	public void setSpssFile(File spssFile) {
 		this.spssFile = spssFile;
 	}
-	
+
 	public void resetDaxploreFile() {
 		daxploreFile = null;
 	}
-	
+
 	public void resetSpssFile() {
 		spssFile = null;
 	}
+
 	
 	/**
 	 * Returns true if a daxplore file is loaded into the system.

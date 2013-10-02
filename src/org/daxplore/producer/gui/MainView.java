@@ -21,7 +21,7 @@ import org.daxplore.producer.gui.navigation.NavigationView;
 
 public class MainView {
 
-	private JFrame mainControllerFrame;
+	private JFrame mainWindow;
 	private final JPanel mainPanel = new JPanel();
 	private JPanel panel;
 	
@@ -75,25 +75,23 @@ public class MainView {
 		EventQueue.invokeLater(new Runnable() {
 			@Override
 			public void run() {
-				MainController mainController = new MainController();
-				mainController.showWindow(true);
+				JFrame window = new JFrame();
+				MainController mainController = new MainController(window);
+				window.setVisible(true);
 			}
 		});
 	}
 	
-	MainView(ButtonPanelView buttonPanelView) {
-		mainControllerFrame = new JFrame();
-		mainControllerFrame.setIconImage(Toolkit.getDefaultToolkit().getImage(MainController.class.getResource("/org/daxplore/producer/gui/resources/Colorful_Chart_Icon_vol2.png")));
-		mainControllerFrame.setTitle("Daxplore Producer Developer Version");
-		mainControllerFrame.setBounds(100, 100, 900, 787);
-		mainControllerFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		mainControllerFrame.getContentPane().setLayout(new BorderLayout(0, 0));
-		
-		// panel views. TODO: Remake the controller interface.
-		mainControllerFrame.getContentPane().add(buttonPanelView, BorderLayout.WEST);
+	MainView(JFrame mainWindow) {
+		this.mainWindow = mainWindow;
+		mainWindow.setIconImage(Toolkit.getDefaultToolkit().getImage(MainController.class.getResource("/org/daxplore/producer/gui/resources/Colorful_Chart_Icon_vol2.png")));
+		mainWindow.setTitle("Daxplore Producer Developer Version");
+		mainWindow.setBounds(100, 100, 900, 787);
+		mainWindow.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		mainWindow.getContentPane().setLayout(new BorderLayout(0, 0));
 		
 		panel = new JPanel();
-		mainControllerFrame.getContentPane().add(panel, BorderLayout.CENTER);
+		mainWindow.getContentPane().add(panel, BorderLayout.CENTER);
 		panel.setLayout(new BorderLayout(0, 0));
 		panel.add(mainPanel, BorderLayout.CENTER);
 		
@@ -103,23 +101,24 @@ public class MainView {
 		mainPanel.setLayout(mainLayout);
 
 		mainPanel.setRequestFocusEnabled(true);
-		mainControllerFrame.setVisible(true);
+		mainWindow.setVisible(true);
 	}
 	
-	void showWindow(boolean show) {
-		mainControllerFrame.setVisible(show);
-	}
-	
-	void addView(Component component, Views view) {
-		mainPanel.add(component, view.toString());
-	}
 	
 	void switchTo(Views view) {
 	    mainLayout.show(mainPanel, view.toString());
 	}
 	
 	JFrame getMainFrame() {
-		return mainControllerFrame;
+		return mainWindow;
+	}
+
+	void addView(Component component, Views view) {
+		mainPanel.add(component, view.toString());
+	}
+	
+	void setButtonPanelView(ButtonPanelView buttonPanelView) {
+		mainWindow.getContentPane().add(buttonPanelView, BorderLayout.WEST);
 	}
 
 	void setNavigationView(NavigationView navigationView) {

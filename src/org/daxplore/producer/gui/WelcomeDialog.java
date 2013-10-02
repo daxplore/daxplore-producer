@@ -107,8 +107,9 @@ public class WelcomeDialog {
 						@Override
 						public void run() {
 							try {
-								MainController mainController = new MainController();
-								mainController.showWindow(true);
+								JFrame window = new JFrame();
+								MainController mainController = new MainController(window);
+								window.setVisible(true);
 								//TODO WIP: welcome dialog is being worked on
 								//window.mainControllerFrame.setVisible(true);
 								//window.mainController.setDaxploreFile(DaxploreFile.createFromExistingFile(file));
