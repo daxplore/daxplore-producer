@@ -181,7 +181,7 @@ public class MainController implements ActionListener {
 	}
 	
 	public void updateStuff() {
-		buttonPanelView.updateButtonPanel();
+		buttonPanelView.setActive(fileIsSet());
 		toolsView.loadData();
 		groupsController.loadData();
 		editTextController.loadData();

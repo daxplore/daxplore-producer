@@ -3,6 +3,7 @@ package org.daxplore.producer.gui;
 
 import java.awt.Color;
 import java.awt.GridLayout;
+import java.awt.event.ActionListener;
 
 import javax.swing.ButtonGroup;
 import javax.swing.ImageIcon;
@@ -20,7 +21,6 @@ import org.daxplore.producer.gui.MainController.Views;
 public class ButtonPanelView extends JPanel {
 	
 	// data fields.
-	private MainController mainController;
 	private JRadioButton openButton;
 	private JRadioButton groupsButton;
 	private JRadioButton editButton;
@@ -28,10 +28,9 @@ public class ButtonPanelView extends JPanel {
 	private JRadioButton toolsButton;
 	private ButtonGroup buttonGroup;
 	
-	public ButtonPanelView(final MainController mainController) {
+	public ButtonPanelView(ActionListener mainController) {
 		
 		buttonGroup = new ButtonGroup();
-		this.mainController = mainController;
 		
 		// create the button panel
 		setBorder(new MatteBorder(0, 0, 0, 1, Color.LIGHT_GRAY));
@@ -98,22 +97,15 @@ public class ButtonPanelView extends JPanel {
 		toolsButton.setIcon(new ImageIcon(ButtonPanelView.class.getResource("/org/daxplore/producer/gui/resources/24.png")));
 		add(toolsButton);
 		
-		updateButtonPanel();
+		setActive(false);
 	}
 
-	public void updateButtonPanel() {
+	public void setActive(boolean active) {
 		// disable buttons if no file is loaded.
-		if (!mainController.fileIsSet()) {
-			groupsButton.setEnabled(false);
-			editButton.setEnabled(false);
-			timeSeriesButton.setEnabled(false);
-			toolsButton.setEnabled(false);
-		} else {
-			groupsButton.setEnabled(true);
-			editButton.setEnabled(true);
-			timeSeriesButton.setEnabled(true);
-			toolsButton.setEnabled(true);
-		}
+		groupsButton.setEnabled(active);
+		editButton.setEnabled(active);
+		timeSeriesButton.setEnabled(active);
+		toolsButton.setEnabled(active);
 	}
 	
 	public void setActiveButton(Views view) {
