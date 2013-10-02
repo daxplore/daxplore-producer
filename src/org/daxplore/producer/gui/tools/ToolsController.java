@@ -10,7 +10,7 @@ import java.util.Locale;
 import org.daxplore.producer.daxplorelib.DaxploreException;
 import org.daxplore.producer.gui.MainController;
 
-import com.beust.jcommander.Strings;
+import com.google.common.base.Strings;
 
 public class ToolsController implements ActionListener {
 
@@ -31,7 +31,7 @@ public class ToolsController implements ActionListener {
 		switch (ToolsCommand.valueOf(e.getActionCommand())) {
 		case IMPORT:
 			String localeText = toolsView.getUserLocaleText();
-			if(Strings.isStringEmpty(localeText)) {
+			if(!Strings.isNullOrEmpty(localeText)) {
 				Locale locale = new Locale(localeText);
 				if(!locale.toLanguageTag().equals("und")) {
 					try {
