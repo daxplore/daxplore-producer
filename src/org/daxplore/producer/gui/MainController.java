@@ -16,7 +16,7 @@ import org.daxplore.producer.gui.navigation.NavigationController;
 import org.daxplore.producer.gui.open.OpenFileController;
 import org.daxplore.producer.gui.question.QuestionController;
 import org.daxplore.producer.gui.timeseries.TimeSeriesController;
-import org.daxplore.producer.gui.tools.ToolsView;
+import org.daxplore.producer.gui.tools.ToolsController;
 import org.daxplore.producer.gui.widget.QuestionWidget;
 import org.daxplore.producer.gui.widget.TextWidget;
 
@@ -34,7 +34,7 @@ public class MainController implements ActionListener {
 	private OpenFileController openFileController;
 	private GroupsController groupsController;
 	private EditTextController editTextController;
-	private ToolsView toolsView;
+	private ToolsController toolsController;
 	private NavigationController navigationController;
 	private QuestionController questionController;
 	private TimeSeriesController timeSeriesController;
@@ -73,7 +73,7 @@ public class MainController implements ActionListener {
 		openFileController = new OpenFileController(this);
 		groupsController = new GroupsController(this);
 		editTextController = new EditTextController(this);
-		toolsView = new ToolsView(this);
+		toolsController = new ToolsController(this);
 		navigationController = new NavigationController(this);
 		questionController = new QuestionController(this);
 		timeSeriesController = new TimeSeriesController(this);
@@ -82,7 +82,7 @@ public class MainController implements ActionListener {
 		mainView.addView(openFileController.getView(), Views.OPENFILEVIEW);
 		mainView.addView(groupsController.getView(), Views.GROUPSVIEW);
 		mainView.addView(editTextController.getView(), Views.EDITTEXTVIEW);
-		mainView.addView(toolsView, Views.TOOLSVIEW);
+		mainView.addView(toolsController.getView(), Views.TOOLSVIEW);
 		mainView.addView(questionController.getView(), Views.QUESTIONVIEW);
 		mainView.addView(timeSeriesController.getView(), Views.TIMESERIESVIEW);
 		
@@ -183,7 +183,7 @@ public class MainController implements ActionListener {
 	
 	public void updateStuff() {
 		buttonPanelView.setActive(fileIsSet());
-		toolsView.loadData();
+		toolsController.loadData();
 		groupsController.loadData();
 		editTextController.loadData();
 		timeSeriesController.loadData();
@@ -202,9 +202,6 @@ public class MainController implements ActionListener {
 		return openFileController;
 	}
 
-	public ToolsView getToolsView() {
-		return toolsView;
-	}
 
 	/* Files and stuff */
 
