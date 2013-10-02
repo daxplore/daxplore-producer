@@ -10,7 +10,7 @@ import javax.swing.JFrame;
 import org.daxplore.producer.daxplorelib.DaxploreFile;
 import org.daxplore.producer.daxplorelib.metadata.MetaQuestion;
 import org.daxplore.producer.daxplorelib.metadata.textreference.TextReference;
-import org.daxplore.producer.gui.edit.EditTextView;
+import org.daxplore.producer.gui.edit.EditTextController;
 import org.daxplore.producer.gui.groups.GroupsController;
 import org.daxplore.producer.gui.navigation.NavigationView;
 import org.daxplore.producer.gui.open.OpenFileController;
@@ -32,7 +32,7 @@ public class MainController implements ActionListener {
 
 	private OpenFileController openFileController;
 	private GroupsController groupsController;
-	private EditTextView editTextView;
+	private EditTextController editTextController;
 	private ButtonPanelView buttonPanelView;
 	private ToolsView toolsView;
 	private NavigationView navigationView;
@@ -70,7 +70,7 @@ public class MainController implements ActionListener {
 		
 		openFileController = new OpenFileController(this);
 		groupsController = new GroupsController(this);
-		editTextView = new EditTextView(this);
+		editTextController = new EditTextController(this);
 		buttonPanelView = new ButtonPanelView(this);
 		toolsView = new ToolsView(this);
 		navigationView = new NavigationView(this);
@@ -80,7 +80,7 @@ public class MainController implements ActionListener {
 		mainView = new MainView(buttonPanelView);
 		mainView.addView(openFileController.getView(), Views.OPENFILEVIEW);
 		mainView.addView(groupsController.getView(), Views.GROUPSVIEW);
-		mainView.addView(editTextView, Views.EDITTEXTVIEW);
+		mainView.addView(editTextController.getView(), Views.EDITTEXTVIEW);
 		mainView.addView(toolsView, Views.TOOLSVIEW);
 		mainView.addView(questionView, Views.QUESTIONVIEW);
 		mainView.addView(timeSeriesView, Views.TIMESERIESVIEW);
@@ -133,7 +133,7 @@ public class MainController implements ActionListener {
 				break;
 			case EDITTEXTVIEW:
 				if(hi.command instanceof TextReference) {
-					editTextView.getController().jumpToTextReference((TextReference)hi.command);
+					editTextController.jumpToTextReference((TextReference)hi.command);
 				}
 				break;
 			case GROUPSVIEW:
@@ -155,7 +155,7 @@ public class MainController implements ActionListener {
 	private void setToolbar(Views view) {
 		switch(view) {
 		case EDITTEXTVIEW:
-			navigationView.setToolbar(editTextView.getController().getToolbar());
+			navigationView.setToolbar(editTextController.getToolbar());
 			return;
 		case GROUPSVIEW:
 			navigationView.setToolbar(groupsController.getToolbar());
@@ -184,7 +184,7 @@ public class MainController implements ActionListener {
 		buttonPanelView.updateButtonPanel();
 		toolsView.loadData();
 		groupsController.loadData();
-		editTextView.getController().loadData();
+		editTextController.loadData();
 		timeSeriesView.getController().loadData();
 	}
 
@@ -199,10 +199,6 @@ public class MainController implements ActionListener {
 
 	public OpenFileController getOpenFileController() {
 		return openFileController;
-	}
-
-	public EditTextView getEditTextView() {
-		return editTextView;
 	}
 
 	public NavigationView getNavigationView() {

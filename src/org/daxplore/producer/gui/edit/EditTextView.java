@@ -2,10 +2,7 @@ package org.daxplore.producer.gui.edit;
 
 import java.awt.BorderLayout;
 import java.awt.GridLayout;
-import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.awt.event.ComponentEvent;
-import java.awt.event.ComponentListener;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
@@ -16,49 +13,42 @@ import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.JTextField;
 import javax.swing.SwingConstants;
-import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 
-import org.daxplore.producer.gui.MainController;
+import org.daxplore.producer.gui.edit.EditTextController.EditTextCommand;
 
 @SuppressWarnings("serial")
 public class EditTextView extends JPanel {
 	private JTextField textField;
 
-	MainController mainController;
 	private JComboBox<LocaleItem> localeCombo1;
 	private JComboBox<LocaleItem> localeCombo2;
 	private JScrollPane scrollPane;
-	private JTable table;
-	private EditTextController editTextController;
 	
 	protected static class LocaleItem {
-		Locale loc;
+		Locale locale;
 		public LocaleItem(Locale loc) {
-			this.loc = loc;
+			this.locale = loc;
 		}
 		@Override
 		public String toString() {
-			return loc.getDisplayLanguage();
+			return locale.getDisplayLanguage();
 		}
 		@Override
 		public boolean equals(Object o) {
-			return o!=null && o instanceof LocaleItem && loc != null && loc.equals(((LocaleItem)o).loc);
+			return o!=null && o instanceof LocaleItem && locale != null && locale.equals(((LocaleItem)o).locale);
 		}
 		@Override
 		public int hashCode() {
-			return loc==null ? 7 : loc.hashCode();
+			return locale==null ? 7 : locale.hashCode();
 		}
 	}
 	
 	/**
 	 * Create the panel.
 	 * @param guiFile 
-	 * @param mainController 
 	 */
-	public EditTextView(MainController mainController) {
-		this.mainController = mainController;
-		this.editTextController = new EditTextController(mainController, this);
+	public <T extends DocumentListener & ActionListener> EditTextView(T listener) {
 		setLayout(new BorderLayout(0, 0));
 		
 		JPanel panel = new JPanel();
@@ -69,75 +59,23 @@ public class EditTextView extends JPanel {
 		textField.setHorizontalAlignment(SwingConstants.LEFT);
 		panel.add(textField);
 		textField.setColumns(15);
-		textField.getDocument().addDocumentListener(new DocumentListener() {
-			@Override
-			public void removeUpdate(DocumentEvent e) {
-				editTextController.filter(textField.getText());
-			}
-			@Override
-			public void insertUpdate(DocumentEvent e) {
-				editTextController.filter(textField.getText());
-			}
-			@Override
-			public void changedUpdate(DocumentEvent e) {
-				editTextController.filter(textField.getText());
-			}
-		});
-		
-		
-		
+		textField.getDocument().addDocumentListener(listener);
+
 		localeCombo1 = new JComboBox<>();
 		panel.add(localeCombo1);
-		localeCombo1.addActionListener(new ActionListener() {
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				if(localeCombo1.getSelectedItem() != null) {
-					LocaleItem locale = (LocaleItem)localeCombo1.getSelectedItem();
-					editTextController.setCurrentLocale(locale.loc, 0);
-					doUpdate();
-				}
-			}
-		});
+		localeCombo1.setActionCommand(EditTextCommand.UPDATE_COLUMN_1.toString());
+		localeCombo1.addActionListener(listener);
+		
 		localeCombo2 = new JComboBox<>();
 		panel.add(localeCombo2);
-		localeCombo2.addActionListener(new ActionListener() {
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				if(localeCombo2.getSelectedItem() != null) {
-					LocaleItem locale = (LocaleItem)localeCombo2.getSelectedItem();
-					editTextController.setCurrentLocale(locale.loc, 1);
-					doUpdate();
-				}
-			}
-		});
+		localeCombo2.setActionCommand(EditTextCommand.UPDATE_COLUMN_2.toString());
+		localeCombo2.addActionListener(listener);
 		
 		scrollPane = new JScrollPane();
 		add(scrollPane, BorderLayout.CENTER);
-		
-		
-		addComponentListener(new ComponentListener() {
-			
-			@Override
-			public void componentShown(ComponentEvent e) {
-				//doUpdate();
-			}
-			
-			@Override
-			public void componentResized(ComponentEvent e) {}
-			@Override
-			public void componentMoved(ComponentEvent e) {}
-			@Override
-			public void componentHidden(ComponentEvent e) {}
-		});
-		
-	}
-	
-	public EditTextController getController() {
-		return editTextController;
 	}
 	
 	public void setTable(JTable table) {
-		this.table = table;
 		scrollPane.setViewportView(table);
 	}
 	
@@ -180,17 +118,36 @@ public class EditTextView extends JPanel {
 		localeCombo1.setSelectedItem(item1);
 		localeCombo2.setSelectedItem(item2);
 	}
-
-	public void doUpdate() {
-		if(table != null) {
-			int a = scrollPane.getVerticalScrollBar().getValue();
-			editTextController.loadTable();
-			scrollPane.getVerticalScrollBar().setValue(a);
-		}
-		//table.updateUI();
+	
+	public String getFilterText() {
+		return textField.getText();
 	}
 	
 	public void setSearchField(String text) {
 		textField.setText(text);
+	}
+	
+	public Locale getSelectedLocale1() {
+		LocaleItem item = (LocaleItem)localeCombo1.getSelectedItem(); 
+		if(item != null) {
+			return item.locale;
+		}
+		return null;
+	}
+
+	public Locale getSelectedLocale2() {
+		LocaleItem item = (LocaleItem)localeCombo2.getSelectedItem(); 
+		if(item != null) {
+			return item.locale;
+		}
+		return null;
+	}
+	
+	public int getScrollbarPosition() {
+		return scrollPane.getVerticalScrollBar().getValue();
+	}
+	
+	public void setScrollbarPosition(int position) {
+		scrollPane.getVerticalScrollBar().setValue(position);
 	}
 }

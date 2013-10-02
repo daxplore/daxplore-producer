@@ -14,6 +14,7 @@ import javax.swing.filechooser.FileFilter;
 import javax.swing.filechooser.FileNameExtensionFilter;
 
 import org.daxplore.producer.gui.Settings;
+import org.daxplore.producer.gui.edit.EditTextController.EditTextCommand;
 import org.daxplore.producer.gui.edit.EditTextView.LocaleItem;
 
 @SuppressWarnings("serial")
@@ -26,10 +27,10 @@ public class EditToolbarView extends JPanel {
 	public EditToolbarView(ActionListener listner) {
 		setLayout(new GridLayout(1, 2));
 		importButton = new JButton("Import texts...");
-		importButton.setActionCommand("import");
+		importButton.setActionCommand(EditTextCommand.IMPORT.toString());
 		importButton.addActionListener(listner);
 		exportButton = new JButton("Export texts...");
-		exportButton.setActionCommand("export");
+		exportButton.setActionCommand(EditTextCommand.EXPORT.toString());
 		exportButton.addActionListener(listner);
 		add(importButton);
 		add(exportButton);
@@ -84,7 +85,7 @@ public class EditToolbarView extends JPanel {
 		@Override
 		public void approveSelection() {
 			if(localeBox.getSelectedItem() != null) {
-				selectedLocale = ((LocaleItem)localeBox.getSelectedItem()).loc;
+				selectedLocale = ((LocaleItem)localeBox.getSelectedItem()).locale;
 				super.approveSelection();
 			} else {
 				System.out.println("No locale selected during import");

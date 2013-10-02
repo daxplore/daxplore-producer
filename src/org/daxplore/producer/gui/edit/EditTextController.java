@@ -1,5 +1,6 @@
 package org.daxplore.producer.gui.edit;
 
+import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.Rectangle;
 import java.awt.event.ActionEvent;
@@ -10,13 +11,14 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.StandardOpenOption;
-import java.sql.SQLException;
 import java.util.List;
 import java.util.Locale;
 
 import javax.swing.JTable;
 import javax.swing.ListSelectionModel;
 import javax.swing.RowFilter;
+import javax.swing.event.DocumentEvent;
+import javax.swing.event.DocumentListener;
 import javax.swing.table.TableRowSorter;
 
 import org.daxplore.producer.daxplorelib.DaxploreException;
@@ -29,7 +31,7 @@ import org.daxplore.producer.gui.Settings;
 
 import com.google.common.base.Charsets;
 
-public class EditTextController implements ActionListener {
+public class EditTextController implements ActionListener, DocumentListener {
 
 	private Locale[] currentLocales = new Locale[2];
 	private MainController mainController;
@@ -40,9 +42,13 @@ public class EditTextController implements ActionListener {
 	private JTable table;
 	private EditToolbarView editToolbar;
 	
-	public EditTextController(MainController mainController, EditTextView editTextView) {
+	enum EditTextCommand {
+		IMPORT, EXPORT, UPDATE_COLUMN_1, UPDATE_COLUMN_2
+	}
+	
+	public EditTextController(MainController mainController) {
 		this.mainController = mainController;
-		this.editTextView = editTextView;
+		editTextView = new EditTextView(this);
 		editToolbar = new EditToolbarView(this);
 	}
 	
@@ -84,6 +90,8 @@ public class EditTextController implements ActionListener {
 	}
 	
 	void loadTable() {
+		int scrollPosition = editTextView.getScrollbarPosition();
+		
 		model = new TextsTableModel(this, textsList);
 		sorter = new TableRowSorter<>(model);
 		table = new JTable(model);
@@ -92,6 +100,8 @@ public class EditTextController implements ActionListener {
         table.setPreferredScrollableViewportSize(new Dimension(500, 70));
         table.setFillsViewportHeight(true);
 		editTextView.setTable(table);
+		
+		editTextView.setScrollbarPosition(scrollPosition);
 	}
 	
 	void filter(String text) {
@@ -118,8 +128,8 @@ public class EditTextController implements ActionListener {
 	public void actionPerformed(ActionEvent e) {
 		List<Locale> localeList;
 		File file;
-		switch(e.getActionCommand()) {
-		case "import":
+		switch(EditTextCommand.valueOf(e.getActionCommand())) {
+		case IMPORT:
 			localeList = Settings.availableLocales();
 			file = editToolbar.showImportDialog(localeList);
 			if(file != null && file.exists() && file.canRead()) {
@@ -150,9 +160,8 @@ public class EditTextController implements ActionListener {
 				}
 			}
 			break;
-		case "export":
+		case EXPORT:
 			try {
-				
 				localeList = mainController.getDaxploreFile().getTextReferenceManager().getAllLocales();
 				file = editToolbar.showExportDialog(localeList);
 				if(file == null) {
@@ -190,7 +199,20 @@ public class EditTextController implements ActionListener {
 				// TODO Auto-generated catch block
 				e1.printStackTrace();
 			}
-			
+			break;
+		case UPDATE_COLUMN_1:
+			Locale locale = editTextView.getSelectedLocale1();
+			if(locale != null) {
+				setCurrentLocale(locale, 0);
+				loadTable();
+			}
+			break;
+		case UPDATE_COLUMN_2:
+			locale = editTextView.getSelectedLocale2();
+			if(locale != null) {
+				setCurrentLocale(locale, 1);
+				loadTable();
+			}
 			break;
 		default:
 			throw new AssertionError("No such action command: '" + e.getActionCommand() + "'");
@@ -199,5 +221,25 @@ public class EditTextController implements ActionListener {
 	
 	public EditToolbarView getToolbar() {
 		return editToolbar;
+	}
+
+	public Component getView() {
+		return editTextView;
+	}
+	
+	// Document listener methods
+	@Override
+	public void removeUpdate(DocumentEvent e) {
+		filter(editTextView.getFilterText());
+	}
+	
+	@Override
+	public void insertUpdate(DocumentEvent e) {
+		filter(editTextView.getFilterText());
+	}
+	
+	@Override
+	public void changedUpdate(DocumentEvent e) {
+		filter(editTextView.getFilterText());
 	}
 }

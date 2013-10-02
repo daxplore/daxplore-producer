@@ -1,5 +1,7 @@
 package org.daxplore.producer.gui.edit;
 
+import java.util.Locale;
+
 import javax.swing.event.TableModelEvent;
 import javax.swing.event.TableModelListener;
 import javax.swing.table.DefaultTableModel;
@@ -24,9 +26,12 @@ class TextsTableModel extends DefaultTableModel implements TableModelListener {
 		case 0:
 			return "Reference";
 		case 1:
-			return controller.getCurrentLocale(0).getDisplayLanguage();
 		case 2:
-			return controller.getCurrentLocale(1).getDisplayLanguage();
+			Locale locale = controller.getCurrentLocale(col-1);
+			if(locale != null) {
+				return locale.getDisplayLanguage(Locale.ENGLISH);
+			}
+			return "";
 		default:
 			throw new IndexOutOfBoundsException("Column out of bounds: " + col);
 		}
