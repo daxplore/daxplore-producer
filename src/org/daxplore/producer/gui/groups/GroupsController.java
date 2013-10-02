@@ -22,20 +22,11 @@ import org.daxplore.producer.gui.Settings;
 
 public class GroupsController implements ActionListener {
 
-	public static final String GROUPS_ADD_ACTION_COMMAND = "GroupsAddActionCommand";
-	public static final String GROUPS_UP_ACTION_COMMAND = "GroupsUpActionCommand";
-	public static final String GROUPS_DOWN_ACTION_COMMAND = "GroupsDownActionCommand";
-	public static final String GROUPS_REMOVE_ACTION_COMMAND = "GroupsRemoveActionCommand";
-	
-	public static final String PERSPECTIVES_UP_ACTION_COMMAND = "PerspectivesUpActionCommand";
-	public static final String PERSPECTIVES_DOWN_ACTION_COMMAND = "PerspectivesDownActionCommand";
-	public static final String PERSPECTIVES_REMOVE_ACTION_COMMAND = "PerspectivesRemoveActionCommand";
-	
-	public static final String ADD_TO_GROUP_ACTION_COMMAND = "AddToGroupActionCommand";
-	public static final String ADD_TO_PERSPECTIVES_ACTION_COMMAND = "AddToPerspectivesActionCommand";
-	
-	//debug thingy
-	public static final String RELOADDATA = "reload";
+	enum GroupsCommand {
+		GROUP_ADD, GROUP_UP, GROUP_DOWN, GROUP_REMOVE, GROUP_ADD_ITEM,
+		PERSPECTIVE_UP, PERSPECTIVE_DOWN, PERSPECTIVE_REMOVE, PERSPECTIVE_ADD_ITEM,
+		RELOAD_DATA //debug thingy
+	}
 	
 	private MainController mainController;
 	private GroupsView groupsView;
@@ -62,8 +53,8 @@ public class GroupsController implements ActionListener {
 	public void actionPerformed(ActionEvent e) {
 		Object[] path;
 		int[] selectedRows;
-		switch(e.getActionCommand()) {
-		case GROUPS_ADD_ACTION_COMMAND:
+		switch(GroupsCommand.valueOf(e.getActionCommand())) {
+		case GROUP_ADD:
 			String groupName = (String)JOptionPane.showInputDialog(mainController.getMainWindow(), "Name:", "Create new group", JOptionPane.PLAIN_MESSAGE, null, null, "");
 			if(groupName != null && !groupName.equals("")) {
 				try {
@@ -89,8 +80,7 @@ public class GroupsController implements ActionListener {
 					    JOptionPane.ERROR_MESSAGE);
 			}
 			break;
-		case GROUPS_UP_ACTION_COMMAND:
-			System.out.println("GROUPS_UP_ACTION_COMMAND");
+		case GROUP_UP:
 			path = groupTree.getSelectionPath().getPath();
 			try {
 				if(path.length == 2) {
@@ -118,8 +108,7 @@ public class GroupsController implements ActionListener {
 				}
 			} catch (Exception ex) { ex.printStackTrace(); }
 			break;
-		case GROUPS_DOWN_ACTION_COMMAND:
-			System.out.println("GROUPS_DOWN_ACTION_COMMAND");
+		case GROUP_DOWN:
 			path = groupTree.getSelectionPath().getPath();
 			try {
 				if(path.length == 2) {
@@ -150,7 +139,7 @@ public class GroupsController implements ActionListener {
 				}
 			} catch (Exception ex) { ex.printStackTrace(); }
 			break;
-		case GROUPS_REMOVE_ACTION_COMMAND:
+		case GROUP_REMOVE:
 			try {
 				path = groupTree.getSelectionPath().getPath();
 				Object child = path[path.length-1];
@@ -171,7 +160,7 @@ public class GroupsController implements ActionListener {
 				e2.printStackTrace();
 			}
 			break;
-		case PERSPECTIVES_UP_ACTION_COMMAND:
+		case PERSPECTIVE_UP:
 			selectedRows = perspectivesTable.getSelectedRows();
 			if(selectedRows.length < 1 || selectedRows[0] == 0) break;
 			perspectivesTable.clearSelection();
@@ -181,7 +170,7 @@ public class GroupsController implements ActionListener {
 				perspectivesTable.getSelectionModel().addSelectionInterval(selectedRows[i]-1, selectedRows[i]-1);
 			}
 			break;
-		case PERSPECTIVES_DOWN_ACTION_COMMAND:
+		case PERSPECTIVE_DOWN:
 			selectedRows = perspectivesTable.getSelectedRows();
 			if(selectedRows.length < 1 || selectedRows[selectedRows.length-1] == perspectivesTableModel.getRowCount() -1) break;
 			perspectivesTable.clearSelection();
@@ -192,7 +181,7 @@ public class GroupsController implements ActionListener {
 				perspectivesTable.getSelectionModel().addSelectionInterval(selectedRows[i]+1, selectedRows[i]+1);
 			}
 			break;
-		case PERSPECTIVES_REMOVE_ACTION_COMMAND:
+		case PERSPECTIVE_REMOVE:
 			selectedRows = perspectivesTable.getSelectedRows();
 			int delta = 0;
 			for(int row: selectedRows) {
@@ -200,7 +189,7 @@ public class GroupsController implements ActionListener {
 				delta++;
 			}
 			break;
-		case ADD_TO_GROUP_ACTION_COMMAND:
+		case GROUP_ADD_ITEM:
 			path = groupTree.getSelectionPath().getPath();
 			MetaGroup parent;
 			int atIndex = 0;
@@ -225,7 +214,7 @@ public class GroupsController implements ActionListener {
 				// TODO: handle exception
 			}
 			break;
-		case ADD_TO_PERSPECTIVES_ACTION_COMMAND:
+		case PERSPECTIVE_ADD_ITEM:
 			int index = perspectivesTable.getSelectedRow() != -1? perspectivesTable.getSelectedRow(): perspectivesTable.getRowCount();
 			for(int i : questionJTable.getSelectedRows()) {
 				MetaQuestion mq = (MetaQuestion)questionJTable.getValueAt(i, 0);
@@ -233,7 +222,7 @@ public class GroupsController implements ActionListener {
 				index++;
 			}
 			break;
-		case RELOADDATA:
+		case RELOAD_DATA:
 			loadData();
 			break;
 		default:

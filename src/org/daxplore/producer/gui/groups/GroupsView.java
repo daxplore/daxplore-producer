@@ -17,6 +17,7 @@ import javax.swing.JTree;
 import javax.swing.ListCellRenderer;
 import javax.swing.tree.TreeCellRenderer;
 
+import org.daxplore.producer.gui.groups.GroupsController.GroupsCommand;
 import org.daxplore.producer.gui.widget.GroupRenderer;
 import org.daxplore.producer.gui.widget.QuestionWidget;
 
@@ -82,22 +83,22 @@ public class GroupsView extends JPanel {
 		groupsPanel.add(groupsButtonPanel, BorderLayout.SOUTH);
 		
 		JButton groupsAddNewButton = new JButton("+");
-		groupsAddNewButton.setActionCommand(GroupsController.GROUPS_ADD_ACTION_COMMAND);
+		groupsAddNewButton.setActionCommand(GroupsCommand.GROUP_ADD.toString());
 		groupsAddNewButton.addActionListener(actionListener);
 		groupsButtonPanel.add(groupsAddNewButton);
 		
 		JButton groupsUpButton = new JButton("Up");
-		groupsUpButton.setActionCommand(GroupsController.GROUPS_UP_ACTION_COMMAND);
+		groupsUpButton.setActionCommand(GroupsCommand.GROUP_UP.toString());
 		groupsUpButton.addActionListener(actionListener);
 		groupsButtonPanel.add(groupsUpButton);
 		
 		JButton groupsDownButton = new JButton("Down");
-		groupsDownButton.setActionCommand(GroupsController.GROUPS_DOWN_ACTION_COMMAND);
+		groupsDownButton.setActionCommand(GroupsCommand.GROUP_DOWN.toString());
 		groupsDownButton.addActionListener(actionListener);
 		groupsButtonPanel.add(groupsDownButton);
 		
 		JButton groupsRemoveButton = new JButton("X");
-		groupsRemoveButton.setActionCommand(GroupsController.GROUPS_REMOVE_ACTION_COMMAND);
+		groupsRemoveButton.setActionCommand(GroupsCommand.GROUP_REMOVE.toString());
 		groupsRemoveButton.addActionListener(actionListener);
 		groupsButtonPanel.add(groupsRemoveButton);
 		
@@ -107,7 +108,7 @@ public class GroupsView extends JPanel {
 		
 		addToGroupsPanel.add(Box.createVerticalGlue());
 		JButton addToGroupsButton = new JButton("->");
-		addToGroupsButton.setActionCommand(GroupsController.ADD_TO_GROUP_ACTION_COMMAND);
+		addToGroupsButton.setActionCommand(GroupsCommand.GROUP_ADD_ITEM.toString());
 		addToGroupsButton.addActionListener(actionListener);
 		addToGroupsPanel.add(addToGroupsButton);
 		addToGroupsPanel.add(Box.createVerticalGlue());
@@ -121,17 +122,17 @@ public class GroupsView extends JPanel {
 		perspectivePanel.add(perspectivesButtonPanel, BorderLayout.SOUTH);
 		
 		JButton perspectivesUpButton = new JButton("Up");
-		perspectivesUpButton.setActionCommand(GroupsController.PERSPECTIVES_UP_ACTION_COMMAND);
+		perspectivesUpButton.setActionCommand(GroupsCommand.PERSPECTIVE_UP.toString());
 		perspectivesUpButton.addActionListener(actionListener);
 		perspectivesButtonPanel.add(perspectivesUpButton);
 		
 		JButton perspectivesDownButton = new JButton("Down");
-		perspectivesDownButton.setActionCommand(GroupsController.PERSPECTIVES_DOWN_ACTION_COMMAND);
+		perspectivesDownButton.setActionCommand(GroupsCommand.PERSPECTIVE_DOWN.toString());
 		perspectivesDownButton.addActionListener(actionListener);
 		perspectivesButtonPanel.add(perspectivesDownButton);
 		
 		JButton perspectivesRemoveButton = new JButton("X");
-		perspectivesRemoveButton.setActionCommand(GroupsController.PERSPECTIVES_REMOVE_ACTION_COMMAND);
+		perspectivesRemoveButton.setActionCommand(GroupsCommand.PERSPECTIVE_REMOVE.toString());
 		perspectivesRemoveButton.addActionListener(actionListener);
 		perspectivesButtonPanel.add(perspectivesRemoveButton);
 		
@@ -139,7 +140,7 @@ public class GroupsView extends JPanel {
 		perspectivePanel.add(addToPerspectivesPanel, BorderLayout.WEST);
 		
 		JButton addToPerspectivesButton = new JButton("->");
-		addToPerspectivesButton.setActionCommand(GroupsController.ADD_TO_PERSPECTIVES_ACTION_COMMAND);
+		addToPerspectivesButton.setActionCommand(GroupsCommand.PERSPECTIVE_ADD_ITEM.toString());
 		addToPerspectivesButton.addActionListener(actionListener);
 		addToPerspectivesPanel.setLayout(new BoxLayout(addToPerspectivesPanel, BoxLayout.X_AXIS));
 		addToPerspectivesPanel.add(Box.createVerticalGlue());
