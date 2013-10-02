@@ -2,40 +2,29 @@ package org.daxplore.producer.gui.timeseries;
 
 import java.awt.BorderLayout;
 import java.awt.FlowLayout;
+import java.awt.event.ActionListener;
 
 import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTextField;
-import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 
-import org.daxplore.producer.gui.MainController;
+import org.daxplore.producer.gui.timeseries.TimeSeriesController.TimeSeriesCommand;
 
 @SuppressWarnings("serial")
 public class TimeSeriesView extends JPanel {
 
 	private JScrollPane scrollPane;
-	private TimeSeriesController controller;
 	private JTextField timeSeriesTextField;
 	private JScrollPane columnValueCountPane;
-
-
-	/**
-	 * @return the columnValueCountPane
-	 */
-	public JScrollPane getColumnValueCountPane() {
-		return columnValueCountPane;
-	}
 
 	/**
 	 * Create the panel.
 	 */
-	public TimeSeriesView(MainController mainController) {
+	public <T extends DocumentListener & ActionListener> TimeSeriesView(T listener) {
 		setLayout(new BorderLayout(0, 0));
-		
-		controller = new TimeSeriesController(mainController, this);
 		
 		scrollPane = new JScrollPane();
 		add(scrollPane, BorderLayout.CENTER);
@@ -55,26 +44,11 @@ public class TimeSeriesView extends JPanel {
 		timeSeriesTextField.setColumns(10);
 		
 		JButton setColumnButton = new JButton("Set");
-		setColumnButton.setActionCommand(TimeSeriesController.TIMESERIES_SET_COLUMN_ACTION_COMMAND);
-		setColumnButton.addActionListener(controller);
+		setColumnButton.setActionCommand(TimeSeriesCommand.SET_COLUMN.toString());
+		setColumnButton.addActionListener(listener);
 		panel_2.add(setColumnButton);
 		
-		
-		timeSeriesTextField.getDocument().addDocumentListener(new DocumentListener() {
-			@Override
-			public void removeUpdate(DocumentEvent e) {
-				controller.filter(timeSeriesTextField.getText());
-			}
-			@Override
-			public void insertUpdate(DocumentEvent e) {
-				controller.filter(timeSeriesTextField.getText());
-			}
-			@Override
-			public void changedUpdate(DocumentEvent e) {
-				controller.filter(timeSeriesTextField.getText());
-			}
-		});
-		
+		timeSeriesTextField.getDocument().addDocumentListener(listener);
 		
 		columnValueCountPane = new JScrollPane();
 		panel_1.add(columnValueCountPane, BorderLayout.CENTER);
@@ -84,33 +58,35 @@ public class TimeSeriesView extends JPanel {
 		panel.setLayout(new FlowLayout(FlowLayout.CENTER, 5, 5));
 		
 		JButton addButton = new JButton("Add");
-		addButton.setActionCommand(TimeSeriesController.TIMEPOINT_ADD_ACTION_COMMAND);
-		addButton.addActionListener(controller);
+		addButton.setActionCommand(TimeSeriesCommand.ADD.toString());
+		addButton.addActionListener(listener);
 		panel.add(addButton);
 		
 		JButton removeButton = new JButton("Remove");
-		removeButton.setActionCommand(TimeSeriesController.TIMEPOINT_REMOVE_ACTION_COMMAND);
-		removeButton.addActionListener(controller);
+		removeButton.setActionCommand(TimeSeriesCommand.REMOVE.toString());
+		removeButton.addActionListener(listener);
 		panel.add(removeButton);
 		
 		JButton upButton = new JButton("Up");
-		upButton.setActionCommand(TimeSeriesController.TIMEPOINT_UP_ACTION_COMMAND);
-		upButton.addActionListener(controller);
+		upButton.setActionCommand(TimeSeriesCommand.UP.toString());
+		upButton.addActionListener(listener);
 		panel.add(upButton);
 		
 		JButton downButton = new JButton("Down");
-		downButton.setActionCommand(TimeSeriesController.TIMEPOINT_DOWN_ACTION_COMMAND);
-		downButton.addActionListener(controller);
+		downButton.setActionCommand(TimeSeriesCommand.DOWN.toString());
+		downButton.addActionListener(listener);
 		panel.add(downButton);
-		
+	}
+	
+	/**
+	 * @return the columnValueCountPane
+	 */
+	public JScrollPane getColumnValueCountPane() {
+		return columnValueCountPane;
 	}
 
 	public JScrollPane getTimeSeriesScrollPane() {
 		return scrollPane;
-	}
-
-	public TimeSeriesController getController() {
-		return controller;
 	}
 	
 	public String getTimeSeriesColumn() {
@@ -119,5 +95,9 @@ public class TimeSeriesView extends JPanel {
 	
 	public void setTimeSeriesColumn(String column) {
 		timeSeriesTextField.setText(column);
+	}
+	
+	public String getTimeSeriesText() {
+		return timeSeriesTextField.getText();
 	}
 }

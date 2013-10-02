@@ -1,5 +1,6 @@
 package org.daxplore.producer.gui.timeseries;
 
+import java.awt.Component;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.sql.SQLException;
@@ -7,6 +8,8 @@ import java.util.LinkedList;
 import java.util.List;
 
 import javax.swing.JTable;
+import javax.swing.event.DocumentEvent;
+import javax.swing.event.DocumentListener;
 
 import org.daxplore.producer.daxplorelib.DaxploreException;
 import org.daxplore.producer.daxplorelib.metadata.MetaTimepointShort;
@@ -19,28 +22,27 @@ import org.daxplore.producer.gui.MainController;
 import org.daxplore.producer.gui.widget.ColumnTableModel;
 import org.daxplore.producer.tools.Pair;
 
-public class TimeSeriesController implements ActionListener {
-	public static final String TIMEPOINT_ADD_ACTION_COMMAND = "TimePointAddActionCommand";
-	public static final String TIMEPOINT_UP_ACTION_COMMAND = "TimePointUpActionCommand";
-	public static final String TIMEPOINT_DOWN_ACTION_COMMAND = "TimePointDownActionCommand";
-	public static final String TIMEPOINT_REMOVE_ACTION_COMMAND = "TimePointRemoveActionCommand";
-	public static final String TIMESERIES_SET_COLUMN_ACTION_COMMAND = "TimeSeriesSetColumnActionCommand";
+public class TimeSeriesController implements ActionListener, DocumentListener {
+	
+	enum TimeSeriesCommand {
+		ADD, UP, DOWN, REMOVE, SET_COLUMN
+	}
 	
 	private MainController mainController;
 	private TimeSeriesTableModel timeSeriesTableModel;
 	private TimeSeriesTable timeSeriesTable;
-	private TimeSeriesView view;
+	private TimeSeriesView timeSeriesView;
 	
-	public TimeSeriesController(MainController mainController, TimeSeriesView view) {
+	public TimeSeriesController(MainController mainController) {
 		this.mainController = mainController;
-		this.view = view;
+		timeSeriesView = new TimeSeriesView(this);
 	}
 	
 	@Override
-	public void actionPerformed(ActionEvent arg0) {
+	public void actionPerformed(ActionEvent event) {
 		int[] selectedRows;
-		switch(arg0.getActionCommand()) {
-		case TIMEPOINT_ADD_ACTION_COMMAND:
+		switch(TimeSeriesCommand.valueOf(event.getActionCommand())) {
+		case ADD:
 			try {
 				MetaTimepointShortManager timeManager = mainController.getDaxploreFile().getMetaTimepointShortManager();
 				List<MetaTimepointShort> timeList = timeManager.getAll();
@@ -78,7 +80,7 @@ public class TimeSeriesController implements ActionListener {
 				e.printStackTrace();
 			}
 			break;
-		case TIMEPOINT_REMOVE_ACTION_COMMAND:
+		case REMOVE:
 			selectedRows = timeSeriesTable.getSelectedRows();
 			if(selectedRows.length < 1) break;
 			timeSeriesTable.clearSelection();
@@ -87,7 +89,7 @@ public class TimeSeriesController implements ActionListener {
 				timeSeriesTableModel.removeRow(selectedRows[i]);
 			}
 			break;
-		case TIMEPOINT_UP_ACTION_COMMAND:
+		case UP:
 			selectedRows = timeSeriesTable.getSelectedRows();
 			if(selectedRows.length < 1 || selectedRows[0] == 0) break;
 			timeSeriesTable.clearSelection();
@@ -97,7 +99,7 @@ public class TimeSeriesController implements ActionListener {
 				timeSeriesTable.getSelectionModel().addSelectionInterval(selectedRows[i]-1, selectedRows[i]-1);
 			}
 			break;
-		case TIMEPOINT_DOWN_ACTION_COMMAND:
+		case DOWN:
 			selectedRows = timeSeriesTable.getSelectedRows();
 			if(selectedRows.length < 1 || selectedRows[selectedRows.length-1] == timeSeriesTableModel.getRowCount() -1) break;
 			timeSeriesTable.clearSelection();
@@ -108,8 +110,8 @@ public class TimeSeriesController implements ActionListener {
 				timeSeriesTable.getSelectionModel().addSelectionInterval(selectedRows[i]+1, selectedRows[i]+1);
 			}
 			break;
-		case TIMESERIES_SET_COLUMN_ACTION_COMMAND:
-			String column = view.getTimeSeriesColumn();
+		case SET_COLUMN:
+			String column = timeSeriesView.getTimeSeriesColumn();
 			try {
 				boolean hasColumn = mainController.getDaxploreFile().getRawMeta().hasColumn(column);
 				if(hasColumn) {
@@ -153,8 +155,8 @@ public class TimeSeriesController implements ActionListener {
 		if(mainController.fileIsSet()) {
 			timeSeriesTableModel = new TimeSeriesTableModel(mainController.getDaxploreFile().getMetaTimepointShortManager());
 			timeSeriesTable = new TimeSeriesTable(timeSeriesTableModel);
-			view.getTimeSeriesScrollPane().setViewportView(timeSeriesTable);
-			view.setTimeSeriesColumn(mainController.getDaxploreFile().getAbout().getTimeSeriesShortColumn());
+			timeSeriesView.getTimeSeriesScrollPane().setViewportView(timeSeriesTable);
+			timeSeriesView.setTimeSeriesColumn(mainController.getDaxploreFile().getAbout().getTimeSeriesShortColumn());
 		}
 	}
 
@@ -166,11 +168,31 @@ public class TimeSeriesController implements ActionListener {
 				LinkedList<Pair<Double, Integer>> columnValueList = rawData.getColumnValueCount(text);
 				ColumnTableModel model = new ColumnTableModel(columnValueList);
 				JTable columnValueTable = new JTable(model);
-				view.getColumnValueCountPane().setViewportView(columnValueTable);
+				timeSeriesView.getColumnValueCountPane().setViewportView(columnValueTable);
 			}
 		} catch (SQLException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
+	}
+
+	public Component getView() {
+		return timeSeriesView;
+	}
+	
+	// Document listener methods	
+	@Override
+	public void removeUpdate(DocumentEvent e) {
+		filter(timeSeriesView.getTimeSeriesText());
+	}
+	
+	@Override
+	public void insertUpdate(DocumentEvent e) {
+		filter(timeSeriesView.getTimeSeriesText());
+	}
+	
+	@Override
+	public void changedUpdate(DocumentEvent e) {
+		filter(timeSeriesView.getTimeSeriesText());
 	}
 }

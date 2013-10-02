@@ -15,7 +15,7 @@ import org.daxplore.producer.gui.groups.GroupsController;
 import org.daxplore.producer.gui.navigation.NavigationController;
 import org.daxplore.producer.gui.open.OpenFileController;
 import org.daxplore.producer.gui.question.QuestionController;
-import org.daxplore.producer.gui.timeseries.TimeSeriesView;
+import org.daxplore.producer.gui.timeseries.TimeSeriesController;
 import org.daxplore.producer.gui.tools.ToolsView;
 import org.daxplore.producer.gui.widget.QuestionWidget;
 import org.daxplore.producer.gui.widget.TextWidget;
@@ -37,7 +37,7 @@ public class MainController implements ActionListener {
 	private ToolsView toolsView;
 	private NavigationController navigationController;
 	private QuestionController questionController;
-	private TimeSeriesView timeSeriesView;
+	private TimeSeriesController timeSeriesController;
 	
 	private Stack<HistoryItem> history = new Stack<>();
 	private HistoryItem currentCommand;
@@ -67,15 +67,16 @@ public class MainController implements ActionListener {
 	public MainController() {
 		QuestionWidget.mainController = this;
 		TextWidget.mainController = this;
+
+		buttonPanelView = new ButtonPanelView(this);
 		
 		openFileController = new OpenFileController(this);
 		groupsController = new GroupsController(this);
 		editTextController = new EditTextController(this);
-		buttonPanelView = new ButtonPanelView(this);
 		toolsView = new ToolsView(this);
 		navigationController = new NavigationController(this);
 		questionController = new QuestionController(this);
-		timeSeriesView = new TimeSeriesView(this);
+		timeSeriesController = new TimeSeriesController(this);
 
 		mainView = new MainView(buttonPanelView);
 		mainView.addView(openFileController.getView(), Views.OPENFILEVIEW);
@@ -83,7 +84,7 @@ public class MainController implements ActionListener {
 		mainView.addView(editTextController.getView(), Views.EDITTEXTVIEW);
 		mainView.addView(toolsView, Views.TOOLSVIEW);
 		mainView.addView(questionController.getView(), Views.QUESTIONVIEW);
-		mainView.addView(timeSeriesView, Views.TIMESERIESVIEW);
+		mainView.addView(timeSeriesController.getView(), Views.TIMESERIESVIEW);
 		
 		mainView.setNavigationView(navigationController.getView());
 	}
@@ -185,7 +186,7 @@ public class MainController implements ActionListener {
 		toolsView.loadData();
 		groupsController.loadData();
 		editTextController.loadData();
-		timeSeriesView.getController().loadData();
+		timeSeriesController.loadData();
 	}
 
 	//TODO decouple more
@@ -205,11 +206,6 @@ public class MainController implements ActionListener {
 		return toolsView;
 	}
 
-	public TimeSeriesView getTimeSeriesView() {
-		return timeSeriesView;
-	}
-	
-	
 	/* Files and stuff */
 
 	public DaxploreFile getDaxploreFile() {
