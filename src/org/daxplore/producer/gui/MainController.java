@@ -84,6 +84,8 @@ public class MainController implements ActionListener {
 		mainView.addView(toolsView, Views.TOOLSVIEW);
 		mainView.addView(questionView, Views.QUESTIONVIEW);
 		mainView.addView(timeSeriesView, Views.TIMESERIESVIEW);
+		
+		mainView.setNavigationView(navigationView);
 	}
 	
 	public void showWindow(boolean show) {

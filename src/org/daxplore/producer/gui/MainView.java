@@ -17,6 +17,7 @@ import javax.swing.UnsupportedLookAndFeelException;
 import javax.swing.border.MatteBorder;
 
 import org.daxplore.producer.gui.MainController.Views;
+import org.daxplore.producer.gui.navigation.NavigationView;
 
 public class MainView {
 
@@ -119,5 +120,9 @@ public class MainView {
 	
 	JFrame getMainFrame() {
 		return mainControllerFrame;
+	}
+
+	void setNavigationView(NavigationView navigationView) {
+		panel.add(navigationView, BorderLayout.SOUTH);
 	}
 }
