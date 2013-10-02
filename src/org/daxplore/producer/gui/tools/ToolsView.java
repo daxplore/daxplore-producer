@@ -3,7 +3,6 @@ package org.daxplore.producer.gui.tools;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
-import java.io.IOException;
 import java.sql.SQLException;
 import java.util.Locale;
 
@@ -16,14 +15,10 @@ import javax.swing.JTable;
 import javax.swing.JTextField;
 import javax.swing.filechooser.FileFilter;
 import javax.swing.filechooser.FileNameExtensionFilter;
-import javax.xml.parsers.ParserConfigurationException;
-import javax.xml.transform.TransformerException;
-import javax.xml.transform.TransformerFactoryConfigurationError;
 
 import org.daxplore.producer.daxplorelib.DaxploreException;
 import org.daxplore.producer.gui.MainController;
 import org.daxplore.producer.gui.Settings;
-import org.xml.sax.SAXException;
 
 @SuppressWarnings("serial")
 public class ToolsView extends JPanel {

@@ -29,11 +29,11 @@ public class MainController implements ActionListener {
 	// data fields for main class.
 	
 	private MainView mainView;
+	private ButtonPanelView buttonPanelView;
 
 	private OpenFileController openFileController;
 	private GroupsController groupsController;
 	private EditTextController editTextController;
-	private ButtonPanelView buttonPanelView;
 	private ToolsView toolsView;
 	private NavigationView navigationView;
 	private QuestionController questionController;
