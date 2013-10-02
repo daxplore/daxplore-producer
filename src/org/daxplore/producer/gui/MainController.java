@@ -12,7 +12,7 @@ import org.daxplore.producer.daxplorelib.metadata.MetaQuestion;
 import org.daxplore.producer.daxplorelib.metadata.textreference.TextReference;
 import org.daxplore.producer.gui.edit.EditTextController;
 import org.daxplore.producer.gui.groups.GroupsController;
-import org.daxplore.producer.gui.navigation.NavigationView;
+import org.daxplore.producer.gui.navigation.NavigationController;
 import org.daxplore.producer.gui.open.OpenFileController;
 import org.daxplore.producer.gui.question.QuestionController;
 import org.daxplore.producer.gui.timeseries.TimeSeriesView;
@@ -35,7 +35,7 @@ public class MainController implements ActionListener {
 	private GroupsController groupsController;
 	private EditTextController editTextController;
 	private ToolsView toolsView;
-	private NavigationView navigationView;
+	private NavigationController navigationController;
 	private QuestionController questionController;
 	private TimeSeriesView timeSeriesView;
 	
@@ -73,7 +73,7 @@ public class MainController implements ActionListener {
 		editTextController = new EditTextController(this);
 		buttonPanelView = new ButtonPanelView(this);
 		toolsView = new ToolsView(this);
-		navigationView = new NavigationView(this);
+		navigationController = new NavigationController(this);
 		questionController = new QuestionController(this);
 		timeSeriesView = new TimeSeriesView(this);
 
@@ -85,7 +85,7 @@ public class MainController implements ActionListener {
 		mainView.addView(questionController.getView(), Views.QUESTIONVIEW);
 		mainView.addView(timeSeriesView, Views.TIMESERIESVIEW);
 		
-		mainView.setNavigationView(navigationView);
+		mainView.setNavigationView(navigationController.getView());
 	}
 	
 	public void showWindow(boolean show) {
@@ -107,7 +107,7 @@ public class MainController implements ActionListener {
 		buttonPanelView.setActiveButton(hi.view);
 		mainView.switchTo(hi.view);
 		setToolbar(hi.view);
-		navigationView.getController().setHistoryAvailible(true);
+		navigationController.setHistoryAvailible(true);
 	}
 	
 	public void historyBack(){
@@ -118,7 +118,7 @@ public class MainController implements ActionListener {
 		setToolbar(hi.view);
 		currentCommand = hi;
 		if(history.empty()) {
-			navigationView.getController().setHistoryAvailible(false);
+			navigationController.setHistoryAvailible(false);
 		}
 	}
 	
@@ -155,17 +155,17 @@ public class MainController implements ActionListener {
 	private void setToolbar(Views view) {
 		switch(view) {
 		case EDITTEXTVIEW:
-			navigationView.setToolbar(editTextController.getToolbar());
+			navigationController.setToolbar(editTextController.getToolbar());
 			return;
 		case GROUPSVIEW:
-			navigationView.setToolbar(groupsController.getToolbar());
+			navigationController.setToolbar(groupsController.getToolbar());
 			return;
 		case OPENFILEVIEW:
 		case QUESTIONVIEW:
 		case TIMESERIESVIEW:
 		case TOOLSVIEW:
 		default:
-			navigationView.setToolbar(null);
+			navigationController.setToolbar(null);
 			break;
 		}
 	}
@@ -201,10 +201,6 @@ public class MainController implements ActionListener {
 		return openFileController;
 	}
 
-	public NavigationView getNavigationView() {
-		return navigationView;
-	}
-	
 	public ToolsView getToolsView() {
 		return toolsView;
 	}

@@ -37,8 +37,6 @@ public class ToolsView extends JPanel {
 		JButton btnImportfromraw = new JButton("ImportFromRaw");
 		btnImportfromraw.setBounds(12, 67, 145, 25);
 		btnImportfromraw.addActionListener(new ActionListener() {
-			
-
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				String localeText = textField.getText();

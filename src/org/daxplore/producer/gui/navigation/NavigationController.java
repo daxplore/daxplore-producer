@@ -1,5 +1,6 @@
 package org.daxplore.producer.gui.navigation;
 
+import java.awt.Component;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
@@ -11,19 +12,22 @@ public class NavigationController implements ActionListener {
 	private NavigationView navigationView;
 	private MainController mainController;
 	
-	public NavigationController(NavigationView navigationView, MainController mainController) {
-		this.navigationView = navigationView;
+	enum NavigationCommand {
+		BACK, SAVE
+	}
+	
+	public NavigationController(MainController mainController) {
 		this.mainController = mainController;
-		
+		navigationView = new NavigationView(this);
 	}
 
 	@Override
 	public void actionPerformed(ActionEvent e) {
-		switch(e.getActionCommand()) {
-		case "BACK":
+		switch(NavigationCommand.valueOf(e.getActionCommand())) {
+		case BACK:
 			mainController.historyBack();
 			break;
-		case "SAVE":
+		case SAVE:
 			try {
 				mainController.getDaxploreFile().saveAll();
 			} catch (DaxploreException e1) {
@@ -32,7 +36,7 @@ public class NavigationController implements ActionListener {
 			}
 			break;
 		default:
-			break;
+			throw new AssertionError("Not a defined command: '" + e.getActionCommand() + "'");
 		}
 	}
 	
@@ -40,4 +44,11 @@ public class NavigationController implements ActionListener {
 		navigationView.setHistoryAvailble(availible);
 	}
 
+	public NavigationView getView() {
+		return navigationView;
+	}
+	
+	public void setToolbar(Component comp) {
+		navigationView.setToolbar(comp);
+	}
 }

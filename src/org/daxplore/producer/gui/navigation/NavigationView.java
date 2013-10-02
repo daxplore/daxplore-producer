@@ -3,6 +3,7 @@ package org.daxplore.producer.gui.navigation;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Component;
+import java.awt.event.ActionListener;
 
 import javax.swing.JButton;
 import javax.swing.JPanel;
@@ -10,32 +11,27 @@ import javax.swing.JSeparator;
 import javax.swing.SwingConstants;
 import javax.swing.border.MatteBorder;
 
-import org.daxplore.producer.gui.MainController;
+import org.daxplore.producer.gui.navigation.NavigationController.NavigationCommand;
 
 @SuppressWarnings("serial")
 public class NavigationView extends JPanel {
-	
-	MainController mainController;
-	NavigationController navigationController;
 
 	private JButton backButton;
 	private JPanel toolbarPanel;
 	
-	public NavigationView(final MainController mainController) {
-		this.mainController = mainController;
-		navigationController = new NavigationController(this, mainController);
+	NavigationView(ActionListener listener) {
 		setLayout(new BorderLayout(0, 0));
 		setBorder(new MatteBorder(0, 1, 0, 0, Color.GRAY));
 		
 		backButton = new JButton("Back");
-		backButton.setActionCommand("BACK");
-		backButton.addActionListener(navigationController);
+		backButton.setActionCommand(NavigationCommand.BACK.toString());
+		backButton.addActionListener(listener);
 		backButton.setEnabled(false);
 		add(backButton, BorderLayout.WEST);
 		
 		JButton saveButton = new JButton("Save");
-		saveButton.setActionCommand("SAVE");
-		saveButton.addActionListener(navigationController);
+		saveButton.setActionCommand(NavigationCommand.SAVE.toString());
+		saveButton.addActionListener(listener);
 		add(saveButton, BorderLayout.EAST);
 		
 		JPanel centerPanel = new JPanel();
@@ -58,14 +54,8 @@ public class NavigationView extends JPanel {
 		backButton.setEnabled(availible);
 	}
 
-	public NavigationController getController() {
-		return navigationController;
-	}
-	
-	public void setToolbar(Component comp) {
+	void setToolbar(Component comp) {
 		toolbarPanel.removeAll();
 		if(comp != null) toolbarPanel.add(comp);
 	}
-
-
 }
