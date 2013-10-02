@@ -6,6 +6,7 @@ import java.util.Vector;
 
 import javax.swing.table.DefaultTableModel;
 
+import org.daxplore.producer.daxplorelib.DaxploreException;
 import org.daxplore.producer.daxplorelib.metadata.MetaGroup;
 import org.daxplore.producer.daxplorelib.metadata.MetaGroup.GroupType;
 import org.daxplore.producer.daxplorelib.metadata.MetaQuestion;
@@ -15,11 +16,11 @@ public class PerspectivesTableModel extends DefaultTableModel {
 
 	MetaGroup mg;
 	
-	public PerspectivesTableModel(MetaGroup mg) throws Exception {
+	public PerspectivesTableModel(MetaGroup mg) throws DaxploreException {
 		if(mg.getType() == GroupType.PERSPECTIVE) {
 			this.mg = mg;
 		} else {
-			throw new Exception("Group not of perspective type");
+			throw new DaxploreException("Group not of perspective type");
 		}
 	}
 	

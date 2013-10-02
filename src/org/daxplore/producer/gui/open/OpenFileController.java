@@ -34,14 +34,15 @@ public final class OpenFileController implements ActionListener {
 	//TODO remove direct main controller
 	private MainController mainController;
 	private DaxploreFile daxploreFile;
-	private JFrame mainWindow;
+	private Component parentComponent;
 	private EventBus eventBus;
 	
 	private final OpenFileView openFileView;
 
-	public OpenFileController(MainController mainController, JFrame mainWindow, EventBus eventBus) {
+	public OpenFileController(MainController mainController,
+			Component parentComponent, EventBus eventBus) {
 		this.mainController = mainController;
-		this.mainWindow = mainWindow;
+		this.parentComponent = parentComponent;
 		this.eventBus = eventBus;
 		
 		eventBus.register(this);
@@ -108,7 +109,7 @@ public final class OpenFileController implements ActionListener {
 				"Daxplore Files", "daxplore");
 		fc.setFileFilter(filter);
 
-		int returnVal = fc.showSaveDialog(mainWindow);
+		int returnVal = fc.showSaveDialog(parentComponent);
 
 		if (returnVal == JFileChooser.APPROVE_OPTION) {
 			try {
@@ -154,7 +155,7 @@ public final class OpenFileController implements ActionListener {
 				"Daxplore Files", "daxplore");
 		fc.setFileFilter(filter);
 
-		int returnVal = fc.showOpenDialog(mainWindow);
+		int returnVal = fc.showOpenDialog(parentComponent);
 
 		if (returnVal == JFileChooser.APPROVE_OPTION) {
 			Settings.setWorkingDirectory(fc.getCurrentDirectory());
@@ -179,7 +180,7 @@ public final class OpenFileController implements ActionListener {
 				// print the contents of daxplore file about section, just for testing.
 				System.out.println("Daxplore file content: " + daxploreFile.getAbout());
 			} catch (DaxploreException e1) {
-				JOptionPane.showMessageDialog(mainWindow,
+				JOptionPane.showMessageDialog(parentComponent,
 						"You must select a valid daxplore file.",
 						"Daxplore file warning", JOptionPane.ERROR_MESSAGE);
 				e1.printStackTrace();
@@ -191,7 +192,7 @@ public final class OpenFileController implements ActionListener {
 	
 	public void importButtonPressed() {
 		if (daxploreFile == null) {
-			JOptionPane.showMessageDialog(mainWindow,
+			JOptionPane.showMessageDialog(parentComponent,
 					"Create or open a daxplore project file before you import an SPSS file.",
 					"Daxplore file warning", JOptionPane.ERROR_MESSAGE);
 			return;

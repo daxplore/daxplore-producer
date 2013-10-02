@@ -81,7 +81,7 @@ public class MainController implements ActionListener {
 
 		//TODO remove *this* as an argument, only needed for old import wizard
 		openFileController = new OpenFileController(this, mainWindow, eventBus);
-		groupsController = new GroupsController(this);
+		groupsController = new GroupsController(mainWindow, eventBus);
 		editTextController = new EditTextController(this);
 		toolsController = new ToolsController(this);
 		navigationController = new NavigationController(this);
@@ -193,9 +193,7 @@ public class MainController implements ActionListener {
 	
 	//TODO let them update themselves via events
 	public void updateStuff() {
-		buttonPanelView.setActive(fileIsSet());
 		toolsController.loadData();
-		groupsController.loadData();
 		editTextController.loadData();
 		timeSeriesController.loadData();
 	}
@@ -223,6 +221,7 @@ public class MainController implements ActionListener {
 	@Subscribe
 	public void daxploreFileUpdate(DaxploreFileUpdateEvent e) {
 		this.daxploreFile = e.getDaxploreFile();
+		buttonPanelView.setActive(daxploreFile != null);
 		updateStuff(); //TODO let them update themselves via event
 	}
 
