@@ -24,7 +24,7 @@ public class TextWidget extends AbstractWidgetEditor<TextReference>{
 
 	private JButton gotoButton;
 	
-	public static MainController mainController; //TODO: fulhack
+	public static MainController mainController; //TODO: ugly hack, replace with eventbus
  	
 	public TextWidget() {
 		setLayout(new BorderLayout(0, 0));

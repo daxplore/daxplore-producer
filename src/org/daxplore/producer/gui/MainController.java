@@ -65,6 +65,7 @@ public class MainController implements ActionListener {
 	}
 	
 	public MainController() {
+		//TODO: ugly hack, replace with eventbus
 		QuestionWidget.mainController = this;
 		TextWidget.mainController = this;
 

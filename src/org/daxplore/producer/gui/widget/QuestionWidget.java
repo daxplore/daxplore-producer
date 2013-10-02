@@ -24,7 +24,7 @@ public class QuestionWidget extends AbstractWidgetEditor<MetaQuestion> {
 
 	private JButton gotoButton;
 	
-	public static MainController mainController; //TODO: fulhack
+	public static MainController mainController; //TODO: ugly hack, replace with eventbus
 	
 	public QuestionWidget(MetaQuestion metaQuestion) {
 		this();
