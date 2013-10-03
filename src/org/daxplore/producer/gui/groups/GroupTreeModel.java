@@ -91,6 +91,7 @@ class GroupTreeModel implements TreeModel {
 				throw new Exception("Can't have duplicate of that");
 			}
 		}
+		
 		if(groups.contains(parent) && atIndex >= 0 && atIndex <= getChildCount(parent)) {
 			parent.addQuestion(mq, atIndex);
 			fireTreeNodesInserted(new TreeModelEvent(this, 

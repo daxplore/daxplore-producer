@@ -393,15 +393,19 @@ public class MetaGroup implements Comparable<MetaGroup> {
 		return result;
 	}
 
+
 	/**
 	 * {@inheritDoc}
 	 */
 	@Override
 	public boolean equals(Object obj) {
-		if (this == obj || obj == null || getClass() != obj.getClass()) {
+		if (this == obj) {
+			return true;
+		}
+		if (obj == null || getClass() != obj.getClass() || id != ((MetaGroup)obj).id) {
 			return false;
 		}
-		return id == ((MetaGroup)obj).id;
+		return true;
 	}
 
 	public int getQuestionCount() {

@@ -153,6 +153,31 @@ public class GroupsController implements ActionListener {
 				}
 			} catch (Exception ex) { ex.printStackTrace(); }
 			break;
+		case GROUP_ADD_ITEM:
+			path = groupTree.getSelectionPath().getPath();
+			MetaGroup parent;
+			int atIndex = 0;
+			if(path.length == 1) { 
+				return; 
+			} else if(path.length == 2) {
+				parent = (MetaGroup)path[1];
+				atIndex = parent.getQuestionCount();
+			} else if(path.length == 3) {
+				parent = (MetaGroup)path[1];
+				atIndex = groupTreeModel.getIndexOfChild(parent, path[2]) + 1;
+			} else {return;}
+			
+			try {
+				for(int i : questionJTable.getSelectedRows()) {
+					MetaQuestion mq = (MetaQuestion)questionJTable.getValueAt(i, 0);
+					TreePath treepath = groupTreeModel.addQuestion(mq, parent, atIndex);
+					atIndex++;
+					groupTree.setSelectionPath(treepath);
+				}
+			}catch (Exception e2) {
+				// TODO: handle exception
+			}
+			break;
 		case GROUP_REMOVE:
 			try {
 				path = groupTree.getSelectionPath().getPath();
@@ -201,31 +226,6 @@ public class GroupsController implements ActionListener {
 			for(int row: selectedRows) {
 				perspectivesTableModel.removeRow(row - delta);
 				delta++;
-			}
-			break;
-		case GROUP_ADD_ITEM:
-			path = groupTree.getSelectionPath().getPath();
-			MetaGroup parent;
-			int atIndex = 0;
-			if(path.length == 1) { 
-				return; 
-			} else if(path.length == 2) {
-				parent = (MetaGroup)path[1];
-				atIndex = parent.getQuestionCount();
-			} else if(path.length == 3) {
-				parent = (MetaGroup)path[1];
-				atIndex = groupTreeModel.getIndexOfChild(parent, path[2]) + 1;
-			} else {return;}
-			
-			try {
-				for(int i : questionJTable.getSelectedRows()) {
-					MetaQuestion mq = (MetaQuestion)questionJTable.getValueAt(i, 0);
-					TreePath treepath = groupTreeModel.addQuestion(mq, parent, atIndex);
-					atIndex++;
-					groupTree.setSelectionPath(treepath);
-				}
-			}catch (Exception e2) {
-				// TODO: handle exception
 			}
 			break;
 		case PERSPECTIVE_ADD_ITEM:
