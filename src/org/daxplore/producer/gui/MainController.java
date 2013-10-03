@@ -214,7 +214,8 @@ public class MainController implements ActionListener {
 
 
 	/* Files and stuff */
-
+	//TODO remove when not needed by the old importer
+	
 	public DaxploreFile getDaxploreFile() {
 		return daxploreFile;
 	}
