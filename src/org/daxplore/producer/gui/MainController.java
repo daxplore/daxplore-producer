@@ -122,7 +122,7 @@ public class MainController implements ActionListener {
 			navigationController.setHistoryAvailible(false);
 		}
 	}
-
+	
 	public void switchTo(Views view) {
 		mainView.switchTo(view);
 		setToolbar(view);

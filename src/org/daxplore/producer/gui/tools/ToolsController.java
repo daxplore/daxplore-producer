@@ -10,6 +10,7 @@ import java.util.Locale;
 import org.daxplore.producer.daxplorelib.DaxploreException;
 import org.daxplore.producer.daxplorelib.DaxploreFile;
 import org.daxplore.producer.gui.event.DaxploreFileUpdateEvent;
+import org.daxplore.producer.gui.event.RawImportEvent;
 
 import com.google.common.base.Strings;
 import com.google.common.eventbus.EventBus;
@@ -49,6 +50,7 @@ public class ToolsController implements ActionListener {
 				if(!locale.toLanguageTag().equals("und")) {
 					try {
 						daxploreFile.importFromRaw(locale);
+						eventBus.post(new RawImportEvent());
 					} catch (DaxploreException e1) {
 						// TODO Auto-generated catch block
 						e1.printStackTrace();

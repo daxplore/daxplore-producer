@@ -30,6 +30,7 @@ import org.daxplore.producer.daxplorelib.metadata.textreference.TextTree;
 import org.daxplore.producer.gui.Settings;
 import org.daxplore.producer.gui.event.DaxploreFileUpdateEvent;
 import org.daxplore.producer.gui.event.LocaleUpdateEvent;
+import org.daxplore.producer.gui.event.RawImportEvent;
 
 import com.google.common.base.Charsets;
 import com.google.common.eventbus.EventBus;
@@ -66,6 +67,11 @@ public class EditTextController implements ActionListener, DocumentListener {
 	
 	@Subscribe
 	public void localeUpdate(LocaleUpdateEvent e) {
+		loadData();
+	}
+	
+	@Subscribe
+	public void daxploreFileUpdate(RawImportEvent e) {
 		loadData();
 	}
 	

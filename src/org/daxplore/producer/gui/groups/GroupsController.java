@@ -19,6 +19,7 @@ import org.daxplore.producer.daxplorelib.metadata.textreference.TextReference;
 import org.daxplore.producer.daxplorelib.metadata.textreference.TextReferenceManager;
 import org.daxplore.producer.gui.Settings;
 import org.daxplore.producer.gui.event.DaxploreFileUpdateEvent;
+import org.daxplore.producer.gui.event.RawImportEvent;
 
 import com.google.common.eventbus.EventBus;
 import com.google.common.eventbus.Subscribe;
@@ -60,6 +61,11 @@ public class GroupsController implements ActionListener {
 	@Subscribe
 	public void daxploreFileUpdate(DaxploreFileUpdateEvent e) {
 		this.daxploreFile = e.getDaxploreFile();
+		loadData();
+	}
+	
+	@Subscribe
+	public void daxploreFileUpdate(RawImportEvent e) {
 		loadData();
 	}
 	
