@@ -59,13 +59,13 @@ public class GroupsController implements ActionListener {
 	}
 	
 	@Subscribe
-	public void daxploreFileUpdate(DaxploreFileUpdateEvent e) {
+	public void onDaxploreFileUpdate(DaxploreFileUpdateEvent e) {
 		this.daxploreFile = e.getDaxploreFile();
 		loadData();
 	}
 	
 	@Subscribe
-	public void daxploreFileUpdate(RawImportEvent e) {
+	public void onRawImport(RawImportEvent e) {
 		loadData();
 	}
 	

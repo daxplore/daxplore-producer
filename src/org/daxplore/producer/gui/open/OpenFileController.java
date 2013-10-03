@@ -68,7 +68,7 @@ public final class OpenFileController implements ActionListener {
 	}
 
 	@Subscribe
-	public void daxploreFileUpdated(DaxploreFileUpdateEvent e) {
+	public void onDaxploreFileUpdated(DaxploreFileUpdateEvent e) {
 		daxploreFile = e.getDaxploreFile();
 		updateTextFields();
 	}

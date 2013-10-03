@@ -50,7 +50,7 @@ public class QuestionController implements TableModelListener, ActionListener  {
 	}
 	
 	@Subscribe
-	public void daxploreFileUpdate(DaxploreFileUpdateEvent e) {
+	public void onDaxploreFileUpdate(DaxploreFileUpdateEvent e) {
 		this.daxploreFile = e.getDaxploreFile();
 		updateCalculatedValues();
 	}

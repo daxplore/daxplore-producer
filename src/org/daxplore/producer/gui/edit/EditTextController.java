@@ -60,18 +60,18 @@ public class EditTextController implements ActionListener, DocumentListener {
 	}
 	
 	@Subscribe
-	public void daxploreFileUpdate(DaxploreFileUpdateEvent e) {
+	public void onDaxploreFileUpdate(DaxploreFileUpdateEvent e) {
 		this.daxploreFile = e.getDaxploreFile();
 		loadData();
 	}
 	
 	@Subscribe
-	public void localeUpdate(LocaleUpdateEvent e) {
+	public void onLocaleUpdate(LocaleUpdateEvent e) {
 		loadData();
 	}
 	
 	@Subscribe
-	public void daxploreFileUpdate(RawImportEvent e) {
+	public void onRawImport(RawImportEvent e) {
 		loadData();
 	}
 	

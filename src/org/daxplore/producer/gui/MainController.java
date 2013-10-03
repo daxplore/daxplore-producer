@@ -105,13 +105,13 @@ public class MainController implements ActionListener {
 	}
 	
 	@Subscribe
-	public void daxploreFileUpdate(DaxploreFileUpdateEvent e) {
+	public void onDaxploreFileUpdate(DaxploreFileUpdateEvent e) {
 		this.daxploreFile = e.getDaxploreFile();
 		buttonPanelView.setActive(daxploreFile != null);
 	}
 	
 	@Subscribe
-	public void historyGoBack(HistoryGoBackEvent e) {
+	public void onHistoryGoBack(HistoryGoBackEvent e) {
 		HistoryItem hi = history.pop();
 		doCommand(hi);
 		buttonPanelView.setActiveButton(hi.view);

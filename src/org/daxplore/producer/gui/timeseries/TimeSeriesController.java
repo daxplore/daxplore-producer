@@ -44,7 +44,7 @@ public class TimeSeriesController implements ActionListener, DocumentListener {
 	}
 	
 	@Subscribe
-	public void daxploreFileUpdate(DaxploreFileUpdateEvent e) {
+	public void onDaxploreFileUpdate(DaxploreFileUpdateEvent e) {
 		this.daxploreFile = e.getDaxploreFile();
 		loadData();
 	}
