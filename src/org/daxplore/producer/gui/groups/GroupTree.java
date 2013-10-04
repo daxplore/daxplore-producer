@@ -21,21 +21,20 @@ import org.daxplore.producer.gui.widget.GroupEditor;
 import org.daxplore.producer.gui.widget.GroupRenderer;
 import org.daxplore.producer.gui.widget.QuestionWidget;
 
+import com.google.common.eventbus.EventBus;
+
 @SuppressWarnings("serial")
 public class GroupTree extends JTree {
 	
-    static Color listBackground, listSelectionBackground;
-    static {
-        listBackground = new Color(255,255,255);
-        listSelectionBackground = new Color(200, 200, 255);
-    }
+	private Color listBackground = new Color(255,255,255);
+	private Color listSelectionBackground = new Color(200, 200, 255);
     
-    public GroupTree(GroupTreeModel groupTreeModel) {
+    public GroupTree(EventBus eventBus, GroupTreeModel groupTreeModel) {
     	super(groupTreeModel);
     	//System.out.println("Pretty print group tree");
     	//System.out.println(groupTreeModel.prettyPrint(new Locale("sv")));
     	setRootVisible(false);
-    	GroupTreeCellRendererEditor groupTreeCellRendererEditor = new GroupTreeCellRendererEditor();
+    	GroupTreeCellRendererEditor groupTreeCellRendererEditor = new GroupTreeCellRendererEditor(eventBus);
     	setCellRenderer(groupTreeCellRendererEditor);
     	setCellEditor(groupTreeCellRendererEditor);
     	setEditable(true);
@@ -43,9 +42,15 @@ public class GroupTree extends JTree {
 	
 	class GroupTreeCellRendererEditor extends AbstractCellEditor implements TreeCellRenderer, TreeCellEditor {
 		
-		private QuestionWidget questionRenderer = new QuestionWidget();
+		private EventBus eventBus;
+		private QuestionWidget questionRenderer;
 		private GroupRenderer groupRenderer = new GroupRenderer();
 		private AbstractWidgetEditor<?> editor;
+		
+		public GroupTreeCellRendererEditor(EventBus eventBus) {
+			this.eventBus = eventBus;
+			questionRenderer = new QuestionWidget(eventBus);
+		}
 		
 		@Override
 		public Component getTreeCellRendererComponent(JTree tree, Object value, boolean selected, boolean expanded, boolean leaf, int row, boolean hasFocus) {
@@ -93,7 +98,7 @@ public class GroupTree extends JTree {
 		@Override
 		public Component getTreeCellEditorComponent(JTree tree, Object value, boolean isSelected, boolean expanded, boolean leaf, int row) {
 			if(value instanceof MetaQuestion) {
-				QuestionWidget qEdit = new QuestionWidget((MetaQuestion)value);
+				QuestionWidget qEdit = new QuestionWidget(eventBus, (MetaQuestion)value);
 				editor = qEdit;
 			} else if(value instanceof MetaGroup) {
 				GroupEditor gEdit = new GroupEditor();

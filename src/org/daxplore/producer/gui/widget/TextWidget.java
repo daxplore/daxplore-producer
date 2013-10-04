@@ -12,21 +12,19 @@ import javax.swing.SwingConstants;
 import javax.swing.border.LineBorder;
 
 import org.daxplore.producer.daxplorelib.metadata.textreference.TextReference;
-import org.daxplore.producer.gui.MainController;
 import org.daxplore.producer.gui.MainController.Views;
+import org.daxplore.producer.gui.event.ChangeMainViewEvent;
+
+import com.google.common.eventbus.EventBus;
 
 @SuppressWarnings("serial")
 public class TextWidget extends AbstractWidgetEditor<TextReference>{
 
 	private TextReference textRef;
-	
 	private JLabel label = new JLabel();
-
 	private JButton gotoButton;
 	
-	public static MainController mainController; //TODO: ugly hack, replace with eventbus
- 	
-	public TextWidget() {
+	public TextWidget(final EventBus eventBus) {
 		setLayout(new BorderLayout(0, 0));
 		add(label, BorderLayout.WEST);
 		gotoButton = new JButton("");
@@ -36,12 +34,11 @@ public class TextWidget extends AbstractWidgetEditor<TextReference>{
 		gotoButton.setContentAreaFilled(false);
 		gotoButton.setBorderPainted(false);
 		gotoButton.setEnabled(true);
-		//gotoButton.setVisible(false);
+
 		gotoButton.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				//mainController.switchTo(Views.EDITTEXTVIEW, metaQuestion.getFullTextRef());
-				mainController.switchTo(Views.EDITTEXTVIEW, textRef);
+				eventBus.post(new ChangeMainViewEvent(Views.EDITTEXTVIEW, textRef));
 			}
 		});
 		add(gotoButton, BorderLayout.EAST);

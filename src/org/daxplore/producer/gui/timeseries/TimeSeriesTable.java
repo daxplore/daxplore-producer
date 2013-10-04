@@ -18,18 +18,19 @@ import javax.swing.table.TableModel;
 import org.daxplore.producer.daxplorelib.metadata.textreference.TextReference;
 import org.daxplore.producer.gui.widget.TextWidget;
 
+import com.google.common.eventbus.EventBus;
+
 @SuppressWarnings("serial")
 public class TimeSeriesTable extends JTable {
-protected int mouseOver;
+	private EventBus eventBus;
+	private int mouseOver;
+
+    private Color listBackground = new Color(255,255,255);
+    private Color listSelectionBackground = new Color(200, 200, 255);
 	
-    static Color listBackground, listSelectionBackground;
-    static {
-        listBackground = new Color(255,255,255);
-        listSelectionBackground = new Color(200, 200, 255);
-    }
-	
-	public TimeSeriesTable(TableModel model) {
+	public TimeSeriesTable(EventBus eventBus, TableModel model) {
 		super(model);
+		this.eventBus = eventBus;
 		this.setTableHeader(null);
 		
 		setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
@@ -38,7 +39,8 @@ protected int mouseOver;
         TimePointCellRenderer timePointCellRenderer = new TimePointCellRenderer();
         setDefaultRenderer(TextReference.class, timePointCellRenderer);
         setDefaultEditor(TextReference.class, timePointCellRenderer);
-        setRowHeight(new TextWidget().getPreferredSize().height);
+      //TODO should we have to create a TextWidget here?
+        setRowHeight(new TextWidget(eventBus).getPreferredSize().height);
         
         addMouseMotionListener(new MouseMotionAdapter() {
             @Override
@@ -59,8 +61,13 @@ protected int mouseOver;
 	
 	class TimePointCellRenderer extends AbstractCellEditor implements TableCellRenderer, TableCellEditor {
 
-		private TextWidget textRefRenderer = new TextWidget();
-		private TextWidget textRefEditor = new TextWidget();
+		private TextWidget textRefRenderer;
+		private TextWidget textRefEditor;
+		
+		public TimePointCellRenderer() {
+			this.textRefRenderer = new TextWidget(eventBus);
+			this.textRefEditor = new TextWidget(eventBus);
+		}
 		
 	    @Override
 	    public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {

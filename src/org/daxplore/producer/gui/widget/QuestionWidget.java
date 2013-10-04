@@ -11,27 +11,27 @@ import javax.swing.JPanel;
 import javax.swing.SwingConstants;
 
 import org.daxplore.producer.daxplorelib.metadata.MetaQuestion;
-import org.daxplore.producer.gui.MainController;
 import org.daxplore.producer.gui.MainController.Views;
+import org.daxplore.producer.gui.event.ChangeMainViewEvent;
+
+import com.google.common.eventbus.EventBus;
 
 @SuppressWarnings("serial")
 public class QuestionWidget extends AbstractWidgetEditor<MetaQuestion> {
 	
-	public MetaQuestion metaQuestion;
+	private MetaQuestion metaQuestion;
 	
 	private JPanel labelHolder = new JPanel();
 	private JLabel label;
 
 	private JButton gotoButton;
 	
-	public static MainController mainController; //TODO: ugly hack, replace with eventbus
-	
-	public QuestionWidget(MetaQuestion metaQuestion) {
-		this();
+	public QuestionWidget(EventBus eventBus, MetaQuestion metaQuestion) {
+		this(eventBus);
 		setContent(metaQuestion);
 	}
  	
-	public QuestionWidget() {
+	public QuestionWidget(final EventBus eventBus) {
 		setLayout(new BorderLayout(0, 0));
 		add(labelHolder, BorderLayout.WEST);
 		gotoButton = new JButton("");
@@ -41,12 +41,11 @@ public class QuestionWidget extends AbstractWidgetEditor<MetaQuestion> {
 		gotoButton.setContentAreaFilled(false);
 		gotoButton.setBorderPainted(false);
 		gotoButton.setEnabled(true);
-		//gotoButton.setVisible(false);
+		
 		gotoButton.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				//mainController.switchTo(Views.EDITTEXTVIEW, metaQuestion.getFullTextRef());
-				mainController.switchTo(Views.QUESTIONVIEW, metaQuestion);
+				eventBus.post(new ChangeMainViewEvent(Views.QUESTIONVIEW, metaQuestion));
 			}
 		});
 		add(gotoButton, BorderLayout.EAST);

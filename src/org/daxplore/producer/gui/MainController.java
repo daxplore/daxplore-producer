@@ -11,6 +11,7 @@ import org.daxplore.producer.daxplorelib.DaxploreFile;
 import org.daxplore.producer.daxplorelib.metadata.MetaQuestion;
 import org.daxplore.producer.daxplorelib.metadata.textreference.TextReference;
 import org.daxplore.producer.gui.edit.EditTextController;
+import org.daxplore.producer.gui.event.ChangeMainViewEvent;
 import org.daxplore.producer.gui.event.DaxploreFileUpdateEvent;
 import org.daxplore.producer.gui.event.HistoryGoBackEvent;
 import org.daxplore.producer.gui.groups.GroupsController;
@@ -19,8 +20,6 @@ import org.daxplore.producer.gui.open.OpenFileController;
 import org.daxplore.producer.gui.question.QuestionController;
 import org.daxplore.producer.gui.timeseries.TimeSeriesController;
 import org.daxplore.producer.gui.tools.ToolsController;
-import org.daxplore.producer.gui.widget.QuestionWidget;
-import org.daxplore.producer.gui.widget.TextWidget;
 
 import com.google.common.eventbus.EventBus;
 import com.google.common.eventbus.Subscribe;
@@ -47,8 +46,8 @@ public class MainController implements ActionListener {
 	private QuestionController questionController;
 	private TimeSeriesController timeSeriesController;
 	
+	private HistoryItem currentHistoryItem; 
 	private Stack<HistoryItem> history = new Stack<>();
-	private HistoryItem currentCommand;
 	
 	//TODO remove direct spss file reference
 	private File spssFile;
@@ -66,17 +65,12 @@ public class MainController implements ActionListener {
 		public Views view;
 		public Object command;
 		public HistoryItem(Views view, Object command) {
-			super();
 			this.view = view;
 			this.command = command;
 		}
 	}
 	
 	public MainController(JFrame mainWindow) {
-		//TODO: ugly hack, replace with eventbus
-		QuestionWidget.mainController = this;
-		TextWidget.mainController = this;
-		
 		eventBus = new EventBus();
 		eventBus.register(this);
 
@@ -102,6 +96,8 @@ public class MainController implements ActionListener {
 		
 		mainView.setButtonPanelView(buttonPanelView);
 		mainView.setNavigationView(navigationController.getView());
+		
+		currentHistoryItem = new HistoryItem(Views.OPENFILEVIEW, null);
 	}
 	
 	@Subscribe
@@ -111,48 +107,36 @@ public class MainController implements ActionListener {
 	}
 	
 	@Subscribe
-	public void onHistoryGoBack(HistoryGoBackEvent e) {
-		HistoryItem hi = history.pop();
-		doCommand(hi);
-		buttonPanelView.setActiveButton(hi.view);
-		mainView.switchTo(hi.view);
-		setToolbar(hi.view);
-		currentCommand = hi;
-		if(history.empty()) {
-			navigationController.setHistoryAvailible(false);
+	public void onViewChange(ChangeMainViewEvent e) {
+		// Only adds history if it's a completely new view.
+		// Should maybe be changed to take the command into account?
+		if(currentHistoryItem != null && currentHistoryItem.view != e.getView()) {
+			history.push(currentHistoryItem);
+			navigationController.setHistoryAvailible(true);
 		}
+		currentHistoryItem = new HistoryItem(e.getView(), e.getCommand());
+		setView(e.getView(), e.getCommand());
+	}
+
+	@Subscribe
+	public void onHistoryGoBack(HistoryGoBackEvent e) {
+		currentHistoryItem = history.pop();
+		navigationController.setHistoryAvailible(!history.empty());
+		setView(currentHistoryItem.view, currentHistoryItem.command);
 	}
 	
-	public void switchTo(Views view) {
-		mainView.switchTo(view);
+	private void setView(Views view, Object command) {
+		buttonPanelView.setActiveButton(view);
 		setToolbar(view);
-		history.clear();
-		currentCommand = new HistoryItem(view, null);
-	}
-	
-	public void switchTo(Views view, Object command) {
-		HistoryItem hi = new HistoryItem(view, command);
-		history.push(currentCommand);
-		currentCommand = hi;
-		doCommand(hi);
-		buttonPanelView.setActiveButton(hi.view);
-		mainView.switchTo(hi.view);
-		setToolbar(hi.view);
-		navigationController.setHistoryAvailible(true);
-	}
-	
-	public boolean hasHistory() {
-		return history.empty();
-	}
-	
-	private void doCommand(HistoryItem hi) {
-		if(hi.command != null) {
-			switch(hi.view) {
+		mainView.switchTo(view);
+		
+		if(command != null) {
+			switch(view) {
 			case OPENFILEVIEW:
 				break;
 			case EDITTEXTVIEW:
-				if(hi.command instanceof TextReference) {
-					editTextController.jumpToTextReference((TextReference)hi.command);
+				if(command instanceof TextReference) {
+					editTextController.jumpToTextReference((TextReference)command);
 				}
 				break;
 			case GROUPSVIEW:
@@ -160,15 +144,19 @@ public class MainController implements ActionListener {
 			case TOOLSVIEW:
 				break;
 			case QUESTIONVIEW:
-				if(hi.command instanceof MetaQuestion) {
-					questionController.openMetaQuestion((MetaQuestion)hi.command);
+				if(command instanceof MetaQuestion) {
+					questionController.openMetaQuestion((MetaQuestion)command);
 				}
 				break;
 			case TIMESERIESVIEW:
 			default:
-				throw new AssertionError("Undefined history item command: " + hi.view);
+				throw new AssertionError("Undefined history item command: " + view);
 			}
 		}
+	}
+	
+	public boolean hasHistory() {
+		return history.empty();
 	}
 	
 	private void setToolbar(Views view) {
@@ -193,7 +181,7 @@ public class MainController implements ActionListener {
 	public void actionPerformed(ActionEvent e) {
 		try { //from buttonPanelView
 			Views view = Views.valueOf(e.getActionCommand());
-			switchTo(view);
+			eventBus.post(new ChangeMainViewEvent(view));
 		} catch (IllegalArgumentException e2) {
 			//place for other types of buttons
 		}

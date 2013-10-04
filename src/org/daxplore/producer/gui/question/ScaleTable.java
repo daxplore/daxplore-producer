@@ -24,32 +24,31 @@ import org.daxplore.producer.gui.widget.QuestionWidget;
 import org.daxplore.producer.gui.widget.TextWidget;
 import org.daxplore.producer.tools.NumberlineCoverage;
 
+import com.google.common.eventbus.EventBus;
+
 @SuppressWarnings("serial")
 public class ScaleTable extends JTable {
 	
-    static Color listBackground, listSelectionBackground;
-    static {
-        listBackground = new Color(255,255,255);
-        listSelectionBackground = new Color(200, 200, 255);
-    }
+	private Color listBackground = new Color(255,255,255);
+    private Color listSelectionBackground = new Color(200, 200, 255);
 	
 	private int mouseOverRow;
 	private int mouseOverColumn;
 
-	public ScaleTable(ScaleTableModel model) {
+	public ScaleTable(EventBus eventBus, ScaleTableModel model) {
 		super(model);
-		//this.setTableHeader(null);
 		
 		setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
         mouseOverRow = -1;
         mouseOverColumn = -1;
         
-        ScaleCellRenderer cellRenderer = new ScaleCellRenderer();
+        ScaleCellRenderer cellRenderer = new ScaleCellRenderer(eventBus);
         setDefaultRenderer(TextReference.class, cellRenderer);
         setDefaultEditor(TextReference.class, cellRenderer);
         setDefaultRenderer(NumberlineCoverage.class, cellRenderer);
         setDefaultEditor(NumberlineCoverage.class, cellRenderer);
-        setRowHeight(new QuestionWidget().getPreferredSize().height);
+        //TODO should we have to create a QuestionWidget here?
+        setRowHeight(new QuestionWidget(eventBus).getPreferredSize().height);
         
         addMouseMotionListener(new MouseMotionAdapter() {
             @Override
@@ -75,11 +74,16 @@ public class ScaleTable extends JTable {
 		private AbstractWidgetEditor<?> editor;
 		private AbstractWidget<?> renderer;
 		
-		private TextWidget textRenderer = new TextWidget();
-		private TextWidget textEditor = new TextWidget();
+		private TextWidget textRenderer;
+		private TextWidget textEditor;
 		
 		private NumberLineRenderer numberRenderer = new NumberLineRenderer();
 		private NumberLineEditor numberEditor = new NumberLineEditor();
+		
+		public ScaleCellRenderer(EventBus eventBus) {
+			textRenderer = new TextWidget(eventBus);
+			textEditor = new TextWidget(eventBus);
+		}
 		
 	    @Override
 	    public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {

@@ -29,9 +29,10 @@ public class GroupsController implements ActionListener {
 	enum GroupsCommand {
 		GROUP_ADD, GROUP_UP, GROUP_DOWN, GROUP_REMOVE, GROUP_ADD_ITEM,
 		PERSPECTIVE_UP, PERSPECTIVE_DOWN, PERSPECTIVE_REMOVE, PERSPECTIVE_ADD_ITEM,
-		RELOAD_DATA //debug thingy
+		RELOAD_DATA //TODO remove debug thingy
 	}
 	
+	private EventBus eventBus;
 	private Component parentComponent;
 	
 	private DaxploreFile daxploreFile;
@@ -47,7 +48,9 @@ public class GroupsController implements ActionListener {
 	private QuestionTable perspectivesTable;
 	
 	public GroupsController(EventBus eventBus, Component parentComponent) {
+		this.eventBus = eventBus;
 		this.parentComponent = parentComponent;
+		
 		eventBus.register(this);
 		
 		groupsView = new GroupsView(this);
@@ -255,12 +258,12 @@ public class GroupsController implements ActionListener {
 		if(daxploreFile != null) {
 			try {
 				questionTableModel = new QuestionTableModel(daxploreFile.getMetaQuestionManager());
-				questionJTable = new QuestionTable(questionTableModel);
+				questionJTable = new QuestionTable(eventBus, questionTableModel);
 				groupsView.getQuestionsScrollPane().setViewportView(questionJTable);
 				
 				//get groups and perspectives
 				groupTreeModel = new GroupTreeModel(daxploreFile.getMetaGroupManager());
-				groupTree = new GroupTree(groupTreeModel);
+				groupTree = new GroupTree(eventBus, groupTreeModel);
 				groupsView.getGroupsScollPane().setViewportView(groupTree);
 				
 				MetaGroup perspectives = null;
@@ -277,9 +280,8 @@ public class GroupsController implements ActionListener {
 				}
 				
 				perspectivesTableModel = new PerspectivesTableModel(perspectives);
-				perspectivesTable = new QuestionTable(perspectivesTableModel);
+				perspectivesTable = new QuestionTable(eventBus, perspectivesTableModel);
 				groupsView.getPerspectiveScrollPane().setViewportView(perspectivesTable);
-				
 			} catch (DaxploreException | SQLException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();

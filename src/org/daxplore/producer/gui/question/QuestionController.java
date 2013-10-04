@@ -35,6 +35,7 @@ public class QuestionController implements TableModelListener, ActionListener  {
 		ADD, REMOVE, UP, DOWN, INVERT
 	}
 
+	private EventBus eventBus;
 	private DaxploreFile daxploreFile;
 	
 	private QuestionView questionView;
@@ -46,7 +47,7 @@ public class QuestionController implements TableModelListener, ActionListener  {
 	
 	public QuestionController(EventBus eventBus) {
 		eventBus.register(this);
-		questionView = new QuestionView(this);
+		questionView = new QuestionView(eventBus, this);
 	}
 	
 	@Subscribe
@@ -61,7 +62,7 @@ public class QuestionController implements TableModelListener, ActionListener  {
 		
 		scaleTableModel = new ScaleTableModel(metaQuestion.getScale());
 		scaleTableModel.addTableModelListener(this);
-		scaleTable = new ScaleTable(scaleTableModel);
+		scaleTable = new ScaleTable(eventBus, scaleTableModel);
 		questionView.getScaleScrollPane().setViewportView(scaleTable);
 		
 		try {
@@ -83,7 +84,7 @@ public class QuestionController implements TableModelListener, ActionListener  {
 					daxploreFile.getAbout(),
 					metaQuestion);
 			
-			TimePointTable timePointTable = new TimePointTable(timePointTableModel);
+			TimePointTable timePointTable = new TimePointTable(eventBus, timePointTableModel);
 			questionView.getTimePointScrollPane().setViewportView(timePointTable);
 			
 		} catch (SQLException | DaxploreException e) {
@@ -156,7 +157,7 @@ public class QuestionController implements TableModelListener, ActionListener  {
 				if(mq.getScale()==null){
 					mq.setScale(daxploreFile.getMetaScaleManager().create(new LinkedList<Option>(), new NumberlineCoverage()));
 					scaleTableModel = new ScaleTableModel(mq.getScale());
-					scaleTable = new ScaleTable(scaleTableModel);
+					scaleTable = new ScaleTable(eventBus, scaleTableModel);
 					questionView.getScaleScrollPane().setViewportView(scaleTable);
 					questionView.validate();
 				    questionView.repaint();

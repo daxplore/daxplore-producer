@@ -18,28 +18,28 @@ import javax.swing.table.TableModel;
 import org.daxplore.producer.daxplorelib.metadata.MetaQuestion;
 import org.daxplore.producer.gui.widget.QuestionWidget;
 
+import com.google.common.eventbus.EventBus;
+
 @SuppressWarnings("serial")
 public class QuestionTable extends JTable {
 	
 	protected int mouseOver;
 	
-    static Color listBackground, listSelectionBackground;
-    static {
-        listBackground = new Color(255,255,255);
-        listSelectionBackground = new Color(200, 200, 255);
-    }
+    private Color listBackground = new Color(255,255,255);
+    private Color listSelectionBackground = new Color(200, 200, 255);
 	
-	public QuestionTable(TableModel model) {
+	public QuestionTable(EventBus eventBus, TableModel model) {
 		super(model);
-		this.setTableHeader(null);
+		setTableHeader(null);
 		
 		setSelectionMode(ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
         mouseOver = -1;
         
-        QuestionCellRenderer questionCellRenderer = new QuestionCellRenderer();
+        QuestionCellRenderer questionCellRenderer = new QuestionCellRenderer(eventBus);
         setDefaultRenderer(MetaQuestion.class, questionCellRenderer);
         setDefaultEditor(MetaQuestion.class, questionCellRenderer);
-        setRowHeight(new QuestionWidget().getPreferredSize().height);
+        //TODO should we have to create a QuestionWidget here?
+        setRowHeight(new QuestionWidget(eventBus).getPreferredSize().height);
         
         addMouseMotionListener(new MouseMotionAdapter() {
             @Override
@@ -60,8 +60,13 @@ public class QuestionTable extends JTable {
 	
 	class QuestionCellRenderer extends AbstractCellEditor implements TableCellRenderer, TableCellEditor {
 
-		private QuestionWidget qwRenderer = new QuestionWidget();
-		private QuestionWidget qwEditor = new QuestionWidget();
+		private QuestionWidget qwRenderer;
+		private QuestionWidget qwEditor;
+		
+		public QuestionCellRenderer(EventBus eventBus) {
+			qwRenderer = new QuestionWidget(eventBus);
+			qwEditor = new QuestionWidget(eventBus);
+		}
 		
 	    @Override
 	    public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {

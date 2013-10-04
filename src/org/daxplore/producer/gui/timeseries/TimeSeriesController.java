@@ -32,6 +32,7 @@ public class TimeSeriesController implements ActionListener, DocumentListener {
 		ADD, UP, DOWN, REMOVE, SET_COLUMN
 	}
 	
+	private EventBus eventBus;
 	private DaxploreFile daxploreFile;
 	
 	private TimeSeriesTableModel timeSeriesTableModel;
@@ -39,6 +40,7 @@ public class TimeSeriesController implements ActionListener, DocumentListener {
 	private TimeSeriesView timeSeriesView;
 	
 	public TimeSeriesController(EventBus eventBus) {
+		this.eventBus = eventBus; 
 		eventBus.register(this);
 		timeSeriesView = new TimeSeriesView(this);
 	}
@@ -165,7 +167,7 @@ public class TimeSeriesController implements ActionListener, DocumentListener {
 	public void loadData() {
 		if(daxploreFile != null) {
 			timeSeriesTableModel = new TimeSeriesTableModel(daxploreFile.getMetaTimepointShortManager());
-			timeSeriesTable = new TimeSeriesTable(timeSeriesTableModel);
+			timeSeriesTable = new TimeSeriesTable(eventBus, timeSeriesTableModel);
 			timeSeriesView.getTimeSeriesScrollPane().setViewportView(timeSeriesTable);
 			timeSeriesView.setTimeSeriesColumn(daxploreFile.getAbout().getTimeSeriesShortColumn());
 		}

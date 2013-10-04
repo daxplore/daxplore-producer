@@ -22,14 +22,16 @@ import org.daxplore.producer.daxplorelib.metadata.MetaScale.Option;
 import org.daxplore.producer.gui.question.QuestionController.QuestionCommand;
 import org.daxplore.producer.gui.widget.TextWidget;
 
+import com.google.common.eventbus.EventBus;
+
 @SuppressWarnings("serial")
 public class QuestionView extends JPanel {
 	
 	private JLabel questionID;
 	private JPanel fullTextRefHolder;
 	private JPanel shortTextRefHolder;
-	private TextWidget fullText = new TextWidget();
-	private TextWidget shortText = new TextWidget();
+	private TextWidget fullText;
+	private TextWidget shortText;
 	private JScrollPane scaleScrollPane;
 	private JScrollPane beforeScrollPane;
 	private JScrollPane afterScrollPane;
@@ -52,7 +54,10 @@ public class QuestionView extends JPanel {
 		}
 	}
 	
-	public QuestionView(ActionListener actionListener) {
+	public QuestionView(EventBus eventBus, ActionListener actionListener) {
+		fullText = new TextWidget(eventBus);
+		shortText = new TextWidget(eventBus);
+		
 		setLayout(new BorderLayout(0, 0));
 		
 		JPanel panel = new JPanel();

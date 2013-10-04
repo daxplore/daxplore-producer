@@ -24,30 +24,28 @@ import org.daxplore.producer.gui.widget.QuestionWidget;
 import org.daxplore.producer.gui.widget.TextWidget;
 import org.daxplore.producer.tools.NumberlineCoverage;
 
+import com.google.common.eventbus.EventBus;
+
 @SuppressWarnings("serial")
 public class TimePointTable extends JTable {
 
-    static Color listBackground, listSelectionBackground;
-    static {
-        listBackground = new Color(255,255,255);
-        listSelectionBackground = new Color(200, 200, 255);
-    }
+	private Color listBackground = new Color(255,255,255);
+	private Color listSelectionBackground = new Color(200, 200, 255);
 	
 	private int mouseOverRow;
 	private int mouseOverColumn;
 
-	public TimePointTable(TimePointTableModel model) {
+	public TimePointTable(EventBus eventBus, TimePointTableModel model) {
 		super(model);
-		//this.setTableHeader(null);
-		
 		setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
         mouseOverRow = -1;
         mouseOverColumn = -1;
         
-        TimePointCellRenderer cellRenderer = new TimePointCellRenderer();
+        TimePointCellRenderer cellRenderer = new TimePointCellRenderer(eventBus);
         setDefaultRenderer(TextReference.class, cellRenderer);
         setDefaultEditor(TextReference.class, cellRenderer);
-        setRowHeight(new QuestionWidget().getPreferredSize().height);
+        //TODO should we have to create a QuestionWidget here?
+        setRowHeight(new QuestionWidget(eventBus).getPreferredSize().height);
         
         addMouseMotionListener(new MouseMotionAdapter() {
             @Override
@@ -73,11 +71,16 @@ public class TimePointTable extends JTable {
 		private AbstractWidgetEditor<?> editor;
 		private AbstractWidget<?> renderer;
 		
-		private TextWidget textRenderer = new TextWidget();
-		private TextWidget textEditor = new TextWidget();
+		private TextWidget textRenderer;
+		private TextWidget textEditor;
 		
 		private NumberLineRenderer numberRenderer = new NumberLineRenderer();
 		private NumberLineEditor numberEditor = new NumberLineEditor();
+		
+		public TimePointCellRenderer(EventBus eventBus) {
+			textRenderer = new TextWidget(eventBus);
+			textEditor = new TextWidget(eventBus);
+		}
 		
 	    @Override
 	    public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
