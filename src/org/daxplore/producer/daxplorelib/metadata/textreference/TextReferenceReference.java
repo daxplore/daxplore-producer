@@ -36,7 +36,10 @@ class TextReferenceReference implements Comparable<TextReferenceReference> {
 	 */
 	@Override
 	public boolean equals(Object obj) {
-		if (this == obj || obj == null || getClass() != obj.getClass()) {
+		if (this == obj) {
+			return true;
+		}
+		if (obj == null || getClass() != obj.getClass()) {
 			return false;
 		}
 		TextReferenceReference other = (TextReferenceReference) obj;
