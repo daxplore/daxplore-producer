@@ -8,6 +8,7 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
 
+import org.daxplore.producer.daxplorelib.DaxploreException;
 import org.opendatafoundation.data.FileFormatInfo;
 import org.opendatafoundation.data.FileFormatInfo.ASCIIFormat;
 import org.opendatafoundation.data.FileFormatInfo.Compatibility;
@@ -17,7 +18,7 @@ import org.opendatafoundation.data.spss.SPSSVariable;
 
 public class SPSSTools {
 	
-	public static Set<String> getNonAsciiStrings(File spssFile, Charset charset) throws Exception {
+	public static Set<String> getNonAsciiStrings(File spssFile, Charset charset) throws DaxploreException {
 		Set<String> stringSet = new HashSet<>();
 		Charset ascii = Charset.forName("US-ASCII");
 		CharsetEncoder asciiEncoder = ascii.newEncoder();
@@ -58,7 +59,7 @@ public class SPSSTools {
 		} catch (SPSSFileException | IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
-			throw new Exception("Couldn't open file");
+			throw new DaxploreException("Couldn't open file");
 		}
 		return stringSet;
 	}

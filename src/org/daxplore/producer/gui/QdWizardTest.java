@@ -1,5 +1,6 @@
 package org.daxplore.producer.gui;
 
+import java.awt.BorderLayout;
 import java.awt.TextField;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -8,20 +9,39 @@ import java.beans.PropertyChangeListener;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.nio.charset.Charset;
 import java.nio.file.Files;
+import java.util.Locale;
+import java.util.Set;
+import java.util.SortedMap;
 
+import javax.swing.BorderFactory;
+import javax.swing.BoxLayout;
+import javax.swing.DefaultComboBoxModel;
 import javax.swing.JButton;
+import javax.swing.JComboBox;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
+import javax.swing.JLabel;
+import javax.swing.JList;
+import javax.swing.JOptionPane;
+import javax.swing.JPanel;
+import javax.swing.JScrollPane;
 import javax.swing.JTextField;
+import javax.swing.JViewport;
 import javax.swing.filechooser.FileFilter;
 import javax.swing.filechooser.FileNameExtensionFilter;
 
+import org.daxplore.producer.daxplorelib.DaxploreException;
+import org.daxplore.producer.gui.importwizard.CharsetPanel;
+import org.daxplore.producer.tools.CharsetTest;
+import org.daxplore.producer.tools.SPSSTools;
 import org.opendatafoundation.data.spss.SPSSFile;
 import org.opendatafoundation.data.spss.SPSSFileException;
 import org.qdwizard.Screen;
 import org.qdwizard.Wizard;
 
+import com.google.appengine.repackaged.com.google.common.base.Objects.ToStringHelper;
 import com.google.common.base.Charsets;
 import com.google.common.base.Strings;
 
@@ -110,7 +130,6 @@ public class QdWizardTest extends Wizard{
 			add(fileNameTextField);
 			add(chooseButton);
 			setProblem("No file selected");
-			setCanFinish(true);
 		}
 
 		@Override
@@ -152,40 +171,171 @@ public class QdWizardTest extends Wizard{
 		}
 	}
 	
-	public static class ChooseEncodingPanel extends Screen {
+	public static class ChooseEncodingPanel extends Screen implements ActionListener {
 
+		private enum TextCommand {
+			ENCODING, LOCALE
+		}
+
+		private static final String ENCODING_COMBO_BOX_LIST_LABEL = "<Select encoding type>"; //TODO: externalize
+		private static final String LOCALE_COMBO_BOX_LIST_LABEL = "<Select a language>";
+		private static final String COMBO_BOX_SEPARATOR =  "----------------------";
+		
+		private boolean validLocale = false;
+		private boolean validEncoding = false;
+		
+		private JScrollPane encodingListPanel;
+		
 		@Override
 		public String getName() {
-			// TODO Auto-generated method stub
-			return null;
+			return "Choose encoding and language";
 		}
 
 		@Override
 		public String getDescription() {
-			// TODO Auto-generated method stub
-			return null;
+			return "To import metadata correctly we need to know what language and character encoding the SPSS file uses. " + 
+					"If you don't know what character set to use, try different ones until the strings below look right";
+		}
+		
+		private class DisplayLocale {
+			public Locale locale;
+			public String alternativeText;
+			public DisplayLocale(Locale locale) {
+				this.locale = locale;
+			}
+			public DisplayLocale(String text) {
+				alternativeText = text;
+			}
+			public String toString() {
+				if(locale!=null) {
+					return locale.getDisplayLanguage(Locale.ENGLISH);
+				} else {
+					return alternativeText;
+				}
+			}
+		}
+		
+		@Override
+		public void initUI() {
+			setLayout(new BorderLayout(0, 0));
+			
+			JPanel localePanel = new JPanel();
+			localePanel.setBorder(BorderFactory.createTitledBorder("Select language"));
+			JComboBox<DisplayLocale> localeComboBox = new JComboBox<>();
+			localePanel.add(localeComboBox);
+			//TODO better locale handling
+			localeComboBox.addItem(new DisplayLocale(LOCALE_COMBO_BOX_LIST_LABEL));
+			localeComboBox.addItem(new DisplayLocale(COMBO_BOX_SEPARATOR));
+			localeComboBox.addItem(new DisplayLocale(new Locale("sv")));
+			localeComboBox.addItem(new DisplayLocale(Locale.ENGLISH));
+			localeComboBox.setActionCommand(TextCommand.LOCALE.toString());
+			localeComboBox.addActionListener(this);
+			add(localePanel, BorderLayout.NORTH);
+			
+			
+			JPanel encodingPanel = new JPanel(new BorderLayout());
+			encodingPanel.setBorder(BorderFactory.createTitledBorder("Select character encoding"));
+			JComboBox<String> encodingComboBox = new JComboBox<>();
+			// TODO let guava charset manager upply suggested charsets
+			encodingComboBox.addItem(ENCODING_COMBO_BOX_LIST_LABEL);
+			encodingComboBox.addItem("US-ASCII");
+			encodingComboBox.addItem("UTF-8");
+			encodingComboBox.addItem("ISO-8859-1");
+			encodingComboBox.addItem("windows-1252");
+			encodingComboBox.addItem(COMBO_BOX_SEPARATOR);
+			SortedMap<String, Charset> cset = Charset.availableCharsets();
+			for (String charname : cset.keySet()) {
+				if(CharsetTest.charset8bitTest(cset.get(charname))){
+					encodingComboBox.addItem(charname);
+				}
+			}
+			encodingPanel.add(encodingComboBox, BorderLayout.NORTH);
+			encodingComboBox.setActionCommand(TextCommand.ENCODING.toString());
+			encodingComboBox.addActionListener(this);
+			
+			encodingListPanel = new JScrollPane();
+			encodingListPanel.setBounds(0, 0, 0, -36);
+			JPanel tablePanel = new JPanel();
+			encodingListPanel.setViewportView(tablePanel);
+			encodingPanel.add(encodingListPanel, BorderLayout.CENTER);
+
+			add(encodingPanel, BorderLayout.CENTER);
+			
+			updateWizardProblem();
 		}
 
 		@Override
-		public void initUI() {
-			// TODO Auto-generated method stub
+		public void actionPerformed(ActionEvent e) {
+			switch (TextCommand.valueOf(e.getActionCommand())) {
+			case LOCALE:
+				validLocale = false;
+				JComboBox<DisplayLocale> localeSource = (JComboBox<DisplayLocale>) e.getSource();
+				
+				Locale locale = ((DisplayLocale)localeSource.getSelectedItem()).locale;
+				if(locale != null) {
+					data.put("locale", locale);
+					validLocale = true;
+				}
+				break;
+			case ENCODING:
+				validEncoding = false;
+				JComboBox<String> charsetSource = (JComboBox<String>) e.getSource();
+				
+				String charsetType = (String) charsetSource.getSelectedItem();
+				if (charsetType.equals(ENCODING_COMBO_BOX_LIST_LABEL) || charsetType.equals(COMBO_BOX_SEPARATOR)) {
+					return;
+				}
+				
+				if(charsetType != null && !charsetType.isEmpty()) {
+					Charset charset = Charset.forName(charsetType);
+					try {
+						Set<String> encodedStrings = SPSSTools.getNonAsciiStrings((File)data.get("spssFile"), charset);
+						
+						DefaultComboBoxModel<String> stringList = new DefaultComboBoxModel<>();
+						for (String es : encodedStrings) {
+							stringList.addElement(es);
+						}
+						
+						JList<String> encodedStringsList = new JList<>(stringList);
+						
+						System.out.println("List Size: "+ encodedStrings.size());
+						data.put("charset", charset);
+						encodingListPanel.getViewport().setView(encodedStringsList);
+						encodingListPanel.validate();
+						validEncoding = true;
+					} catch (DaxploreException e1) {
+						setProblem("Unsupported encoding");
+					}
+				}
+				break;
+			default:
+				throw new AssertionError("Not defined: " + e.getActionCommand());
+			}
 			
+			updateWizardProblem();
 		}
 		
+		private void updateWizardProblem() {
+			if(!validLocale) {
+				setProblem("Select a language");
+			} else if(!validEncoding) {
+				setProblem("Select an encoding");
+			} else {
+				setProblem(null);
+			}
+		}
 	}
 	
 	public static class ReviewDataPanel extends Screen {
 
 		@Override
 		public String getName() {
-			// TODO Auto-generated method stub
-			return null;
+			return "Review your data";
 		}
 
 		@Override
 		public String getDescription() {
-			// TODO Auto-generated method stub
-			return null;
+			return "Make sure that all your data looks right before finalizing the import";
 		}
 
 		@Override
@@ -225,6 +375,8 @@ public class QdWizardTest extends Wizard{
 	public Class<? extends Screen> getNextScreen(Class<? extends Screen> screen) {
 		if(CreateFilePanel.class.equals(screen)) {
 			return OpenSPSSPanel.class;
+		} else if(OpenSPSSPanel.class.equals(screen)) {
+			return ChooseEncodingPanel.class;
 		}
 		return null;
 	}
