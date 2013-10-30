@@ -1,39 +1,29 @@
 package org.daxplore.producer.gui;
 
 import java.awt.BorderLayout;
-import java.awt.TextField;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.beans.PropertyChangeEvent;
-import java.beans.PropertyChangeListener;
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.nio.charset.Charset;
-import java.nio.file.Files;
 import java.util.Locale;
 import java.util.Set;
 import java.util.SortedMap;
 
 import javax.swing.BorderFactory;
-import javax.swing.BoxLayout;
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
-import javax.swing.JLabel;
 import javax.swing.JList;
-import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTextField;
-import javax.swing.JViewport;
 import javax.swing.filechooser.FileFilter;
 import javax.swing.filechooser.FileNameExtensionFilter;
 
 import org.daxplore.producer.daxplorelib.DaxploreException;
-import org.daxplore.producer.gui.importwizard.CharsetPanel;
 import org.daxplore.producer.tools.CharsetTest;
 import org.daxplore.producer.tools.SPSSTools;
 import org.opendatafoundation.data.spss.SPSSFile;
@@ -41,9 +31,7 @@ import org.opendatafoundation.data.spss.SPSSFileException;
 import org.qdwizard.Screen;
 import org.qdwizard.Wizard;
 
-import com.google.appengine.repackaged.com.google.common.base.Objects.ToStringHelper;
 import com.google.common.base.Charsets;
-import com.google.common.base.Strings;
 
 @SuppressWarnings("serial")
 public class QdWizardTest extends Wizard{
@@ -225,7 +213,6 @@ public class QdWizardTest extends Wizard{
 			localePanel.add(localeComboBox);
 			//TODO better locale handling
 			localeComboBox.addItem(new DisplayLocale(LOCALE_COMBO_BOX_LIST_LABEL));
-			localeComboBox.addItem(new DisplayLocale(COMBO_BOX_SEPARATOR));
 			localeComboBox.addItem(new DisplayLocale(new Locale("sv")));
 			localeComboBox.addItem(new DisplayLocale(Locale.ENGLISH));
 			localeComboBox.setActionCommand(TextCommand.LOCALE.toString());
@@ -236,12 +223,10 @@ public class QdWizardTest extends Wizard{
 			JPanel encodingPanel = new JPanel(new BorderLayout());
 			encodingPanel.setBorder(BorderFactory.createTitledBorder("Select character encoding"));
 			JComboBox<String> encodingComboBox = new JComboBox<>();
-			// TODO let guava charset manager upply suggested charsets
 			encodingComboBox.addItem(ENCODING_COMBO_BOX_LIST_LABEL);
-			encodingComboBox.addItem("US-ASCII");
-			encodingComboBox.addItem("UTF-8");
-			encodingComboBox.addItem("ISO-8859-1");
-			encodingComboBox.addItem("windows-1252");
+			encodingComboBox.addItem(Charsets.US_ASCII.name());
+			encodingComboBox.addItem(Charsets.UTF_8.name());
+			encodingComboBox.addItem(Charsets.ISO_8859_1.name());
 			encodingComboBox.addItem(COMBO_BOX_SEPARATOR);
 			SortedMap<String, Charset> cset = Charset.availableCharsets();
 			for (String charname : cset.keySet()) {
@@ -298,7 +283,6 @@ public class QdWizardTest extends Wizard{
 						
 						JList<String> encodedStringsList = new JList<>(stringList);
 						
-						System.out.println("List Size: "+ encodedStrings.size());
 						data.put("charset", charset);
 						encodingListPanel.getViewport().setView(encodedStringsList);
 						encodingListPanel.validate();
