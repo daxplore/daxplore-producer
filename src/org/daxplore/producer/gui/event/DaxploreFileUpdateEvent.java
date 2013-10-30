@@ -4,6 +4,7 @@ import org.daxplore.producer.daxplorelib.DaxploreFile;
 
 public class DaxploreFileUpdateEvent {
 	private DaxploreFile daxploreFile;
+	
 	public DaxploreFileUpdateEvent(DaxploreFile daxploreFile) {
 		this.daxploreFile = daxploreFile;
 	}

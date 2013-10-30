@@ -35,7 +35,7 @@ public class MainView {
 	 * Do not move the main() method from this file as it will
 	 * break windowbuilder parsing.
 	 */
-	public static void main(String[] args) {
+	/*public static void main(String[] args) {
 		try {
 			DaxploreLogger.setup();
 		} catch (IOException e2) {
@@ -80,7 +80,7 @@ public class MainView {
 				window.setVisible(true);
 			}
 		});
-	}
+	}*/
 	
 	MainView(JFrame mainWindow) {
 		this.mainWindow = mainWindow;

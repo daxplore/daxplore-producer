@@ -4,6 +4,8 @@ import java.nio.BufferUnderflowException;
 import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
 import java.util.SortedMap;
+
+import com.google.common.base.Charsets;
  
 public class CharsetTest {
  
@@ -37,7 +39,10 @@ public class CharsetTest {
 			} catch (BufferUnderflowException e) {
 				System.out.print(" -end- ");
 			}
-			System.out.print("(" + s + " bytes)\n");
+			System.out.print("(" + s + " bytes)");
+			System.out.print(charset8bitTest(c)? " 8": " !8");
+			System.out.print(charsetSPSSTest(c)? " s": " !s");
+			System.out.print("\n");
 		}
 	}
 	
@@ -67,5 +72,25 @@ public class CharsetTest {
 			
 		}
 		return s == 3;
+	}
+	
+	public static boolean charsetSPSSTest(Charset charset) {
+		String origin = "$FL2";
+		byte[] data = origin.getBytes(Charsets.US_ASCII);
+		String testString = new String(data, charset); 
+		
+		if(!origin.equals(testString)) {
+			return false;
+		}
+		
+		try {
+			charset.encode(testString);
+			
+		} catch (UnsupportedOperationException e) {
+			return false;
+		}
+		
+		
+		return true;
 	}
 }

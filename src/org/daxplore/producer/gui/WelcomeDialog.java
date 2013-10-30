@@ -17,6 +17,13 @@ import javax.swing.UIManager.LookAndFeelInfo;
 import javax.swing.UnsupportedLookAndFeelException;
 import javax.swing.filechooser.FileNameExtensionFilter;
 
+import org.daxplore.producer.daxplorelib.DaxploreException;
+import org.daxplore.producer.daxplorelib.DaxploreFile;
+import org.daxplore.producer.gui.event.DaxploreFileUpdateEvent;
+
+import com.google.common.eventbus.EventBus;
+import com.google.common.eventbus.Subscribe;
+
 public class WelcomeDialog {
 
 	private JFrame welcomeFrame;
@@ -71,8 +78,12 @@ public class WelcomeDialog {
 		});
 	}
 	
+	EventBus eventBus = new EventBus();
+	
 	public WelcomeDialog() {
+		eventBus.register(this);
 		welcomeFrame = new JFrame();
+		
 		
 		welcomeFrame.setSize(500, 300);
 		welcomeFrame.setLocationRelativeTo(null);
@@ -85,7 +96,8 @@ public class WelcomeDialog {
 		newProjectButton.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				
+				CreateFileWizard wizard = new CreateFileWizard(welcomeFrame, eventBus);
+				wizard.show();
 			}
 		});
 		welcomeFrame.add(newProjectButton);
@@ -103,24 +115,17 @@ public class WelcomeDialog {
 			    	Settings.setWorkingDirectory(fileChooser.getCurrentDirectory());
 					final File file = fileChooser.getSelectedFile();
 					System.out.println("Opening: " + file.getName() + ".");
-					EventQueue.invokeLater(new Runnable() {
-						@Override
-						public void run() {
-							try {
-								JFrame window = new JFrame();
-								MainController mainController = new MainController(window);
-								window.setVisible(true);
-								//TODO WIP: welcome dialog is being worked on
-								//window.mainControllerFrame.setVisible(true);
-								//window.mainController.setDaxploreFile(DaxploreFile.createFromExistingFile(file));
-								//window.mainController.updateStuff();
-								//welcomeFrame.setVisible(false);
-								//welcomeFrame.dispose();
-							} catch (Exception e1) {
-								e1.printStackTrace();
-							}
-						}
-					});
+					
+					try {
+						DaxploreFile daxploreFile = DaxploreFile.createFromExistingFile(file);
+						eventBus.post(new DaxploreFileUpdateEvent(daxploreFile));
+					} catch (DaxploreException e2) {
+						// TODO Auto-generated catch block
+						e2.printStackTrace();
+					}
+					
+					
+
 				} else {
 					System.out.println("Open command cancelled by user.");
 				}
@@ -128,5 +133,25 @@ public class WelcomeDialog {
 			}
 		});
 		welcomeFrame.add(existingProjectButton);
+	}
+	
+	@Subscribe
+	public void onHasDaxploreFile(final DaxploreFileUpdateEvent event) {
+		eventBus.unregister(this);
+
+		EventQueue.invokeLater(new Runnable() {
+			@Override
+			public void run() {
+				try {
+					JFrame window = new JFrame();
+					MainController mainController = new MainController(window, eventBus, event.getDaxploreFile());
+					
+					welcomeFrame.setVisible(false);
+					welcomeFrame.dispose();
+				} catch (Exception e1) {
+					e1.printStackTrace();
+				}
+			}
+		});
 	}
 }

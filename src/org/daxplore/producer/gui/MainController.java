@@ -70,10 +70,12 @@ public class MainController implements ActionListener {
 		}
 	}
 	
-	public MainController(JFrame mainWindow) {
-		eventBus = new EventBus();
+	public MainController(JFrame mainWindow, EventBus eventBus, DaxploreFile daxploreFile) {
+		this.eventBus = eventBus;
 		eventBus.register(this);
-
+		
+		this.daxploreFile = daxploreFile;
+		
 		//TODO remove *this* as an argument, only needed for old import wizard
 		openFileController = new OpenFileController(eventBus, mainWindow, this);
 		groupsController = new GroupsController(eventBus, mainWindow);
@@ -98,6 +100,8 @@ public class MainController implements ActionListener {
 		mainView.setNavigationView(navigationController.getView());
 		
 		currentHistoryItem = new HistoryItem(Views.OPENFILEVIEW, null);
+		
+		eventBus.post(new DaxploreFileUpdateEvent(daxploreFile));
 	}
 	
 	@Subscribe
@@ -207,12 +211,7 @@ public class MainController implements ActionListener {
 	public DaxploreFile getDaxploreFile() {
 		return daxploreFile;
 	}
-
-	// TODO replace with daxploreFileUpdate
-	public void setDaxploreFile(DaxploreFile daxploreFile) {
-		this.daxploreFile = daxploreFile;
-	}
-
+	
 	public File getSpssFile() {
 		return spssFile;
 	}

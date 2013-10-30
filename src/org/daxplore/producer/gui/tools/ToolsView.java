@@ -25,16 +25,6 @@ public class ToolsView extends JPanel {
 	
 	ToolsView(ActionListener listener) {
 		setLayout(null);
-
-		JButton importFromRawButton = new JButton("ImportFromRaw");
-		importFromRawButton.setActionCommand(ToolsCommand.IMPORT.toString());
-		importFromRawButton.setBounds(12, 67, 145, 25);
-		importFromRawButton.addActionListener(listener);
-		add(importFromRawButton);
-		
-		JLabel lblEnterLocale = new JLabel("Enter locale");
-		lblEnterLocale.setBounds(12, 12, 117, 15);
-		add(lblEnterLocale);
 		
 		textField = new JTextField();
 		textField.setBounds(147, 10, 114, 19);
