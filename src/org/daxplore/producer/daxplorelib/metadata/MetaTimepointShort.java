@@ -137,6 +137,17 @@ public class MetaTimepointShort implements Comparable<MetaTimepointShort> {
 			}
 		}
 		
+		public int getUnsavedChangesCount() {
+			int nModified = 0;
+			for(MetaTimepointShort timepoint : pointMap.values()) {
+				if(timepoint.modified) {
+					nModified++;
+				}
+			}
+			
+			return nModified + toBeAdded.size() + toBeRemoved.size();
+		}
+		
 		public List<MetaTimepointShort> getAll() throws DaxploreException {
 			// make sure all timepoints are cached before returning the content of the map
 			try (Statement stmt = connection.createStatement();

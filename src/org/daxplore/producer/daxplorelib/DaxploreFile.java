@@ -185,6 +185,15 @@ public class DaxploreFile implements Closeable {
 		Logger.getGlobal().log(Level.INFO, "Save successful");
 	}
 	
+	public int getUnsavedChangesCount() {
+		return metaGroupManager.getUnsavedChangesCount() + 
+				metaQuestionManager.getUnsavedChangesCount() + 
+				metaScaleManager.getUnsavedChangesCount() + 
+				metaTimepointShortManager.getUnsavedChangesCount() + 
+				textReferenceManager.getUnsavedChangesCount() + 
+				about.getUnsavedChangesCount();
+	}
+	
 	@Override
 	public void close() throws IOException {
 		try {

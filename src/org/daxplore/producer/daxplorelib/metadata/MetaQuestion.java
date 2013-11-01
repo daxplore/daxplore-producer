@@ -163,7 +163,7 @@ public class MetaQuestion {
 						mq.timemodified = false;
 					}
 				}
-				
+				//TODO: add new ones before changing the modified ones and set modified flag to false??
 				for(MetaQuestion mq: toBeAdded) {
 					nNew++;
 					insertStmt.setString(1, mq.id);
@@ -205,6 +205,21 @@ public class MetaQuestion {
 				String logString = String.format("MetaQuestion: Saved %d (%d new), %d removed, %d timepoints changed", nModified+nNew, nNew, nRemoved, nTimePoint);
 				Logger.getGlobal().log(Level.INFO, logString);
 			}
+		}
+		
+		public int getUnsavedChangesCount() {
+			int nModified = 0, nTimePoint = 0;
+			
+			for(MetaQuestion mq: questionMap.values()) {
+				if(mq.modified) {
+					nModified++;
+				}
+				if(mq.timemodified) {
+					nTimePoint++;
+				}
+			}
+			
+			return toBeAdded.size() + toBeRemoved.size() + nModified + nTimePoint;
 		}
 		
 		public List<MetaQuestion> getAll() throws DaxploreException {

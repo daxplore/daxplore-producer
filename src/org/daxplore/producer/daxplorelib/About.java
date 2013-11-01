@@ -159,6 +159,10 @@ public class About {
 		}
 	}
 	
+	public int getUnsavedChangesCount() {
+		return (modified ? 1 : 0) + (localesModified ? 1 : 0);
+	}
+	
 	public Date getCreationDate() {
 		return creation;
 	}

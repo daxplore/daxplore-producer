@@ -200,6 +200,17 @@ public class MetaGroup implements Comparable<MetaGroup> {
 				Logger.getGlobal().log(Level.INFO, logString);
 			}
 		}
+		
+		public int getUnsavedChangesCount() {
+			int nModified = 0;
+			for (MetaGroup mg : groupMap.values()) {
+				if (mg.modified) {
+					nModified++;
+				}
+			}
+			
+			return nModified + toBeAddedGroup.size() + toBeAddedGroupRel.size() + toBeRemoved.size();
+		}
 
 		public List<MetaGroup> getAll() throws DaxploreException {
 			// make sure all groups are cached before returning the content of

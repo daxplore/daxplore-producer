@@ -154,6 +154,17 @@ public class TextReferenceManager {
 		}
 	}
 	
+	public int getUnsavedChangesCount() {
+		int nModified = 0;
+		for(TextReferenceReference trr: textTree) {
+			TextReference tr = (TextReference)trr;
+			if(tr.modified) {
+				nModified++;
+			}
+		}
+		
+		return nModified + toBeRemoved.size();
+	}
 
 	public List<Locale> getAllLocales() throws DaxploreException { //TODO read from local data, load from databse
 		List<Locale> list = new LinkedList<>();

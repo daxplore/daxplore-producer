@@ -223,6 +223,19 @@ public class MetaScale {
 			}
 		}
 		
+		public int getUnsavedChangesCount() {
+			int nModified = 0, nOptionModified = 0;
+			for(MetaScale ms: scaleMap.values()) {
+				if(ms.modified) {
+					nModified++;
+				}
+				if(ms.structureChanged) {
+					nOptionModified++;
+				}
+			}			
+			return toBeRemoved.size() + nModified + nOptionModified;
+		}
+		
 		public List<MetaScale> getAll() throws SQLException, DaxploreException {
 			// make sure all scales are cached before returning the content of the map
 			try(Statement stmt = connection.createStatement();
