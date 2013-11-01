@@ -7,7 +7,7 @@ import javax.swing.table.DefaultTableModel;
 
 import org.daxplore.producer.daxplorelib.About;
 import org.daxplore.producer.gui.Settings;
-import org.daxplore.producer.gui.event.LocaleUpdateEvent;
+import org.daxplore.producer.gui.event.EmptyEvents.LocaleUpdateEvent;
 
 import com.google.common.eventbus.EventBus;
 

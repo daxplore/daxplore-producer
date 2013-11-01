@@ -19,7 +19,7 @@ import org.daxplore.producer.daxplorelib.metadata.textreference.TextReference;
 import org.daxplore.producer.daxplorelib.metadata.textreference.TextReferenceManager;
 import org.daxplore.producer.gui.Settings;
 import org.daxplore.producer.gui.event.DaxploreFileUpdateEvent;
-import org.daxplore.producer.gui.event.RawImportEvent;
+import org.daxplore.producer.gui.event.EmptyEvents.RawImportEvent;
 
 import com.google.common.eventbus.EventBus;
 import com.google.common.eventbus.Subscribe;

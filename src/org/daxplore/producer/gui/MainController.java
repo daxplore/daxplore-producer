@@ -7,13 +7,16 @@ import java.util.Stack;
 
 import javax.swing.JFrame;
 
+import org.daxplore.producer.daxplorelib.DaxploreException;
 import org.daxplore.producer.daxplorelib.DaxploreFile;
 import org.daxplore.producer.daxplorelib.metadata.MetaQuestion;
 import org.daxplore.producer.daxplorelib.metadata.textreference.TextReference;
 import org.daxplore.producer.gui.edit.EditTextController;
 import org.daxplore.producer.gui.event.ChangeMainViewEvent;
 import org.daxplore.producer.gui.event.DaxploreFileUpdateEvent;
-import org.daxplore.producer.gui.event.HistoryGoBackEvent;
+import org.daxplore.producer.gui.event.EmptyEvents.HistoryGoBackEvent;
+import org.daxplore.producer.gui.event.EmptyEvents.QuitProgramEvent;
+import org.daxplore.producer.gui.event.EmptyEvents.SaveFileEvent;
 import org.daxplore.producer.gui.groups.GroupsController;
 import org.daxplore.producer.gui.navigation.NavigationController;
 import org.daxplore.producer.gui.open.OpenFileController;
@@ -34,6 +37,7 @@ public class MainController implements ActionListener {
 	
 	private EventBus eventBus;
 	private DaxploreFile daxploreFile = null;
+	private JFrame mainWindow;
 
 	private MainView mainView;
 	private ButtonPanelView buttonPanelView;
@@ -51,6 +55,7 @@ public class MainController implements ActionListener {
 	
 	//TODO remove direct spss file reference
 	private File spssFile;
+	private MenuBarController menuBarController;
 
 	public enum Views {
 		OPENFILEVIEW,
@@ -73,10 +78,12 @@ public class MainController implements ActionListener {
 	public MainController(JFrame mainWindow, EventBus eventBus, DaxploreFile daxploreFile) {
 		this.eventBus = eventBus;
 		eventBus.register(this);
+		this.mainWindow = mainWindow;
 		
 		this.daxploreFile = daxploreFile;
 		
 		//TODO remove *this* as an argument, only needed for old import wizard
+		menuBarController = new MenuBarController(eventBus);
 		openFileController = new OpenFileController(eventBus, mainWindow, this);
 		groupsController = new GroupsController(eventBus, mainWindow);
 		editTextController = new EditTextController(eventBus);
@@ -88,7 +95,9 @@ public class MainController implements ActionListener {
 		buttonPanelView = new ButtonPanelView(this);
 
 		mainView = new MainView(mainWindow);
-
+		
+		mainWindow.setJMenuBar(menuBarController.getView());
+		
 		mainView.addView(openFileController.getView(), Views.OPENFILEVIEW);
 		mainView.addView(groupsController.getView(), Views.GROUPSVIEW);
 		mainView.addView(editTextController.getView(), Views.EDITTEXTVIEW);
@@ -127,6 +136,31 @@ public class MainController implements ActionListener {
 		currentHistoryItem = history.pop();
 		navigationController.setHistoryAvailible(!history.empty());
 		setView(currentHistoryItem.view, currentHistoryItem.command);
+	}
+	
+	@Subscribe
+	public void onSaveFile(SaveFileEvent e) {
+		try {
+			daxploreFile.saveAll();
+		} catch (DaxploreException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		}
+	}
+	
+	@Subscribe
+	public void onProgramQuit(QuitProgramEvent e) {
+		if(daxploreFile.getUnsavedChangesCount() == 0) {
+			try {
+				daxploreFile.close();
+				mainWindow.dispose();
+			} catch (Exception e1) {
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
+			}			
+		} else {
+			System.out.println("Can't quit with "+ daxploreFile.getUnsavedChangesCount() + " unsaved changes");
+		}
 	}
 	
 	private void setView(Views view, Object command) {

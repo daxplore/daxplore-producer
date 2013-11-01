@@ -10,7 +10,7 @@ import java.util.Locale;
 import org.daxplore.producer.daxplorelib.DaxploreException;
 import org.daxplore.producer.daxplorelib.DaxploreFile;
 import org.daxplore.producer.gui.event.DaxploreFileUpdateEvent;
-import org.daxplore.producer.gui.event.RawImportEvent;
+import org.daxplore.producer.gui.event.EmptyEvents.RawImportEvent;
 
 import com.google.common.base.Strings;
 import com.google.common.eventbus.EventBus;

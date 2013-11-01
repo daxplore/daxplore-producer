@@ -29,8 +29,8 @@ import org.daxplore.producer.daxplorelib.metadata.textreference.TextReferenceMan
 import org.daxplore.producer.daxplorelib.metadata.textreference.TextTree;
 import org.daxplore.producer.gui.Settings;
 import org.daxplore.producer.gui.event.DaxploreFileUpdateEvent;
-import org.daxplore.producer.gui.event.LocaleUpdateEvent;
-import org.daxplore.producer.gui.event.RawImportEvent;
+import org.daxplore.producer.gui.event.EmptyEvents.LocaleUpdateEvent;
+import org.daxplore.producer.gui.event.EmptyEvents.RawImportEvent;
 
 import com.google.common.base.Charsets;
 import com.google.common.eventbus.EventBus;

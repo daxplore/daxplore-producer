@@ -4,20 +4,15 @@ import java.awt.Component;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
-import org.daxplore.producer.daxplorelib.DaxploreException;
-import org.daxplore.producer.daxplorelib.DaxploreFile;
-import org.daxplore.producer.gui.event.DaxploreFileUpdateEvent;
-import org.daxplore.producer.gui.event.HistoryGoBackEvent;
+import org.daxplore.producer.gui.event.EmptyEvents.HistoryGoBackEvent;
+import org.daxplore.producer.gui.event.EmptyEvents.SaveFileEvent;
 
 import com.google.common.eventbus.EventBus;
-import com.google.common.eventbus.Subscribe;
 
 public class NavigationController implements ActionListener {
 
 	private EventBus eventBus;
 	private NavigationView navigationView;
-	
-	private DaxploreFile daxploreFile;
 	
 	enum NavigationCommand {
 		BACK, SAVE
@@ -29,11 +24,6 @@ public class NavigationController implements ActionListener {
 		navigationView = new NavigationView(this);
 	}
 	
-	@Subscribe
-	public void onDaxploreFileUpdate(DaxploreFileUpdateEvent e) {
-		this.daxploreFile = e.getDaxploreFile();
-	}
-
 	@Override
 	public void actionPerformed(ActionEvent e) {
 		switch(NavigationCommand.valueOf(e.getActionCommand())) {
@@ -41,14 +31,7 @@ public class NavigationController implements ActionListener {
 			eventBus.post(new HistoryGoBackEvent());
 			break;
 		case SAVE:
-			try {
-				if(daxploreFile != null) {
-					daxploreFile.saveAll();
-				}
-			} catch (DaxploreException e1) {
-				// TODO Auto-generated catch block
-				e1.printStackTrace();
-			}
+			eventBus.post(new SaveFileEvent());
 			break;
 		default:
 			throw new AssertionError("Not a defined command: '" + e.getActionCommand() + "'");
