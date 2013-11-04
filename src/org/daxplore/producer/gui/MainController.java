@@ -6,6 +6,8 @@ import java.io.File;
 import java.util.Stack;
 
 import javax.swing.JFrame;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
 
 import org.daxplore.producer.daxplorelib.DaxploreException;
 import org.daxplore.producer.daxplorelib.DaxploreFile;
@@ -17,6 +19,7 @@ import org.daxplore.producer.gui.event.DaxploreFileUpdateEvent;
 import org.daxplore.producer.gui.event.EmptyEvents.HistoryGoBackEvent;
 import org.daxplore.producer.gui.event.EmptyEvents.QuitProgramEvent;
 import org.daxplore.producer.gui.event.EmptyEvents.SaveFileEvent;
+import org.daxplore.producer.gui.event.HistoryAvailableEvent;
 import org.daxplore.producer.gui.groups.GroupsController;
 import org.daxplore.producer.gui.navigation.NavigationController;
 import org.daxplore.producer.gui.open.OpenFileController;
@@ -42,6 +45,10 @@ public class MainController implements ActionListener {
 	private MainView mainView;
 	private ButtonPanelView buttonPanelView;
 
+	private ProgramCommandListener programCommandListener;
+	private MenuBarController menuBarController;
+	private ToolbarController toolbarController;
+	
 	private OpenFileController openFileController;
 	private GroupsController groupsController;
 	private EditTextController editTextController;
@@ -55,7 +62,6 @@ public class MainController implements ActionListener {
 	
 	//TODO remove direct spss file reference
 	private File spssFile;
-	private MenuBarController menuBarController;
 
 	public enum Views {
 		OPENFILEVIEW,
@@ -75,15 +81,18 @@ public class MainController implements ActionListener {
 		}
 	}
 	
-	public MainController(JFrame mainWindow, EventBus eventBus, DaxploreFile daxploreFile) {
+	public MainController(JFrame mainWindow, final EventBus eventBus, DaxploreFile daxploreFile) {
 		this.eventBus = eventBus;
 		eventBus.register(this);
 		this.mainWindow = mainWindow;
 		
 		this.daxploreFile = daxploreFile;
 		
+		programCommandListener = new ProgramCommandListener(eventBus);
+		
 		//TODO remove *this* as an argument, only needed for old import wizard
-		menuBarController = new MenuBarController(eventBus);
+		menuBarController = new MenuBarController(programCommandListener);
+		toolbarController = new ToolbarController(eventBus, programCommandListener);
 		openFileController = new OpenFileController(eventBus, mainWindow, this);
 		groupsController = new GroupsController(eventBus, mainWindow);
 		editTextController = new EditTextController(eventBus);
@@ -105,8 +114,15 @@ public class MainController implements ActionListener {
 		mainView.addView(questionController.getView(), Views.QUESTIONVIEW);
 		mainView.addView(timeSeriesController.getView(), Views.TIMESERIESVIEW);
 		
-		mainView.setToolbar(buttonPanelView);
+		mainView.setToolbar(toolbarController.getView());
 		mainView.setNavigationView(navigationController.getView());
+		
+		mainView.addChangeListener(new ChangeListener() {
+			@Override
+			public void stateChanged(ChangeEvent e) {
+				eventBus.post(new ChangeMainViewEvent(mainView.getSelectedView()));
+			}
+		});
 		
 		currentHistoryItem = new HistoryItem(Views.OPENFILEVIEW, null);
 		
@@ -133,9 +149,11 @@ public class MainController implements ActionListener {
 
 	@Subscribe
 	public void onHistoryGoBack(HistoryGoBackEvent e) {
-		currentHistoryItem = history.pop();
-		navigationController.setHistoryAvailible(!history.empty());
-		setView(currentHistoryItem.view, currentHistoryItem.command);
+		if(!history.empty()) {
+			currentHistoryItem = history.pop();
+			eventBus.post(new HistoryAvailableEvent(!history.empty()));
+			setView(currentHistoryItem.view, currentHistoryItem.command);
+		}
 	}
 	
 	@Subscribe
@@ -166,7 +184,9 @@ public class MainController implements ActionListener {
 	private void setView(Views view, Object command) {
 		buttonPanelView.setActiveButton(view);
 		setToolbar(view);
-		mainView.switchTo(view);
+		if(mainView.getSelectedView() != view) {
+			mainView.switchTo(view);
+		}
 		
 		if(command != null) {
 			switch(view) {
@@ -191,10 +211,6 @@ public class MainController implements ActionListener {
 				throw new AssertionError("Undefined history item command: " + view);
 			}
 		}
-	}
-	
-	public boolean hasHistory() {
-		return history.empty();
 	}
 	
 	private void setToolbar(Views view) {

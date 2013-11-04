@@ -5,25 +5,25 @@ import java.awt.CardLayout;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.Toolkit;
-import java.util.HashMap;
-import java.util.Map;
 
 import javax.swing.JFrame;
 import javax.swing.JMenuBar;
 import javax.swing.JPanel;
 import javax.swing.JTabbedPane;
 import javax.swing.border.MatteBorder;
+import javax.swing.event.ChangeListener;
 
 import org.daxplore.producer.gui.MainController.Views;
 import org.daxplore.producer.gui.navigation.NavigationView;
+
+import com.google.common.collect.BiMap;
+import com.google.common.collect.HashBiMap;
 
 public class MainView {
 
 	private JFrame mainWindow;
 	private final JTabbedPane mainPanel = new JTabbedPane();
 	private JPanel panel;
-	
-	private CardLayout mainLayout;
 	
 	//TODO figure out if we can move the main method to somewhere else?
 	/**
@@ -79,6 +79,8 @@ public class MainView {
 			}
 		});
 	}*/
+
+	private BiMap<Views, Component> viewsMap = HashBiMap.create();
 	
 	MainView(JFrame mainWindow) {
 		this.mainWindow = mainWindow;
@@ -95,7 +97,7 @@ public class MainView {
 		
 		// create main panel window.
 		mainPanel.setBorder(new MatteBorder(0, 1, 0, 0, Color.GRAY));
-		mainLayout = new CardLayout(0,0);
+		new CardLayout(0,0);
 
 		mainPanel.setRequestFocusEnabled(true);
 		mainWindow.setVisible(true);
@@ -110,15 +112,14 @@ public class MainView {
 		return mainWindow;
 	}
 
-	Map<Views, Component> viewsMap = new HashMap<>();
 	
 	void addView(Component component, Views view) {
 		viewsMap.put(view, component);
 		mainPanel.addTab(view.toString(), component);
 	}
 	
-	void setToolbar(ButtonPanelView buttonPanelView) {
-		mainWindow.getContentPane().add(buttonPanelView, BorderLayout.NORTH);
+	void setToolbar(Component component) {
+		mainWindow.getContentPane().add(component, BorderLayout.NORTH);
 	}
 	
 	void setMenuBar(JMenuBar menuBar) {
@@ -127,5 +128,13 @@ public class MainView {
 
 	void setNavigationView(NavigationView navigationView) {
 		panel.add(navigationView, BorderLayout.SOUTH);
+	}
+	
+	void addChangeListener(ChangeListener listener) {
+		mainPanel.addChangeListener(listener);
+	}
+	
+	Views getSelectedView() {
+		return viewsMap.inverse().get(mainPanel.getSelectedComponent());
 	}
 }
