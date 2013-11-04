@@ -46,6 +46,7 @@ public class QuestionController implements TableModelListener, ActionListener  {
 	private ScaleTableModel scaleTableModel;
 	
 	public QuestionController(EventBus eventBus) {
+		this.eventBus = eventBus;
 		eventBus.register(this);
 		questionView = new QuestionView(eventBus, this);
 	}

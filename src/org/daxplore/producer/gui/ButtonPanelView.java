@@ -34,7 +34,7 @@ public class ButtonPanelView extends JPanel {
 		
 		// create the button panel
 		setBorder(new MatteBorder(0, 0, 0, 1, Color.LIGHT_GRAY));
-		setLayout(new GridLayout(0, 1, 0, 0));
+		setLayout(new GridLayout(1, 0, 0, 0));
 		
 		openButton = new JRadioButton("");
 		openButton.setSelected(true);

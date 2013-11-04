@@ -96,7 +96,7 @@ public class MainController implements ActionListener {
 
 		mainView = new MainView(mainWindow);
 		
-		mainWindow.setJMenuBar(menuBarController.getView());
+		mainView.setMenuBar(menuBarController.getView());
 		
 		mainView.addView(openFileController.getView(), Views.OPENFILEVIEW);
 		mainView.addView(groupsController.getView(), Views.GROUPSVIEW);
@@ -105,7 +105,7 @@ public class MainController implements ActionListener {
 		mainView.addView(questionController.getView(), Views.QUESTIONVIEW);
 		mainView.addView(timeSeriesController.getView(), Views.TIMESERIESVIEW);
 		
-		mainView.setButtonPanelView(buttonPanelView);
+		mainView.setToolbar(buttonPanelView);
 		mainView.setNavigationView(navigationController.getView());
 		
 		currentHistoryItem = new HistoryItem(Views.OPENFILEVIEW, null);

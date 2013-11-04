@@ -5,9 +5,13 @@ import java.awt.CardLayout;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.Toolkit;
+import java.util.HashMap;
+import java.util.Map;
 
 import javax.swing.JFrame;
+import javax.swing.JMenuBar;
 import javax.swing.JPanel;
+import javax.swing.JTabbedPane;
 import javax.swing.border.MatteBorder;
 
 import org.daxplore.producer.gui.MainController.Views;
@@ -16,7 +20,7 @@ import org.daxplore.producer.gui.navigation.NavigationView;
 public class MainView {
 
 	private JFrame mainWindow;
-	private final JPanel mainPanel = new JPanel();
+	private final JTabbedPane mainPanel = new JTabbedPane();
 	private JPanel panel;
 	
 	private CardLayout mainLayout;
@@ -92,7 +96,6 @@ public class MainView {
 		// create main panel window.
 		mainPanel.setBorder(new MatteBorder(0, 1, 0, 0, Color.GRAY));
 		mainLayout = new CardLayout(0,0);
-		mainPanel.setLayout(mainLayout);
 
 		mainPanel.setRequestFocusEnabled(true);
 		mainWindow.setVisible(true);
@@ -100,19 +103,26 @@ public class MainView {
 	
 	
 	void switchTo(Views view) {
-	    mainLayout.show(mainPanel, view.toString());
+		mainPanel.setSelectedComponent(viewsMap.get(view));
 	}
 	
 	JFrame getMainFrame() {
 		return mainWindow;
 	}
 
+	Map<Views, Component> viewsMap = new HashMap<>();
+	
 	void addView(Component component, Views view) {
-		mainPanel.add(component, view.toString());
+		viewsMap.put(view, component);
+		mainPanel.addTab(view.toString(), component);
 	}
 	
-	void setButtonPanelView(ButtonPanelView buttonPanelView) {
-		mainWindow.getContentPane().add(buttonPanelView, BorderLayout.WEST);
+	void setToolbar(ButtonPanelView buttonPanelView) {
+		mainWindow.getContentPane().add(buttonPanelView, BorderLayout.NORTH);
+	}
+	
+	void setMenuBar(JMenuBar menuBar) {
+		mainWindow.setJMenuBar(menuBar);
 	}
 
 	void setNavigationView(NavigationView navigationView) {
