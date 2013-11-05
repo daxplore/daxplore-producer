@@ -22,8 +22,11 @@ public class TextReference extends TextReferenceReference{
 	}
 	
 	public void put(String text, Locale locale) {
-		localeMap.put(locale, text);
-		modified = true;
+		String currentValue = localeMap.get(locale);
+		if(!text.equals(currentValue)) {
+			localeMap.put(locale, text);
+			modified = true;
+		}
 	}
 	
 	public boolean has(Locale locale) {
