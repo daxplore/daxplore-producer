@@ -2,10 +2,13 @@ package org.daxplore.producer.gui;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 import java.io.File;
 import java.util.Stack;
 
 import javax.swing.JFrame;
+import javax.swing.WindowConstants;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
@@ -82,11 +85,19 @@ public class MainController implements ActionListener {
 	}
 	
 	public MainController(JFrame mainWindow, final EventBus eventBus, DaxploreFile daxploreFile) {
-		this.eventBus = eventBus;
-		eventBus.register(this);
 		this.mainWindow = mainWindow;
-		
+		this.eventBus = eventBus;
 		this.daxploreFile = daxploreFile;
+
+		eventBus.register(this);
+		
+		mainWindow.setDefaultCloseOperation(WindowConstants.DO_NOTHING_ON_CLOSE);
+		mainWindow.addWindowListener(new WindowAdapter() {
+			@Override
+			public void windowClosing(WindowEvent e) {
+				eventBus.post(new QuitProgramEvent());
+			}
+		});
 		
 		programCommandListener = new ProgramCommandListener(eventBus);
 		
