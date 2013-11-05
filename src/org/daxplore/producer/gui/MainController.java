@@ -5,9 +5,11 @@ import java.awt.event.ActionListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.io.File;
+import java.io.IOException;
 import java.util.Stack;
 
 import javax.swing.JFrame;
+import javax.swing.JOptionPane;
 import javax.swing.WindowConstants;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
@@ -182,13 +184,48 @@ public class MainController implements ActionListener {
 		if(daxploreFile.getUnsavedChangesCount() == 0) {
 			try {
 				daxploreFile.close();
-				mainWindow.dispose();
-			} catch (Exception e1) {
+			} catch (IOException e1) {
 				// TODO Auto-generated catch block
 				e1.printStackTrace();
-			}			
+			}
+			mainWindow.dispose();
 		} else {
-			System.out.println("Can't quit with "+ daxploreFile.getUnsavedChangesCount() + " unsaved changes");
+			Object[] options = { "Save and quit", "Discard changes", "Do not quit" };
+			int choice = JOptionPane.showOptionDialog(mainWindow,
+					"Do you want to save your changes before closing the program?", "Save changes - Daxplore Presenter",
+					JOptionPane.YES_NO_CANCEL_OPTION, JOptionPane.QUESTION_MESSAGE, null, options, options[2]);
+			switch(choice) {
+			case JOptionPane.YES_OPTION:
+				System.out.println("save changes");
+				try {
+					daxploreFile.saveAll();
+				} catch (DaxploreException e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+				}
+				try {
+					daxploreFile.close();
+				} catch (IOException e2) {
+					// TODO Auto-generated catch block
+					e2.printStackTrace();
+				}
+				mainWindow.dispose();
+				break;
+			case JOptionPane.NO_OPTION:
+				System.out.println("discard changes");
+				try {
+					daxploreFile.close();
+				} catch (IOException e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+				}
+				mainWindow.dispose();
+				break;
+			case JOptionPane.CANCEL_OPTION:
+				System.out.println("cancel");
+			default:
+				// do nothing
+			}
 		}
 	}
 	
