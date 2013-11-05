@@ -256,6 +256,7 @@ public class MetaScale {
 		private double value;
 		private NumberlineCoverage transformation;
 		private boolean modified = false; //TODO remove modified tag as it's never read and Options are overwritten in saveall anyway?
+		//TODO remove unused setters
 		
 		public Option(TextReference textRef, double value, NumberlineCoverage transformation, boolean setNew) {
 			this.textRef = textRef; this.value = value; this.transformation = transformation; this.modified = setNew;
@@ -266,8 +267,10 @@ public class MetaScale {
 		}
 
 		public void setTextRef(TextReference textRef) {
-			this.textRef = textRef;
-			modified = true;
+			if(!textRef.equals(this.textRef)) {
+				this.textRef = textRef;
+				modified = true;
+			}
 		}
 
 		public double getValue() {
@@ -275,8 +278,10 @@ public class MetaScale {
 		}
 
 		public void setValue(double value) {
-			this.value = value;
-			modified = true;
+			if(value != this.value) {
+				this.value = value;
+				modified = true;
+			}
 		}
 
 		public NumberlineCoverage getTransformation() {
@@ -284,8 +289,10 @@ public class MetaScale {
 		}
 
 		public void setTransformation(NumberlineCoverage transformation) {
-			this.transformation = transformation;
-			modified = true;
+			if(!transformation.equals(this.transformation)) {
+				this.transformation = transformation;
+				modified = true;
+			}
 		}
 	}
 	
@@ -319,9 +326,11 @@ public class MetaScale {
 	}
 
 	public void setOptions(List<Option> options) {
-		this.options = options;
-		structureChanged = true;
-		modified = true;
+		if(!options.equals(this.options)) {
+			this.options = options;
+			structureChanged = true;
+			modified = true;
+		}
 	}
 
 	public NumberlineCoverage getIgnoreOption() {
@@ -329,8 +338,10 @@ public class MetaScale {
 	}
 	
 	public void setIgnoreOption(NumberlineCoverage ignore) {
-		this.ignore = ignore;
-		modified = true;
+		if(!ignore.equals(this.ignore)) {
+			this.ignore = ignore;
+			modified = true;
+		}
 	}
 	
 	/**

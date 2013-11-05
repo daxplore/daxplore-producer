@@ -331,18 +331,25 @@ public class MetaGroup implements Comparable<MetaGroup> {
 	}
 	
 	public void addQuestion(MetaQuestion mq, int atIndex) {
+		if(qList.contains(mq)) {
+			throw new IllegalArgumentException("Question already added to Group");
+		}
 		qList.add(atIndex, mq);
 		modified = true;
 	}
 
 	public void addQuestion(MetaQuestion mq) {
+		if(qList.contains(mq)) {
+			throw new IllegalArgumentException("Question already added to Group");
+		}
 		qList.add(mq);
 		modified = true;
 	}
 
 	public void removeQuestion(MetaQuestion mq) {
-		qList.remove(mq);
-		modified = true;
+		if(qList.remove(mq)) {
+			modified = true;
+		}
 	}
 
 	public TextReference getTextRef() {
@@ -350,8 +357,10 @@ public class MetaGroup implements Comparable<MetaGroup> {
 	}
 
 	public void setTextRef(TextReference textref) {
-		this.textref = textref;
-		this.modified = true;
+		if(!textref.equals(this.textref)) {
+			this.textref = textref;
+			modified = true;
+		}
 	}
 
 	public GroupType getType() {
@@ -359,17 +368,21 @@ public class MetaGroup implements Comparable<MetaGroup> {
 	}
 
 	public void resetQuestions() {
-		qList = new LinkedList<>();
-		modified = true;
+		if(!qList.isEmpty()) {
+			qList = new LinkedList<>();
+			modified = true;
+		}
 	}
 
 	public List<MetaQuestion> getQuestions() {
 		return qList;
 	}
 
-	public void setQuestions(List<MetaQuestion> qlist) {
-		this.qList = qlist;
-		this.modified = true;
+	public void setQuestions(List<MetaQuestion> questionList) {
+		if(!questionList.equals(qList)) {
+			qList = questionList;
+			modified = true;
+		}
 	}
 
 	public int getIndex() {
@@ -377,8 +390,10 @@ public class MetaGroup implements Comparable<MetaGroup> {
 	}
 
 	public void setIndex(int index) {
-		this.index = index;
-		this.modified = true;
+		if(this.index != index) {
+			this.index = index;
+			modified = true;
+		}
 	}
 
 	/**

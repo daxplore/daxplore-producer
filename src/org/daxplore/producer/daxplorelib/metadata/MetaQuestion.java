@@ -266,8 +266,10 @@ public class MetaQuestion {
 	}
 	
 	public void setShortTextRef(TextReference shortTextRef) {
-		this.shortTextRef = shortTextRef;
-		this.modified = true;
+		if(!shortTextRef.equals(this.shortTextRef)) {
+			this.shortTextRef = shortTextRef;
+			modified = true;
+		}
 	}
 	
 	public TextReference getFullTextRef() {
@@ -275,8 +277,10 @@ public class MetaQuestion {
 	}
 	
 	public void setFullTextRef(TextReference fullTextRef) {
-		this.fullTextRef = fullTextRef;
-		this.modified = true;
+		if(!fullTextRef.equals(this.fullTextRef)) {
+			this.fullTextRef = fullTextRef;
+			modified = true;
+		}
 	}
 	
 	public MetaScale getScale() {
@@ -284,8 +288,10 @@ public class MetaQuestion {
 	}
 	
 	public void setScale(MetaScale scale) {
-		this.scale = scale;
-		this.modified = true;
+		if(!scale.equals(this.scale)) {
+			this.scale = scale;
+			modified = true;
+		}
 	}
 	
 	public MetaCalculation getCalculation() {
@@ -293,8 +299,10 @@ public class MetaQuestion {
 	}
 	
 	public void setCalculation(MetaCalculation calculation) {
-		this.calculation = calculation;
-		this.modified = true;
+		if(!calculation.equals(this.calculation)) {
+			this.calculation = calculation;
+			modified = true;
+		}
 	}
 
 	public List<MetaTimepointShort> getTimepoints() {
@@ -303,8 +311,10 @@ public class MetaQuestion {
 	}
 	
 	public void setTimepoints(List<MetaTimepointShort> timepoints) {
-		this.timepoints = timepoints;
-		this.timemodified = true;
+		if(!timepoints.equals(this.timemodified)) {
+			this.timepoints = timepoints;
+			timemodified = true;
+		}
 	}
 	
 	public JsonElement toJSONObject(Locale locale) {

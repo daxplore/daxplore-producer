@@ -192,8 +192,10 @@ public class MetaTimepointShort implements Comparable<MetaTimepointShort> {
 	}
 
 	public void setName(TextReference textref) {
-		this.textref = textref;
-		modified = true;
+		if(!textref.equals(this.textref)) {
+			this.textref = textref;
+			modified = true;
+		}
 	}
 
 	public int getTimeindex() {
@@ -201,8 +203,10 @@ public class MetaTimepointShort implements Comparable<MetaTimepointShort> {
 	}
 
 	public void setTimeindex(int timeindex) {
-		this.timeindex = timeindex;
-		modified = true;
+		if(timeindex != this.timeindex) {
+			this.timeindex = timeindex;
+			modified = true;
+		}
 	}
 
 	public double getValue() {
@@ -210,8 +214,10 @@ public class MetaTimepointShort implements Comparable<MetaTimepointShort> {
 	}
 
 	public void setValue(double value) {
-		this.value = value;
-		modified = true;
+		if(value != this.value){
+			this.value = value;
+			modified = true;
+		}
 	}
 
 	/**

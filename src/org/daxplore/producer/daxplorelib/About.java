@@ -187,8 +187,10 @@ public class About {
 	}
 	
 	public void setTimeSeriesType(TimeSeriesType timeSeriesType) {
-		this.timeSeriesType = timeSeriesType;
-		modified = true;
+		if(!timeSeriesType.equals(this.timeSeriesType)) {
+			this.timeSeriesType = timeSeriesType;
+			modified = true;
+		}
 	}
 	
 	public TimeSeriesType getTimeSeriesType() {
@@ -196,8 +198,10 @@ public class About {
 	}
 	
 	public void setTimeSeriesShortColumn(String column) {
-		timeSeriesShortColumn = column;
-		modified = true;
+		if(!column.equals(timeSeriesShortColumn)) {
+			timeSeriesShortColumn = column;
+			modified = true;
+		}
 	}
 	
 	public String getTimeSeriesShortColumn() {
