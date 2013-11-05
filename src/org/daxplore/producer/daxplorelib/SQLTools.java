@@ -19,7 +19,6 @@ public class SQLTools {
 				boolean first = rs.next();
 				if(first) {
 					String name = rs.getString("name");
-					stmt.close();
 					return tablename.equals(name);
 				}
 			}

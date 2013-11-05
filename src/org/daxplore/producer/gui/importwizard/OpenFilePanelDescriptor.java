@@ -87,13 +87,11 @@ public class OpenFilePanelDescriptor extends ImportWizardDescriptor implements A
 			try (SPSSFile spssFile = new SPSSFile(file, "r")) {
 				spssFile.logFlag = false;
 				spssFile.loadMetadata();
-				spssFile.close();
 				
 				getWizard().getmainController().setSpssFile(file);
 				String text = "File selected: " + getWizard().getmainController().getSpssFile().getName();
 				openFilePanel.fileOpenLabel.setText(text);
 				System.out.println(text);
-				
 			} catch (FileNotFoundException e1) {
 				System.out.println("SPSS file open failed.");
 				JOptionPane.showMessageDialog(this.getWizard(),

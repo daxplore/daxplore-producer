@@ -73,7 +73,6 @@ public class MetaGroup implements Comparable<MetaGroup> {
 						tr = textsManager.get(rs.getString("textref"));
 						index = rs.getInt("ord");
 						type = GroupType.fromInt(rs.getInt("type"));
-						rs.close();
 					} else {
 						throw new DaxploreException("No group with id '" + id + "'");
 					}

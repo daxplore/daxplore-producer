@@ -3,7 +3,9 @@ package org.daxplore.producer.gui;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
-import org.daxplore.producer.gui.event.EmptyEvents.*;
+import org.daxplore.producer.gui.event.EmptyEvents.HistoryGoBackEvent;
+import org.daxplore.producer.gui.event.EmptyEvents.QuitProgramEvent;
+import org.daxplore.producer.gui.event.EmptyEvents.SaveFileEvent;
 
 import com.google.common.eventbus.EventBus;
 

@@ -421,16 +421,16 @@ public class ImportExportManager {
 
 			break;
 		case CSV:
-			CSVWriter csvWriter = new CSVWriter(writer);
-			allTexts = daxploreFile.getTextReferenceManager().getAll();
-			for(TextReference tr: allTexts.iterable()) {
-				if(tr.has(locale)) {
-					csvWriter.writeNext(new String[]{tr.getRef(), tr.get(locale)});
-				} else {
-					csvWriter.writeNext(new String[]{tr.getRef(), ""});
+			try(CSVWriter csvWriter = new CSVWriter(writer)) {
+				allTexts = daxploreFile.getTextReferenceManager().getAll();
+				for(TextReference tr: allTexts.iterable()) {
+					if(tr.has(locale)) {
+						csvWriter.writeNext(new String[]{tr.getRef(), tr.get(locale)});
+					} else {
+						csvWriter.writeNext(new String[]{tr.getRef(), ""});
+					}
 				}
 			}
-			csvWriter.close();
 			break;
 		default:
 			throw new AssertionError("Unsupported format: " + format);	
