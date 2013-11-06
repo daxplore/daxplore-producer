@@ -46,11 +46,11 @@ public class MainController implements ActionListener {
 	private EventBus eventBus;
 	private DaxploreFile daxploreFile = null;
 	private JFrame mainWindow;
+	private ActionManager actionManager;
 
 	private MainView mainView;
 	private ButtonPanelView buttonPanelView;
 
-	private ProgramCommandListener programCommandListener;
 	private MenuBarController menuBarController;
 	private ToolbarController toolbarController;
 	
@@ -92,6 +92,7 @@ public class MainController implements ActionListener {
 		this.daxploreFile = daxploreFile;
 
 		eventBus.register(this);
+		actionManager = new ActionManager(eventBus);
 		
 		mainWindow.setDefaultCloseOperation(WindowConstants.DO_NOTHING_ON_CLOSE);
 		mainWindow.addWindowListener(new WindowAdapter() {
@@ -101,11 +102,10 @@ public class MainController implements ActionListener {
 			}
 		});
 		
-		programCommandListener = new ProgramCommandListener(eventBus);
 		
 		//TODO remove *this* as an argument, only needed for old import wizard
-		menuBarController = new MenuBarController(programCommandListener);
-		toolbarController = new ToolbarController(eventBus, programCommandListener);
+		menuBarController = new MenuBarController(actionManager);
+		toolbarController = new ToolbarController(eventBus, actionManager);
 		openFileController = new OpenFileController(eventBus, mainWindow, this);
 		groupsController = new GroupsController(eventBus, mainWindow);
 		editTextController = new EditTextController(eventBus);
