@@ -1,7 +1,6 @@
 package org.daxplore.producer.gui;
 
 import java.awt.event.ActionEvent;
-import java.io.FileNotFoundException;
 
 import javax.swing.AbstractAction;
 import javax.swing.Action;
@@ -9,128 +8,146 @@ import javax.swing.Action;
 import org.daxplore.producer.gui.event.EmptyEvents.HistoryGoBackEvent;
 import org.daxplore.producer.gui.event.EmptyEvents.QuitProgramEvent;
 import org.daxplore.producer.gui.event.EmptyEvents.SaveFileEvent;
+import org.daxplore.producer.gui.resources.GuiTexts;
 import org.daxplore.producer.gui.resources.IconResources;
 
 import com.google.common.eventbus.EventBus;
 
 public class ActionManager {
-	public final Action ABOUT, BACK, DISCARD_CHANGES, EXPORT_TEXTS, EXPORT_UPLOAD_FILE, HELP, IMPORT_SPSS,
+	public final Action ABOUT, BACK, DISCARD_CHANGES, EXPORT_TEXTS, EXPORT_UPLOAD, HELP, IMPORT_SPSS,
 			IMPORT_TEXTS, INFO, NEW, OPEN, QUIT, SAVE, SAVE_AS, SETTINGS;
 	
+	/**
+	 * An {@link Action} class that automatically adds texts and icons
+	 * loaded by {@link GuiTexts} and {@link IconResources}, if available.
+	 * 
+	 * <p>Texts are expected to have they key <b>action.&lt;systemName&gt;.name</b> in {@link GuiTexts}.
+	 * An action may also have the optional key <b>action.&lt;systemName&gt;.tooltip</b>.</p>
+	 * 
+	 * <p>Both icon images are optional. They are expected to be be .png files named
+	 * <b>&lt;systemName&gt;-small.png</b> and <b>&lt;systemName&gt;-large.png</b>.</p>
+	 */
 	@SuppressWarnings("serial")
-	public ActionManager(final EventBus eventBus) throws FileNotFoundException {
+	private abstract static class ResourcedAction extends AbstractAction {
+		public ResourcedAction(GuiTexts texts, String systemName) {
+			super(texts.get("action." + systemName + ".name"));
+			
+			String tooltipKey = "action." + systemName + ".tooltip";
+			if(texts.contains(tooltipKey)) {
+				String tooltip = texts.get(tooltipKey);
+				if(!tooltip.isEmpty()) {
+					putValue(Action.SHORT_DESCRIPTION, tooltip);
+				}
+			}
+			
+			putValue(Action.SMALL_ICON, IconResources.get(systemName + "-small.png"));
+			putValue(Action.LARGE_ICON_KEY, IconResources.get(systemName + "-large.png"));
+		}
+	}
+	
+	@SuppressWarnings("serial")
+	public ActionManager(final EventBus eventBus, GuiTexts texts) {
 		
-		ABOUT = new AbstractAction("About") {
+		ABOUT = new ResourcedAction(texts, "about") {
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				
 			}
 		};
 		
-		BACK = new AbstractAction("Back") {
+		BACK = new ResourcedAction(texts, "back") {
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				eventBus.post(new HistoryGoBackEvent());
 			}
 		};
-		BACK.putValue(Action.LARGE_ICON_KEY, IconResources.get("back-large.png"));
-		BACK.putValue(Action.SMALL_ICON, IconResources.get("back-small.png"));
 		
 		
-		
-		DISCARD_CHANGES = new AbstractAction("Discard changes") {
+		DISCARD_CHANGES = new ResourcedAction(texts, "discard_changes") {
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				
 			}
 		};
 		
-		EXPORT_TEXTS = new AbstractAction("Export texts") {
+		EXPORT_TEXTS = new ResourcedAction(texts, "export_texts") {
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				
 			}
 		};
 		
-		EXPORT_UPLOAD_FILE = new AbstractAction("Export upload file") {
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				
-			}
-		};
-		EXPORT_UPLOAD_FILE.putValue(Action.SMALL_ICON, IconResources.get("generate-small.png"));
-		EXPORT_UPLOAD_FILE.putValue(Action.LARGE_ICON_KEY, IconResources.get("generate-large.png"));
-		
-		HELP = new AbstractAction("Help") {
+		EXPORT_UPLOAD = new ResourcedAction(texts, "export_upload") {
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				
 			}
 		};
 		
-		IMPORT_SPSS = new AbstractAction("Import from SPSS file") {
+		HELP = new ResourcedAction(texts, "help") {
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				
 			}
 		};
 		
-		IMPORT_TEXTS = new AbstractAction("Import texts") {
+		IMPORT_SPSS = new ResourcedAction(texts, "import_spss") {
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				
 			}
 		};
 		
-		INFO = new AbstractAction("Info about this project") {
+		IMPORT_TEXTS = new ResourcedAction(texts, "import_texts") {
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				
 			}
 		};
 		
-		NEW = new AbstractAction("New project") {
+		INFO = new ResourcedAction(texts, "info") {
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				
 			}
 		};
-		NEW.putValue(Action.SMALL_ICON, IconResources.get("new-small.png"));
-		NEW.putValue(Action.LARGE_ICON_KEY, IconResources.get("new-large.png"));
 		
-		OPEN = new AbstractAction("Open project") {
+		NEW = new ResourcedAction(texts, "new") {
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				
 			}
 		};
-		OPEN.putValue(Action.SMALL_ICON, IconResources.get("open-small.png"));
-		OPEN.putValue(Action.LARGE_ICON_KEY, IconResources.get("open-large.png"));
 		
-		QUIT = new AbstractAction("Quit") {
+		OPEN = new ResourcedAction(texts, "open") {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				
+			}
+		};
+		
+		QUIT = new ResourcedAction(texts, "quit") {
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				eventBus.post(new QuitProgramEvent());
 			}
 		};
 		
-		SAVE = new AbstractAction("Save") {
+		SAVE = new ResourcedAction(texts, "save") {
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				eventBus.post(new SaveFileEvent());
 			}
 		};
-		SAVE.putValue(Action.SMALL_ICON, IconResources.get("save-small.png"));
-		SAVE.putValue(Action.LARGE_ICON_KEY, IconResources.get("save-large.png"));
 		
-		SAVE_AS = new AbstractAction("Save project as...") {
+		SAVE_AS = new ResourcedAction(texts, "save_as") {
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				
 			}
 		};
 		
-		SETTINGS = new AbstractAction("Program settings") {
+		SETTINGS = new ResourcedAction(texts, "settings") {
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				

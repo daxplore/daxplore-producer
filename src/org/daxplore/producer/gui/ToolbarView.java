@@ -18,7 +18,7 @@ public class ToolbarView extends JPanel {
 		toolbar.add(actionManager.OPEN);
 		toolbar.add(actionManager.SAVE);
 		toolbar.add(actionManager.SAVE_AS);
-		toolbar.add(actionManager.EXPORT_UPLOAD_FILE);
+		toolbar.add(actionManager.EXPORT_UPLOAD);
 		
 		add(toolbar);
 	}

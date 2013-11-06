@@ -5,8 +5,8 @@ import java.awt.event.ActionListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.util.Locale;
 import java.util.Stack;
 
 import javax.swing.JFrame;
@@ -30,6 +30,7 @@ import org.daxplore.producer.gui.groups.GroupsController;
 import org.daxplore.producer.gui.navigation.NavigationController;
 import org.daxplore.producer.gui.open.OpenFileController;
 import org.daxplore.producer.gui.question.QuestionController;
+import org.daxplore.producer.gui.resources.GuiTexts;
 import org.daxplore.producer.gui.timeseries.TimeSeriesController;
 import org.daxplore.producer.gui.tools.ToolsController;
 
@@ -48,6 +49,7 @@ public class MainController implements ActionListener {
 	private DaxploreFile daxploreFile = null;
 	private JFrame mainWindow;
 	private ActionManager actionManager;
+	private GuiTexts guiTexts;
 
 	private MainView mainView;
 	private ButtonPanelView buttonPanelView;
@@ -93,12 +95,9 @@ public class MainController implements ActionListener {
 		this.daxploreFile = daxploreFile;
 
 		eventBus.register(this);
-		try {
-			actionManager = new ActionManager(eventBus);
-		} catch (FileNotFoundException e1) {
-			eventBus.post(new QuitProgramEvent());
-			e1.printStackTrace();
-		}
+		guiTexts = new GuiTexts(Locale.ENGLISH);
+		
+		actionManager = new ActionManager(eventBus, guiTexts);
 		
 		mainWindow.setDefaultCloseOperation(WindowConstants.DO_NOTHING_ON_CLOSE);
 		mainWindow.addWindowListener(new WindowAdapter() {
