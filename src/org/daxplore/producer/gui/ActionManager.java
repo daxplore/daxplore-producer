@@ -1,6 +1,7 @@
 package org.daxplore.producer.gui;
 
 import java.awt.event.ActionEvent;
+import java.io.FileNotFoundException;
 
 import javax.swing.AbstractAction;
 import javax.swing.Action;
@@ -8,6 +9,7 @@ import javax.swing.Action;
 import org.daxplore.producer.gui.event.EmptyEvents.HistoryGoBackEvent;
 import org.daxplore.producer.gui.event.EmptyEvents.QuitProgramEvent;
 import org.daxplore.producer.gui.event.EmptyEvents.SaveFileEvent;
+import org.daxplore.producer.gui.resources.IconResources;
 
 import com.google.common.eventbus.EventBus;
 
@@ -16,7 +18,7 @@ public class ActionManager {
 			IMPORT_TEXTS, INFO, NEW, OPEN, QUIT, SAVE, SAVE_AS, SETTINGS;
 	
 	@SuppressWarnings("serial")
-	public ActionManager(final EventBus eventBus) {
+	public ActionManager(final EventBus eventBus) throws FileNotFoundException {
 		
 		ABOUT = new AbstractAction("About") {
 			@Override
@@ -31,6 +33,9 @@ public class ActionManager {
 				eventBus.post(new HistoryGoBackEvent());
 			}
 		};
+		BACK.putValue(Action.LARGE_ICON_KEY, IconResources.get("back-large.png"));
+		BACK.putValue(Action.SMALL_ICON, IconResources.get("back-small.png"));
+		
 		
 		
 		DISCARD_CHANGES = new AbstractAction("Discard changes") {
@@ -53,6 +58,8 @@ public class ActionManager {
 				
 			}
 		};
+		EXPORT_UPLOAD_FILE.putValue(Action.SMALL_ICON, IconResources.get("generate-small.png"));
+		EXPORT_UPLOAD_FILE.putValue(Action.LARGE_ICON_KEY, IconResources.get("generate-large.png"));
 		
 		HELP = new AbstractAction("Help") {
 			@Override
@@ -88,6 +95,8 @@ public class ActionManager {
 				
 			}
 		};
+		NEW.putValue(Action.SMALL_ICON, IconResources.get("new-small.png"));
+		NEW.putValue(Action.LARGE_ICON_KEY, IconResources.get("new-large.png"));
 		
 		OPEN = new AbstractAction("Open project") {
 			@Override
@@ -95,6 +104,8 @@ public class ActionManager {
 				
 			}
 		};
+		OPEN.putValue(Action.SMALL_ICON, IconResources.get("open-small.png"));
+		OPEN.putValue(Action.LARGE_ICON_KEY, IconResources.get("open-large.png"));
 		
 		QUIT = new AbstractAction("Quit") {
 			@Override
@@ -109,6 +120,8 @@ public class ActionManager {
 				eventBus.post(new SaveFileEvent());
 			}
 		};
+		SAVE.putValue(Action.SMALL_ICON, IconResources.get("save-small.png"));
+		SAVE.putValue(Action.LARGE_ICON_KEY, IconResources.get("save-large.png"));
 		
 		SAVE_AS = new AbstractAction("Save project as...") {
 			@Override

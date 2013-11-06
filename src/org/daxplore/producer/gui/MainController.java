@@ -5,6 +5,7 @@ import java.awt.event.ActionListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.Stack;
 
@@ -92,7 +93,12 @@ public class MainController implements ActionListener {
 		this.daxploreFile = daxploreFile;
 
 		eventBus.register(this);
-		actionManager = new ActionManager(eventBus);
+		try {
+			actionManager = new ActionManager(eventBus);
+		} catch (FileNotFoundException e1) {
+			eventBus.post(new QuitProgramEvent());
+			e1.printStackTrace();
+		}
 		
 		mainWindow.setDefaultCloseOperation(WindowConstants.DO_NOTHING_ON_CLOSE);
 		mainWindow.addWindowListener(new WindowAdapter() {
