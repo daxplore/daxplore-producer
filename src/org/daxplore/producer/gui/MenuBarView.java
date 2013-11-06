@@ -22,8 +22,8 @@ public class MenuBarView extends JMenuBar {
 		fileMenu.add(importSubMenu);
 		
 		JMenu exportSubMenu = new JMenu("Export");
-		importSubMenu.add(actionManager.EXPORT_UPLOAD_FILE);
-		importSubMenu.add(actionManager.EXPORT_TEXTS);
+		exportSubMenu.add(actionManager.EXPORT_UPLOAD_FILE);
+		exportSubMenu.add(actionManager.EXPORT_TEXTS);
 		fileMenu.add(exportSubMenu);
 		
 		fileMenu.add(actionManager.DISCARD_CHANGES);
