@@ -42,7 +42,7 @@ public class GuiTexts {
 	 * 
 	 * @param key key the key for the desired string
 	 * @param arguments the arguments to put into the string
-	 * @return the string array for the given key formatted with the arguments
+	 * @return the string for the given key formatted with the arguments
 	 */
 	public String format(String key, Object... arguments) {
 		if(textBundle.containsKey(key)) {
