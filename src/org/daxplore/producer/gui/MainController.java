@@ -51,7 +51,7 @@ public class MainController implements ActionListener {
 	private DaxploreFile daxploreFile = null;
 	private JFrame mainWindow;
 	private ActionManager actionManager;
-	private GuiTexts guiTexts;
+	private GuiTexts texts;
 
 	private MainView mainView;
 	private ButtonPanelView buttonPanelView;
@@ -97,9 +97,9 @@ public class MainController implements ActionListener {
 		this.daxploreFile = daxploreFile;
 
 		eventBus.register(this);
-		guiTexts = new GuiTexts(Locale.ENGLISH);
+		texts = new GuiTexts(Locale.ENGLISH);
 		
-		actionManager = new ActionManager(eventBus, guiTexts);
+		actionManager = new ActionManager(eventBus, texts);
 		
 		mainWindow.setDefaultCloseOperation(WindowConstants.DO_NOTHING_ON_CLOSE);
 		mainWindow.addWindowListener(new WindowAdapter() {
@@ -127,12 +127,12 @@ public class MainController implements ActionListener {
 		
 		mainView.setMenuBar(menuBarController.getView());
 		
-		mainView.addTab(guiTexts.get("view.open_file.tab"), openFileController.getView(), Views.OPENFILEVIEW);
-		mainView.addTab(guiTexts.get("view.groups.tab"), groupsController.getView(), Views.GROUPSVIEW);
-		mainView.addTab(guiTexts.get("view.edit_text.tab"), editTextController.getView(), Views.EDITTEXTVIEW);
-		mainView.addTab(guiTexts.get("view.tools.tab"), toolsController.getView(), Views.TOOLSVIEW);
-		mainView.addTab(guiTexts.get("view.questions.tab"), questionController.getView(), Views.QUESTIONVIEW);
-		mainView.addTab(guiTexts.get("view.time_series.tab"), timeSeriesController.getView(), Views.TIMESERIESVIEW);
+		mainView.addTab(texts.get("view.open_file.tab"), openFileController.getView(), Views.OPENFILEVIEW);
+		mainView.addTab(texts.get("view.groups.tab"), groupsController.getView(), Views.GROUPSVIEW);
+		mainView.addTab(texts.get("view.edit_text.tab"), editTextController.getView(), Views.EDITTEXTVIEW);
+		mainView.addTab(texts.get("view.tools.tab"), toolsController.getView(), Views.TOOLSVIEW);
+		mainView.addTab(texts.get("view.questions.tab"), questionController.getView(), Views.QUESTIONVIEW);
+		mainView.addTab(texts.get("view.time_series.tab"), timeSeriesController.getView(), Views.TIMESERIESVIEW);
 		
 		mainView.setToolbar(toolbarController.getView());
 		mainView.setNavigationView(navigationController.getView());
@@ -178,10 +178,10 @@ public class MainController implements ActionListener {
 	
 	@Subscribe
 	public void onErrorMessage(ErrorMessageEvent e) {
-		Object[] options = {guiTexts.get("dialog.error.continue"), guiTexts.get("dialog.error.show_debug")};
+		Object[] options = {texts.get("dialog.error.continue"), texts.get("dialog.error.show_debug")};
 		int answer = JOptionPane.showOptionDialog(mainWindow,
 				new JLabelSelectable(e.getUserMessage()),
-				guiTexts.get("dialog.error.title"),
+				texts.get("dialog.error.title"),
 		        JOptionPane.DEFAULT_OPTION,
 		        JOptionPane.ERROR_MESSAGE,
 		        null,
@@ -190,7 +190,7 @@ public class MainController implements ActionListener {
 		if(answer == 1) {
 			JOptionPane.showMessageDialog(mainWindow, 
 					new JLabelSelectable(Throwables.getStackTraceAsString(e.getCause())), 
-					guiTexts.get("dialog.error.debug_title"),
+					texts.get("dialog.error.debug_title"),
 					JOptionPane.PLAIN_MESSAGE);
 		}
 	}
@@ -216,10 +216,17 @@ public class MainController implements ActionListener {
 			}
 			mainWindow.dispose();
 		} else {
-			Object[] options = { "Save and quit", "Discard changes", "Do not quit" };
+			Object[] options = {texts.get("dialog.quit.save_and_quit"),
+					texts.get("dialog.quit.discard_and_quit"),
+					texts.get("dialog.quit.do_not_quit")};
 			int choice = JOptionPane.showOptionDialog(mainWindow,
-					"Do you want to save your changes before closing the program?", "Save changes - Daxplore Presenter",
-					JOptionPane.YES_NO_CANCEL_OPTION, JOptionPane.QUESTION_MESSAGE, null, options, options[2]);
+					texts.get("dialog.quit.question"),
+					texts.get("dialog.quit.title"),
+					JOptionPane.YES_NO_CANCEL_OPTION,
+					JOptionPane.QUESTION_MESSAGE,
+					null,
+					options,
+					options[2]);
 			switch(choice) {
 			case JOptionPane.YES_OPTION:
 				try {
