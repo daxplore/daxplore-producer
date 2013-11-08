@@ -25,6 +25,7 @@ import org.daxplore.producer.gui.event.DaxploreFileUpdateEvent;
 import org.daxplore.producer.gui.event.EmptyEvents.HistoryGoBackEvent;
 import org.daxplore.producer.gui.event.EmptyEvents.QuitProgramEvent;
 import org.daxplore.producer.gui.event.EmptyEvents.SaveFileEvent;
+import org.daxplore.producer.gui.event.ErrorMessageEvent;
 import org.daxplore.producer.gui.event.HistoryAvailableEvent;
 import org.daxplore.producer.gui.groups.GroupsController;
 import org.daxplore.producer.gui.navigation.NavigationController;
@@ -34,6 +35,7 @@ import org.daxplore.producer.gui.resources.GuiTexts;
 import org.daxplore.producer.gui.timeseries.TimeSeriesController;
 import org.daxplore.producer.gui.tools.ToolsController;
 
+import com.google.common.base.Throwables;
 import com.google.common.eventbus.EventBus;
 import com.google.common.eventbus.Subscribe;
 
@@ -175,6 +177,25 @@ public class MainController implements ActionListener {
 	}
 	
 	@Subscribe
+	public void onErrorMessage(ErrorMessageEvent e) {
+		Object[] options = {guiTexts.get("dialog.error.continue"), guiTexts.get("dialog.error.show_debug")};
+		int answer = JOptionPane.showOptionDialog(mainWindow,
+				new JLabelSelectable(e.getUserMessage()),
+				guiTexts.get("dialog.error.title"),
+		        JOptionPane.DEFAULT_OPTION,
+		        JOptionPane.ERROR_MESSAGE,
+		        null,
+		        options,
+		        options[0]);
+		if(answer == 1) {
+			JOptionPane.showMessageDialog(mainWindow, 
+					new JLabelSelectable(Throwables.getStackTraceAsString(e.getCause())), 
+					guiTexts.get("dialog.error.debug_title"),
+					JOptionPane.PLAIN_MESSAGE);
+		}
+	}
+	
+	@Subscribe
 	public void onSaveFile(SaveFileEvent e) {
 		try {
 			daxploreFile.saveAll();
@@ -201,7 +222,6 @@ public class MainController implements ActionListener {
 					JOptionPane.YES_NO_CANCEL_OPTION, JOptionPane.QUESTION_MESSAGE, null, options, options[2]);
 			switch(choice) {
 			case JOptionPane.YES_OPTION:
-				System.out.println("save changes");
 				try {
 					daxploreFile.saveAll();
 				} catch (DaxploreException e1) {
@@ -217,7 +237,6 @@ public class MainController implements ActionListener {
 				mainWindow.dispose();
 				break;
 			case JOptionPane.NO_OPTION:
-				System.out.println("discard changes");
 				try {
 					daxploreFile.close();
 				} catch (IOException e1) {
@@ -227,7 +246,6 @@ public class MainController implements ActionListener {
 				mainWindow.dispose();
 				break;
 			case JOptionPane.CANCEL_OPTION:
-				System.out.println("cancel");
 			default:
 				// do nothing
 			}

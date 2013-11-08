@@ -1,6 +1,10 @@
 package org.daxplore.producer.gui;
 
+import java.awt.Desktop;
 import java.awt.event.ActionEvent;
+import java.io.IOException;
+import java.net.URISyntaxException;
+import java.net.URL;
 
 import javax.swing.AbstractAction;
 import javax.swing.Action;
@@ -8,6 +12,7 @@ import javax.swing.Action;
 import org.daxplore.producer.gui.event.EmptyEvents.HistoryGoBackEvent;
 import org.daxplore.producer.gui.event.EmptyEvents.QuitProgramEvent;
 import org.daxplore.producer.gui.event.EmptyEvents.SaveFileEvent;
+import org.daxplore.producer.gui.event.ErrorMessageEvent;
 import org.daxplore.producer.gui.resources.GuiTexts;
 import org.daxplore.producer.gui.resources.IconResources;
 
@@ -46,7 +51,7 @@ public class ActionManager {
 	}
 	
 	@SuppressWarnings("serial")
-	public ActionManager(final EventBus eventBus, GuiTexts texts) {
+	public ActionManager(final EventBus eventBus, final GuiTexts texts) {
 		
 		ABOUT = new ResourcedAction(texts, "about") {
 			@Override
@@ -87,9 +92,17 @@ public class ActionManager {
 		HELP = new ResourcedAction(texts, "help") {
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				
+				String helpUrlString = texts.get("action.help.url");
+				try {
+					URL helpSite = new URL(helpUrlString);
+					Desktop.getDesktop().browse(helpSite.toURI());
+				} catch (UnsupportedOperationException | IOException | URISyntaxException e1) {
+					String errorMessage = texts.format("action.help.open_error", helpUrlString);
+					eventBus.post(new ErrorMessageEvent(errorMessage, e1));
+				}
 			}
 		};
+		HELP.putValue(Action.SHORT_DESCRIPTION, texts.format("action.help.tooltip", texts.get("action.help.url")));
 		
 		IMPORT_SPSS = new ResourcedAction(texts, "import_spss") {
 			@Override
