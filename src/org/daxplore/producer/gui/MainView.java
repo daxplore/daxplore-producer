@@ -96,7 +96,6 @@ public class MainView {
 		
 		// create main panel window.
 		mainPanel.setBorder(new MatteBorder(0, 1, 0, 0, Color.GRAY));
-		new CardLayout(0,0);
 
 		mainPanel.setRequestFocusEnabled(true);
 		mainWindow.setVisible(true);
@@ -112,9 +111,9 @@ public class MainView {
 	}
 
 	
-	void addView(Component component, Views view) {
+	void addTab(String tabTitle, Component component, Views view) {
 		viewsMap.put(view, component);
-		mainPanel.addTab(view.toString(), component);
+		mainPanel.addTab(tabTitle, component);
 	}
 	
 	void setToolbar(Component component) {

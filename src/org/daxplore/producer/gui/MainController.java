@@ -127,12 +127,12 @@ public class MainController implements ActionListener {
 		
 		mainView.setMenuBar(menuBarController.getView());
 		
-		mainView.addView(openFileController.getView(), Views.OPENFILEVIEW);
-		mainView.addView(groupsController.getView(), Views.GROUPSVIEW);
-		mainView.addView(editTextController.getView(), Views.EDITTEXTVIEW);
-		mainView.addView(toolsController.getView(), Views.TOOLSVIEW);
-		mainView.addView(questionController.getView(), Views.QUESTIONVIEW);
-		mainView.addView(timeSeriesController.getView(), Views.TIMESERIESVIEW);
+		mainView.addTab(guiTexts.get("view.open_file.tab"), openFileController.getView(), Views.OPENFILEVIEW);
+		mainView.addTab(guiTexts.get("view.groups.tab"), groupsController.getView(), Views.GROUPSVIEW);
+		mainView.addTab(guiTexts.get("view.edit_text.tab"), editTextController.getView(), Views.EDITTEXTVIEW);
+		mainView.addTab(guiTexts.get("view.tools.tab"), toolsController.getView(), Views.TOOLSVIEW);
+		mainView.addTab(guiTexts.get("view.questions.tab"), questionController.getView(), Views.QUESTIONVIEW);
+		mainView.addTab(guiTexts.get("view.time_series.tab"), timeSeriesController.getView(), Views.TIMESERIESVIEW);
 		
 		mainView.setToolbar(toolbarController.getView());
 		mainView.setNavigationView(navigationController.getView());
