@@ -22,9 +22,7 @@ import org.daxplore.producer.daxplorelib.metadata.textreference.TextReference;
 import org.daxplore.producer.gui.edit.EditTextController;
 import org.daxplore.producer.gui.event.ChangeMainViewEvent;
 import org.daxplore.producer.gui.event.DaxploreFileUpdateEvent;
-import org.daxplore.producer.gui.event.EmptyEvents.HistoryGoBackEvent;
-import org.daxplore.producer.gui.event.EmptyEvents.QuitProgramEvent;
-import org.daxplore.producer.gui.event.EmptyEvents.SaveFileEvent;
+import org.daxplore.producer.gui.event.EmptyEvents.*;
 import org.daxplore.producer.gui.event.ErrorMessageEvent;
 import org.daxplore.producer.gui.event.HistoryAvailableEvent;
 import org.daxplore.producer.gui.groups.GroupsController;
@@ -257,6 +255,17 @@ public class MainController implements ActionListener {
 				// do nothing
 			}
 		}
+	}
+	
+	@Subscribe
+	public void on(ExportUploadEvent e) {
+		File exportTo = Dialogs.showExportDialog(mainWindow);
+		try {
+			getDaxploreFile().writeUploadFile(exportTo);
+		} catch (DaxploreException e1) {
+			eventBus.post(new ErrorMessageEvent("Error while generating export file", e1));
+		}
+		
 	}
 	
 	private void setView(Views view, Object command) {

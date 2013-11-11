@@ -13,4 +13,6 @@ public class EmptyEvents {
 	public static class LocaleUpdateEvent {}
 
 	public static class QuitProgramEvent {}
+	
+	public static class ExportUploadEvent {}
 }
