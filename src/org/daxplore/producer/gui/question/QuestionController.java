@@ -12,6 +12,8 @@ import java.util.Map.Entry;
 import java.util.TreeMap;
 
 import javax.swing.JTable;
+import javax.swing.event.ListSelectionEvent;
+import javax.swing.event.ListSelectionListener;
 import javax.swing.event.TableModelEvent;
 import javax.swing.event.TableModelListener;
 
@@ -38,7 +40,7 @@ public class QuestionController implements TableModelListener, ActionListener  {
 	private EventBus eventBus;
 	private DaxploreFile daxploreFile;
 	
-	private QuestionView questionView;
+	private QuestionView view;
 	private LinkedList<Pair<Double, Integer>> values;
 	private MetaQuestion mq;
 	private ColumnTableModel afterTableModel;
@@ -48,15 +50,31 @@ public class QuestionController implements TableModelListener, ActionListener  {
 	public QuestionController(EventBus eventBus) {
 		this.eventBus = eventBus;
 		eventBus.register(this);
-		questionView = new QuestionView(eventBus, this);
+		view = new QuestionView(eventBus, this);
 	}
 	
 	@Subscribe
-	public void onDaxploreFileUpdate(DaxploreFileUpdateEvent e) {
+	public void on(DaxploreFileUpdateEvent e) {
 		this.daxploreFile = e.getDaxploreFile();
 		updateCalculatedValues();
+		
+		try {
+			final QuestionTable table = new QuestionTable(eventBus, new QuestionTableModel(daxploreFile.getMetaQuestionManager()));
+			table.getSelectionModel().addListSelectionListener(new ListSelectionListener(){
+		        public void valueChanged(ListSelectionEvent event) {
+		        	if(!event.getValueIsAdjusting()) {
+		        		openMetaQuestion((MetaQuestion)table.getValueAt(table.getSelectedRow(), 0));
+		        	}
+		        }
+		    });
+			view.setQuestionList(table);
+		} catch (DaxploreException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		}
+		
 	}
-
+	
 	//TODO handle null scales properly
 	public void openMetaQuestion(MetaQuestion metaQuestion) {
 		this.mq = metaQuestion;
@@ -64,11 +82,11 @@ public class QuestionController implements TableModelListener, ActionListener  {
 		scaleTableModel = new ScaleTableModel(metaQuestion.getScale());
 		scaleTableModel.addTableModelListener(this);
 		scaleTable = new ScaleTable(eventBus, scaleTableModel);
-		questionView.getScaleScrollPane().setViewportView(scaleTable);
+		view.getScaleScrollPane().setViewportView(scaleTable);
 		
 		try {
 			values = daxploreFile.getRawData().getColumnValueCount(metaQuestion.getId());
-			questionView.getBeforeScrollPane().setViewportView(new JTable(new ColumnTableModel(values)));
+			view.getBeforeScrollPane().setViewportView(new JTable(new ColumnTableModel(values)));
 		} catch (SQLException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -76,7 +94,7 @@ public class QuestionController implements TableModelListener, ActionListener  {
 		
 		updateCalculatedValues();
 		
-		questionView.getAfterScrollPane().setViewportView(new JTable(afterTableModel));
+		view.getAfterScrollPane().setViewportView(new JTable(afterTableModel));
 		
 		try {
 			TimePointTableModel timePointTableModel = new TimePointTableModel(
@@ -86,7 +104,7 @@ public class QuestionController implements TableModelListener, ActionListener  {
 					metaQuestion);
 			
 			TimePointTable timePointTable = new TimePointTable(eventBus, timePointTableModel);
-			questionView.getTimePointScrollPane().setViewportView(timePointTable);
+			view.getTimePointScrollPane().setViewportView(timePointTable);
 			
 		} catch (SQLException | DaxploreException e) {
 			// TODO Auto-generated catch block
@@ -144,7 +162,6 @@ public class QuestionController implements TableModelListener, ActionListener  {
 	public void tableChanged(TableModelEvent e) {
 		updateCalculatedValues();
 	}
-	
 
 	/**
 	 * {@inheritDoc}
@@ -159,9 +176,9 @@ public class QuestionController implements TableModelListener, ActionListener  {
 					mq.setScale(daxploreFile.getMetaScaleManager().create(new LinkedList<Option>(), new NumberlineCoverage()));
 					scaleTableModel = new ScaleTableModel(mq.getScale());
 					scaleTable = new ScaleTable(eventBus, scaleTableModel);
-					questionView.getScaleScrollPane().setViewportView(scaleTable);
-					questionView.validate();
-				    questionView.repaint();
+					view.getScaleScrollPane().setViewportView(scaleTable);
+					view.validate();
+				    view.repaint();
 					scaleTableModel.fireTableStructureChanged();
 				}
 				boolean added = false;
@@ -253,7 +270,7 @@ public class QuestionController implements TableModelListener, ActionListener  {
 	}
 
 	public Component getView() {
-		return questionView;
+		return view;
 	}
 	
 }

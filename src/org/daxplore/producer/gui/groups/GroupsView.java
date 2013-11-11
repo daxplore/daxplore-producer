@@ -1,25 +1,17 @@
 package org.daxplore.producer.gui.groups;
 
 import java.awt.BorderLayout;
-import java.awt.Color;
-import java.awt.Component;
 import java.awt.GridLayout;
 import java.awt.event.ActionListener;
 
 import javax.swing.Box;
 import javax.swing.BoxLayout;
 import javax.swing.JButton;
-import javax.swing.JList;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JSplitPane;
-import javax.swing.JTree;
-import javax.swing.ListCellRenderer;
-import javax.swing.tree.TreeCellRenderer;
 
 import org.daxplore.producer.gui.groups.GroupsController.GroupsCommand;
-import org.daxplore.producer.gui.widget.GroupRenderer;
-import org.daxplore.producer.gui.widget.QuestionWidget;
 
 @SuppressWarnings("serial")
 public class GroupsView extends JPanel {
@@ -27,38 +19,6 @@ public class GroupsView extends JPanel {
 	private JScrollPane questionsScrollPane = new JScrollPane();
 	private JScrollPane groupsScollPane = new JScrollPane();
 	private JScrollPane perspectiveScrollPane = new JScrollPane();
-	
-	class QuestionListCellRenderer implements ListCellRenderer<QuestionWidget> {
-		@Override
-		public Component getListCellRendererComponent(JList<? extends QuestionWidget> list, QuestionWidget value, int index, boolean isSelected, boolean cellHasFocus) {
-			if(isSelected) {
-				value.setBackground(new Color(255, 255, 200));
-			} else {
-				value.setBackground(new Color(255,255,255));
-			}
-			return value;
-		}
-	}
-	
-	class GroupTreeCellRenderer implements TreeCellRenderer {
-		@Override
-		public Component getTreeCellRendererComponent(JTree tree, Object value, boolean selected, boolean expanded, boolean leaf, int row, boolean hasFocus) {
-			if(selected) {
-				if(value instanceof QuestionWidget) {
-					((QuestionWidget)value).setBackground(new Color(255, 255, 200));
-				} else if (value instanceof GroupRenderer) {
-					((GroupRenderer)value).setBackground(new Color(200, 200, 255));
-				}
-			} else {
-				if(value instanceof QuestionWidget) {
-					((QuestionWidget)value).setBackground(new Color(255, 255, 255));
-				} else if (value instanceof GroupRenderer) {
-					((GroupRenderer)value).setBackground(new Color(255, 255, 255));
-				}
-			}
-			return (Component)value;
-		}
-	}
 	
 	public GroupsView(ActionListener actionListener) {
 		setLayout(new GridLayout(0, 2, 0, 0));

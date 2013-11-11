@@ -12,11 +12,15 @@ import javax.swing.JLabel;
 import javax.swing.JList;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
+import javax.swing.JSplitPane;
+import javax.swing.JTable;
 import javax.swing.ListCellRenderer;
 import javax.swing.border.LineBorder;
 import javax.swing.border.TitledBorder;
 
+import org.daxplore.producer.daxplorelib.DaxploreException;
 import org.daxplore.producer.daxplorelib.metadata.MetaQuestion;
+import org.daxplore.producer.daxplorelib.metadata.MetaQuestion.MetaQuestionManager;
 import org.daxplore.producer.daxplorelib.metadata.MetaScale;
 import org.daxplore.producer.daxplorelib.metadata.MetaScale.Option;
 import org.daxplore.producer.gui.question.QuestionController.QuestionCommand;
@@ -27,6 +31,7 @@ import com.google.common.eventbus.EventBus;
 @SuppressWarnings("serial")
 public class QuestionView extends JPanel {
 	
+	private JScrollPane questionListScrollPane = new JScrollPane();
 	private JLabel questionID;
 	private JPanel fullTextRefHolder;
 	private JPanel shortTextRefHolder;
@@ -60,8 +65,18 @@ public class QuestionView extends JPanel {
 		
 		setLayout(new BorderLayout(0, 0));
 		
+		JSplitPane splitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT);
+		splitPane.setResizeWeight(0.25);
+		add(splitPane, BorderLayout.CENTER);
+		
+		splitPane.setLeftComponent(questionListScrollPane);
+		
+		JPanel questionPanel = new JPanel(new BorderLayout());
+		
+		splitPane.setRightComponent(questionPanel);
+		
 		JPanel panel = new JPanel();
-		add(panel, BorderLayout.NORTH);
+		questionPanel.add(panel, BorderLayout.NORTH);
 		panel.setLayout(new BorderLayout(0, 0));
 		
 		panel_4 = new JPanel();
@@ -87,7 +102,7 @@ public class QuestionView extends JPanel {
 		panel_5.add(timePointScrollPane);
 		
 		panel_1 = new JPanel();
-		add(panel_1, BorderLayout.CENTER);
+		questionPanel.add(panel_1, BorderLayout.CENTER);
 		panel_1.setLayout(new BoxLayout(panel_1, BoxLayout.X_AXIS));
 		
 		beforeScrollPane = new JScrollPane();
@@ -133,6 +148,10 @@ public class QuestionView extends JPanel {
 		afterScrollPane = new JScrollPane();
 		afterScrollPane.setPreferredSize(new Dimension(100, 3));
 		panel_1.add(afterScrollPane);
+	}
+	
+	void setQuestionList(JTable table) {
+		questionListScrollPane.setViewportView(table);
 	}
 
 	void setMetaQuestion(MetaQuestion mq) {
