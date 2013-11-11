@@ -24,6 +24,7 @@ import org.daxplore.producer.daxplorelib.metadata.MetaTimepointShort.MetaTimepoi
 import org.daxplore.producer.daxplorelib.metadata.textreference.TextReference;
 import org.daxplore.producer.daxplorelib.metadata.textreference.TextReferenceManager;
 
+import com.beust.jcommander.internal.Lists;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
@@ -307,11 +308,11 @@ public class MetaQuestion {
 
 	public List<MetaTimepointShort> getTimepoints() {
 		Collections.sort(timepoints);
-		return timepoints;
+		return Lists.newLinkedList(timepoints);
 	}
 	
 	public void setTimepoints(List<MetaTimepointShort> timepoints) {
-		if(!timepoints.equals(this.timemodified)) {
+		if(!timepoints.equals(this.timepoints)) {
 			this.timepoints = timepoints;
 			timemodified = true;
 		}

@@ -266,18 +266,7 @@ public class GroupsController implements ActionListener {
 				groupTree = new GroupTree(eventBus, groupTreeModel);
 				groupsView.getGroupsScollPane().setViewportView(groupTree);
 				
-				MetaGroup perspectives = null;
-				for(MetaGroup mg : daxploreFile.getMetaGroupManager().getAll()) {
-					if(mg.getType() == GroupType.PERSPECTIVE) {
-						perspectives = mg;
-						break;
-					}
-				}
-				if(perspectives == null) {
-					System.out.println("Create perspectives group");
-					TextReference textref = daxploreFile.getTextReferenceManager().get(GroupsCommand.PERSPECTIVE_ADD_ITEM.toString());
-					perspectives = daxploreFile.getMetaGroupManager().create(textref, 999, GroupType.PERSPECTIVE, new LinkedList<MetaQuestion>());
-				}
+				MetaGroup perspectives = daxploreFile.getMetaGroupManager().getPerspectiveGroup();
 				
 				perspectivesTableModel = new PerspectivesTableModel(perspectives);
 				perspectivesTable = new QuestionTable(eventBus, perspectivesTableModel);

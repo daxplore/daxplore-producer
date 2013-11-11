@@ -21,6 +21,7 @@ import org.daxplore.producer.daxplorelib.metadata.MetaQuestion.MetaQuestionManag
 import org.daxplore.producer.daxplorelib.metadata.textreference.TextReference;
 import org.daxplore.producer.daxplorelib.metadata.textreference.TextReferenceManager;
 
+import com.beust.jcommander.internal.Lists;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
@@ -207,7 +208,11 @@ public class MetaGroup implements Comparable<MetaGroup> {
 					nModified++;
 				}
 			}
-			
+			try {
+				int perchanged = getPerspectiveGroup().modified? 1: 0;
+			} catch (SQLException | DaxploreException e) {
+				e.printStackTrace();
+			}
 			return nModified + toBeAddedGroup.size() + toBeAddedGroupRel.size() + toBeRemoved.size();
 		}
 
@@ -253,7 +258,7 @@ public class MetaGroup implements Comparable<MetaGroup> {
 				if(rs.next()) {
 					return get(rs.getInt("id"));
 				}
-				return create(textsManager.get("PERSPECTIVE"), 999, GroupType.PERSPECTIVE, new LinkedList<MetaQuestion>()); //TODO 999 //TODO use in GUI
+				return create(textsManager.get("PERSPECTIVE"), 999, GroupType.PERSPECTIVE, new LinkedList<MetaQuestion>()); //TODO 999
 			}
 		}
 		
@@ -375,7 +380,7 @@ public class MetaGroup implements Comparable<MetaGroup> {
 	}
 
 	public List<MetaQuestion> getQuestions() {
-		return qList;
+		return Lists.newLinkedList(qList);
 	}
 
 	public void setQuestions(List<MetaQuestion> questionList) {

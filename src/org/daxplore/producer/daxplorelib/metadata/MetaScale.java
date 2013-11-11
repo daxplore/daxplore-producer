@@ -21,6 +21,8 @@ import org.daxplore.producer.daxplorelib.metadata.textreference.TextReferenceMan
 import org.daxplore.producer.tools.NumberlineCoverage;
 import org.daxplore.producer.tools.NumberlineCoverage.NumberlineCoverageException;
 
+import com.beust.jcommander.internal.Lists;
+
 public class MetaScale {
 	
 	private static final DaxploreTable maintable = new DaxploreTable(
@@ -322,7 +324,7 @@ public class MetaScale {
 	}
 	
 	public List<Option> getOptions() {
-		return new LinkedList<>(options);
+		return Lists.newLinkedList(options);
 	}
 
 	public void setOptions(List<Option> options) {
