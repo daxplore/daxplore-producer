@@ -93,9 +93,6 @@ public class MainView {
 		panel.setLayout(new BorderLayout(0, 0));
 		panel.add(mainPanel, BorderLayout.CENTER);
 		
-		// create main panel window.
-		mainPanel.setBorder(new MatteBorder(0, 1, 0, 0, Color.GRAY));
-
 		mainPanel.setRequestFocusEnabled(true);
 		mainWindow.setVisible(true);
 	}

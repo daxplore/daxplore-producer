@@ -21,7 +21,6 @@ public class NavigationView extends JPanel {
 	
 	NavigationView(ActionListener listener) {
 		setLayout(new BorderLayout(0, 0));
-		setBorder(new MatteBorder(0, 1, 0, 0, Color.GRAY));
 		
 		backButton = new JButton("Back");
 		backButton.setActionCommand(NavigationCommand.BACK.toString());
