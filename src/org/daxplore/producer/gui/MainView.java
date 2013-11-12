@@ -1,7 +1,6 @@
 package org.daxplore.producer.gui;
 
 import java.awt.BorderLayout;
-import java.awt.Color;
 import java.awt.Component;
 import java.awt.Toolkit;
 
@@ -9,7 +8,6 @@ import javax.swing.JFrame;
 import javax.swing.JMenuBar;
 import javax.swing.JPanel;
 import javax.swing.JTabbedPane;
-import javax.swing.border.MatteBorder;
 import javax.swing.event.ChangeListener;
 
 import org.daxplore.producer.gui.MainController.Views;
@@ -24,61 +22,6 @@ public class MainView {
 	private final JTabbedPane mainPanel = new JTabbedPane();
 	private JPanel panel;
 	
-	//TODO figure out if we can move the main method to somewhere else?
-	/**
-	 * Main execution loop, includes the thread handler, required for swing
-	 * applications.
-	 * 
-	 * Do not move the main() method from this file as it will
-	 * break windowbuilder parsing.
-	 */
-	/*public static void main(String[] args) {
-		try {
-			DaxploreLogger.setup();
-		} catch (IOException e2) {
-			System.out.println("Couldn't set upp logger");
-			e2.printStackTrace();
-		}
-		
-		// do a java version check, if target system doesn't have java 7, exit.
-		if (GuiTools.javaVersionCheck() != true) {
-			JOptionPane.showMessageDialog(null,
-					"This program only supports Java 7 or higher.",
-					"Daxplore warning",
-					JOptionPane.ERROR_MESSAGE);
-			return;
-		}
-			
-		
-		// set the look and feel here, currently we use nimbus.
-		// only available from java 6 and up though.
-		try {
-		    for (LookAndFeelInfo info : UIManager.getInstalledLookAndFeels()) {
-		        if ("Nimbus".equals(info.getName())) {
-		            UIManager.setLookAndFeel(info.getClassName());
-		            break;
-		        }
-		    }
-		} catch (UnsupportedLookAndFeelException | ClassNotFoundException | InstantiationException | IllegalAccessException e) {
-			try {
-				UIManager.setLookAndFeel("javax.swing.plaf.nimbus.NimbusLookAndFeel");
-			} catch (ClassNotFoundException | InstantiationException | IllegalAccessException | UnsupportedLookAndFeelException e1) {
-				// TODO Auto-generated catch block
-				e1.printStackTrace();
-			}
-		}
-		
-		// thread handler for main window.
-		EventQueue.invokeLater(new Runnable() {
-			@Override
-			public void run() {
-				JFrame window = new JFrame();
-				MainController mainController = new MainController(window);
-				window.setVisible(true);
-			}
-		});
-	}*/
-
 	private BiMap<Views, Component> viewsMap = HashBiMap.create();
 	
 	MainView(JFrame mainWindow) {
