@@ -7,9 +7,13 @@ public class EmptyEvents {
 	
 	public static class DiscardChangesEvent {}
 	
+	public static class ExportTextsEvent {}
+
 	public static class ExportUploadEvent {}
 	
 	public static class HistoryGoBackEvent {}
+
+	public static class ImportTextsEvent {}
 	
 	public static class LocaleUpdateEvent {}
 	

@@ -25,14 +25,17 @@ public class EditTextView extends JPanel {
 	private JComboBox<LocaleItem> localeCombo2;
 	private JScrollPane scrollPane;
 	
-	protected static class LocaleItem {
-		Locale locale;
+	public static class LocaleItem {
+		private Locale locale;
 		public LocaleItem(Locale loc) {
 			this.locale = loc;
 		}
+		public Locale getLocale() {
+			return locale;
+		}
 		@Override
 		public String toString() {
-			return locale.getDisplayLanguage();
+			return locale.getDisplayLanguage(Locale.ENGLISH);
 		}
 		@Override
 		public boolean equals(Object o) {
@@ -44,10 +47,6 @@ public class EditTextView extends JPanel {
 		}
 	}
 	
-	/**
-	 * Create the panel.
-	 * @param guiFile 
-	 */
 	public <T extends DocumentListener & ActionListener> EditTextView(T listener) {
 		setLayout(new BorderLayout(0, 0));
 		

@@ -38,7 +38,6 @@ public class GroupsController implements ActionListener {
 	private DaxploreFile daxploreFile;
 	
 	private GroupsView groupsView;
-	private GroupsToolbar toolbar;
 	
 	private GroupTreeModel groupTreeModel;
 	private GroupTree groupTree;
@@ -54,11 +53,6 @@ public class GroupsController implements ActionListener {
 		eventBus.register(this);
 		
 		groupsView = new GroupsView(this);
-		toolbar = new GroupsToolbar(this);
-	}
-	
-	public GroupsToolbar getToolbar() {
-		return toolbar;
 	}
 	
 	@Subscribe

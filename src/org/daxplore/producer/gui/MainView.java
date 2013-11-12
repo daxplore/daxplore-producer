@@ -11,7 +11,6 @@ import javax.swing.JTabbedPane;
 import javax.swing.event.ChangeListener;
 
 import org.daxplore.producer.gui.MainController.Views;
-import org.daxplore.producer.gui.navigation.NavigationView;
 
 import com.google.common.collect.BiMap;
 import com.google.common.collect.HashBiMap;
@@ -63,10 +62,6 @@ public class MainView {
 		mainWindow.setJMenuBar(menuBar);
 	}
 
-	void setNavigationView(NavigationView navigationView) {
-		panel.add(navigationView, BorderLayout.SOUTH);
-	}
-	
 	void addChangeListener(ChangeListener listener) {
 		mainPanel.addChangeListener(listener);
 	}

@@ -4,8 +4,13 @@ import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
+import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.StandardOpenOption;
+import java.util.List;
 import java.util.Locale;
 import java.util.Stack;
 
@@ -20,26 +25,30 @@ import javax.swing.event.ChangeListener;
 
 import org.daxplore.producer.daxplorelib.DaxploreException;
 import org.daxplore.producer.daxplorelib.DaxploreFile;
+import org.daxplore.producer.daxplorelib.ImportExportManager.L10nFormat;
 import org.daxplore.producer.daxplorelib.metadata.MetaQuestion;
 import org.daxplore.producer.daxplorelib.metadata.textreference.TextReference;
+import org.daxplore.producer.gui.Dialogs.FileLocalePair;
 import org.daxplore.producer.gui.edit.EditTextController;
 import org.daxplore.producer.gui.event.ChangeMainViewEvent;
 import org.daxplore.producer.gui.event.DaxploreFileUpdateEvent;
 import org.daxplore.producer.gui.event.EmptyEvents.DiscardChangesEvent;
+import org.daxplore.producer.gui.event.EmptyEvents.ExportTextsEvent;
 import org.daxplore.producer.gui.event.EmptyEvents.ExportUploadEvent;
 import org.daxplore.producer.gui.event.EmptyEvents.HistoryGoBackEvent;
+import org.daxplore.producer.gui.event.EmptyEvents.ImportTextsEvent;
 import org.daxplore.producer.gui.event.EmptyEvents.QuitProgramEvent;
 import org.daxplore.producer.gui.event.EmptyEvents.SaveFileEvent;
 import org.daxplore.producer.gui.event.ErrorMessageEvent;
 import org.daxplore.producer.gui.event.HistoryAvailableEvent;
 import org.daxplore.producer.gui.groups.GroupsController;
-import org.daxplore.producer.gui.navigation.NavigationController;
 import org.daxplore.producer.gui.open.OpenFileController;
 import org.daxplore.producer.gui.question.QuestionController;
 import org.daxplore.producer.gui.resources.GuiTexts;
 import org.daxplore.producer.gui.timeseries.TimeSeriesController;
 import org.daxplore.producer.gui.tools.ToolsController;
 
+import com.google.common.base.Charsets;
 import com.google.common.base.Throwables;
 import com.google.common.eventbus.EventBus;
 import com.google.common.eventbus.Subscribe;
@@ -65,7 +74,6 @@ public class MainController {
 	private GroupsController groupsController;
 	private EditTextController editTextController;
 	private ToolsController toolsController;
-	private NavigationController navigationController;
 	private QuestionController questionController;
 	private TimeSeriesController timeSeriesController;
 	
@@ -115,7 +123,6 @@ public class MainController {
 		groupsController = new GroupsController(eventBus, mainWindow);
 		editTextController = new EditTextController(eventBus);
 		toolsController = new ToolsController(eventBus);
-		navigationController = new NavigationController(eventBus);
 		questionController = new QuestionController(eventBus);
 		timeSeriesController = new TimeSeriesController(eventBus);
 
@@ -131,7 +138,6 @@ public class MainController {
 		mainView.addTab(texts.get("view.time_series.tab"), timeSeriesController.getView(), Views.TIMESERIESVIEW);
 		
 		mainView.setToolbar(toolbarController.getView());
-		mainView.setNavigationView(navigationController.getView());
 		
 		mainView.addChangeListener(new ChangeListener() {
 			@Override
@@ -167,7 +173,6 @@ public class MainController {
 		// Should maybe be changed to take the command into account?
 		if(currentHistoryItem != null && currentHistoryItem.view != e.getView()) {
 			history.push(currentHistoryItem);
-			navigationController.setHistoryAvailible(true);
 		}
 		currentHistoryItem = new HistoryItem(e.getView(), e.getCommand());
 		setView(e.getView(), e.getCommand());
@@ -179,6 +184,83 @@ public class MainController {
 			currentHistoryItem = history.pop();
 			eventBus.post(new HistoryAvailableEvent(!history.empty()));
 			setView(currentHistoryItem.view, currentHistoryItem.command);
+		}
+	}
+	
+	@Subscribe
+	public void on(ExportTextsEvent e) {
+		try {
+			List<Locale> localeList = daxploreFile.getTextReferenceManager().getAllLocales();
+			FileLocalePair fileLocalePair = Dialogs.showExportDialog(mainWindow, localeList);
+			File file = fileLocalePair.file;
+			Locale locale = fileLocalePair.locale;
+			if(fileLocalePair.file == null) {
+				System.out.println("File is null");
+				return; //TODO communicate error properly
+			} 
+			
+			L10nFormat format;
+			String filename = file.toPath().getFileName().toString().toLowerCase();
+			//TODO allow different suffixes and user selection of type?
+			if(filename.endsWith(".csv")) {
+				format = L10nFormat.CSV;
+			} else if(filename.endsWith(".properties")) {
+				format = L10nFormat.PROPERTIES;
+			} else {
+				System.out.println("Unsupported file suffix: " + filename);
+				return; //TODO communicate error properly
+			}
+			
+			if(file.exists() && file.canWrite()) {
+				try (BufferedWriter writer = Files.newBufferedWriter(file.toPath(), Charsets.UTF_8, StandardOpenOption.WRITE, StandardOpenOption.TRUNCATE_EXISTING)) {
+					daxploreFile.exportL10n(writer, format, locale);
+				}
+			} else if (!file.exists()) {
+				try (BufferedWriter writer = Files.newBufferedWriter(file.toPath(), Charsets.UTF_8, StandardOpenOption.CREATE_NEW, StandardOpenOption.WRITE)) {
+					daxploreFile.exportL10n(writer, format, locale);
+				}
+			} else {
+				System.out.println("File is write protected");
+				return; //TODO communicate error properly
+			}
+
+		} catch (DaxploreException | IOException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		}
+	}
+	
+	@Subscribe
+	public void on(ImportTextsEvent e) {
+		List<Locale> localeList = Settings.availableLocales();
+		FileLocalePair fileLocalePair = Dialogs.showImportDialog(mainWindow, localeList);
+		File file = fileLocalePair.file;
+		Locale locale = fileLocalePair.locale;
+		if(file != null && file.exists() && file.canRead()) {
+			
+			L10nFormat format;
+			String filename = file.toPath().getFileName().toString().toLowerCase();
+			//TODO allow different suffixes and user selection of type?
+			if(filename.endsWith(".csv")) {
+				format = L10nFormat.CSV;
+			} else if(filename.endsWith(".properties")) {
+				format = L10nFormat.PROPERTIES;
+			} else {
+				System.out.println("Unsupported file suffix: " + filename); //TODO communicate error properly
+				return;
+			}
+			
+			daxploreFile.getAbout().addLocale(locale);
+			try {
+				daxploreFile.importL10n(
+						Files.newBufferedReader(file.toPath(), Charsets.UTF_8), format, locale);
+			} catch (FileNotFoundException e1) {
+				throw new AssertionError("File exists but is not found");
+			} catch (IOException e1) {
+				e1.printStackTrace();
+			} catch (DaxploreException e1) {
+				e1.printStackTrace();
+			}
 		}
 	}
 	
@@ -291,7 +373,6 @@ public class MainController {
 	}
 	
 	private void setView(Views view, Object command) {
-		setToolbar(view);
 		if(mainView.getSelectedView() != view) {
 			mainView.switchTo(view);
 		}
@@ -318,24 +399,6 @@ public class MainController {
 			default:
 				throw new AssertionError("Undefined history item command: " + view);
 			}
-		}
-	}
-	
-	private void setToolbar(Views view) {
-		switch(view) {
-		case EDITTEXTVIEW:
-			navigationController.setToolbar(editTextController.getToolbar());
-			return;
-		case GROUPSVIEW:
-			navigationController.setToolbar(groupsController.getToolbar());
-			return;
-		case OPENFILEVIEW:
-		case QUESTIONVIEW:
-		case TIMESERIESVIEW:
-		case TOOLSVIEW:
-		default:
-			navigationController.setToolbar(null);
-			break;
 		}
 	}
 	
