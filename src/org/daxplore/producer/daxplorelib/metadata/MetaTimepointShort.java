@@ -169,6 +169,13 @@ public class MetaTimepointShort implements Comparable<MetaTimepointShort> {
 		public int getHighestId() throws SQLException {
 			return SQLTools.maxId(pointTable.name, "id", connection) + addDelta;
 		}
+		
+		public void discardChanges() {
+			pointMap.clear();
+			toBeAdded.clear();
+			toBeRemoved.clear();
+			addDelta = 0;
+		}
 	}
 	
 	private TextReference textref;

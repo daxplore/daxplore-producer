@@ -251,6 +251,13 @@ public class MetaScale {
 			}
 			return new LinkedList<>(scaleMap.values());
 		}
+		
+		public void discardChanges() {
+			scaleMap.clear();
+			toBeAdded.clear();
+			toBeRemoved.clear();
+			addDelta = 0;
+		}
 	}
 	
 	public static class Option {

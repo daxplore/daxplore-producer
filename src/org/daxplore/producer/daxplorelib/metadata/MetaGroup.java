@@ -273,6 +273,14 @@ public class MetaGroup implements Comparable<MetaGroup> {
 			}
 			return json;
 		}
+		
+		public void discardChanges() {
+			groupMap.clear();
+			toBeAddedGroup.clear();
+			toBeAddedGroupRel.clear();
+			toBeRemoved.clear();
+			addDelta = 0;
+		}
 	}
 
 	public enum GroupType {

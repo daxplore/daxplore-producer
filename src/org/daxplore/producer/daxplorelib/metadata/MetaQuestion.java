@@ -238,6 +238,12 @@ public class MetaQuestion {
 			}
 			return new LinkedList<>(questionMap.values());
 		}
+		
+		public void discardChanges() {
+			questionMap.clear();
+			toBeAdded.clear();
+			toBeRemoved.clear();
+		}
 	}
 	
 	private String id;
