@@ -18,9 +18,7 @@ import javax.swing.ListCellRenderer;
 import javax.swing.border.LineBorder;
 import javax.swing.border.TitledBorder;
 
-import org.daxplore.producer.daxplorelib.DaxploreException;
 import org.daxplore.producer.daxplorelib.metadata.MetaQuestion;
-import org.daxplore.producer.daxplorelib.metadata.MetaQuestion.MetaQuestionManager;
 import org.daxplore.producer.daxplorelib.metadata.MetaScale;
 import org.daxplore.producer.daxplorelib.metadata.MetaScale.Option;
 import org.daxplore.producer.gui.question.QuestionController.QuestionCommand;

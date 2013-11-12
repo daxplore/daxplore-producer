@@ -22,7 +22,10 @@ import org.daxplore.producer.daxplorelib.metadata.textreference.TextReference;
 import org.daxplore.producer.gui.edit.EditTextController;
 import org.daxplore.producer.gui.event.ChangeMainViewEvent;
 import org.daxplore.producer.gui.event.DaxploreFileUpdateEvent;
-import org.daxplore.producer.gui.event.EmptyEvents.*;
+import org.daxplore.producer.gui.event.EmptyEvents.ExportUploadEvent;
+import org.daxplore.producer.gui.event.EmptyEvents.HistoryGoBackEvent;
+import org.daxplore.producer.gui.event.EmptyEvents.QuitProgramEvent;
+import org.daxplore.producer.gui.event.EmptyEvents.SaveFileEvent;
 import org.daxplore.producer.gui.event.ErrorMessageEvent;
 import org.daxplore.producer.gui.event.HistoryAvailableEvent;
 import org.daxplore.producer.gui.groups.GroupsController;
@@ -108,10 +111,9 @@ public class MainController implements ActionListener {
 		});
 		
 		
-		//TODO remove *this* as an argument, only needed for old import wizard
 		menuBarController = new MenuBarController(actionManager);
 		toolbarController = new ToolbarController(eventBus, actionManager);
-		openFileController = new OpenFileController(eventBus, mainWindow, this);
+		openFileController = new OpenFileController();
 		groupsController = new GroupsController(eventBus, mainWindow);
 		editTextController = new EditTextController(eventBus);
 		toolsController = new ToolsController(eventBus);
