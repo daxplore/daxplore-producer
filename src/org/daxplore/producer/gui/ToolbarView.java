@@ -18,6 +18,7 @@ public class ToolbarView extends JPanel {
 		toolbar = new JToolBar();
 		toolbar.setFloatable(false);
 		toolbar.setRollover(true);
+		toolbar.setBorderPainted(false);
 		
 		toolbar.add(actionManager.BACK);
 		toolbar.add(actionManager.NEW);
@@ -25,6 +26,7 @@ public class ToolbarView extends JPanel {
 		toolbar.add(actionManager.SAVE);
 		toolbar.add(actionManager.SAVE_AS);
 		toolbar.add(actionManager.EXPORT_UPLOAD);
+		
 		
 		add(toolbar, BorderLayout.WEST);
 	}
