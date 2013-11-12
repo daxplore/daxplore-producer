@@ -2,8 +2,6 @@ package org.daxplore.producer.gui;
 
 import java.awt.BorderLayout;
 import java.awt.Dimension;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.io.File;
@@ -51,7 +49,7 @@ import com.google.common.eventbus.Subscribe;
  * 
  * Singleton.
  */
-public class MainController implements ActionListener {
+public class MainController {
 	private EventBus eventBus;
 	private DaxploreFile daxploreFile = null;
 	private JFrame mainWindow;
@@ -59,7 +57,6 @@ public class MainController implements ActionListener {
 	private GuiTexts texts;
 
 	private MainView mainView;
-	private ButtonPanelView buttonPanelView;
 
 	private MenuBarController menuBarController;
 	private ToolbarController toolbarController;
@@ -122,8 +119,6 @@ public class MainController implements ActionListener {
 		questionController = new QuestionController(eventBus);
 		timeSeriesController = new TimeSeriesController(eventBus);
 
-		buttonPanelView = new ButtonPanelView(this);
-
 		mainView = new MainView(mainWindow);
 		
 		mainView.setMenuBar(menuBarController.getView());
@@ -153,7 +148,6 @@ public class MainController implements ActionListener {
 	@Subscribe
 	public void on(DaxploreFileUpdateEvent e) {
 		this.daxploreFile = e.getDaxploreFile();
-		buttonPanelView.setActive(daxploreFile != null);
 	}
 	
 	@Subscribe
@@ -289,7 +283,7 @@ public class MainController implements ActionListener {
 	public void on(ExportUploadEvent e) {
 		File exportTo = Dialogs.showExportDialog(mainWindow);
 		try {
-			getDaxploreFile().writeUploadFile(exportTo);
+			daxploreFile.writeUploadFile(exportTo);
 		} catch (DaxploreException e1) {
 			eventBus.post(new ErrorMessageEvent("Error while generating export file", e1));
 		}
@@ -297,7 +291,6 @@ public class MainController implements ActionListener {
 	}
 	
 	private void setView(Views view, Object command) {
-		buttonPanelView.setActiveButton(view);
 		setToolbar(view);
 		if(mainView.getSelectedView() != view) {
 			mainView.switchTo(view);
@@ -346,45 +339,7 @@ public class MainController implements ActionListener {
 		}
 	}
 	
-	@Override
-	public void actionPerformed(ActionEvent e) {
-		try { //from buttonPanelView
-			Views view = Views.valueOf(e.getActionCommand());
-			eventBus.post(new ChangeMainViewEvent(view));
-		} catch (IllegalArgumentException e2) {
-			//place for other types of buttons
-		}
-	}
-
-	//TODO decouple more
-	public JFrame getMainWindow() {
-		return mainView.getMainFrame();
-	}
-	
-	public ButtonPanelView getButtonPanelView() {
-		return buttonPanelView;
-	}
-
 	public OpenFileController getOpenFileController() {
 		return openFileController;
-	}
-
-
-	/* Files and stuff */
-	//TODO remove when not needed by the old importer
-	
-	public DaxploreFile getDaxploreFile() {
-		return daxploreFile;
-	}
-
-	public void resetDaxploreFile() {
-		daxploreFile = null;
-	}
-
-	/**
-	 * Returns true if a daxplore file is loaded into the system.
-	 */
-	public boolean fileIsSet() {
-		return daxploreFile != null;
 	}
 }
