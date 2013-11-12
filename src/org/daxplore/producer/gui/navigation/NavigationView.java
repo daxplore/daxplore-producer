@@ -1,7 +1,6 @@
 package org.daxplore.producer.gui.navigation;
 
 import java.awt.BorderLayout;
-import java.awt.Color;
 import java.awt.Component;
 import java.awt.event.ActionListener;
 
@@ -9,7 +8,6 @@ import javax.swing.JButton;
 import javax.swing.JPanel;
 import javax.swing.JSeparator;
 import javax.swing.SwingConstants;
-import javax.swing.border.MatteBorder;
 
 import org.daxplore.producer.gui.navigation.NavigationController.NavigationCommand;
 

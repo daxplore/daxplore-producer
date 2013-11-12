@@ -1,5 +1,7 @@
 package org.daxplore.producer.gui;
 
+import java.awt.BorderLayout;
+import java.awt.Dimension;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.WindowAdapter;
@@ -11,6 +13,9 @@ import java.util.Stack;
 
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
+import javax.swing.JPanel;
+import javax.swing.JScrollPane;
+import javax.swing.JTextArea;
 import javax.swing.WindowConstants;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
@@ -179,19 +184,33 @@ public class MainController implements ActionListener {
 	@Subscribe
 	public void onErrorMessage(ErrorMessageEvent e) {
 		Object[] options = {texts.get("dialog.error.continue"), texts.get("dialog.error.show_debug")};
-		int answer = JOptionPane.showOptionDialog(mainWindow,
-				new JLabelSelectable(e.getUserMessage()),
-				texts.get("dialog.error.title"),
-		        JOptionPane.DEFAULT_OPTION,
-		        JOptionPane.ERROR_MESSAGE,
-		        null,
-		        options,
-		        options[0]);
-		if(answer == 1) {
-			JOptionPane.showMessageDialog(mainWindow, 
-					new JLabelSelectable(Throwables.getStackTraceAsString(e.getCause())), 
-					texts.get("dialog.error.debug_title"),
-					JOptionPane.PLAIN_MESSAGE);
+		if(e.getCause() == null) {
+			JLabelSelectable message = new JLabelSelectable(e.getUserMessage());
+			JOptionPane.showMessageDialog(mainWindow, message);
+		} else {
+			JLabelSelectable message = new JLabelSelectable(
+					texts.format("dialog.error.message", e.getUserMessage(), e.getCause().getLocalizedMessage()));
+			int answer = JOptionPane.showOptionDialog(mainWindow,
+					message,
+					texts.get("dialog.error.title"),
+			        JOptionPane.DEFAULT_OPTION,
+			        JOptionPane.ERROR_MESSAGE,
+			        null,
+			        options,
+			        options[0]);
+			if(answer == 1) {
+				JPanel debugMessage = new JPanel(new BorderLayout(0, 10));
+				debugMessage.add(message, BorderLayout.NORTH);
+				JTextArea stacktraceText = new JTextArea(Throwables.getStackTraceAsString(e.getCause()));
+				stacktraceText.setEditable(false);
+				JScrollPane stacktraceScrollPane = new JScrollPane(stacktraceText);
+				stacktraceScrollPane.setPreferredSize(new Dimension((int)stacktraceScrollPane.getPreferredSize().getWidth()+30, 300));
+				debugMessage.add(stacktraceScrollPane, BorderLayout.CENTER);
+				JOptionPane.showMessageDialog(mainWindow, 
+						debugMessage, 
+						texts.get("dialog.error.debug_title"),
+						JOptionPane.PLAIN_MESSAGE);
+			}
 		}
 	}
 	

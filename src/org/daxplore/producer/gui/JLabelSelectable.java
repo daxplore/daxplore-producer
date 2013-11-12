@@ -11,7 +11,7 @@ import javax.swing.JTextPane;
 public class JLabelSelectable extends JTextPane {
 	
 	public JLabelSelectable(String text) {
-		this(text, false);
+		this(text, true);
 	}
 	
 	public JLabelSelectable(String text, boolean asHTML) {
