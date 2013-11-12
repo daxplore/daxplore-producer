@@ -35,7 +35,7 @@ public class ToolsController implements ActionListener {
 	}
 	
 	@Subscribe
-	public void onDaxploreFileUpdate(DaxploreFileUpdateEvent e) {
+	public void on(DaxploreFileUpdateEvent e) {
 		this.daxploreFile = e.getDaxploreFile();
 		loadData();
 	}

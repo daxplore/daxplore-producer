@@ -135,7 +135,7 @@ public class WelcomeDialog {
 	}
 	
 	@Subscribe
-	public void onHasDaxploreFile(final DaxploreFileUpdateEvent event) {
+	public void on(final DaxploreFileUpdateEvent event) {
 		eventBus.unregister(this);
 
 		EventQueue.invokeLater(new Runnable() {

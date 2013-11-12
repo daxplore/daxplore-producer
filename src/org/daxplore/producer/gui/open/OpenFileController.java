@@ -23,7 +23,7 @@ public final class OpenFileController {
 	}
 	
 	@Subscribe
-	public void onDaxploreFileUpdated(DaxploreFileUpdateEvent e) {
+	public void on(DaxploreFileUpdateEvent e) {
 		daxploreFile = e.getDaxploreFile();
 		updateTextFields();
 	}

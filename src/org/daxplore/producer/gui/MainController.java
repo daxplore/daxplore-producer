@@ -51,8 +51,6 @@ import com.google.common.eventbus.Subscribe;
  * Singleton.
  */
 public class MainController implements ActionListener {
-	// data fields for main class.
-	
 	private EventBus eventBus;
 	private DaxploreFile daxploreFile = null;
 	private JFrame mainWindow;
@@ -76,9 +74,6 @@ public class MainController implements ActionListener {
 	private HistoryItem currentHistoryItem; 
 	private Stack<HistoryItem> history = new Stack<>();
 	
-	//TODO remove direct spss file reference
-	private File spssFile;
-
 	public enum Views {
 		OPENFILEVIEW,
 		EDITTEXTVIEW,
@@ -155,13 +150,13 @@ public class MainController implements ActionListener {
 	}
 	
 	@Subscribe
-	public void onDaxploreFileUpdate(DaxploreFileUpdateEvent e) {
+	public void on(DaxploreFileUpdateEvent e) {
 		this.daxploreFile = e.getDaxploreFile();
 		buttonPanelView.setActive(daxploreFile != null);
 	}
 	
 	@Subscribe
-	public void onViewChange(ChangeMainViewEvent e) {
+	public void on(ChangeMainViewEvent e) {
 		// Only adds history if it's a completely new view.
 		// Should maybe be changed to take the command into account?
 		if(currentHistoryItem != null && currentHistoryItem.view != e.getView()) {
@@ -173,7 +168,7 @@ public class MainController implements ActionListener {
 	}
 
 	@Subscribe
-	public void onHistoryGoBack(HistoryGoBackEvent e) {
+	public void on(HistoryGoBackEvent e) {
 		if(!history.empty()) {
 			currentHistoryItem = history.pop();
 			eventBus.post(new HistoryAvailableEvent(!history.empty()));
@@ -182,7 +177,7 @@ public class MainController implements ActionListener {
 	}
 	
 	@Subscribe
-	public void onErrorMessage(ErrorMessageEvent e) {
+	public void on(ErrorMessageEvent e) {
 		Object[] options = {texts.get("dialog.error.continue"), texts.get("dialog.error.show_debug")};
 		if(e.getCause() == null) {
 			JLabelSelectable message = new JLabelSelectable(e.getUserMessage());
@@ -215,7 +210,7 @@ public class MainController implements ActionListener {
 	}
 	
 	@Subscribe
-	public void onSaveFile(SaveFileEvent e) {
+	public void on(SaveFileEvent e) {
 		try {
 			daxploreFile.saveAll();
 		} catch (DaxploreException e1) {
@@ -225,7 +220,7 @@ public class MainController implements ActionListener {
 	}
 	
 	@Subscribe
-	public void onProgramQuit(QuitProgramEvent e) {
+	public void on(QuitProgramEvent e) {
 		if(daxploreFile.getUnsavedChangesCount() == 0) {
 			try {
 				daxploreFile.close();
@@ -369,24 +364,11 @@ public class MainController implements ActionListener {
 	public DaxploreFile getDaxploreFile() {
 		return daxploreFile;
 	}
-	
-	public File getSpssFile() {
-		return spssFile;
-	}
-
-	public void setSpssFile(File spssFile) {
-		this.spssFile = spssFile;
-	}
 
 	public void resetDaxploreFile() {
 		daxploreFile = null;
 	}
 
-	public void resetSpssFile() {
-		spssFile = null;
-	}
-
-	
 	/**
 	 * Returns true if a daxplore file is loaded into the system.
 	 */
