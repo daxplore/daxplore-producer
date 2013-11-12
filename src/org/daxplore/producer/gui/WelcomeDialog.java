@@ -46,8 +46,7 @@ public class WelcomeDialog {
 		}
 			
 		
-		// set the look and feel here, currently we use nimbus.
-		// only available from java 6 and up though.
+		// Use the Nimbus look and feel (Java 6+)
 		try {
 		    for (LookAndFeelInfo info : UIManager.getInstalledLookAndFeels()) {
 		        if ("Nimbus".equals(info.getName())) {
