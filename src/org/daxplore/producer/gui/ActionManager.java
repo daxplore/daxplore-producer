@@ -158,11 +158,7 @@ public class ActionManager {
 		SAVE_AS = new ResourcedAction(texts, "save_as") {
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				try {
-					throw new IOException("Some text about IO errors");
-				} catch (IOException e1) {
-					eventBus.post(new ErrorMessageEvent("Error message event main text", e1));
-				}
+
 			}
 		};
 		

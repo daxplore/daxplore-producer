@@ -1,7 +1,6 @@
 package org.daxplore.producer.gui.groups;
 
 import java.awt.BorderLayout;
-import java.awt.GridLayout;
 import java.awt.event.ActionListener;
 
 import javax.swing.Box;
@@ -21,10 +20,13 @@ public class GroupsView extends JPanel {
 	private JScrollPane perspectiveScrollPane = new JScrollPane();
 	
 	public GroupsView(ActionListener actionListener) {
-		setLayout(new GridLayout(0, 2, 0, 0));
+		setLayout(new BorderLayout());
+		
+		JSplitPane mainSplitPanel = new JSplitPane();
+		mainSplitPanel.setResizeWeight(0.2);
 		
 		JPanel questionsPanel = new JPanel();
-		add(questionsPanel);
+		mainSplitPanel.setLeftComponent(questionsPanel);
 		questionsPanel.setLayout(new BorderLayout(0, 0));
 		
 		questionsPanel.add(questionsScrollPane);
@@ -32,7 +34,7 @@ public class GroupsView extends JPanel {
 		JSplitPane splitPane = new JSplitPane();
 		splitPane.setResizeWeight(0.6);
 		splitPane.setOrientation(JSplitPane.VERTICAL_SPLIT);
-		add(splitPane);
+		mainSplitPanel.setRightComponent(splitPane);
 		
 		JPanel groupsPanel = new JPanel();
 		splitPane.setLeftComponent(groupsPanel);
@@ -107,6 +109,8 @@ public class GroupsView extends JPanel {
 		addToPerspectivesPanel.add(addToPerspectivesButton);
 		addToPerspectivesPanel.add(Box.createVerticalGlue());
 		splitPane.setDividerLocation(0.6);
+		
+		add(mainSplitPanel);
 	}
 	
 	JScrollPane getQuestionsScrollPane() {
