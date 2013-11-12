@@ -9,7 +9,10 @@ import java.net.URL;
 import javax.swing.AbstractAction;
 import javax.swing.Action;
 
-import org.daxplore.producer.gui.event.EmptyEvents.*;
+import org.daxplore.producer.gui.event.EmptyEvents.ExportUploadEvent;
+import org.daxplore.producer.gui.event.EmptyEvents.HistoryGoBackEvent;
+import org.daxplore.producer.gui.event.EmptyEvents.QuitProgramEvent;
+import org.daxplore.producer.gui.event.EmptyEvents.SaveFileEvent;
 import org.daxplore.producer.gui.event.ErrorMessageEvent;
 import org.daxplore.producer.gui.resources.GuiTexts;
 import org.daxplore.producer.gui.resources.IconResources;
