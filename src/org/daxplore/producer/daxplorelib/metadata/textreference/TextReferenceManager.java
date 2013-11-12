@@ -199,4 +199,9 @@ public class TextReferenceManager {
 		return textTree;
 	}
 	
+	public void discardChanges() {
+		textTree.clear();
+		toBeRemoved.clear();
+		nNew = 0;
+	}
 }

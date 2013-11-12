@@ -159,6 +159,28 @@ public class About {
 		}
 	}
 	
+	public void discardChanges() throws SQLException {
+		locales.clear();
+		try (Statement stmt = connection.createStatement()) {
+			stmt.execute("SELECT * FROM about");
+			try(ResultSet rs = stmt.getResultSet()) {
+				rs.next();
+				creation = rs.getDate("creation");
+				lastupdate = rs.getDate("lastupdate");
+				importdate = rs.getDate("importdate");
+				filename = rs.getString("filename");
+				timeSeriesType = TimeSeriesType.valueOf(rs.getString("timeseriestype"));
+				timeSeriesShortColumn = rs.getString("timeshortcolumn");
+			}
+			try(ResultSet rs = stmt.executeQuery("SELECT locale FROM locales")) {
+				while(rs.next()) {
+					locales.add(new Locale(rs.getString("locale")));
+				}
+			}
+		}
+		modified = false;
+	}
+	
 	public int getUnsavedChangesCount() {
 		return (modified ? 1 : 0) + (localesModified ? 1 : 0);
 	}

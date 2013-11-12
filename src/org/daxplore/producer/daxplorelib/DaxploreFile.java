@@ -313,5 +313,19 @@ public class DaxploreFile implements Closeable {
 		String logString = String.format("replaceAllTimepointsInQuestions: %d questions affected, %d timepoints added", questionsModified, tpAdded);
 		Logger.getGlobal().log(Level.INFO, logString);
 	}
+	
+	public void discardChanges() throws DaxploreException {
+		try {
+			about.discardChanges();
+			metaGroupManager.discardChanges();
+			metaQuestionManager.discardChanges();
+			metaScaleManager.discardChanges();
+			metaTimepointShortManager.discardChanges();
+			textReferenceManager.discardChanges();
+		} catch (SQLException e) {
+			throw new DaxploreException("Error when discarding changes", e);
+		}
+		
+	}
 
 }
