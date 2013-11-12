@@ -9,6 +9,7 @@ import java.net.URL;
 import javax.swing.AbstractAction;
 import javax.swing.Action;
 
+import org.daxplore.producer.gui.event.EmptyEvents.DiscardChangesEvent;
 import org.daxplore.producer.gui.event.EmptyEvents.ExportUploadEvent;
 import org.daxplore.producer.gui.event.EmptyEvents.HistoryGoBackEvent;
 import org.daxplore.producer.gui.event.EmptyEvents.QuitProgramEvent;
@@ -72,7 +73,7 @@ public class ActionManager {
 		DISCARD_CHANGES = new ResourcedAction(texts, "discard_changes") {
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				
+				eventBus.post(new DiscardChangesEvent());
 			}
 		};
 		
@@ -153,7 +154,6 @@ public class ActionManager {
 				eventBus.post(new SaveFileEvent());
 			}
 		};
-		
 		
 		SAVE_AS = new ResourcedAction(texts, "save_as") {
 			@Override

@@ -27,6 +27,7 @@ import org.daxplore.producer.daxplorelib.metadata.textreference.TextReference;
 import org.daxplore.producer.gui.edit.EditTextController;
 import org.daxplore.producer.gui.event.ChangeMainViewEvent;
 import org.daxplore.producer.gui.event.DaxploreFileUpdateEvent;
+import org.daxplore.producer.gui.event.EmptyEvents.DiscardChangesEvent;
 import org.daxplore.producer.gui.event.EmptyEvents.ExportUploadEvent;
 import org.daxplore.producer.gui.event.EmptyEvents.HistoryGoBackEvent;
 import org.daxplore.producer.gui.event.EmptyEvents.QuitProgramEvent;
@@ -153,6 +154,17 @@ public class MainController implements ActionListener {
 	public void on(DaxploreFileUpdateEvent e) {
 		this.daxploreFile = e.getDaxploreFile();
 		buttonPanelView.setActive(daxploreFile != null);
+	}
+	
+	@Subscribe
+	public void on(DiscardChangesEvent e) {
+		try {
+			daxploreFile.discardChanges();
+			eventBus.post(new DaxploreFileUpdateEvent(daxploreFile));
+		} catch (DaxploreException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		}
 	}
 	
 	@Subscribe
