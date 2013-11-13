@@ -143,43 +143,6 @@ public class CreateFileWizard extends Wizard {
 					
 		}
 		
-		private class DisplayLocale {
-			public Locale locale;
-			public String alternativeText;
-			public DisplayLocale(Locale locale) {
-				this.locale = locale;
-			}
-			public DisplayLocale(String text) {
-				alternativeText = text;
-			}
-			public String toString() {
-				if(locale!=null) {
-					return locale.getDisplayLanguage(Locale.ENGLISH);
-				} else {
-					return alternativeText;
-				}
-			}
-		}
-		
-		private class DisplayCharset {
-			public Charset charset;
-			public String alternativeText;
-			public DisplayCharset(Charset charset) {
-				this.charset = charset;
-			}
-			public DisplayCharset(String text) {
-				alternativeText = text;
-			}
-			public String toString() {
-				if(charset!=null) {
-					return charset.displayName(Locale.ENGLISH);
-				} else {
-					return alternativeText;
-				}
-			}
-			
-		}
-		
 		@Override
 		public void initUI() {
 			setLayout(new BorderLayout(0, 0));

@@ -15,37 +15,16 @@ import javax.swing.JTextField;
 import javax.swing.SwingConstants;
 import javax.swing.event.DocumentListener;
 
+import org.daxplore.producer.gui.DisplayLocale;
 import org.daxplore.producer.gui.edit.EditTextController.EditTextCommand;
 
 @SuppressWarnings("serial")
 public class EditTextView extends JPanel {
 	private JTextField textField;
 
-	private JComboBox<LocaleItem> localeCombo1;
-	private JComboBox<LocaleItem> localeCombo2;
+	private JComboBox<DisplayLocale> localeCombo1;
+	private JComboBox<DisplayLocale> localeCombo2;
 	private JScrollPane scrollPane;
-	
-	public static class LocaleItem {
-		private Locale locale;
-		public LocaleItem(Locale loc) {
-			this.locale = loc;
-		}
-		public Locale getLocale() {
-			return locale;
-		}
-		@Override
-		public String toString() {
-			return locale.getDisplayLanguage(Locale.ENGLISH);
-		}
-		@Override
-		public boolean equals(Object o) {
-			return o!=null && o instanceof LocaleItem && locale != null && locale.equals(((LocaleItem)o).locale);
-		}
-		@Override
-		public int hashCode() {
-			return locale==null ? 7 : locale.hashCode();
-		}
-	}
 	
 	public <T extends DocumentListener & ActionListener> EditTextView(T listener) {
 		setLayout(new BorderLayout(0, 0));
@@ -79,18 +58,18 @@ public class EditTextView extends JPanel {
 	}
 	
 	public void setLocales(List<Locale> localeList) {
-		LocaleItem item1 = (LocaleItem)localeCombo1.getSelectedItem();
-		LocaleItem item2 = (LocaleItem)localeCombo2.getSelectedItem();
+		DisplayLocale item1 = (DisplayLocale)localeCombo1.getSelectedItem();
+		DisplayLocale item2 = (DisplayLocale)localeCombo2.getSelectedItem();
 		localeCombo1.removeAllItems();
 		localeCombo2.removeAllItems();
-		List<LocaleItem> localeItemList = new LinkedList<>();
+		List<DisplayLocale> localeItemList = new LinkedList<>();
 		for(Locale l: localeList) { 
-			localeItemList.add(new LocaleItem(l));
+			localeItemList.add(new DisplayLocale(l));
 		}
 		if(localeList.size() == 0 ) {
 			return;
 		}
-		for(LocaleItem l: localeItemList) {
+		for(DisplayLocale l: localeItemList) {
 			localeCombo1.addItem(l);
 			localeCombo2.addItem(l);
 		}
@@ -105,7 +84,7 @@ public class EditTextView extends JPanel {
 		if(localeItemList.contains(item2) && !item1.equals(item2)) {
 			// stay same
 		} else if(localeItemList.size() > 1) {
-			for(LocaleItem l: localeItemList) {
+			for(DisplayLocale l: localeItemList) {
 				if(!l.equals(item1)) {
 					item2 = l;
 					break;
@@ -127,7 +106,7 @@ public class EditTextView extends JPanel {
 	}
 	
 	public Locale getSelectedLocale1() {
-		LocaleItem item = (LocaleItem)localeCombo1.getSelectedItem(); 
+		DisplayLocale item = (DisplayLocale)localeCombo1.getSelectedItem(); 
 		if(item != null) {
 			return item.locale;
 		}
@@ -135,7 +114,7 @@ public class EditTextView extends JPanel {
 	}
 
 	public Locale getSelectedLocale2() {
-		LocaleItem item = (LocaleItem)localeCombo2.getSelectedItem(); 
+		DisplayLocale item = (DisplayLocale)localeCombo2.getSelectedItem(); 
 		if(item != null) {
 			return item.locale;
 		}
