@@ -42,7 +42,6 @@ import org.daxplore.producer.gui.event.EmptyEvents.SaveFileEvent;
 import org.daxplore.producer.gui.event.ErrorMessageEvent;
 import org.daxplore.producer.gui.event.HistoryAvailableEvent;
 import org.daxplore.producer.gui.groups.GroupsController;
-import org.daxplore.producer.gui.open.OpenFileController;
 import org.daxplore.producer.gui.question.QuestionController;
 import org.daxplore.producer.gui.resources.GuiTexts;
 import org.daxplore.producer.gui.timeseries.TimeSeriesController;
@@ -70,7 +69,6 @@ public class MainController {
 	private MenuBarController menuBarController;
 	private ToolbarController toolbarController;
 	
-	private OpenFileController openFileController;
 	private GroupsController groupsController;
 	private EditTextController editTextController;
 	private ToolsController toolsController;
@@ -81,7 +79,6 @@ public class MainController {
 	private Stack<HistoryItem> history = new Stack<>();
 	
 	public enum Views {
-		OPENFILEVIEW,
 		EDITTEXTVIEW,
 		GROUPSVIEW,
 		TIMESERIESVIEW,
@@ -119,7 +116,6 @@ public class MainController {
 		
 		menuBarController = new MenuBarController(actionManager);
 		toolbarController = new ToolbarController(eventBus, actionManager);
-		openFileController = new OpenFileController();
 		groupsController = new GroupsController(eventBus, mainWindow);
 		editTextController = new EditTextController(eventBus);
 		toolsController = new ToolsController(eventBus);
@@ -130,7 +126,6 @@ public class MainController {
 		
 		mainView.setMenuBar(menuBarController.getView());
 		
-		mainView.addTab(texts.get("view.open_file.tab"), openFileController.getView(), Views.OPENFILEVIEW);
 		mainView.addTab(texts.get("view.groups.tab"), groupsController.getView(), Views.GROUPSVIEW);
 		mainView.addTab(texts.get("view.edit_text.tab"), editTextController.getView(), Views.EDITTEXTVIEW);
 		mainView.addTab(texts.get("view.tools.tab"), toolsController.getView(), Views.TOOLSVIEW);
@@ -145,8 +140,6 @@ public class MainController {
 				eventBus.post(new ChangeMainViewEvent(mainView.getSelectedView()));
 			}
 		});
-		
-		currentHistoryItem = new HistoryItem(Views.OPENFILEVIEW, null);
 		
 		eventBus.post(new DaxploreFileUpdateEvent(daxploreFile));
 	}
@@ -379,8 +372,6 @@ public class MainController {
 		
 		if(command != null) {
 			switch(view) {
-			case OPENFILEVIEW:
-				break;
 			case EDITTEXTVIEW:
 				if(command instanceof TextReference) {
 					editTextController.jumpToTextReference((TextReference)command);
@@ -400,9 +391,5 @@ public class MainController {
 				throw new AssertionError("Undefined history item command: " + view);
 			}
 		}
-	}
-	
-	public OpenFileController getOpenFileController() {
-		return openFileController;
 	}
 }
