@@ -8,7 +8,7 @@ public class Settings {
 	
 	private final static Locale[] availableLocales = new Locale[]{new Locale("sv"), new Locale("en")};
 	private static Locale defaultLocale = new Locale("sv");
-
+	
 	public static List<Locale> availableLocales() {
 		return Arrays.asList(availableLocales.clone());
 	}

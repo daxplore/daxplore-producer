@@ -21,7 +21,7 @@ import org.daxplore.producer.daxplorelib.metadata.textreference.TextReference;
 import org.daxplore.producer.daxplorelib.metadata.textreference.TextReferenceManager;
 import org.daxplore.producer.daxplorelib.metadata.textreference.TextTree;
 import org.daxplore.producer.gui.event.DaxploreFileUpdateEvent;
-import org.daxplore.producer.gui.event.EmptyEvents.LocaleUpdateEvent;
+import org.daxplore.producer.gui.event.EmptyEvents.LocaleAddedOrRemovedEvent;
 import org.daxplore.producer.gui.event.EmptyEvents.RawImportEvent;
 
 import com.google.common.eventbus.EventBus;
@@ -55,7 +55,7 @@ public class EditTextController implements ActionListener, DocumentListener {
 	}
 	
 	@Subscribe
-	public void on(LocaleUpdateEvent e) {
+	public void on(LocaleAddedOrRemovedEvent e) {
 		loadData();
 	}
 	

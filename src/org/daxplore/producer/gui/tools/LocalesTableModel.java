@@ -7,7 +7,7 @@ import javax.swing.table.DefaultTableModel;
 
 import org.daxplore.producer.daxplorelib.About;
 import org.daxplore.producer.gui.Settings;
-import org.daxplore.producer.gui.event.EmptyEvents.LocaleUpdateEvent;
+import org.daxplore.producer.gui.event.EmptyEvents.LocaleAddedOrRemovedEvent;
 
 import com.google.common.eventbus.EventBus;
 
@@ -82,7 +82,7 @@ public class LocalesTableModel extends DefaultTableModel {
 			} else {
 				about.removeLocale(Settings.availableLocales().get(row));
 			}
-			eventBus.post(new LocaleUpdateEvent());
+			eventBus.post(new LocaleAddedOrRemovedEvent());
 		}
 	}
 }

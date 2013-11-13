@@ -101,7 +101,7 @@ public class GroupTree extends JTree {
 				QuestionWidget qEdit = new QuestionWidget(eventBus, (MetaQuestion)value);
 				editor = qEdit;
 			} else if(value instanceof MetaGroup) {
-				GroupEditor gEdit = new GroupEditor();
+				GroupEditor gEdit = new GroupEditor(eventBus);
 				gEdit.setContent((MetaGroup)value);
 				editor = gEdit;
 			} else {

@@ -10,8 +10,6 @@ import javax.swing.JFileChooser;
 import javax.swing.filechooser.FileFilter;
 import javax.swing.filechooser.FileNameExtensionFilter;
 
-import org.daxplore.producer.gui.edit.EditTextView.LocaleItem;
-
 public class Dialogs {
 	
 	public static File showExportDialog(Component parent, DaxplorePreferences preferences) {
@@ -73,7 +71,7 @@ public class Dialogs {
 	
 	@SuppressWarnings("serial")
 	private static class LocalizationFileChooser extends JFileChooser {
-		private JComboBox<LocaleItem> localeBox;
+		private JComboBox<DisplayLocale> localeBox;
 		private Locale selectedLocale;
 		
 		public LocalizationFileChooser(List<Locale> localeList, DaxplorePreferences preferences) {
@@ -81,7 +79,7 @@ public class Dialogs {
 			localeBox = new JComboBox<>();
 			localeBox.addItem(null);
 			for(Locale loc: localeList) {
-				localeBox.addItem(new LocaleItem(loc));
+				localeBox.addItem(new DisplayLocale(loc));
 			}
 			setAccessory(localeBox);
 		}
@@ -89,7 +87,7 @@ public class Dialogs {
 		@Override
 		public void approveSelection() {
 			if(localeBox.getSelectedItem() != null) {
-				selectedLocale = ((LocaleItem)localeBox.getSelectedItem()).getLocale();
+				selectedLocale = ((DisplayLocale)localeBox.getSelectedItem()).locale;
 				super.approveSelection();
 			} else {
 				System.out.println("No locale selected during import");

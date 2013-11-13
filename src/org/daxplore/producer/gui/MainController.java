@@ -38,6 +38,7 @@ import org.daxplore.producer.gui.event.EmptyEvents.ExportUploadEvent;
 import org.daxplore.producer.gui.event.EmptyEvents.HistoryGoBackEvent;
 import org.daxplore.producer.gui.event.EmptyEvents.ImportTextsEvent;
 import org.daxplore.producer.gui.event.EmptyEvents.QuitProgramEvent;
+import org.daxplore.producer.gui.event.EmptyEvents.RepaintWindowEvent;
 import org.daxplore.producer.gui.event.EmptyEvents.SaveFileEvent;
 import org.daxplore.producer.gui.event.ErrorMessageEvent;
 import org.daxplore.producer.gui.event.HistoryAvailableEvent;
@@ -356,6 +357,11 @@ public class MainController {
 				// do nothing
 			}
 		}
+	}
+	
+	@Subscribe
+	public void on(RepaintWindowEvent e) {
+		mainWindow.repaint();
 	}
 	
 	@Subscribe

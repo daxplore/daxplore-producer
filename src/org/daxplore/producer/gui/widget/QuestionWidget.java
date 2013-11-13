@@ -3,28 +3,31 @@ package org.daxplore.producer.gui.widget;
 import java.awt.BorderLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.util.Locale;
 
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JLabel;
-import javax.swing.JPanel;
-import javax.swing.SwingConstants;
 
 import org.daxplore.producer.daxplorelib.metadata.MetaQuestion;
 import org.daxplore.producer.gui.MainController.Views;
 import org.daxplore.producer.gui.event.ChangeMainViewEvent;
+import org.daxplore.producer.gui.event.DisplayLocaleSelectEvent;
 
+import com.google.common.base.Strings;
 import com.google.common.eventbus.EventBus;
+import com.google.common.eventbus.Subscribe;
 
 @SuppressWarnings("serial")
 public class QuestionWidget extends AbstractWidgetEditor<MetaQuestion> {
 	
 	private MetaQuestion metaQuestion;
 	
-	private JPanel labelHolder = new JPanel();
-	private JLabel label;
+	private JLabel label = new JLabel();
 
 	private JButton gotoButton;
+	
+	private Locale locale;
 	
 	public QuestionWidget(EventBus eventBus, MetaQuestion metaQuestion) {
 		this(eventBus);
@@ -32,8 +35,9 @@ public class QuestionWidget extends AbstractWidgetEditor<MetaQuestion> {
 	}
  	
 	public QuestionWidget(final EventBus eventBus) {
+		eventBus.register(this);
 		setLayout(new BorderLayout(0, 0));
-		add(labelHolder, BorderLayout.WEST);
+		add(label, BorderLayout.WEST);
 		gotoButton = new JButton("");
 		gotoButton.setHideActionText(true);
 		gotoButton.setIcon(new ImageIcon(QuestionWidget.class.getResource("/org/daxplore/producer/gui/resources/edit_go_32.png")));
@@ -59,14 +63,30 @@ public class QuestionWidget extends AbstractWidgetEditor<MetaQuestion> {
 	@Override
 	public void setContent(MetaQuestion value) {
 		this.metaQuestion = value;
-		label = new JLabel(metaQuestion.getId());
-		label.setHorizontalAlignment(SwingConstants.LEFT);
-		labelHolder.removeAll();
-		labelHolder.add(label);
+		String text = getLabelText();
+		label.setText(text);
+	}
+	
+	private String getLabelText() {
+		if(locale == null) {
+			return metaQuestion.getId();
+		}
+	
+		String text = metaQuestion.getShortTextRef().get(locale);
+		if(Strings.isNullOrEmpty(text)) {
+			return metaQuestion.getId();
+		}
+
+		return text;
 	}
 
 	@Override
 	public MetaQuestion getContent() {
 		return metaQuestion;
+	}
+	
+	@Subscribe
+	public void on(DisplayLocaleSelectEvent e) {
+		locale = e.getLocale();
 	}
 }

@@ -15,11 +15,13 @@ public class EmptyEvents {
 
 	public static class ImportTextsEvent {}
 	
-	public static class LocaleUpdateEvent {}
-	
+	public static class LocaleAddedOrRemovedEvent {}
+
 	public static class QuitProgramEvent {}
 	
 	public static class RawImportEvent {}
+	
+	public static class RepaintWindowEvent {}
 
 	public static class SaveFileEvent {}
 	
