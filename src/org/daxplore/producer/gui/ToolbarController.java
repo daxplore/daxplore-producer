@@ -8,8 +8,8 @@ import java.util.Locale;
 import org.daxplore.producer.daxplorelib.DaxploreFile;
 import org.daxplore.producer.gui.event.DaxploreFileUpdateEvent;
 import org.daxplore.producer.gui.event.DisplayLocaleSelectEvent;
-import org.daxplore.producer.gui.event.EmptyEvents.RepaintWindowEvent;
 import org.daxplore.producer.gui.event.EmptyEvents.LocaleAddedOrRemovedEvent;
+import org.daxplore.producer.gui.event.EmptyEvents.RepaintWindowEvent;
 
 import com.google.common.eventbus.EventBus;
 import com.google.common.eventbus.Subscribe;

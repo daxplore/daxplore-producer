@@ -11,7 +11,6 @@ import java.nio.charset.Charset;
 import java.util.Iterator;
 import java.util.Locale;
 import java.util.Set;
-import java.util.prefs.Preferences;
 
 import javax.swing.BorderFactory;
 import javax.swing.DefaultComboBoxModel;

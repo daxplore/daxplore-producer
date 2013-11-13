@@ -44,11 +44,12 @@ public class GroupTree extends JTree {
 		
 		private EventBus eventBus;
 		private QuestionWidget questionRenderer;
-		private GroupRenderer groupRenderer = new GroupRenderer();
+		private GroupRenderer groupRenderer;
 		private AbstractWidgetEditor<?> editor;
 		
 		public GroupTreeCellRendererEditor(EventBus eventBus) {
 			this.eventBus = eventBus;
+			groupRenderer  = new GroupRenderer(eventBus);
 			questionRenderer = new QuestionWidget(eventBus);
 		}
 		

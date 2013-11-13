@@ -8,7 +8,6 @@ import javax.swing.event.DocumentListener;
 
 import org.daxplore.producer.daxplorelib.metadata.MetaGroup;
 import org.daxplore.producer.daxplorelib.metadata.textreference.TextReference;
-import org.daxplore.producer.gui.Settings;
 import org.daxplore.producer.gui.event.DisplayLocaleSelectEvent;
 
 import com.google.common.base.Strings;
@@ -41,16 +40,16 @@ public class GroupEditor extends AbstractWidgetEditor<MetaGroup> {
 			@Override
 			public void removeUpdate(DocumentEvent e) {
 				if(!textField.getText().equals("")) {
-					metaGroup.getTextRef().put(textField.getText(), Settings.getDefaultLocale());
+					metaGroup.getTextRef().put(textField.getText(), locale);
 				}
 			}
 			@Override
 			public void insertUpdate(DocumentEvent e) {
-				metaGroup.getTextRef().put(textField.getText(), Settings.getDefaultLocale());
+				metaGroup.getTextRef().put(textField.getText(), locale);
 			}
 			@Override
 			public void changedUpdate(DocumentEvent e) {
-				metaGroup.getTextRef().put(textField.getText(), Settings.getDefaultLocale());
+				metaGroup.getTextRef().put(textField.getText(), locale);
 			}
 		});
 	}

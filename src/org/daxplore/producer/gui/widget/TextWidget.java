@@ -16,7 +16,6 @@ import org.daxplore.producer.daxplorelib.metadata.textreference.TextReference;
 import org.daxplore.producer.gui.MainController.Views;
 import org.daxplore.producer.gui.event.ChangeMainViewEvent;
 import org.daxplore.producer.gui.event.DisplayLocaleSelectEvent;
-import org.daxplore.producer.gui.event.EmptyEvents.RepaintWindowEvent;
 
 import com.google.common.base.Strings;
 import com.google.common.eventbus.EventBus;
