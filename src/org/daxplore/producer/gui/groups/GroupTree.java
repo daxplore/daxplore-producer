@@ -43,14 +43,16 @@ public class GroupTree extends JTree {
 	class GroupTreeCellRendererEditor extends AbstractCellEditor implements TreeCellRenderer, TreeCellEditor {
 		
 		private EventBus eventBus;
-		private QuestionWidget questionRenderer;
+		private QuestionWidget questionWidget;
 		private GroupRenderer groupRenderer;
+		private GroupEditor groupEditor;
 		private AbstractWidgetEditor<?> editor;
 		
 		public GroupTreeCellRendererEditor(EventBus eventBus) {
 			this.eventBus = eventBus;
 			groupRenderer  = new GroupRenderer(eventBus);
-			questionRenderer = new QuestionWidget(eventBus);
+			groupEditor = new GroupEditor(eventBus);
+			questionWidget = new QuestionWidget(eventBus);
 		}
 		
 		@Override
@@ -58,8 +60,8 @@ public class GroupTree extends JTree {
 			Container container;
 			if(value instanceof MetaQuestion) {
 				MetaQuestion mq = (MetaQuestion)value;
-				questionRenderer.setContent(mq);
-				container = questionRenderer;
+				questionWidget.setContent(mq);
+				container = questionWidget;
 			} else if(value instanceof MetaGroup) {
 				MetaGroup mg = (MetaGroup)value;
 				groupRenderer.setContent(mg);
@@ -99,12 +101,11 @@ public class GroupTree extends JTree {
 		@Override
 		public Component getTreeCellEditorComponent(JTree tree, Object value, boolean isSelected, boolean expanded, boolean leaf, int row) {
 			if(value instanceof MetaQuestion) {
-				QuestionWidget qEdit = new QuestionWidget(eventBus, (MetaQuestion)value);
-				editor = qEdit;
+				questionWidget.setContent((MetaQuestion)value);
+				editor = questionWidget;
 			} else if(value instanceof MetaGroup) {
-				GroupEditor gEdit = new GroupEditor(eventBus);
-				gEdit.setContent((MetaGroup)value);
-				editor = gEdit;
+				groupEditor.setContent((MetaGroup)value);
+				editor = groupEditor;
 			} else {
 				throw new AssertionError(); 
 			}

@@ -72,6 +72,7 @@ public class GroupEditor extends AbstractWidgetEditor<MetaGroup> {
 	@Subscribe
 	public void on(DisplayLocaleSelectEvent e) {
 		locale = e.getLocale();
+		textField.setEditable(locale != null);
 	}
 
 }
