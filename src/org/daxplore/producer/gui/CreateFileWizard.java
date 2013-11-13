@@ -11,6 +11,7 @@ import java.nio.charset.Charset;
 import java.util.Iterator;
 import java.util.Locale;
 import java.util.Set;
+import java.util.prefs.Preferences;
 
 import javax.swing.BorderFactory;
 import javax.swing.DefaultComboBoxModel;
@@ -31,6 +32,7 @@ import javax.swing.table.TableModel;
 import org.daxplore.producer.daxplorelib.DaxploreException;
 import org.daxplore.producer.daxplorelib.DaxploreFile;
 import org.daxplore.producer.gui.event.DaxploreFileUpdateEvent;
+import org.daxplore.producer.gui.resources.GuiTexts;
 import org.daxplore.producer.tools.CharsetTest;
 import org.daxplore.producer.tools.SPSSTools;
 import org.opendatafoundation.data.spss.SPSSFile;
@@ -45,19 +47,6 @@ import com.google.common.eventbus.EventBus;
 @SuppressWarnings("serial")
 public class CreateFileWizard extends Wizard {
 	
-	public static class WizardDoneEvent {
-
-		private DaxploreFile daxploreFile;
-		
-		public WizardDoneEvent(DaxploreFile daxploreFile) {
-			this.daxploreFile = daxploreFile;
-		}
-		
-		public DaxploreFile getDaxploreFile() {
-			return daxploreFile;
-		}
-	}
-
 	public static class CreateFilePanel extends Screen implements ActionListener {
 		
 		private JTextField fileNameTextField;
@@ -86,7 +75,7 @@ public class CreateFileWizard extends Wizard {
 
 		@Override
 		public void actionPerformed(ActionEvent e) {
-			JFileChooser jfc = new JFileChooser();
+			JFileChooser jfc = new JFileChooser(CreateFileWizard.preferences.getWorkingDirectory());
 			
 			FileFilter filter = new FileNameExtensionFilter("Daxplore files", "daxplore");
 			jfc.addChoosableFileFilter(filter);
@@ -96,6 +85,7 @@ public class CreateFileWizard extends Wizard {
 			
 			switch(returnVal) {
 			case JFileChooser.APPROVE_OPTION:
+				preferences.setWorkingDirectory(jfc.getCurrentDirectory());
 				setCanFinish(false);
 				setProblem("No file selected");
 				File fileToCreate = jfc.getSelectedFile();
@@ -243,7 +233,6 @@ public class CreateFileWizard extends Wizard {
 			updateWizardProblem();
 		}
 
-		@SuppressWarnings("unchecked")
 		@Override
 		public void actionPerformed(ActionEvent e) {
 			switch (TextCommand.valueOf(e.getActionCommand())) {
@@ -348,7 +337,7 @@ public class CreateFileWizard extends Wizard {
 		@Override
 		public void actionPerformed(ActionEvent e) {
 			
-			JFileChooser jfc = new JFileChooser();
+			JFileChooser jfc = new JFileChooser(CreateFileWizard.preferences.getWorkingDirectory());
 			
 			FileFilter filter = new FileNameExtensionFilter("SPSS files", "sav");
 			jfc.addChoosableFileFilter(filter);
@@ -358,6 +347,7 @@ public class CreateFileWizard extends Wizard {
 			switch(returnVal) {
 			case JFileChooser.APPROVE_OPTION:
 				File spssFile = jfc.getSelectedFile();
+				preferences.setWorkingDirectory(jfc.getCurrentDirectory());
 				try {
 					fileNameTextField.setText(spssFile.getCanonicalPath());
 				} catch (IOException e1) {
@@ -410,10 +400,16 @@ public class CreateFileWizard extends Wizard {
 	}
 
 	private EventBus eventBus;
+	// static variable access for use by the screen subclasses 
+	static GuiTexts texts;
+	static DaxplorePreferences preferences;
 	
-	public CreateFileWizard(JFrame window, EventBus eventBus) {
+	public CreateFileWizard(JFrame window, EventBus eventBus, GuiTexts texts, DaxplorePreferences preferences) {
 		super(new Wizard.Builder("Create new project", OpenSPSSPanel.class, window));
 		this.eventBus = eventBus;
+		CreateFileWizard.texts = texts;
+		CreateFileWizard.preferences = preferences;
+		data.put("preferences", preferences);
 	}
 	
 	@Override

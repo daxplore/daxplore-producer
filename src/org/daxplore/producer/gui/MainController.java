@@ -58,8 +58,10 @@ import com.google.common.eventbus.Subscribe;
  * Singleton.
  */
 public class MainController {
-	private EventBus eventBus;
 	private DaxploreFile daxploreFile = null;
+
+	private EventBus eventBus;
+	private DaxplorePreferences preferences;
 	private JFrame mainWindow;
 	private ActionManager actionManager;
 	private GuiTexts texts;
@@ -95,13 +97,15 @@ public class MainController {
 		}
 	}
 	
-	public MainController(JFrame mainWindow, final EventBus eventBus, DaxploreFile daxploreFile) {
+	public MainController(JFrame mainWindow, final EventBus eventBus, GuiTexts texts,
+			DaxplorePreferences preferences, DaxploreFile daxploreFile) {
 		this.mainWindow = mainWindow;
 		this.eventBus = eventBus;
+		this.texts = texts;
+		this.preferences = preferences;
 		this.daxploreFile = daxploreFile;
 
 		eventBus.register(this);
-		texts = new GuiTexts(Locale.ENGLISH);
 		
 		actionManager = new ActionManager(eventBus, texts);
 		
@@ -118,7 +122,7 @@ public class MainController {
 		toolbarController = new ToolbarController(eventBus, actionManager);
 		groupsController = new GroupsController(eventBus, mainWindow);
 		editTextController = new EditTextController(eventBus);
-		toolsController = new ToolsController(eventBus);
+		toolsController = new ToolsController(eventBus, preferences);
 		questionController = new QuestionController(eventBus);
 		timeSeriesController = new TimeSeriesController(eventBus);
 
@@ -184,7 +188,7 @@ public class MainController {
 	public void on(ExportTextsEvent e) {
 		try {
 			List<Locale> localeList = daxploreFile.getTextReferenceManager().getAllLocales();
-			FileLocalePair fileLocalePair = Dialogs.showExportDialog(mainWindow, localeList);
+			FileLocalePair fileLocalePair = Dialogs.showExportDialog(mainWindow, localeList, preferences);
 			File file = fileLocalePair.file;
 			Locale locale = fileLocalePair.locale;
 			if(fileLocalePair.file == null) {
@@ -226,7 +230,7 @@ public class MainController {
 	@Subscribe
 	public void on(ImportTextsEvent e) {
 		List<Locale> localeList = Settings.availableLocales();
-		FileLocalePair fileLocalePair = Dialogs.showImportDialog(mainWindow, localeList);
+		FileLocalePair fileLocalePair = Dialogs.showImportDialog(mainWindow, localeList, preferences);
 		File file = fileLocalePair.file;
 		Locale locale = fileLocalePair.locale;
 		if(file != null && file.exists() && file.canRead()) {
@@ -356,7 +360,7 @@ public class MainController {
 	
 	@Subscribe
 	public void on(ExportUploadEvent e) {
-		File exportTo = Dialogs.showExportDialog(mainWindow);
+		File exportTo = Dialogs.showExportDialog(mainWindow, preferences);
 		try {
 			daxploreFile.writeUploadFile(exportTo);
 		} catch (DaxploreException e1) {

@@ -12,7 +12,7 @@ import javax.swing.JTextField;
 import javax.swing.filechooser.FileFilter;
 import javax.swing.filechooser.FileNameExtensionFilter;
 
-import org.daxplore.producer.gui.Settings;
+import org.daxplore.producer.gui.DaxplorePreferences;
 import org.daxplore.producer.gui.tools.ToolsController.ToolsCommand;
 
 @SuppressWarnings("serial")
@@ -47,8 +47,8 @@ public class ToolsView extends JPanel {
 		add(scrollPane);
 	}
 	
-	File showExportDialog() {
-		JFileChooser fc = new JFileChooser(Settings.getWorkingDirectory());
+	File showExportDialog(DaxplorePreferences preferences) {
+		JFileChooser fc = new JFileChooser(preferences.getWorkingDirectory());
 		
 		FileFilter filter = new FileNameExtensionFilter("Zip files", "zip");
 		fc.addChoosableFileFilter(filter);
@@ -57,7 +57,7 @@ public class ToolsView extends JPanel {
 		int returnVal = fc.showSaveDialog(this);
 		switch(returnVal) {
 		case JFileChooser.APPROVE_OPTION:
-			Settings.setWorkingDirectory(fc.getCurrentDirectory());
+			preferences.setWorkingDirectory(fc.getCurrentDirectory());
 			return fc.getSelectedFile();
 		default:
 			return null;

@@ -9,6 +9,7 @@ import java.util.Locale;
 
 import org.daxplore.producer.daxplorelib.DaxploreException;
 import org.daxplore.producer.daxplorelib.DaxploreFile;
+import org.daxplore.producer.gui.DaxplorePreferences;
 import org.daxplore.producer.gui.event.DaxploreFileUpdateEvent;
 import org.daxplore.producer.gui.event.EmptyEvents.RawImportEvent;
 
@@ -23,12 +24,13 @@ public class ToolsController implements ActionListener {
 	}
 	
 	private EventBus eventBus;
-	
+	private DaxplorePreferences preferences;
 	private DaxploreFile daxploreFile;
 	private ToolsView toolsView;
 	
-	public ToolsController(EventBus eventBus) {
+	public ToolsController(EventBus eventBus, DaxplorePreferences preferences) {
 		this.eventBus = eventBus;
+		this.preferences = preferences;
 		eventBus.register(this);
 		
 		toolsView = new ToolsView(this);
@@ -67,7 +69,7 @@ public class ToolsController implements ActionListener {
 			}
 			break;
 		case  GENERATE_DATA:
-			File uploadFile = toolsView.showExportDialog();
+			File uploadFile = toolsView.showExportDialog(preferences);
 			if(uploadFile == null) {
 				return;
 			}

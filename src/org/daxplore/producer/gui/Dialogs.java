@@ -14,8 +14,8 @@ import org.daxplore.producer.gui.edit.EditTextView.LocaleItem;
 
 public class Dialogs {
 	
-	public static File showExportDialog(Component parent) {
-		JFileChooser fc = new JFileChooser(Settings.getWorkingDirectory());
+	public static File showExportDialog(Component parent, DaxplorePreferences preferences) {
+		JFileChooser fc = new JFileChooser(preferences.getWorkingDirectory());
 		
 		FileFilter filter = new FileNameExtensionFilter("Zip files", "zip");
 		fc.addChoosableFileFilter(filter);
@@ -24,15 +24,16 @@ public class Dialogs {
 		int returnVal = fc.showSaveDialog(parent);
 		switch(returnVal) {
 		case JFileChooser.APPROVE_OPTION:
-			Settings.setWorkingDirectory(fc.getCurrentDirectory());
+			preferences.setWorkingDirectory(fc.getCurrentDirectory());
 			return fc.getSelectedFile();
 		default:
 			return null;
 		}
 	}
 	
-	public static FileLocalePair showImportDialog(Component parent, List<Locale> localeList) {
-		LocalizationFileChooser ifc = new LocalizationFileChooser(localeList);
+	public static FileLocalePair showImportDialog(Component parent, List<Locale> localeList,
+			DaxplorePreferences preferences) {
+		LocalizationFileChooser ifc = new LocalizationFileChooser(localeList, preferences);
 		
 		FileFilter filter = new FileNameExtensionFilter("language files", "csv", "properties");
 		ifc.addChoosableFileFilter(filter);
@@ -41,18 +42,20 @@ public class Dialogs {
 		int returnVal = ifc.showOpenDialog(parent);
 		switch(returnVal) {
 		case JFileChooser.APPROVE_OPTION:
+			preferences.setWorkingDirectory(ifc.getCurrentDirectory());
 			return new FileLocalePair(ifc.getSelectedFile(), ifc.getSelectedLocale());
 		default:
 			return null;
 		}
 	}
 	
-	public static FileLocalePair showExportDialog(Component parent, List<Locale> localeList) {
-		LocalizationFileChooser efc = new LocalizationFileChooser(localeList);
+	public static FileLocalePair showExportDialog(Component parent, List<Locale> localeList,
+			DaxplorePreferences preferences) {
+		LocalizationFileChooser efc = new LocalizationFileChooser(localeList, preferences);
 		int returnVal = efc.showSaveDialog(parent);
 		switch(returnVal) {
 		case JFileChooser.APPROVE_OPTION:
-			Settings.setWorkingDirectory(efc.getCurrentDirectory());
+			preferences.setWorkingDirectory(efc.getCurrentDirectory());
 			return new FileLocalePair(efc.getSelectedFile(), efc.getSelectedLocale());
 		default:
 			return null;
@@ -73,8 +76,8 @@ public class Dialogs {
 		private JComboBox<LocaleItem> localeBox;
 		private Locale selectedLocale;
 		
-		public LocalizationFileChooser(List<Locale> localeList) {
-			super(Settings.getWorkingDirectory());
+		public LocalizationFileChooser(List<Locale> localeList, DaxplorePreferences preferences) {
+			super(preferences.getWorkingDirectory());
 			localeBox = new JComboBox<>();
 			localeBox.addItem(null);
 			for(Locale loc: localeList) {
