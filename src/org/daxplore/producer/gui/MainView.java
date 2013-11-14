@@ -27,7 +27,8 @@ public class MainView {
 		this.mainWindow = mainWindow;
 		mainWindow.setIconImage(Toolkit.getDefaultToolkit().getImage(MainController.class.getResource("/org/daxplore/producer/gui/resources/Colorful_Chart_Icon_vol2.png")));
 		mainWindow.setTitle("Daxplore Producer Developer Version");
-		mainWindow.setBounds(100, 100, 900, 787);
+		mainWindow.setSize(1020, 900); //TODO: save size in preferences
+		mainWindow.setLocationRelativeTo(null);
 		mainWindow.getContentPane().setLayout(new BorderLayout(0, 0));
 		
 		panel = new JPanel();
