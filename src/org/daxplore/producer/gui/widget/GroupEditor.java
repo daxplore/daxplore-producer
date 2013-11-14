@@ -39,17 +39,22 @@ public class GroupEditor extends AbstractWidgetEditor<MetaGroup> {
 		textField.getDocument().addDocumentListener(new DocumentListener() {
 			@Override
 			public void removeUpdate(DocumentEvent e) {
-				if(!textField.getText().equals("")) {
+				if(!Strings.isNullOrEmpty(textField.getText()) && locale != null) {
 					metaGroup.getTextRef().put(textField.getText(), locale);
 				}
 			}
 			@Override
 			public void insertUpdate(DocumentEvent e) {
-				metaGroup.getTextRef().put(textField.getText(), locale);
+				if(locale != null) {
+					metaGroup.getTextRef().put(textField.getText(), locale);
+				}
 			}
 			@Override
 			public void changedUpdate(DocumentEvent e) {
-				metaGroup.getTextRef().put(textField.getText(), locale);
+				if(locale != null) {
+					metaGroup.getTextRef().put(textField.getText(), locale);
+				}
+
 			}
 		});
 	}
