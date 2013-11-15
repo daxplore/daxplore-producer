@@ -29,6 +29,7 @@ public class ToolbarView extends JPanel {
 		toolbar.setBorderPainted(false);
 		
 		toolbar.add(actionManager.BACK);
+		toolbar.add(new JToolBar.Separator());
 		toolbar.add(actionManager.NEW);
 		toolbar.add(actionManager.OPEN);
 		toolbar.add(actionManager.SAVE);
