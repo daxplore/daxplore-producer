@@ -72,14 +72,12 @@ public class QuestionTable extends JTable {
 		    	qwRenderer.setContent((MetaQuestion)value);
 		    	Color bgColor = null;
 			    if (row == mouseOver) {
-			        qwRenderer.showEdit(false);
 			        if(!isSelected) {
 			        	bgColor = new Color(200,200,255);
 			        } else {
 			        	bgColor = new Color(175,175,255);
 			        }
 			    } else {
-			    	qwRenderer.showEdit(false);
 			        if(isSelected) {
 			            bgColor = listSelectionBackground;
 			        } else {
@@ -100,33 +98,6 @@ public class QuestionTable extends JTable {
 	    
 		@Override
 		public Component getTableCellEditorComponent(JTable table, Object value, boolean isSelected, int row, int column) {
-		    if(value instanceof MetaQuestion) {
-		    	qwRenderer.setContent((MetaQuestion)value);
-		    	Color bgColor = null;
-			    if (row == mouseOver) {
-			    	qwRenderer.showEdit(false);
-			        if(!isSelected) {
-			        	bgColor = new Color(150,150,255);
-			        } else {
-			        	bgColor = new Color(175,175,255);
-			        }
-			    } else {
-			    	qwRenderer.showEdit(false);
-			        if(isSelected) {
-			            bgColor = listSelectionBackground;
-			        } else {
-			            bgColor = listBackground;
-			        }
-			    }
-			    qwRenderer.setBackground(bgColor);
-
-			    Component[] children = qwRenderer.getComponents();
-		    	for (int ii = 0; (children != null) && (ii < children.length); ii++) {
-		    		children[ii].setBackground(bgColor);
-		    	}
-			    return qwRenderer;
-		    }
-	    	System.out.println("not editor MetaQuestion");
 	    	return null;
 		}
 		
