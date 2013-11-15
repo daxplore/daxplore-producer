@@ -16,7 +16,9 @@ import javax.swing.SwingConstants;
 import javax.swing.event.DocumentListener;
 
 import org.daxplore.producer.gui.DisplayLocale;
+import org.daxplore.producer.gui.SectionHeader;
 import org.daxplore.producer.gui.edit.EditTextController.EditTextCommand;
+import org.daxplore.producer.gui.resources.GuiTexts;
 
 @SuppressWarnings("serial")
 public class EditTextView extends JPanel {
@@ -26,31 +28,36 @@ public class EditTextView extends JPanel {
 	private JComboBox<DisplayLocale> localeCombo2;
 	private JScrollPane scrollPane;
 	
-	public <T extends DocumentListener & ActionListener> EditTextView(T listener) {
+	public <T extends DocumentListener & ActionListener> EditTextView(GuiTexts texts, T listener) {
 		setLayout(new BorderLayout(0, 0));
 		
-		JPanel panel = new JPanel();
-		add(panel, BorderLayout.NORTH);
-		panel.setLayout(new GridLayout(0, 3, 0, 0));
+		add(new SectionHeader(texts, "texts"), BorderLayout.NORTH);
+		
+		JPanel textsPanel = new JPanel(new BorderLayout());
+		JPanel searchComboPanel = new JPanel(new GridLayout(0, 3, 0, 0));
 		
 		textField = new JTextField();
 		textField.setHorizontalAlignment(SwingConstants.LEFT);
-		panel.add(textField);
 		textField.setColumns(15);
 		textField.getDocument().addDocumentListener(listener);
+		searchComboPanel.add(textField);
 
 		localeCombo1 = new JComboBox<>();
-		panel.add(localeCombo1);
 		localeCombo1.setActionCommand(EditTextCommand.UPDATE_COLUMN_1.toString());
 		localeCombo1.addActionListener(listener);
+		searchComboPanel.add(localeCombo1);
 		
 		localeCombo2 = new JComboBox<>();
-		panel.add(localeCombo2);
 		localeCombo2.setActionCommand(EditTextCommand.UPDATE_COLUMN_2.toString());
 		localeCombo2.addActionListener(listener);
+		searchComboPanel.add(localeCombo2);
 		
+		textsPanel.add(searchComboPanel, BorderLayout.NORTH);
+
 		scrollPane = new JScrollPane();
-		add(scrollPane, BorderLayout.CENTER);
+		textsPanel.add(scrollPane, BorderLayout.CENTER);
+		
+		add(textsPanel, BorderLayout.CENTER);
 	}
 	
 	public void setTable(JTable table) {

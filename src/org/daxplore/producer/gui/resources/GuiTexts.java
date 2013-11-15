@@ -30,7 +30,7 @@ public class GuiTexts {
 		
 		//TODO log missing property?
 		//TODO fall back to default locale?
-		return "<" + key + ">";
+		return "[" + key + "]";
 	}
 	
 	public boolean contains(String key) {
@@ -51,6 +51,6 @@ public class GuiTexts {
 		
 		//TODO log missing property?
 		//TODO fall back to default locale?
-		return "<" + key + ": " + MyTools.join(arguments, ", ") + ">";
+		return "[" + key + ": " + MyTools.join(arguments, ", ") + "]";
 	}
 }

@@ -20,6 +20,7 @@ import org.daxplore.producer.daxplorelib.metadata.textreference.TextReferenceMan
 import org.daxplore.producer.gui.Settings;
 import org.daxplore.producer.gui.event.DaxploreFileUpdateEvent;
 import org.daxplore.producer.gui.event.EmptyEvents.RawImportEvent;
+import org.daxplore.producer.gui.resources.GuiTexts;
 
 import com.google.common.eventbus.EventBus;
 import com.google.common.eventbus.Subscribe;
@@ -46,13 +47,13 @@ public class GroupsController implements ActionListener {
 	private PerspectivesTableModel perspectivesTableModel;
 	private QuestionTable perspectivesTable;
 	
-	public GroupsController(EventBus eventBus, Component parentComponent) {
+	public GroupsController(EventBus eventBus, GuiTexts texts, Component parentComponent) {
 		this.eventBus = eventBus;
 		this.parentComponent = parentComponent;
 		
 		eventBus.register(this);
 		
-		groupsView = new GroupsView(this);
+		groupsView = new GroupsView(texts, this);
 	}
 	
 	@Subscribe

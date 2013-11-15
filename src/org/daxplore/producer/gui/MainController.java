@@ -121,8 +121,8 @@ public class MainController {
 		
 		menuBarController = new MenuBarController(actionManager);
 		toolbarController = new ToolbarController(eventBus, actionManager);
-		groupsController = new GroupsController(eventBus, mainWindow);
-		editTextController = new EditTextController(eventBus);
+		groupsController = new GroupsController(eventBus, texts, mainWindow);
+		editTextController = new EditTextController(eventBus, texts);
 		toolsController = new ToolsController(eventBus, preferences);
 		questionController = new QuestionController(eventBus);
 		timeSeriesController = new TimeSeriesController(eventBus);

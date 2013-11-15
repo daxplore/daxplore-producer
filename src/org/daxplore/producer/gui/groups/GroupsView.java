@@ -10,7 +10,9 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JSplitPane;
 
+import org.daxplore.producer.gui.SectionHeader;
 import org.daxplore.producer.gui.groups.GroupsController.GroupsCommand;
+import org.daxplore.producer.gui.resources.GuiTexts;
 
 @SuppressWarnings("serial")
 public class GroupsView extends JPanel {
@@ -19,17 +21,17 @@ public class GroupsView extends JPanel {
 	private JScrollPane groupsScollPane = new JScrollPane();
 	private JScrollPane perspectiveScrollPane = new JScrollPane();
 	
-	public GroupsView(ActionListener actionListener) {
+	public GroupsView(GuiTexts texts, ActionListener actionListener) {
 		setLayout(new BorderLayout());
 		
 		JSplitPane mainSplitPanel = new JSplitPane();
-		mainSplitPanel.setResizeWeight(0.2);
 		
-		JPanel questionsPanel = new JPanel();
-		mainSplitPanel.setLeftComponent(questionsPanel);
-		questionsPanel.setLayout(new BorderLayout(0, 0));
+		JPanel questionListPanel = new JPanel();
+		mainSplitPanel.setLeftComponent(questionListPanel);
+		questionListPanel.setLayout(new BorderLayout(0, 0));
 		
-		questionsPanel.add(questionsScrollPane);
+		questionListPanel.add(new SectionHeader(texts, "variable_list"), BorderLayout.NORTH);
+		questionListPanel.add(questionsScrollPane, BorderLayout.CENTER);
 		
 		JSplitPane splitPane = new JSplitPane();
 		splitPane.setResizeWeight(0.6);
@@ -39,7 +41,9 @@ public class GroupsView extends JPanel {
 		JPanel groupsPanel = new JPanel();
 		splitPane.setLeftComponent(groupsPanel);
 		groupsPanel.setLayout(new BorderLayout(0,0));
-		groupsPanel.add(groupsScollPane);
+		
+		groupsPanel.add(new SectionHeader(texts, "question_tree"), BorderLayout.NORTH);
+		groupsPanel.add(groupsScollPane, BorderLayout.CENTER);
 		
 		JPanel groupsButtonPanel = new JPanel();
 		groupsPanel.add(groupsButtonPanel, BorderLayout.SOUTH);
@@ -78,7 +82,8 @@ public class GroupsView extends JPanel {
 		JPanel perspectivePanel = new JPanel();
 		splitPane.setRightComponent(perspectivePanel);
 		perspectivePanel.setLayout(new BorderLayout(0, 0));
-		perspectivePanel.add(perspectiveScrollPane);
+		perspectivePanel.add(new SectionHeader(texts, "perspective_list"), BorderLayout.NORTH);
+		perspectivePanel.add(perspectiveScrollPane, BorderLayout.CENTER);
 		
 		JPanel perspectivesButtonPanel = new JPanel();
 		perspectivePanel.add(perspectivesButtonPanel, BorderLayout.SOUTH);
