@@ -26,21 +26,37 @@ public class GroupsView extends JPanel {
 		
 		JSplitPane mainSplitPanel = new JSplitPane();
 		
-		JPanel questionListPanel = new JPanel();
-		mainSplitPanel.setLeftComponent(questionListPanel);
-		questionListPanel.setLayout(new BorderLayout(0, 0));
+		JPanel leftSection = new JPanel(new BorderLayout());
+		leftSection.add(buildListSection(texts), BorderLayout.CENTER);
+		leftSection.add(buildVariableInfoSection(texts), BorderLayout.SOUTH);
+		mainSplitPanel.setLeftComponent(leftSection);
 		
-		questionListPanel.add(new SectionHeader(texts, "variable_list"), BorderLayout.NORTH);
-		questionListPanel.add(questionsScrollPane, BorderLayout.CENTER);
+		JSplitPane rightSection = new JSplitPane();
+		rightSection.setResizeWeight(0.6);
+		rightSection.setOrientation(JSplitPane.VERTICAL_SPLIT);
+		rightSection.setTopComponent(buildQuestionTreeSection(texts, actionListener));
+		rightSection.setBottomComponent(buildPerspectiveSection(texts, actionListener));
+
+		mainSplitPanel.setRightComponent(rightSection);
 		
-		JSplitPane splitPane = new JSplitPane();
-		splitPane.setResizeWeight(0.6);
-		splitPane.setOrientation(JSplitPane.VERTICAL_SPLIT);
-		mainSplitPanel.setRightComponent(splitPane);
-		
-		JPanel groupsPanel = new JPanel();
-		splitPane.setLeftComponent(groupsPanel);
-		groupsPanel.setLayout(new BorderLayout(0,0));
+		add(mainSplitPanel);
+	}
+	
+	private JPanel buildListSection(GuiTexts texts) {
+		JPanel variableListPanel = new JPanel(new BorderLayout(0, 0));
+		variableListPanel.add(new SectionHeader(texts, "variable_list"), BorderLayout.NORTH);
+		variableListPanel.add(questionsScrollPane, BorderLayout.CENTER);
+		return variableListPanel;
+	}
+	
+	private JPanel buildVariableInfoSection(GuiTexts texts) {
+		JPanel variableInfoPanel = new JPanel(new BorderLayout());
+		variableInfoPanel.add(new SectionHeader(texts, "variable_info"), BorderLayout.NORTH);
+		return variableInfoPanel;
+	}
+	
+	private JPanel buildQuestionTreeSection(GuiTexts texts, ActionListener actionListener) {
+		JPanel groupsPanel = new JPanel(new BorderLayout(0,0));
 		
 		groupsPanel.add(new SectionHeader(texts, "question_tree"), BorderLayout.NORTH);
 		groupsPanel.add(groupsScollPane, BorderLayout.CENTER);
@@ -79,8 +95,11 @@ public class GroupsView extends JPanel {
 		addToGroupsPanel.add(addToGroupsButton);
 		addToGroupsPanel.add(Box.createVerticalGlue());
 		
+		return groupsPanel;
+	}
+	
+	private JPanel buildPerspectiveSection(GuiTexts texts, ActionListener actionListener) {
 		JPanel perspectivePanel = new JPanel();
-		splitPane.setRightComponent(perspectivePanel);
 		perspectivePanel.setLayout(new BorderLayout(0, 0));
 		perspectivePanel.add(new SectionHeader(texts, "perspective_list"), BorderLayout.NORTH);
 		perspectivePanel.add(perspectiveScrollPane, BorderLayout.CENTER);
@@ -113,9 +132,8 @@ public class GroupsView extends JPanel {
 		addToPerspectivesPanel.add(Box.createVerticalGlue());
 		addToPerspectivesPanel.add(addToPerspectivesButton);
 		addToPerspectivesPanel.add(Box.createVerticalGlue());
-		splitPane.setDividerLocation(0.6);
 		
-		add(mainSplitPanel);
+		return perspectivePanel;
 	}
 	
 	JScrollPane getQuestionsScrollPane() {
