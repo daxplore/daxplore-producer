@@ -85,7 +85,11 @@ public class QuestionTable extends JTable {
 			        if(isSelected) {
 			            bgColor = listSelectionBackground;
 			        } else {
-			            bgColor = listBackground;
+			        	if(row % 2 == 0) {
+			        		bgColor = listBackground;
+			        	} else {
+			        		bgColor = new Color(245,245,245);
+			        	}
 			        }
 			    }
 			    qwRenderer.setBackground(bgColor);
@@ -110,7 +114,7 @@ public class QuestionTable extends JTable {
 			        if(!isSelected) {
 			        	bgColor = new Color(150,150,255);
 			        } else {
-			        	bgColor = new Color(175,175,255);
+			        	bgColor = new Color(255,175,255);
 			        }
 			    } else {
 			    	qwEditor.showEdit(false);
