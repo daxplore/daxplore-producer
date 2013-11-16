@@ -64,10 +64,11 @@ public class QuestionWidget extends AbstractWidgetEditor<MetaQuestion> {
 		String longText = metaQuestion.getFullTextRef().get(locale);
 		if(Strings.isNullOrEmpty(longText)) {
 			longText = "";
+		} else {
+			setToolTipText(longText);
 		}
+		
 		longTextLabel.setText(MessageFormat.format(longTextFormat, longText));
-
-		setToolTipText(longText);
 	}
 
 	@Override

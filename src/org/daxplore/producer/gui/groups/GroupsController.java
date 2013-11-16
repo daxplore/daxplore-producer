@@ -5,8 +5,11 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.sql.SQLException;
 import java.util.LinkedList;
+import java.util.Locale;
 
 import javax.swing.JOptionPane;
+import javax.swing.event.ListSelectionEvent;
+import javax.swing.event.ListSelectionListener;
 import javax.swing.tree.TreePath;
 
 import org.daxplore.producer.daxplorelib.DaxploreException;
@@ -17,20 +20,23 @@ import org.daxplore.producer.daxplorelib.metadata.MetaGroup.MetaGroupManager;
 import org.daxplore.producer.daxplorelib.metadata.MetaQuestion;
 import org.daxplore.producer.daxplorelib.metadata.textreference.TextReference;
 import org.daxplore.producer.daxplorelib.metadata.textreference.TextReferenceManager;
+import org.daxplore.producer.gui.MainController.Views;
 import org.daxplore.producer.gui.Settings;
+import org.daxplore.producer.gui.event.ChangeMainViewEvent;
 import org.daxplore.producer.gui.event.DaxploreFileUpdateEvent;
+import org.daxplore.producer.gui.event.DisplayLocaleSelectEvent;
 import org.daxplore.producer.gui.event.EmptyEvents.RawImportEvent;
 import org.daxplore.producer.gui.resources.GuiTexts;
 
+import com.google.common.base.Strings;
 import com.google.common.eventbus.EventBus;
 import com.google.common.eventbus.Subscribe;
 
 public class GroupsController implements ActionListener {
 
 	enum GroupsCommand {
-		GROUP_ADD, GROUP_UP, GROUP_DOWN, GROUP_REMOVE, GROUP_ADD_ITEM,
-		PERSPECTIVE_UP, PERSPECTIVE_DOWN, PERSPECTIVE_REMOVE, PERSPECTIVE_ADD_ITEM,
-		RELOAD_DATA //TODO remove debug thingy
+		EDIT_VARIABLE, GROUP_ADD, GROUP_UP, GROUP_DOWN, GROUP_REMOVE, GROUP_ADD_ITEM,
+		PERSPECTIVE_UP, PERSPECTIVE_DOWN, PERSPECTIVE_REMOVE, PERSPECTIVE_ADD_ITEM
 	}
 	
 	private EventBus eventBus;
@@ -46,6 +52,9 @@ public class GroupsController implements ActionListener {
 	private QuestionTableModel questionTableModel;
 	private PerspectivesTableModel perspectivesTableModel;
 	private QuestionTable perspectivesTable;
+	
+	private MetaQuestion selectedMetaQuestion;
+	private Locale selectedLocale;
 	
 	public GroupsController(EventBus eventBus, GuiTexts texts, Component parentComponent) {
 		this.eventBus = eventBus;
@@ -67,14 +76,24 @@ public class GroupsController implements ActionListener {
 		loadData();
 	}
 	
+	@Subscribe
+	public void on(DisplayLocaleSelectEvent e) {
+		selectedLocale = e.getLocale();
+		viewMetaQuestionInfo(selectedMetaQuestion);
+	}
+	
 	@Override
 	public void actionPerformed(ActionEvent e) {
 		Object[] path;
 		int[] selectedRows;
 		switch(GroupsCommand.valueOf(e.getActionCommand())) {
+		case EDIT_VARIABLE:
+			//TODO use a different event when the question view is replaced with modular window
+			eventBus.post(new ChangeMainViewEvent(Views.QUESTIONVIEW, selectedMetaQuestion));
+			break;
 		case GROUP_ADD:
 			String groupName = (String)JOptionPane.showInputDialog(parentComponent, "Name:", "Create new group", JOptionPane.PLAIN_MESSAGE, null, null, "");
-			if(groupName != null && !groupName.equals("")) {
+			if(groupName != null && !Strings.isNullOrEmpty(groupName)) {
 				try {
 					MetaGroupManager metaGroupManager = daxploreFile.getMetaGroupManager();
 					int nextid = metaGroupManager.getHighestId(); // Assumes perspective group is at index 0, standard groups are 1-indexed
@@ -158,6 +177,9 @@ public class GroupsController implements ActionListener {
 			} catch (Exception ex) { ex.printStackTrace(); }
 			break;
 		case GROUP_ADD_ITEM:
+			if(groupTree.getSelectionPath()==null) {
+				break;
+			}
 			path = groupTree.getSelectionPath().getPath();
 			MetaGroup parent;
 			int atIndex = 0;
@@ -240,9 +262,6 @@ public class GroupsController implements ActionListener {
 				index++;
 			}
 			break;
-		case RELOAD_DATA:
-			loadData();
-			break;
 		default:
 			throw new AssertionError("Action command not implemented: '" + e.getActionCommand() + "'");
 		}
@@ -254,22 +273,47 @@ public class GroupsController implements ActionListener {
 			try {
 				questionTableModel = new QuestionTableModel(daxploreFile.getMetaQuestionManager());
 				questionJTable = new QuestionTable(eventBus, questionTableModel);
-				groupsView.getQuestionsScrollPane().setViewportView(questionJTable);
+				
+				questionJTable.getSelectionModel().addListSelectionListener(new ListSelectionListener(){
+			        @Override
+					public void valueChanged(ListSelectionEvent event) {
+			        	if(!event.getValueIsAdjusting() && questionJTable.getSelectedRow() >= 0) {
+			        		viewMetaQuestionInfo((MetaQuestion)questionJTable.getValueAt(questionJTable.getSelectedRow(), 0));
+			        	}
+			        }
+			    });
+				
+				groupsView.setVariableList(questionJTable);
 				
 				//get groups and perspectives
 				groupTreeModel = new GroupTreeModel(daxploreFile.getMetaGroupManager());
 				groupTree = new GroupTree(eventBus, groupTreeModel);
-				groupsView.getGroupsScollPane().setViewportView(groupTree);
+				groupsView.setQuestionTree(groupTree);
 				
 				MetaGroup perspectives = daxploreFile.getMetaGroupManager().getPerspectiveGroup();
 				
 				perspectivesTableModel = new PerspectivesTableModel(perspectives);
 				perspectivesTable = new QuestionTable(eventBus, perspectivesTableModel);
-				groupsView.getPerspectiveScrollPane().setViewportView(perspectivesTable);
+				groupsView.setPerspectiveList(perspectivesTable);
+				
+				questionJTable.getSelectionModel().setSelectionInterval(0, 0);
 			} catch (DaxploreException | SQLException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
+		}
+	}
+	
+	private void viewMetaQuestionInfo(MetaQuestion question) {
+		selectedMetaQuestion = question;
+		String id = question.getId();
+		if(selectedLocale != null) {
+			
+			String shorttext = question.getShortTextRef().get(selectedLocale);
+			String fulltext = question.getFullTextRef().get(selectedLocale);
+			groupsView.setVariableInfo(id, shorttext, fulltext);
+		} else {
+			groupsView.setVariableInfo(id, "", "");
 		}
 	}
 
