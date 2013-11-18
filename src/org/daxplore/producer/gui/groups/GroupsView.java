@@ -152,10 +152,9 @@ public class GroupsView extends JPanel {
 	}
 	
 	private JPanel buildPerspectiveSection() {
-		JPanel perspectivePanel = new JPanel();
-		perspectivePanel.setLayout(new BorderLayout());
+		JPanel perspectivePanel = new JPanel(new BorderLayout());
 		
-		JPanel listPanel = new JPanel();
+		JPanel listPanel = new JPanel(new BorderLayout());
 		listPanel.add(new SectionHeader(texts, "perspective_list"), BorderLayout.NORTH);
 		listPanel.add(perspectiveScrollPane, BorderLayout.CENTER);
 		perspectivePanel.add(listPanel, BorderLayout.CENTER);
