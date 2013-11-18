@@ -49,12 +49,16 @@ public class ToolbarController implements ActionListener {
 	public void actionPerformed(ActionEvent e) {
 		switch(ToolbarCommand.valueOf(e.getActionCommand())) {
 		case SELECT_LOCALE:
-			Locale locale = view.getSelectedLocale().locale;
-			eventBus.post(new DisplayLocaleSelectEvent(locale));
-			eventBus.post(new RepaintWindowEvent());
+			updateSelectedLocale();
 			break;
 		default:
 			throw new AssertionError("Unimplemented action command");
 		}
+	}
+	
+	public void updateSelectedLocale() {
+		Locale locale = view.getSelectedLocale().locale;
+		eventBus.post(new DisplayLocaleSelectEvent(locale));
+		eventBus.post(new RepaintWindowEvent());
 	}
 }

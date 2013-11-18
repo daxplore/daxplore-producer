@@ -32,6 +32,7 @@ import org.daxplore.producer.gui.Dialogs.FileLocalePair;
 import org.daxplore.producer.gui.edit.EditTextController;
 import org.daxplore.producer.gui.event.ChangeMainViewEvent;
 import org.daxplore.producer.gui.event.DaxploreFileUpdateEvent;
+import org.daxplore.producer.gui.event.DisplayLocaleSelectEvent;
 import org.daxplore.producer.gui.event.EmptyEvents.DiscardChangesEvent;
 import org.daxplore.producer.gui.event.EmptyEvents.ExportTextsEvent;
 import org.daxplore.producer.gui.event.EmptyEvents.ExportUploadEvent;
@@ -147,6 +148,7 @@ public class MainController {
 		});
 		
 		eventBus.post(new DaxploreFileUpdateEvent(daxploreFile));
+		toolbarController.updateSelectedLocale();
 	}
 	
 	@Subscribe
