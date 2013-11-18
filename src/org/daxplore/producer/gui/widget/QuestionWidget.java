@@ -6,6 +6,7 @@ import java.text.MessageFormat;
 import java.util.Locale;
 
 import javax.swing.JLabel;
+import javax.swing.JPanel;
 import javax.swing.border.EmptyBorder;
 
 import org.daxplore.producer.daxplorelib.metadata.MetaQuestion;
@@ -20,13 +21,13 @@ public class QuestionWidget extends AbstractWidgetEditor<MetaQuestion> {
 	
 	private MetaQuestion metaQuestion;
 
-	private final String idFormat = "<html><h3>{0}</h3></html>";
+	private final String idFormat = "<html><b>{0}</b></html>";
 	private JLabel idLabel = new JLabel("placeholder");
 	
 	private final String shortTextFormat = "<html>{0}</html>";
 	private JLabel shortTextLabel = new JLabel("placeholder");
 
-	private final String longTextFormat = "<html>{0}</html>";
+	private final String longTextFormat = "{0}";
 	private JLabel longTextLabel = new JLabel("placeholder");
 	
 	private Locale locale;
@@ -44,9 +45,11 @@ public class QuestionWidget extends AbstractWidgetEditor<MetaQuestion> {
 		shortTextLabel.setForeground(Color.GRAY);
 		longTextLabel.setForeground(Color.GRAY);
 		
-		add(idLabel, BorderLayout.WEST);
-		add(shortTextLabel, BorderLayout.EAST);
-		add(longTextLabel, BorderLayout.SOUTH);
+		JPanel topRowPanel = new JPanel(new BorderLayout());
+		topRowPanel.add(idLabel, BorderLayout.WEST);
+		topRowPanel.add(shortTextLabel, BorderLayout.EAST);
+		add(topRowPanel, BorderLayout.NORTH);
+		add(longTextLabel, BorderLayout.CENTER);
 	}
 	
 	@Override
