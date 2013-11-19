@@ -14,6 +14,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Stack;
 
+import javax.swing.JDialog;
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
@@ -32,6 +33,8 @@ import org.daxplore.producer.gui.Dialogs.FileLocalePair;
 import org.daxplore.producer.gui.edit.EditTextController;
 import org.daxplore.producer.gui.event.ChangeMainViewEvent;
 import org.daxplore.producer.gui.event.DaxploreFileUpdateEvent;
+import org.daxplore.producer.gui.event.DisplayLocaleSelectEvent;
+import org.daxplore.producer.gui.event.EditQuestionEvent;
 import org.daxplore.producer.gui.event.EmptyEvents.DiscardChangesEvent;
 import org.daxplore.producer.gui.event.EmptyEvents.ExportTextsEvent;
 import org.daxplore.producer.gui.event.EmptyEvents.ExportUploadEvent;
@@ -47,6 +50,7 @@ import org.daxplore.producer.gui.question.QuestionController;
 import org.daxplore.producer.gui.resources.GuiTexts;
 import org.daxplore.producer.gui.timeseries.TimeSeriesController;
 import org.daxplore.producer.gui.tools.ToolsController;
+import org.daxplore.producer.gui.variable.VariableController;
 
 import com.google.common.base.Charsets;
 import com.google.common.base.Throwables;
@@ -261,6 +265,20 @@ public class MainController {
 				e1.printStackTrace();
 			}
 		}
+	}
+	
+	@Subscribe
+	public void on(EditQuestionEvent e) {
+		VariableController vc = new VariableController(eventBus, daxploreFile, e.getMetaQuestion());
+		JDialog dialog = vc.getDialog();
+		dialog.setSize(800, 800);
+		dialog.setLocationRelativeTo(mainWindow);
+		dialog.setVisible(true);
+	}
+	
+	@Subscribe
+	public void on(DisplayLocaleSelectEvent e) {
+		Settings.setCurrentDisplayLocale(e.getLocale());
 	}
 	
 	@Subscribe
