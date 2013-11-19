@@ -1,4 +1,4 @@
-package org.daxplore.producer.gui.edit;
+package org.daxplore.producer.gui.textview;
 
 import java.util.Locale;
 

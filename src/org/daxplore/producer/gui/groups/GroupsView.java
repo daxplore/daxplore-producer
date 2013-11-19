@@ -16,6 +16,7 @@ import javax.swing.border.EmptyBorder;
 import org.daxplore.producer.gui.SectionHeader;
 import org.daxplore.producer.gui.groups.GroupsController.GroupsCommand;
 import org.daxplore.producer.gui.resources.GuiTexts;
+import org.daxplore.producer.gui.utility.VerticallyGrowingJPanel;
 
 import com.google.common.base.Strings;
 

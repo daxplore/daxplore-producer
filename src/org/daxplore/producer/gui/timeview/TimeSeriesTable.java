@@ -1,4 +1,4 @@
-package org.daxplore.producer.gui.timeseries;
+package org.daxplore.producer.gui.timeview;
 
 import java.awt.Color;
 import java.awt.Component;

@@ -22,6 +22,8 @@ import org.daxplore.producer.daxplorelib.DaxploreException;
 import org.daxplore.producer.daxplorelib.DaxploreFile;
 import org.daxplore.producer.gui.event.DaxploreFileUpdateEvent;
 import org.daxplore.producer.gui.resources.GuiTexts;
+import org.daxplore.producer.gui.utility.DaxploreLogger;
+import org.daxplore.producer.gui.utility.GuiTools;
 
 import com.google.common.eventbus.EventBus;
 import com.google.common.eventbus.Subscribe;

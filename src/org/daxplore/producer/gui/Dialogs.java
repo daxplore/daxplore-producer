@@ -10,6 +10,8 @@ import javax.swing.JFileChooser;
 import javax.swing.filechooser.FileFilter;
 import javax.swing.filechooser.FileNameExtensionFilter;
 
+import org.daxplore.producer.gui.utility.DisplayLocale;
+
 public class Dialogs {
 	
 	public static File showExportDialog(Component parent, DaxplorePreferences preferences) {

@@ -32,6 +32,8 @@ import org.daxplore.producer.daxplorelib.DaxploreException;
 import org.daxplore.producer.daxplorelib.DaxploreFile;
 import org.daxplore.producer.gui.event.DaxploreFileUpdateEvent;
 import org.daxplore.producer.gui.resources.GuiTexts;
+import org.daxplore.producer.gui.utility.DisplayCharset;
+import org.daxplore.producer.gui.utility.DisplayLocale;
 import org.daxplore.producer.tools.CharsetTest;
 import org.daxplore.producer.tools.SPSSTools;
 import org.opendatafoundation.data.spss.SPSSFile;

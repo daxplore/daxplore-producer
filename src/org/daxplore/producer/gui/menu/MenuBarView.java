@@ -1,4 +1,4 @@
-package org.daxplore.producer.gui;
+package org.daxplore.producer.gui.menu;
 
 import javax.swing.JMenu;
 import javax.swing.JMenuBar;

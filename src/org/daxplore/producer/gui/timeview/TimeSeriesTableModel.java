@@ -1,4 +1,4 @@
-package org.daxplore.producer.gui.timeseries;
+package org.daxplore.producer.gui.timeview;
 
 import java.util.LinkedList;
 import java.util.List;

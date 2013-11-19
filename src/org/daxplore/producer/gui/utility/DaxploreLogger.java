@@ -1,4 +1,4 @@
-package org.daxplore.producer.gui;
+package org.daxplore.producer.gui.utility;
 
 import java.io.IOException;
 import java.util.logging.FileHandler;

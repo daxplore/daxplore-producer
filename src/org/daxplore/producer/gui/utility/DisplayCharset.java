@@ -1,4 +1,4 @@
-package org.daxplore.producer.gui;
+package org.daxplore.producer.gui.utility;
 
 import java.nio.charset.Charset;
 import java.util.Locale;

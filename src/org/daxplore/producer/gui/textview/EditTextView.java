@@ -1,4 +1,4 @@
-package org.daxplore.producer.gui.edit;
+package org.daxplore.producer.gui.textview;
 
 import java.awt.BorderLayout;
 import java.awt.GridLayout;
@@ -15,10 +15,10 @@ import javax.swing.JTextField;
 import javax.swing.SwingConstants;
 import javax.swing.event.DocumentListener;
 
-import org.daxplore.producer.gui.DisplayLocale;
 import org.daxplore.producer.gui.SectionHeader;
-import org.daxplore.producer.gui.edit.EditTextController.EditTextCommand;
 import org.daxplore.producer.gui.resources.GuiTexts;
+import org.daxplore.producer.gui.textview.EditTextController.EditTextCommand;
+import org.daxplore.producer.gui.utility.DisplayLocale;
 
 @SuppressWarnings("serial")
 public class EditTextView extends JPanel {

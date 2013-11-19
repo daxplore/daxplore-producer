@@ -1,4 +1,4 @@
-package org.daxplore.producer.gui.timeseries;
+package org.daxplore.producer.gui.timeview;
 
 import java.awt.BorderLayout;
 import java.awt.FlowLayout;
@@ -11,7 +11,7 @@ import javax.swing.JScrollPane;
 import javax.swing.JTextField;
 import javax.swing.event.DocumentListener;
 
-import org.daxplore.producer.gui.timeseries.TimeSeriesController.TimeSeriesCommand;
+import org.daxplore.producer.gui.timeview.TimeSeriesController.TimeSeriesCommand;
 
 @SuppressWarnings("serial")
 public class TimeSeriesView extends JPanel {

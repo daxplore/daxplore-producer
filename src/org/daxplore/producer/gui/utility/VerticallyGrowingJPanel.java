@@ -1,4 +1,4 @@
-package org.daxplore.producer.gui.groups;
+package org.daxplore.producer.gui.utility;
 
 import java.awt.Dimension;
 import java.awt.LayoutManager;

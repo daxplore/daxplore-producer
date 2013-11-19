@@ -1,4 +1,4 @@
-package org.daxplore.producer.gui;
+package org.daxplore.producer.gui.utility;
 
 /**
  * Various help methods for the GUI are located in this class.

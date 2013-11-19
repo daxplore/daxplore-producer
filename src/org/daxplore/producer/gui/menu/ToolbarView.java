@@ -1,4 +1,4 @@
-package org.daxplore.producer.gui;
+package org.daxplore.producer.gui.menu;
 
 import java.awt.BorderLayout;
 import java.awt.event.ActionListener;
@@ -11,7 +11,8 @@ import javax.swing.JPanel;
 import javax.swing.JToolBar;
 import javax.swing.border.EmptyBorder;
 
-import org.daxplore.producer.gui.ToolbarController.ToolbarCommand;
+import org.daxplore.producer.gui.menu.ToolbarController.ToolbarCommand;
+import org.daxplore.producer.gui.utility.DisplayLocale;
 
 @SuppressWarnings("serial")
 public class ToolbarView extends JPanel {

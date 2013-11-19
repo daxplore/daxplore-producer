@@ -1,4 +1,4 @@
-package org.daxplore.producer.gui;
+package org.daxplore.producer.gui.menu;
 
 import java.awt.Component;
 import java.awt.event.ActionEvent;
