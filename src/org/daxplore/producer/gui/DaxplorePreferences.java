@@ -6,7 +6,7 @@ import java.util.prefs.Preferences;
 public class DaxplorePreferences {
 	private Preferences preferences;
 	
-	private String workingDirectoryKey = "working_directory";
+	private static final String workingDirectoryKey = "working_directory";
 
 	public DaxplorePreferences() {
 		 preferences = Preferences.userRoot().node("org/daxplore/producer");
