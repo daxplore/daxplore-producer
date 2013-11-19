@@ -1,6 +1,5 @@
 package org.daxplore.producer.gui.variable;
 
-import java.awt.Dimension;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.sql.SQLException;
@@ -29,8 +28,6 @@ import org.daxplore.producer.gui.question.TimePointTableModel;
 import org.daxplore.producer.gui.widget.ColumnTableModel;
 import org.daxplore.producer.tools.NumberlineCoverage;
 import org.daxplore.producer.tools.Pair;
-
-import sun.reflect.ReflectionFactory.GetReflectionFactoryAction;
 
 import com.google.common.eventbus.EventBus;
 
