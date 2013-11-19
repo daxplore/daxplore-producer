@@ -14,6 +14,7 @@ import javax.swing.border.LineBorder;
 
 import org.daxplore.producer.daxplorelib.metadata.textreference.TextReference;
 import org.daxplore.producer.gui.MainController.Views;
+import org.daxplore.producer.gui.Settings;
 import org.daxplore.producer.gui.event.ChangeMainViewEvent;
 import org.daxplore.producer.gui.event.DisplayLocaleSelectEvent;
 
@@ -33,6 +34,7 @@ public class TextWidget extends AbstractWidgetEditor<TextReference>{
 	public TextWidget(final EventBus eventBus) {
 		eventBus.register(this);
 		setLayout(new BorderLayout(0, 0));
+		locale = Settings.getCurrentDisplayLocale();
 		add(label, BorderLayout.WEST);
 		label.setHorizontalAlignment(SwingConstants.LEFT);
 		gotoButton = new JButton("");

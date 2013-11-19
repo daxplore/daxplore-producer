@@ -25,6 +25,7 @@ import org.daxplore.producer.gui.Settings;
 import org.daxplore.producer.gui.event.ChangeMainViewEvent;
 import org.daxplore.producer.gui.event.DaxploreFileUpdateEvent;
 import org.daxplore.producer.gui.event.DisplayLocaleSelectEvent;
+import org.daxplore.producer.gui.event.EditQuestionEvent;
 import org.daxplore.producer.gui.event.EmptyEvents.RawImportEvent;
 import org.daxplore.producer.gui.resources.GuiTexts;
 
@@ -89,7 +90,7 @@ public class GroupsController implements ActionListener {
 		switch(GroupsCommand.valueOf(e.getActionCommand())) {
 		case EDIT_VARIABLE:
 			//TODO use a different event when the question view is replaced with modular window
-			eventBus.post(new ChangeMainViewEvent(Views.QUESTIONVIEW, selectedMetaQuestion));
+			eventBus.post(new EditQuestionEvent(selectedMetaQuestion));
 			break;
 		case GROUP_ADD:
 			String groupName = (String)JOptionPane.showInputDialog(parentComponent, "Name:", "Create new group", JOptionPane.PLAIN_MESSAGE, null, null, "");
