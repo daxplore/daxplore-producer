@@ -3,6 +3,7 @@ package org.daxplore.producer.gui.view.build;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.Container;
+import java.awt.event.MouseEvent;
 import java.util.EventObject;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -10,11 +11,14 @@ import java.util.logging.Logger;
 import javax.swing.AbstractCellEditor;
 import javax.swing.JPanel;
 import javax.swing.JTree;
+import javax.swing.tree.DefaultTreeCellEditor;
 import javax.swing.tree.TreeCellEditor;
 import javax.swing.tree.TreeCellRenderer;
+import javax.swing.tree.TreePath;
 
 import org.daxplore.producer.daxplorelib.metadata.MetaGroup;
 import org.daxplore.producer.daxplorelib.metadata.MetaQuestion;
+import org.daxplore.producer.gui.resources.Colors;
 import org.daxplore.producer.gui.widget.AbstractWidgetEditor;
 import org.daxplore.producer.gui.widget.AbstractWidgetEditor.InvalidContentException;
 import org.daxplore.producer.gui.widget.GroupEditor;
@@ -52,7 +56,7 @@ public class GroupTree extends JTree {
 			this.eventBus = eventBus;
 			groupRenderer  = new GroupRenderer(eventBus);
 			groupEditor = new GroupEditor(eventBus);
-			questionWidget = new QuestionWidget(eventBus);
+			questionWidget = new QuestionWidget(eventBus, true);
 		}
 		
 		@Override
@@ -74,20 +78,7 @@ public class GroupTree extends JTree {
 			}
 			
 			int mouseOver = -1; //TODO fix broken mouse over
-			Color bgColor = null;
-		    if (row == mouseOver) {
-		        if(!selected) {
-		        	bgColor = new Color(255,255,220);
-		        } else {
-		        	bgColor = new Color(175,175,255);
-		        }
-		    } else {
-		        if(selected) {
-		            bgColor = listSelectionBackground;
-		        } else {
-		            bgColor = listBackground;
-		        }
-		    }
+			Color bgColor = Colors.getRowColor(selected, false, row%2==0);
 		    container.setBackground(bgColor);
 		    
 		    Component[] children = container.getComponents();
@@ -138,7 +129,15 @@ public class GroupTree extends JTree {
 
 	    @Override
 	    public boolean isCellEditable(EventObject anEvent) {
-	        return true;
+	    	if (anEvent instanceof MouseEvent && anEvent.getSource() instanceof JTree) {
+	    		MouseEvent e = (MouseEvent)anEvent;
+	    		JTree tree = (JTree)anEvent.getSource();
+	    		TreePath path = tree.getPathForLocation(e.getX(),e.getY());
+	    		if(path.getLastPathComponent() instanceof MetaGroup) {
+	    			return true;
+	    		}
+	    	}
+	    	return false;
 	    }
 	    
 	    @Override

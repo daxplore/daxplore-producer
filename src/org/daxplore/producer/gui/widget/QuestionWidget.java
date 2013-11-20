@@ -32,15 +32,16 @@ public class QuestionWidget extends AbstractWidgetEditor<MetaQuestion> {
 	
 	private Locale locale;
 	
-	public QuestionWidget(EventBus eventBus, MetaQuestion metaQuestion) {
-		this(eventBus);
-		setContent(metaQuestion);
+	public QuestionWidget(EventBus eventBus) {
+		this(eventBus, false);
 	}
  	
-	public QuestionWidget(final EventBus eventBus) {
+	public QuestionWidget(final EventBus eventBus, boolean compact) {
 		eventBus.register(this);
-		setLayout(new BorderLayout(0, 7));
-		setBorder(new EmptyBorder(9, 7, 8, 7));
+		if(!compact) {
+			setLayout(new BorderLayout(0, 7));
+			setBorder(new EmptyBorder(9, 7, 8, 7));
+		}
 		
 		shortTextLabel.setForeground(Color.GRAY);
 		longTextLabel.setForeground(Color.GRAY);
@@ -49,7 +50,9 @@ public class QuestionWidget extends AbstractWidgetEditor<MetaQuestion> {
 		topRowPanel.add(idLabel, BorderLayout.WEST);
 		topRowPanel.add(shortTextLabel, BorderLayout.EAST);
 		add(topRowPanel, BorderLayout.NORTH);
-		add(longTextLabel, BorderLayout.CENTER);
+		if(!compact) {
+			add(longTextLabel, BorderLayout.CENTER);
+		}
 	}
 	
 	@Override
