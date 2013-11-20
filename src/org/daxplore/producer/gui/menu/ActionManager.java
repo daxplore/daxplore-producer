@@ -49,8 +49,8 @@ public class ActionManager {
 				}
 			}
 			
-			putValue(Action.SMALL_ICON, IconResources.get(systemName + "-small.png"));
-			putValue(Action.LARGE_ICON_KEY, IconResources.get(systemName + "-large.png"));
+			putValue(Action.SMALL_ICON, IconResources.getIcon(systemName + "-small.png"));
+			putValue(Action.LARGE_ICON_KEY, IconResources.getIcon(systemName + "-large.png"));
 		}
 	}
 	

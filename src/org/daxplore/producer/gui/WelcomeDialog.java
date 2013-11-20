@@ -22,6 +22,7 @@ import org.daxplore.producer.daxplorelib.DaxploreException;
 import org.daxplore.producer.daxplorelib.DaxploreFile;
 import org.daxplore.producer.gui.event.DaxploreFileUpdateEvent;
 import org.daxplore.producer.gui.resources.GuiTexts;
+import org.daxplore.producer.gui.resources.IconResources;
 import org.daxplore.producer.gui.utility.DaxploreLogger;
 import org.daxplore.producer.gui.utility.GuiTools;
 
@@ -95,7 +96,7 @@ public class WelcomeDialog {
 		
 		welcomeFrame.setSize(500, 300);
 		welcomeFrame.setLocationRelativeTo(null);
-		welcomeFrame.setIconImage(Toolkit.getDefaultToolkit().getImage(MainController.class.getResource("/org/daxplore/producer/gui/resources/Colorful_Chart_Icon_vol2.png")));
+		welcomeFrame.setIconImage(IconResources.getImage("window-icon.png"));
 		welcomeFrame.setTitle("Daxplore Producer Developer Version");
 		welcomeFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		welcomeFrame.getContentPane().setLayout(new GridLayout(1, 2));

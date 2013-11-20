@@ -11,6 +11,7 @@ import javax.swing.JTabbedPane;
 import javax.swing.event.ChangeListener;
 
 import org.daxplore.producer.gui.MainController.Views;
+import org.daxplore.producer.gui.resources.IconResources;
 
 import com.google.common.collect.BiMap;
 import com.google.common.collect.HashBiMap;
@@ -25,7 +26,7 @@ public class MainView {
 	
 	MainView(JFrame mainWindow) {
 		this.mainWindow = mainWindow;
-		mainWindow.setIconImage(Toolkit.getDefaultToolkit().getImage(MainController.class.getResource("/org/daxplore/producer/gui/resources/Colorful_Chart_Icon_vol2.png")));
+		mainWindow.setIconImage(IconResources.getImage("window-icon.png"));
 		mainWindow.setTitle("Daxplore Producer Developer Version");
 		mainWindow.setSize(1020, 900); //TODO: save size in preferences
 		mainWindow.setLocationRelativeTo(null);

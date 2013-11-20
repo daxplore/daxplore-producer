@@ -17,6 +17,7 @@ import org.daxplore.producer.gui.MainController.Views;
 import org.daxplore.producer.gui.Settings;
 import org.daxplore.producer.gui.event.ChangeMainViewEvent;
 import org.daxplore.producer.gui.event.DisplayLocaleSelectEvent;
+import org.daxplore.producer.gui.resources.IconResources;
 
 import com.google.common.base.Strings;
 import com.google.common.eventbus.EventBus;
@@ -39,7 +40,7 @@ public class TextWidget extends AbstractWidgetEditor<TextReference>{
 		label.setHorizontalAlignment(SwingConstants.LEFT);
 		gotoButton = new JButton("");
 		gotoButton.setHideActionText(true);
-		gotoButton.setIcon(new ImageIcon(QuestionWidget.class.getResource("/org/daxplore/producer/gui/resources/edit_go_32.png")));
+		gotoButton.setIcon(IconResources.getIcon("edit_go_32.png"));
 		gotoButton.setOpaque(false);
 		gotoButton.setContentAreaFilled(false);
 		gotoButton.setBorderPainted(false);
