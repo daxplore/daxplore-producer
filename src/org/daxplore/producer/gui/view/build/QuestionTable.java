@@ -16,6 +16,7 @@ import javax.swing.table.TableCellRenderer;
 import javax.swing.table.TableModel;
 
 import org.daxplore.producer.daxplorelib.metadata.MetaQuestion;
+import org.daxplore.producer.gui.resources.Colors;
 import org.daxplore.producer.gui.widget.QuestionWidget;
 
 import com.google.common.eventbus.EventBus;
@@ -72,24 +73,7 @@ public class QuestionTable extends JTable {
 	    public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
 		    if(value instanceof MetaQuestion) {
 		    	qwRenderer.setContent((MetaQuestion)value);
-		    	Color bgColor = null;
-			    if (row == mouseOver) {
-			        if(!isSelected) {
-			        	bgColor = new Color(200,200,255);
-			        } else {
-			        	bgColor = new Color(175,175,255);
-			        }
-			    } else {
-			        if(isSelected) {
-			            bgColor = listSelectionBackground;
-			        } else {
-			        	if(row % 2 == 0) {
-			        		bgColor = listBackground;
-			        	} else {
-			        		bgColor = new Color(245,245,245);
-			        	}
-			        }
-			    }
+		    	Color bgColor = Colors.getRowColor(isSelected, row == mouseOver, row%2 == 0);
 			    qwRenderer.setBackground(bgColor);
 			    
 		    	Component[] children = qwRenderer.getComponents();
