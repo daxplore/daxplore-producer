@@ -15,14 +15,15 @@ import javax.swing.AbstractCellEditor;
 import javax.swing.Icon;
 import javax.swing.JPanel;
 import javax.swing.JTree;
+import javax.swing.ToolTipManager;
 import javax.swing.plaf.basic.BasicTreeUI;
-import javax.swing.tree.DefaultTreeCellEditor;
 import javax.swing.tree.TreeCellEditor;
 import javax.swing.tree.TreeCellRenderer;
 import javax.swing.tree.TreePath;
 
 import org.daxplore.producer.daxplorelib.metadata.MetaGroup;
 import org.daxplore.producer.daxplorelib.metadata.MetaQuestion;
+import org.daxplore.producer.gui.Settings;
 import org.daxplore.producer.gui.resources.Colors;
 import org.daxplore.producer.gui.widget.AbstractWidgetEditor;
 import org.daxplore.producer.gui.widget.AbstractWidgetEditor.InvalidContentException;
@@ -35,9 +36,6 @@ import com.google.common.eventbus.EventBus;
 @SuppressWarnings("serial")
 public class GroupTree extends JTree {
 	
-	private Color listBackground = new Color(255,255,255);
-	private Color listSelectionBackground = new Color(200, 200, 255);
-    
     public GroupTree(EventBus eventBus, GroupTreeModel groupTreeModel) {
     	super(groupTreeModel);
     	setRootVisible(false);
@@ -46,6 +44,17 @@ public class GroupTree extends JTree {
     	setCellEditor(groupTreeCellRendererEditor);
     	setUI(new GroupTreeUI());
     	setEditable(true);
+    	ToolTipManager.sharedInstance().registerComponent(this);
+    }
+    
+    @Override
+    public String getToolTipText(MouseEvent event) {
+    	TreePath path = getPathForLocation(event.getX(),event.getY());
+    	if(path != null && path.getLastPathComponent() instanceof MetaQuestion) {
+    		MetaQuestion mq = (MetaQuestion)path.getLastPathComponent();
+    		return mq.getFullTextRef().get(Settings.getCurrentDisplayLocale());
+    	}
+		return null;
     }
 	
 	class GroupTreeCellRendererEditor extends AbstractCellEditor implements TreeCellRenderer, TreeCellEditor {
@@ -105,13 +114,7 @@ public class GroupTree extends JTree {
 				throw new AssertionError(); 
 			}
 			
-			Color bgColor = null;
-			if(isSelected) {
-	            bgColor = listSelectionBackground;
-	        } else {
-	            bgColor = listBackground;
-	        }
-			
+			Color bgColor = Colors.transparent;
 			editor.setBackground(bgColor);
 		    
 		    Component[] children = editor.getComponents();

@@ -4,10 +4,13 @@ import java.awt.Component;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.sql.SQLException;
+import java.util.Arrays;
+import java.util.Comparator;
 import java.util.LinkedList;
 import java.util.Locale;
 
 import javax.swing.JOptionPane;
+import javax.swing.UIManager;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 import javax.swing.tree.TreePath;
@@ -55,6 +58,19 @@ public class GroupsController implements ActionListener {
 	private MetaQuestion selectedMetaQuestion;
 	private Locale selectedLocale;
 	
+	private Comparator<TreePath> pathComparator = new Comparator<TreePath>() {
+
+		@Override
+		public int compare(TreePath o1, TreePath o2) {
+			if(o1.getLastPathComponent() instanceof MetaGroup || o2.getLastPathComponent() instanceof MetaGroup) {
+				return groupTreeModel.getIndexOfChild(o1.getPathComponent(0), o1.getPathComponent(1)) - groupTreeModel.getIndexOfChild(o2.getPathComponent(0), o2.getPathComponent(1));
+			} else if(o1.getLastPathComponent() instanceof MetaQuestion && o2.getLastPathComponent() instanceof MetaQuestion) {
+				return groupTreeModel.getIndexOfChild(o1.getPathComponent(1), o1.getPathComponent(2)) - groupTreeModel.getIndexOfChild(o2.getPathComponent(1), o2.getPathComponent(2));
+			}
+			throw new AssertionError("Only metagroups and metaquestions in grouptree");
+		}
+	};
+	
 	public GroupsController(EventBus eventBus, GuiTexts texts, Component parentComponent) {
 		this.eventBus = eventBus;
 		this.parentComponent = parentComponent;
@@ -84,6 +100,7 @@ public class GroupsController implements ActionListener {
 	@Override
 	public void actionPerformed(ActionEvent e) {
 		Object[] path;
+		TreePath[] paths;
 		int[] selectedRows;
 		switch(GroupsCommand.valueOf(e.getActionCommand())) {
 		case EDIT_VARIABLE:
@@ -117,61 +134,96 @@ public class GroupsController implements ActionListener {
 			}
 			break;
 		case GROUP_UP:
-			path = groupTree.getSelectionPath().getPath();
+			paths = groupTree.getSelectionPaths();
+			if(paths == null) {
+				break;
+			}
+			
+			Arrays.sort(paths, pathComparator);
+			
 			try {
-				if(path.length == 2) {
-					int currentIndex = groupTreeModel.getIndexOfChild(path[0], path[1]);
-					if(currentIndex > 0) {
-						groupTree.setSelectionPath(null);
-						groupTreeModel.moveChild(path[1], path[0], currentIndex-1);
-						groupTree.setSelectionPath(new TreePath(path));
-					}
-				} else if(path.length == 3) {
-					int currentIndex = groupTreeModel.getIndexOfChild(path[1], path[2]);
-					if(currentIndex > 0) {
-						groupTree.setSelectionPath(null);
-						groupTreeModel.moveChild(path[2], path[1], currentIndex-1);
-						groupTree.setSelectionPath(new TreePath(path));
-					} else {
-						int groupIndex = groupTreeModel.getIndexOfChild(path[0], path[1]);
-						if(groupIndex > 0) {
-							Object newGroup = groupTreeModel.getChild(path[0], groupIndex-1);
-							groupTree.setSelectionPath(null);
-							groupTreeModel.moveChild(path[2], newGroup, groupTreeModel.getChildCount(newGroup));
-							groupTree.setSelectionPath(new TreePath(new Object[]{path[0], newGroup, path[2]}));
+				groupTree.setSelectionPath(null);
+				if(paths[0].getLastPathComponent() instanceof MetaGroup) {
+					for(TreePath p: paths) {
+						if(p.getLastPathComponent() instanceof MetaGroup) {
+							int currentIndex = groupTreeModel.getIndexOfChild(p.getPathComponent(0), p.getPathComponent(1));
+							if(currentIndex > 0) {
+								groupTreeModel.moveChild(p.getPathComponent(1), p.getPathComponent(0), currentIndex-1);
+							} else {
+								break;
+							}
 						}
 					}
+				} else if(paths[0].getLastPathComponent() instanceof MetaQuestion) {
+					int i = 0;
+					for(TreePath p: paths) {
+						if(p.getLastPathComponent() instanceof MetaQuestion) {
+							int currentIndex = groupTreeModel.getIndexOfChild(p.getPathComponent(1), p.getPathComponent(2));
+							if(currentIndex > 0) {
+								groupTreeModel.moveChild(p.getPathComponent(2), p.getPathComponent(1), currentIndex-1);
+							} else {
+								int groupIndex = groupTreeModel.getIndexOfChild(p.getPathComponent(0), p.getPathComponent(1));
+								if(groupIndex > 0) {
+									Object newGroup = groupTreeModel.getChild(p.getPathComponent(0), groupIndex-1);
+									groupTreeModel.moveChild(p.getPathComponent(2), newGroup, groupTreeModel.getChildCount(newGroup));
+									paths[i] = new TreePath(new Object[]{p.getPathComponent(0), newGroup, p.getPathComponent(2)});
+								} else {
+									break;
+								}
+							}
+						}
+						i++;
+					}
 				}
+				groupTree.setSelectionPaths(paths);
 			} catch (Exception ex) { ex.printStackTrace(); }
 			break;
 		case GROUP_DOWN:
-			path = groupTree.getSelectionPath().getPath();
+			paths = groupTree.getSelectionPaths();
+			if(paths == null) {
+				break;
+			}
+			
+			Arrays.sort(paths, pathComparator);
+			
 			try {
-				if(path.length == 2) {
-					int currentIndex = groupTreeModel.getIndexOfChild(path[0], path[1]);
-					int siblingCount = groupTreeModel.getChildCount(path[0]);
-					if(currentIndex < siblingCount-1) {
-						groupTree.setSelectionPath(null);
-						groupTreeModel.moveChild(path[1], path[0], currentIndex+1);
-						groupTree.setSelectionPath(new TreePath(path));
+				groupTree.setSelectionPath(null);
+				if(paths[0].getLastPathComponent() instanceof MetaGroup) {
+					for(int i = paths.length-1; i >= 0; i--) {
+						TreePath p = paths[i];
+						if(p.getLastPathComponent() instanceof MetaGroup) {
+							int currentIndex = groupTreeModel.getIndexOfChild(p.getPathComponent(0), p.getPathComponent(1));
+							int siblingCount = groupTreeModel.getChildCount(p.getPathComponent(0));
+							if(currentIndex < siblingCount-1) {
+								groupTreeModel.moveChild(p.getPathComponent(1), p.getPathComponent(0), currentIndex+1);
+							} else {
+								break;
+							}
+						}
 					}
-				} else if(path.length == 3) {
-					int currentIndex = groupTreeModel.getIndexOfChild(path[1], path[2]);
-					int siblingCount = groupTreeModel.getChildCount(path[1]);
-					if(currentIndex < siblingCount-1){
-						groupTree.setSelectionPath(null);
-						groupTreeModel.moveChild(path[2], path[1], currentIndex+1);
-						groupTree.setSelectionPath(new TreePath(path));
-					} else {
-						int groupIndex = groupTreeModel.getIndexOfChild(path[0], path[1]);
-						if(groupIndex < groupTreeModel.getChildCount(path[0])-1) {
-							Object newGroup = groupTreeModel.getChild(path[0], groupIndex+1);
-							groupTree.setSelectionPath(null);
-							groupTreeModel.moveChild(path[2], newGroup, 0);
-							groupTree.setSelectionPath(new TreePath(new Object[]{path[0], newGroup, path[2]}));
+				} else if(paths[0].getLastPathComponent() instanceof MetaQuestion) {
+					for(int i = paths.length-1; i >= 0; i--) {
+						TreePath p = paths[i];
+						if(p.getLastPathComponent() instanceof MetaQuestion) {
+							int currentIndex = groupTreeModel.getIndexOfChild(p.getPathComponent(1), p.getPathComponent(2));
+							int siblingCount = groupTreeModel.getChildCount(p.getPathComponent(1));
+							if(currentIndex < siblingCount-1){
+								groupTreeModel.moveChild(p.getPathComponent(2), p.getPathComponent(1), currentIndex+1);
+							} else {
+								int groupIndex = groupTreeModel.getIndexOfChild(p.getPathComponent(0), p.getPathComponent(1));
+								int groupSiblingCount = groupTreeModel.getChildCount(p.getPathComponent(0));
+								if(groupIndex < groupSiblingCount-1) {
+									Object newGroup = groupTreeModel.getChild(p.getPathComponent(0), groupIndex+1);
+									groupTreeModel.moveChild(p.getPathComponent(2), newGroup, 0);
+									paths[i] = new TreePath(new Object[]{p.getPathComponent(0), newGroup, p.getPathComponent(2)});
+								} else {
+									break;
+								}
+							}
 						}
 					}
 				}
+				groupTree.setSelectionPaths(paths);
 			} catch (Exception ex) { ex.printStackTrace(); }
 			break;
 		case GROUP_ADD_ITEM:

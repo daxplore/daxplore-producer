@@ -19,7 +19,6 @@ public class GuiTools {
 			return true;
 		
 		String javaVersion = System.getProperty("java.version");
-		System.out.println("Java version " + javaVersion + " was found.");
 		String[] javaVersionSplit = javaVersion.split("\\.");
 		int indexZero = Integer.parseInt(javaVersionSplit[0]);
 		int indexOne = Integer.parseInt(javaVersionSplit[1]);

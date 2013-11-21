@@ -7,10 +7,13 @@ import java.util.Locale;
 
 import javax.swing.JLabel;
 import javax.swing.JPanel;
+import javax.swing.UIDefaults;
+import javax.swing.UIManager;
 import javax.swing.border.EmptyBorder;
 
 import org.daxplore.producer.daxplorelib.metadata.MetaQuestion;
 import org.daxplore.producer.gui.event.DisplayLocaleSelectEvent;
+import org.daxplore.producer.gui.resources.IconResources;
 
 import com.google.common.base.Strings;
 import com.google.common.eventbus.EventBus;
@@ -45,7 +48,7 @@ public class QuestionWidget extends AbstractWidgetEditor<MetaQuestion> {
 		if(compact) {
 			idFormat = "<html>(<b>{0}</b>)</html>";
 			idLabel.setForeground(Color.GRAY);
-			shortTextLabel.setBorder(new EmptyBorder(0, 0, 0, 15));;
+			shortTextLabel.setBorder(new EmptyBorder(0, 0, 0, 15));
 			topRowPanel.add(shortTextLabel, BorderLayout.WEST);
 			topRowPanel.add(idLabel, BorderLayout.EAST);
 		} else {
