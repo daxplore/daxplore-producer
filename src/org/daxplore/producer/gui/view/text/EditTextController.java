@@ -84,7 +84,6 @@ public class EditTextController implements ActionListener, DocumentListener {
 	}
 	
 	public void loadData() {
-		System.out.println("EditPanelView.updateStuff()");
 		if(daxploreFile != null) {
 			try {
 				TextReferenceManager trm = daxploreFile.getTextReferenceManager();

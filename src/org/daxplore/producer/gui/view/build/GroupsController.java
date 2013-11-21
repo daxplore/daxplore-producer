@@ -156,7 +156,6 @@ public class GroupsController implements ActionListener {
 						groupTree.setSelectionPath(new TreePath(path));
 					}
 				} else if(path.length == 3) {
-					System.out.println("move question down");
 					int currentIndex = groupTreeModel.getIndexOfChild(path[1], path[2]);
 					int siblingCount = groupTreeModel.getChildCount(path[1]);
 					if(currentIndex < siblingCount-1){

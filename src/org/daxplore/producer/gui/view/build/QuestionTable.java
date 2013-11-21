@@ -9,8 +9,11 @@ import java.awt.event.MouseMotionAdapter;
 import java.util.EventObject;
 
 import javax.swing.AbstractCellEditor;
+import javax.swing.BorderFactory;
 import javax.swing.JTable;
 import javax.swing.ListSelectionModel;
+import javax.swing.border.Border;
+import javax.swing.border.EmptyBorder;
 import javax.swing.table.TableCellEditor;
 import javax.swing.table.TableCellRenderer;
 import javax.swing.table.TableModel;
@@ -63,6 +66,8 @@ public class QuestionTable extends JTable {
 
 		private QuestionWidget qwRenderer;
 		private QuestionWidget qwEditor;
+		private Border focusBorder = BorderFactory.createLineBorder(Colors.listFocusBorder, 1);
+		private Border nonFocusBorder = new EmptyBorder(1, 1, 1, 1);
 		
 		public QuestionCellRenderer(EventBus eventBus) {
 			qwRenderer = new QuestionWidget(eventBus);
@@ -75,6 +80,11 @@ public class QuestionTable extends JTable {
 		    	qwRenderer.setContent((MetaQuestion)value);
 		    	Color bgColor = Colors.getRowColor(isSelected, row == mouseOver, row%2 == 0);
 			    qwRenderer.setBackground(bgColor);
+			    if(hasFocus) {
+			    	qwRenderer.setBorder(focusBorder);
+			    } else {
+			    	qwRenderer.setBorder(nonFocusBorder);
+			    }
 			    
 		    	Component[] children = qwRenderer.getComponents();
 		    	for (int ii = 0; (children != null) && (ii < children.length); ii++) {

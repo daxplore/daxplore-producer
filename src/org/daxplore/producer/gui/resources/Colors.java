@@ -12,6 +12,7 @@ public class Colors {
 	public static final Color listSelectedMouseOdd = listSelectedMouseEven;
 	public static final Color listMouseEven = new Color(215, 215, 215);
 	public static final Color listMouseOdd = listMouseEven;
+	public static final Color listFocusBorder = new Color(100, 100, 200);
 	
 	public static Color getRowColor(boolean isSelected, boolean mouseOver, boolean evenRow) {
 		if(isSelected && mouseOver && evenRow) {

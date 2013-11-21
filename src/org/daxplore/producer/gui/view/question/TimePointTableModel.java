@@ -97,7 +97,6 @@ public class TimePointTableModel extends DefaultTableModel {
 		case 1:
 			break;
 		case 2:
-			System.out.println("Checkbox data class: " + aValue.getClass() + " at row: " + row);
 			if(aValue instanceof Boolean) {
 				MetaTimepointShort tp = getAtIndex(row);
 				List<MetaTimepointShort> tpList = mq.getTimepoints();

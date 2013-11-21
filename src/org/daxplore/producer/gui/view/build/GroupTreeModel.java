@@ -193,7 +193,6 @@ class GroupTreeModel implements TreeModel {
 
 	@Override
 	public void addTreeModelListener(TreeModelListener l) {
-		System.out.println("TreeModelListener added");
 		if(l != null) {
 			listeners.add(TreeModelListener.class, l);
 		}

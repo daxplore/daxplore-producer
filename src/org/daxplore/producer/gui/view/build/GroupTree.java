@@ -3,14 +3,19 @@ package org.daxplore.producer.gui.view.build;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.Container;
+import java.awt.Graphics;
+import java.awt.Insets;
+import java.awt.Rectangle;
 import java.awt.event.MouseEvent;
 import java.util.EventObject;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import javax.swing.AbstractCellEditor;
+import javax.swing.Icon;
 import javax.swing.JPanel;
 import javax.swing.JTree;
+import javax.swing.plaf.basic.BasicTreeUI;
 import javax.swing.tree.DefaultTreeCellEditor;
 import javax.swing.tree.TreeCellEditor;
 import javax.swing.tree.TreeCellRenderer;
@@ -35,12 +40,11 @@ public class GroupTree extends JTree {
     
     public GroupTree(EventBus eventBus, GroupTreeModel groupTreeModel) {
     	super(groupTreeModel);
-    	//System.out.println("Pretty print group tree");
-    	//System.out.println(groupTreeModel.prettyPrint(new Locale("sv")));
     	setRootVisible(false);
     	GroupTreeCellRendererEditor groupTreeCellRendererEditor = new GroupTreeCellRendererEditor(eventBus);
     	setCellRenderer(groupTreeCellRendererEditor);
     	setCellEditor(groupTreeCellRendererEditor);
+    	setUI(new GroupTreeUI());
     	setEditable(true);
     }
 	
@@ -144,6 +148,32 @@ public class GroupTree extends JTree {
 	    public boolean shouldSelectCell(EventObject anEvent) {
 	        return true;
 	    }
+		
+	}
+	
+	class GroupTreeUI extends BasicTreeUI {
+		
+		@Override
+		protected void paintRow( Graphics g, Rectangle clipBounds, Insets insets, Rectangle bounds, TreePath path, int row, boolean isExpanded, boolean hasBeenExpanded, boolean isLeaf) {
+			Graphics gg = g.create();
+			Color bgColor = Colors.getRowColor(tree.isRowSelected(row), false, row%2==0);
+			gg.setColor(bgColor);
+			gg.fillRect(0, bounds.y, tree.getWidth(), bounds.height);
+			gg.dispose();
+
+			if(path.getLastPathComponent() instanceof MetaGroup) {
+				int arrowX = bounds.x - getRightChildIndent() + 1;
+				int arrowY = bounds.y + (bounds.height / 2);
+				Icon expandIcon;
+				if (isExpanded) {
+					expandIcon = getExpandedIcon();
+				} else {
+					expandIcon = getCollapsedIcon();
+				}
+				drawCentered(tree, g, expandIcon, arrowX, arrowY);
+			}			
+			super.paintRow(g, clipBounds, insets, bounds, path, row, isExpanded, hasBeenExpanded, isLeaf);
+		}
 		
 	}
 }

@@ -21,7 +21,7 @@ public class QuestionWidget extends AbstractWidgetEditor<MetaQuestion> {
 	
 	private MetaQuestion metaQuestion;
 
-	private final String idFormat = "<html><b>{0}</b></html>";
+	private String idFormat = "<html><b>{0}</b></html>";
 	private JLabel idLabel = new JLabel("placeholder");
 	
 	private final String shortTextFormat = "<html>{0}</html>";
@@ -31,28 +31,34 @@ public class QuestionWidget extends AbstractWidgetEditor<MetaQuestion> {
 	private JLabel longTextLabel = new JLabel("placeholder");
 	
 	private Locale locale;
+	boolean compact = false;
 	
 	public QuestionWidget(EventBus eventBus) {
 		this(eventBus, false);
 	}
  	
 	public QuestionWidget(final EventBus eventBus, boolean compact) {
+		this.compact = compact;
 		eventBus.register(this);
-		if(!compact) {
-			setLayout(new BorderLayout(0, 7));
-			setBorder(new EmptyBorder(9, 7, 8, 7));
-		}
-		
-		shortTextLabel.setForeground(Color.GRAY);
-		longTextLabel.setForeground(Color.GRAY);
 		
 		JPanel topRowPanel = new JPanel(new BorderLayout());
-		topRowPanel.add(idLabel, BorderLayout.WEST);
-		topRowPanel.add(shortTextLabel, BorderLayout.EAST);
-		add(topRowPanel, BorderLayout.NORTH);
-		if(!compact) {
+		if(compact) {
+			idFormat = "<html>(<b>{0}</b>)</html>";
+			idLabel.setForeground(Color.GRAY);
+			shortTextLabel.setBorder(new EmptyBorder(0, 0, 0, 15));;
+			topRowPanel.add(shortTextLabel, BorderLayout.WEST);
+			topRowPanel.add(idLabel, BorderLayout.EAST);
+		} else {
+			shortTextLabel.setForeground(Color.GRAY);
+			topRowPanel.add(idLabel, BorderLayout.WEST);
+			topRowPanel.add(shortTextLabel, BorderLayout.EAST);
+			
+			longTextLabel.setForeground(Color.GRAY);
+			setLayout(new BorderLayout(0, 7));
+			setBorder(new EmptyBorder(9, 7, 8, 7));
 			add(longTextLabel, BorderLayout.CENTER);
 		}
+		add(topRowPanel, BorderLayout.NORTH);
 	}
 	
 	@Override
