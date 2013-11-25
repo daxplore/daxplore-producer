@@ -3,14 +3,12 @@ package org.daxplore.producer.gui.view.build;
 import java.awt.Component;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.sql.SQLException;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.LinkedList;
 import java.util.Locale;
 
 import javax.swing.JOptionPane;
-import javax.swing.UIManager;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 import javax.swing.tree.TreePath;
@@ -347,7 +345,7 @@ public class GroupsController implements ActionListener {
 				groupsView.setPerspectiveList(perspectivesTable);
 				
 				questionJTable.getSelectionModel().setSelectionInterval(0, 0);
-			} catch (DaxploreException | SQLException e) {
+			} catch (DaxploreException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}

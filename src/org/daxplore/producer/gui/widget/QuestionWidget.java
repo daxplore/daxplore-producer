@@ -7,13 +7,10 @@ import java.util.Locale;
 
 import javax.swing.JLabel;
 import javax.swing.JPanel;
-import javax.swing.UIDefaults;
-import javax.swing.UIManager;
 import javax.swing.border.EmptyBorder;
 
 import org.daxplore.producer.daxplorelib.metadata.MetaQuestion;
 import org.daxplore.producer.gui.event.DisplayLocaleSelectEvent;
-import org.daxplore.producer.gui.resources.IconResources;
 
 import com.google.common.base.Strings;
 import com.google.common.eventbus.EventBus;

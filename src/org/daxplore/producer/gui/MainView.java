@@ -2,7 +2,6 @@ package org.daxplore.producer.gui;
 
 import java.awt.BorderLayout;
 import java.awt.Component;
-import java.awt.Toolkit;
 
 import javax.swing.JFrame;
 import javax.swing.JMenuBar;
