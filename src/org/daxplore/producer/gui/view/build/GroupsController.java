@@ -281,9 +281,9 @@ public class GroupsController implements ActionListener {
 					groupTreeModel.removeChild(group);
 				}
 			} else if(paths[0].getLastPathComponent() instanceof MetaQuestion) {
+				groupTree.setSelectionPath(null);
 				for(TreePath p: paths) {
 					if(p.getLastPathComponent() instanceof MetaQuestion) {
-						groupTree.setSelectionPath(null);
 						groupTreeModel.removeChild(p.getLastPathComponent());
 					}
 				}
