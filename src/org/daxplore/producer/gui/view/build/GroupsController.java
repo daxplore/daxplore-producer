@@ -27,7 +27,6 @@ import org.daxplore.producer.gui.Settings;
 import org.daxplore.producer.gui.event.DaxploreFileUpdateEvent;
 import org.daxplore.producer.gui.event.DisplayLocaleSelectEvent;
 import org.daxplore.producer.gui.event.EditQuestionEvent;
-import org.daxplore.producer.gui.event.EmptyEvents.RawImportEvent;
 import org.daxplore.producer.gui.resources.GuiTexts;
 
 import com.google.common.base.Strings;
@@ -42,6 +41,7 @@ public class GroupsController implements ActionListener {
 	}
 	
 	private EventBus eventBus;
+	private GuiTexts texts;
 	private Component parentComponent;
 	
 	private DaxploreFile daxploreFile;
@@ -73,6 +73,7 @@ public class GroupsController implements ActionListener {
 	
 	public GroupsController(EventBus eventBus, GuiTexts texts, Component parentComponent) {
 		this.eventBus = eventBus;
+		this.texts = texts;
 		this.parentComponent = parentComponent;
 		
 		eventBus.register(this);
@@ -100,7 +101,7 @@ public class GroupsController implements ActionListener {
 			
 			//get groups and perspectives
 			groupTreeModel = new GroupTreeModel(daxploreFile.getMetaGroupManager());
-			groupTree = new GroupTree(eventBus, groupTreeModel);
+			groupTree = new GroupTree(eventBus, texts, groupTreeModel);
 			groupsView.setQuestionTree(groupTree);
 			
 			MetaGroup perspectives = daxploreFile.getMetaGroupManager().getPerspectiveGroup();
