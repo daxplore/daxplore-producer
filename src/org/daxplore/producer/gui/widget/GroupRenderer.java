@@ -7,6 +7,7 @@ import javax.swing.SwingConstants;
 
 import org.daxplore.producer.daxplorelib.metadata.MetaGroup;
 import org.daxplore.producer.daxplorelib.metadata.textreference.TextReference;
+import org.daxplore.producer.gui.Settings;
 import org.daxplore.producer.gui.event.DisplayLocaleSelectEvent;
 
 import com.google.common.base.Strings;
@@ -22,6 +23,7 @@ public class GroupRenderer extends AbstractWidget<MetaGroup> {
 	
 	public GroupRenderer(EventBus eventBus) {
 		eventBus.register(this);
+		locale = Settings.getCurrentDisplayLocale();
 		label = new JLabel();
 		label.setHorizontalAlignment(SwingConstants.LEFT);
 		add(label);

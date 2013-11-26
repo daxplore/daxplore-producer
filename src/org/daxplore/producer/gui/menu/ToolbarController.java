@@ -38,18 +38,22 @@ public class ToolbarController implements ActionListener {
 	public void on(DaxploreFileUpdateEvent e) {
 		daxploreFile = e.getDaxploreFile();
 		view.setLocales(daxploreFile.getAbout().getLocales());
+		updateSelectedLocale();
 	}
 
 	@Subscribe
 	public void on(LocaleAddedOrRemovedEvent e) {
 		view.setLocales(daxploreFile.getAbout().getLocales());
+		updateSelectedLocale();
 	}
 
 	@Override
 	public void actionPerformed(ActionEvent e) {
 		switch(ToolbarCommand.valueOf(e.getActionCommand())) {
 		case SELECT_LOCALE:
-			updateSelectedLocale();
+			if(view.getSelectedLocale() != null) {
+				updateSelectedLocale();
+			}
 			break;
 		default:
 			throw new AssertionError("Unimplemented action command");

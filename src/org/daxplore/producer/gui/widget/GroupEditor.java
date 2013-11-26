@@ -8,6 +8,7 @@ import javax.swing.event.DocumentListener;
 
 import org.daxplore.producer.daxplorelib.metadata.MetaGroup;
 import org.daxplore.producer.daxplorelib.metadata.textreference.TextReference;
+import org.daxplore.producer.gui.Settings;
 import org.daxplore.producer.gui.event.DisplayLocaleSelectEvent;
 
 import com.google.common.base.Strings;
@@ -23,6 +24,7 @@ public class GroupEditor extends AbstractWidgetEditor<MetaGroup> {
 	
 	public GroupEditor(EventBus eventBus) {
 		eventBus.register(this);
+		locale = Settings.getCurrentDisplayLocale();
 		textField = new JTextField();
 		add(textField);
 	}

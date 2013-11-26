@@ -49,10 +49,11 @@ public class ToolbarView extends JPanel {
 	}
 	
 	public void setLocales(List<Locale> locales) {
-		localePicker.removeAll();
+		localePicker.removeAllItems();
 		for(Locale locale : locales) {
 			localePicker.addItem(new DisplayLocale(locale));
 		}
+		localePicker.setSelectedIndex(0);
 	}
 	
 	public DisplayLocale getSelectedLocale() {
