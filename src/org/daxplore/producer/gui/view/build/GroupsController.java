@@ -3,6 +3,8 @@ package org.daxplore.producer.gui.view.build;
 import java.awt.Component;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.text.MessageFormat;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.LinkedList;
@@ -241,36 +243,50 @@ public class GroupsController implements ActionListener {
 				atIndex = groupTreeModel.getIndexOfChild(parent, path[2]) + 1;
 			} else {return;}
 			
+			ArrayList<TreePath> pathslist = new ArrayList<>(questionJTable.getSelectedRowCount()); 
+			
 			try {
 				for(int i : questionJTable.getSelectedRows()) {
 					MetaQuestion mq = (MetaQuestion)questionJTable.getValueAt(i, 0);
-					TreePath treepath = groupTreeModel.addQuestion(mq, parent, atIndex);
-					atIndex++;
-					groupTree.setSelectionPath(treepath);
+					MetaGroup gr = groupTreeModel.getGroupFor(mq);
+					if(gr == null) {
+						TreePath treepath = groupTreeModel.addQuestion(mq, parent, atIndex);
+						atIndex++;
+						pathslist.add(treepath);
+					} else {
+						pathslist.add(new TreePath(new Object[]{groupTreeModel.getRoot(), gr, mq}));
+					}
 				}
-			}catch (Exception e2) {
+				}catch (Exception e2) {
 				// TODO: handle exception
+				e2.printStackTrace();
 			}
+			groupTree.setSelectionPaths(pathslist.toArray(new TreePath[pathslist.size()]));
 			break;
 		case GROUP_REMOVE:
-			try {
-				path = groupTree.getSelectionPath().getPath();
-				Object child = path[path.length-1];
-				groupTree.setSelectionPath(null);
-				groupTreeModel.removeChild(child); //the row that actually does work, rest just what the selection should be...
-				/*
-				Object parent = path[path.length-2];
-				int index = groupTreeModel.getIndexOfChild(parent, child);
-				int siblingCount = groupTreeModel.getChildCount(parent);
-				List<Object> newPath = Arrays.asList(Arrays.copyOfRange(path, 0, path.length-2));
-				if(siblingCount > 0 && siblingCount >= index) {
-					newPath.add(groupTreeModel.getChild(parent, index));
-				} else if(siblingCount > 0) {
-					newPath.add(groupTreeModel.getChild(parent, index-1));
+			paths = groupTree.getSelectionPaths();
+			if(paths == null) {
+				break;
+			}
+			
+			if(paths[0].getLastPathComponent() instanceof MetaGroup) {
+				MetaGroup group = (MetaGroup)paths[0].getLastPathComponent();
+				 //TODO externalize 
+				int removeOption = JOptionPane.showConfirmDialog(groupsView,
+						MessageFormat.format("Are you sure you want to remove the group \"{0}\"?", group.getTextRef().get(Settings.getCurrentDisplayLocale())),
+								"Remove group?",
+								JOptionPane.YES_NO_OPTION);
+				if(removeOption==JOptionPane.YES_OPTION) {
+					groupTree.setSelectionPath(null);
+					groupTreeModel.removeChild(group);
 				}
-				groupTree.setSelectionPath(new TreePath(newPath.toArray()));*/
-			} catch (Exception e2) {
-				e2.printStackTrace();
+			} else if(paths[0].getLastPathComponent() instanceof MetaQuestion) {
+				for(TreePath p: paths) {
+					if(p.getLastPathComponent() instanceof MetaQuestion) {
+						groupTree.setSelectionPath(null);
+						groupTreeModel.removeChild(p.getLastPathComponent());
+					}
+				}
 			}
 			break;
 		case PERSPECTIVE_UP:

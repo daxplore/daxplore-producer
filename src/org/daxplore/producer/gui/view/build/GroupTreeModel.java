@@ -20,14 +20,14 @@ import org.daxplore.producer.daxplorelib.metadata.MetaQuestion;
 
 class GroupTreeModel implements TreeModel {
 
-	JPanel root = new JPanel();
-	//List<GroupWidget> groups = new LinkedList<GroupWidget>();
-	List<MetaGroup> groups = new LinkedList<>();
+	private JPanel root = new JPanel();
+	private List<MetaGroup> groups = new LinkedList<>();
+	private MetaGroupManager manager;
 	
 	private EventListenerList listeners = new EventListenerList();
-	//private Vector<TreeModelListener> listeners = new Vector<TreeModelListener>(); // Declare the listeners vector
 	
 	public GroupTreeModel(MetaGroupManager metaGroupManager) throws DaxploreException {
+		manager = metaGroupManager;
 		root.add(new JLabel("root object"));
 		List<MetaGroup> allGroups = metaGroupManager.getAll();
 		for(MetaGroup mg: allGroups) {
@@ -103,6 +103,10 @@ class GroupTreeModel implements TreeModel {
 		throw new Exception("Not allowed to place this at that");
 	}
 	
+	public MetaGroup getGroupFor(MetaQuestion metaQuestion) throws DaxploreException {
+		return manager.getGroupFor(metaQuestion); 
+	}
+	
 	public void moveChild(Object child, Object toParent, int atIndex) throws Exception { //TODO: specialize exception
 		if(child instanceof MetaGroup && toParent == root && groups.contains(child)
 				&& atIndex >= 0 && atIndex < groups.size()) {
@@ -127,11 +131,11 @@ class GroupTreeModel implements TreeModel {
 		throw new Exception("Couldn't move this to that");
 	}
 	
-	public void removeChild(Object child) throws Exception { //TODO: specialize exception
+	public boolean removeChild(Object child) {
 		if(child instanceof MetaGroup && groups.contains(child)) {
 			groups.remove(child);
 			fireTreeNodesRemoved(new TreeModelEvent(this, new Object[]{root}));
-			return;
+			return true;
 		} else if(child instanceof MetaQuestion) {
 			MetaQuestion mq = (MetaQuestion)child;
 			for(MetaGroup gw: groups) {
@@ -143,11 +147,11 @@ class GroupTreeModel implements TreeModel {
 							new Object[]{root, gw},
 							new int[]{index},
 							new Object[]{child}));
-					return;
+					return true;
 				}
 			}
 		}
-		throw new Exception("Couldn't remove " + child.getClass());
+		return false;
 	}
 
 	@Override
