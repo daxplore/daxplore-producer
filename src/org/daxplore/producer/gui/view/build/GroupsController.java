@@ -83,12 +83,37 @@ public class GroupsController implements ActionListener {
 	@Subscribe
 	public void on(DaxploreFileUpdateEvent e) {
 		this.daxploreFile = e.getDaxploreFile();
-		loadData();
-	}
-	
-	@Subscribe
-	public void on(RawImportEvent e) {
-		loadData();
+		try {
+			questionTableModel = new QuestionTableModel(daxploreFile.getMetaQuestionManager());
+			questionJTable = new QuestionTable(eventBus, questionTableModel);
+			
+			questionJTable.getSelectionModel().addListSelectionListener(new ListSelectionListener(){
+		        @Override
+				public void valueChanged(ListSelectionEvent event) {
+		        	if(!event.getValueIsAdjusting() && questionJTable.getSelectedRow() >= 0) {
+		        		viewMetaQuestionInfo((MetaQuestion)questionJTable.getValueAt(questionJTable.getSelectedRow(), 0));
+		        	}
+		        }
+		    });
+			
+			groupsView.setVariableList(questionJTable);
+			
+			//get groups and perspectives
+			groupTreeModel = new GroupTreeModel(daxploreFile.getMetaGroupManager());
+			groupTree = new GroupTree(eventBus, groupTreeModel);
+			groupsView.setQuestionTree(groupTree);
+			
+			MetaGroup perspectives = daxploreFile.getMetaGroupManager().getPerspectiveGroup();
+			
+			perspectivesTableModel = new PerspectivesTableModel(perspectives);
+			perspectivesTable = new QuestionTable(eventBus, perspectivesTableModel);
+			groupsView.setPerspectiveList(perspectivesTable);
+			
+			questionJTable.getSelectionModel().setSelectionInterval(0, 0);
+		} catch (DaxploreException ex) {
+			// TODO Auto-generated catch block
+			ex.printStackTrace();
+		}
 	}
 	
 	@Subscribe
@@ -330,42 +355,6 @@ public class GroupsController implements ActionListener {
 			throw new AssertionError("Action command not implemented: '" + e.getActionCommand() + "'");
 		}
 		
-	}
-
-	public void loadData() {
-		if(daxploreFile != null) {
-			try {
-				questionTableModel = new QuestionTableModel(daxploreFile.getMetaQuestionManager());
-				questionJTable = new QuestionTable(eventBus, questionTableModel);
-				
-				questionJTable.getSelectionModel().addListSelectionListener(new ListSelectionListener(){
-			        @Override
-					public void valueChanged(ListSelectionEvent event) {
-			        	if(!event.getValueIsAdjusting() && questionJTable.getSelectedRow() >= 0) {
-			        		viewMetaQuestionInfo((MetaQuestion)questionJTable.getValueAt(questionJTable.getSelectedRow(), 0));
-			        	}
-			        }
-			    });
-				
-				groupsView.setVariableList(questionJTable);
-				
-				//get groups and perspectives
-				groupTreeModel = new GroupTreeModel(daxploreFile.getMetaGroupManager());
-				groupTree = new GroupTree(eventBus, groupTreeModel);
-				groupsView.setQuestionTree(groupTree);
-				
-				MetaGroup perspectives = daxploreFile.getMetaGroupManager().getPerspectiveGroup();
-				
-				perspectivesTableModel = new PerspectivesTableModel(perspectives);
-				perspectivesTable = new QuestionTable(eventBus, perspectivesTableModel);
-				groupsView.setPerspectiveList(perspectivesTable);
-				
-				questionJTable.getSelectionModel().setSelectionInterval(0, 0);
-			} catch (DaxploreException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-		}
 	}
 	
 	private void viewMetaQuestionInfo(MetaQuestion question) {
