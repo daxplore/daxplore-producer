@@ -27,6 +27,8 @@ import org.daxplore.producer.gui.Settings;
 import org.daxplore.producer.gui.event.DaxploreFileUpdateEvent;
 import org.daxplore.producer.gui.event.DisplayLocaleSelectEvent;
 import org.daxplore.producer.gui.event.EditQuestionEvent;
+import org.daxplore.producer.gui.event.EditTextRefEvent;
+import org.daxplore.producer.gui.event.EmptyEvents;
 import org.daxplore.producer.gui.resources.GuiTexts;
 
 import com.google.common.base.Strings;
@@ -37,7 +39,7 @@ public class GroupsController implements ActionListener {
 
 	enum GroupsCommand {
 		EDIT_VARIABLE, GROUP_ADD, GROUP_UP, GROUP_DOWN, GROUP_REMOVE, GROUP_ADD_ITEM,
-		PERSPECTIVE_UP, PERSPECTIVE_DOWN, PERSPECTIVE_REMOVE, PERSPECTIVE_ADD_ITEM
+		PERSPECTIVE_UP, PERSPECTIVE_DOWN, PERSPECTIVE_REMOVE, PERSPECTIVE_ADD_ITEM, EDIT_TREE
 	}
 	
 	private EventBus eventBus;
@@ -101,7 +103,7 @@ public class GroupsController implements ActionListener {
 			
 			//get groups and perspectives
 			groupTreeModel = new GroupTreeModel(daxploreFile.getMetaGroupManager());
-			groupTree = new GroupTree(eventBus, texts, groupTreeModel);
+			groupTree = new GroupTree(eventBus, groupTreeModel);
 			groupsView.setQuestionTree(groupTree);
 			
 			MetaGroup perspectives = daxploreFile.getMetaGroupManager().getPerspectiveGroup();
@@ -313,6 +315,16 @@ public class GroupsController implements ActionListener {
 						groupTreeModel.removeChild(p.getLastPathComponent());
 					}
 				}
+			}
+			break;
+		case EDIT_TREE:
+			if(groupTree.getSelectionPath()==null) {
+				break;
+			}
+			path = groupTree.getSelectionPath().getPath();
+			if(path.length == 2 && path[1] instanceof MetaGroup) {
+				MetaGroup metaGroup = (MetaGroup) path[1];
+				eventBus.post(new EditTextRefEvent(metaGroup.getTextRef()));
 			}
 			break;
 		case PERSPECTIVE_UP:

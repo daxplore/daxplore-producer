@@ -29,9 +29,6 @@ public class QuestionTable extends JTable {
 	
 	protected int mouseOver;
 	
-    private Color listBackground = new Color(255,255,255);
-    private Color listSelectionBackground = new Color(200, 200, 255);
-	
 	public QuestionTable(EventBus eventBus, TableModel model) {
 		super(model);
 		setTableHeader(null);

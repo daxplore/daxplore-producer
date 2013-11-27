@@ -67,6 +67,7 @@ public class PerspectivesTableModel extends DefaultTableModel {
 		fireTableRowsDeleted(row, row);
 	}
 	
+	@SuppressWarnings("rawtypes")
 	@Override
 	public void insertRow(int row, Vector rowData) {
 		if(rowData.size() == 1 && rowData.get(0) instanceof MetaQuestion) {
