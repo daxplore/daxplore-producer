@@ -27,7 +27,7 @@ import org.daxplore.producer.gui.Settings;
 import org.daxplore.producer.gui.event.DaxploreFileUpdateEvent;
 import org.daxplore.producer.gui.event.DisplayLocaleSelectEvent;
 import org.daxplore.producer.gui.event.EditQuestionEvent;
-import org.daxplore.producer.gui.event.EditTextRefEvent;
+import org.daxplore.producer.gui.event.EditGroupTextEvent;
 import org.daxplore.producer.gui.event.EmptyEvents;
 import org.daxplore.producer.gui.resources.GuiTexts;
 
@@ -323,8 +323,11 @@ public class GroupsController implements ActionListener {
 			}
 			path = groupTree.getSelectionPath().getPath();
 			if(path.length == 2 && path[1] instanceof MetaGroup) {
+				paths = groupTree.getSelectionPaths(); 
 				MetaGroup metaGroup = (MetaGroup) path[1];
-				eventBus.post(new EditTextRefEvent(metaGroup.getTextRef()));
+				eventBus.post(new EditGroupTextEvent(metaGroup));
+				groupTree.setSelectionPath(null);
+				groupTree.setSelectionPaths(paths);
 			}
 			break;
 		case PERSPECTIVE_UP:

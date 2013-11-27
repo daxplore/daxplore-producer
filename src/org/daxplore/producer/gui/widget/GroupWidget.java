@@ -12,7 +12,6 @@ import org.daxplore.producer.daxplorelib.metadata.MetaGroup;
 import org.daxplore.producer.daxplorelib.metadata.textreference.TextReference;
 import org.daxplore.producer.gui.Settings;
 import org.daxplore.producer.gui.event.DisplayLocaleSelectEvent;
-import org.daxplore.producer.gui.event.EmptyEvents;
 
 import com.google.common.base.Strings;
 import com.google.common.eventbus.EventBus;
@@ -21,14 +20,12 @@ import com.google.common.eventbus.Subscribe;
 @SuppressWarnings("serial")
 public class GroupWidget extends AbstractWidgetEditor<MetaGroup> {
 
-	private EventBus eventBus;
 	private JLabel textField;
 	private MetaGroup metaGroup;
 	private Locale locale;
 	private String htmlFormat = "<html><b>{0}</b></html>";
 	
 	public GroupWidget(EventBus eventBus) {
-		this.eventBus = eventBus;
 		setLayout(new BorderLayout());
 		eventBus.register(this);
 		locale = Settings.getCurrentDisplayLocale();
@@ -47,8 +44,6 @@ public class GroupWidget extends AbstractWidgetEditor<MetaGroup> {
 		this.metaGroup = value;
 		textField.setText(MessageFormat.format(htmlFormat, getLabelText()));
 		textField.setForeground(Color.BLACK);
-		
-		eventBus.post(new EmptyEvents.RepaintWindowEvent());
 	}
 	
 	private String getLabelText() {
