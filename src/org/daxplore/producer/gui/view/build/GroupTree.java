@@ -25,7 +25,6 @@ import org.daxplore.producer.daxplorelib.metadata.MetaGroup;
 import org.daxplore.producer.daxplorelib.metadata.MetaQuestion;
 import org.daxplore.producer.gui.Settings;
 import org.daxplore.producer.gui.resources.Colors;
-import org.daxplore.producer.gui.resources.GuiTexts;
 import org.daxplore.producer.gui.widget.AbstractWidgetEditor;
 import org.daxplore.producer.gui.widget.AbstractWidgetEditor.InvalidContentException;
 import org.daxplore.producer.gui.widget.GroupWidget;
@@ -36,10 +35,10 @@ import com.google.common.eventbus.EventBus;
 @SuppressWarnings("serial")
 public class GroupTree extends JTree {
 	
-    public GroupTree(EventBus eventBus, GuiTexts texts, GroupTreeModel groupTreeModel) {
+    public GroupTree(EventBus eventBus, GroupTreeModel groupTreeModel) {
     	super(groupTreeModel);
     	setRootVisible(false);
-    	GroupTreeCellRendererEditor groupTreeCellRendererEditor = new GroupTreeCellRendererEditor(eventBus, texts);
+    	GroupTreeCellRendererEditor groupTreeCellRendererEditor = new GroupTreeCellRendererEditor(eventBus);
     	setCellRenderer(groupTreeCellRendererEditor);
     	setCellEditor(groupTreeCellRendererEditor);
     	setUI(new GroupTreeUI());
@@ -64,9 +63,9 @@ public class GroupTree extends JTree {
 		private GroupWidget groupEditor;
 		private AbstractWidgetEditor<?> editor;
 		
-		public GroupTreeCellRendererEditor(EventBus eventBus, GuiTexts texts) {
-			groupWidget = new GroupWidget(eventBus, texts);
-			groupEditor = new GroupWidget(eventBus, texts);
+		public GroupTreeCellRendererEditor(EventBus eventBus) {
+			groupWidget = new GroupWidget(eventBus);
+			groupEditor = new GroupWidget(eventBus);
 			questionWidget = new QuestionWidget(eventBus, true);
 		}
 		

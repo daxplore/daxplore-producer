@@ -2,13 +2,10 @@ package org.daxplore.producer.gui.widget;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.text.MessageFormat;
 import java.util.Locale;
 
 import javax.swing.JLabel;
-import javax.swing.JOptionPane;
 import javax.swing.border.EmptyBorder;
 
 import org.daxplore.producer.daxplorelib.metadata.MetaGroup;
@@ -16,27 +13,22 @@ import org.daxplore.producer.daxplorelib.metadata.textreference.TextReference;
 import org.daxplore.producer.gui.Settings;
 import org.daxplore.producer.gui.event.DisplayLocaleSelectEvent;
 import org.daxplore.producer.gui.event.EmptyEvents;
-import org.daxplore.producer.gui.resources.GuiTexts;
-import org.daxplore.producer.gui.view.build.GroupEditorPopupPanel;
 
 import com.google.common.base.Strings;
 import com.google.common.eventbus.EventBus;
 import com.google.common.eventbus.Subscribe;
 
 @SuppressWarnings("serial")
-public class GroupWidget extends AbstractWidgetEditor<MetaGroup> implements ActionListener {
+public class GroupWidget extends AbstractWidgetEditor<MetaGroup> {
 
 	private EventBus eventBus;
-	private GuiTexts texts;
-//	private JTextField textField;
 	private JLabel textField;
 	private MetaGroup metaGroup;
 	private Locale locale;
 	private String htmlFormat = "<html><b>{0}</b></html>";
 	
-	public GroupWidget(EventBus eventBus, GuiTexts texts) {
+	public GroupWidget(EventBus eventBus) {
 		this.eventBus = eventBus;
-		this.texts = texts;
 		setLayout(new BorderLayout());
 		eventBus.register(this);
 		locale = Settings.getCurrentDisplayLocale();
@@ -77,28 +69,6 @@ public class GroupWidget extends AbstractWidgetEditor<MetaGroup> implements Acti
 	@Subscribe
 	public void on(DisplayLocaleSelectEvent e) {
 		locale = e.getLocale();
-	}
-
-	@Override
-	public void actionPerformed(ActionEvent e) {
-		GroupEditorPopupPanel editor = new GroupEditorPopupPanel(texts,
-				metaGroup.getTextRef().getRef(),
-				metaGroup.getTextRef().get(locale));
-		int answer = JOptionPane.showConfirmDialog(this,
-				editor,
-				"Edit group",
-				JOptionPane.OK_CANCEL_OPTION,
-				JOptionPane.PLAIN_MESSAGE);
-		if(answer == JOptionPane.OK_OPTION) {
-			//TODO allow changing the textref id
-			String technicalText = editor.getTechnicalText(); 
-			
-			String userText = editor.getUserText();
-			metaGroup.getTextRef().put(userText, locale);
-			
-			setContent(metaGroup);
-		}
-		
 	}
 
 }

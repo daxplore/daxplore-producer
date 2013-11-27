@@ -101,7 +101,7 @@ public class GroupsController implements ActionListener {
 			
 			//get groups and perspectives
 			groupTreeModel = new GroupTreeModel(daxploreFile.getMetaGroupManager());
-			groupTree = new GroupTree(eventBus, texts, groupTreeModel);
+			groupTree = new GroupTree(eventBus, groupTreeModel);
 			groupsView.setQuestionTree(groupTree);
 			
 			MetaGroup perspectives = daxploreFile.getMetaGroupManager().getPerspectiveGroup();
