@@ -115,8 +115,11 @@ public class GroupsView extends JPanel {
 		listPanel.add(groupsScollPane, BorderLayout.CENTER);
 		groupsPanel.add(listPanel, BorderLayout.CENTER);
 		
+		JPanel groupsButtonsContainer = new JPanel(new BorderLayout());
+		groupsPanel.add(groupsButtonsContainer, BorderLayout.SOUTH);
+		
 		JPanel groupsButtonPanel = new JPanel();
-		groupsPanel.add(groupsButtonPanel, BorderLayout.SOUTH);
+		groupsButtonsContainer.add(groupsButtonPanel, BorderLayout.CENTER);
 		
 		JButton groupsAddNewButton = new JButton("+");
 		groupsAddNewButton.setActionCommand(GroupsCommand.GROUP_ADD.toString());
@@ -137,6 +140,13 @@ public class GroupsView extends JPanel {
 		groupsRemoveButton.setActionCommand(GroupsCommand.GROUP_REMOVE.toString());
 		groupsRemoveButton.addActionListener(actionListener);
 		groupsButtonPanel.add(groupsRemoveButton);
+		
+		JPanel editButtonPanel = new JPanel();
+		JButton editButton = new JButton("Edit");
+		editButton.setActionCommand(GroupsCommand.EDIT_TREE.toString());
+		editButton.addActionListener(actionListener);
+		editButtonPanel.add(editButton);
+		groupsButtonsContainer.add(editButtonPanel, BorderLayout.EAST);
 		
 		JPanel addToGroupsPanel = new JPanel();
 		groupsPanel.add(addToGroupsPanel, BorderLayout.WEST);

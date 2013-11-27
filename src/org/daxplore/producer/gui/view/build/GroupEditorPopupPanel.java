@@ -8,6 +8,7 @@ import javax.swing.JTextField;
 
 import org.daxplore.producer.gui.resources.GuiTexts;
 
+@SuppressWarnings("serial")
 public class GroupEditorPopupPanel extends JPanel {
 	
 	private JTextField technicalTextField;

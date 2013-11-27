@@ -28,8 +28,7 @@ import org.daxplore.producer.gui.resources.Colors;
 import org.daxplore.producer.gui.resources.GuiTexts;
 import org.daxplore.producer.gui.widget.AbstractWidgetEditor;
 import org.daxplore.producer.gui.widget.AbstractWidgetEditor.InvalidContentException;
-import org.daxplore.producer.gui.widget.GroupEditor;
-import org.daxplore.producer.gui.widget.GroupRenderer;
+import org.daxplore.producer.gui.widget.GroupWidget;
 import org.daxplore.producer.gui.widget.QuestionWidget;
 
 import com.google.common.eventbus.EventBus;
@@ -60,16 +59,14 @@ public class GroupTree extends JTree {
 	
 	class GroupTreeCellRendererEditor extends AbstractCellEditor implements TreeCellRenderer, TreeCellEditor {
 		
-		private EventBus eventBus;
 		private QuestionWidget questionWidget;
-		private GroupRenderer groupRenderer;
-		private GroupEditor groupEditor;
+		private GroupWidget groupWidget;
+		private GroupWidget groupEditor;
 		private AbstractWidgetEditor<?> editor;
 		
 		public GroupTreeCellRendererEditor(EventBus eventBus, GuiTexts texts) {
-			this.eventBus = eventBus;
-			groupRenderer  = new GroupRenderer(eventBus, texts);
-			groupEditor = new GroupEditor(eventBus, texts);
+			groupWidget = new GroupWidget(eventBus, texts);
+			groupEditor = new GroupWidget(eventBus, texts);
 			questionWidget = new QuestionWidget(eventBus, true);
 		}
 		
@@ -82,8 +79,8 @@ public class GroupTree extends JTree {
 				container = questionWidget;
 			} else if(value instanceof MetaGroup) {
 				MetaGroup mg = (MetaGroup)value;
-				groupRenderer.setContent(mg);
-				container = groupRenderer;
+				groupWidget.setContent(mg);
+				container = groupWidget;
 			} else if(value instanceof JPanel){
 				return (JPanel)value; //TODO why is it trying to display the root?
 			} else {
@@ -91,7 +88,7 @@ public class GroupTree extends JTree {
 				throw new AssertionError("Tried showing " + value.getClass() + " in grouptree");
 			}
 			
-			int mouseOver = -1; //TODO fix broken mouse over
+			//int mouseOver = -1; //TODO fix broken mouse over
 			Color bgColor = Colors.getRowColor(selected, false, row%2==0);
 		    container.setBackground(bgColor);
 		    

@@ -37,7 +37,7 @@ public class GroupsController implements ActionListener {
 
 	enum GroupsCommand {
 		EDIT_VARIABLE, GROUP_ADD, GROUP_UP, GROUP_DOWN, GROUP_REMOVE, GROUP_ADD_ITEM,
-		PERSPECTIVE_UP, PERSPECTIVE_DOWN, PERSPECTIVE_REMOVE, PERSPECTIVE_ADD_ITEM
+		PERSPECTIVE_UP, PERSPECTIVE_DOWN, PERSPECTIVE_REMOVE, PERSPECTIVE_ADD_ITEM, EDIT_TREE
 	}
 	
 	private EventBus eventBus;
@@ -313,6 +313,31 @@ public class GroupsController implements ActionListener {
 						groupTreeModel.removeChild(p.getLastPathComponent());
 					}
 				}
+			}
+			break;
+		case EDIT_TREE:
+			if(groupTree.getSelectionPath()==null) {
+				break;
+			}
+			path = groupTree.getSelectionPath().getPath();
+			if(path.length == 2 && path[1] instanceof MetaGroup) {
+				MetaGroup metaGroup = (MetaGroup) path[1];
+				GroupEditorPopupPanel editor = new GroupEditorPopupPanel(texts,
+						metaGroup.getTextRef().getRef(),
+						metaGroup.getTextRef().get(Settings.getCurrentDisplayLocale()));
+				int answer = JOptionPane.showConfirmDialog(parentComponent,
+						editor,
+						"Edit group",
+						JOptionPane.OK_CANCEL_OPTION,
+						JOptionPane.PLAIN_MESSAGE);
+				if(answer == JOptionPane.OK_OPTION) {
+					//TODO allow changing the textref id
+					//String technicalText = editor.getTechnicalText(); 
+					
+					String userText = editor.getUserText();
+					metaGroup.getTextRef().put(userText, Settings.getCurrentDisplayLocale());
+				}
+				
 			}
 			break;
 		case PERSPECTIVE_UP:

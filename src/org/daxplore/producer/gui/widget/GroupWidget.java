@@ -1,13 +1,15 @@
 package org.daxplore.producer.gui.widget;
 
 import java.awt.BorderLayout;
+import java.awt.Color;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.text.MessageFormat;
 import java.util.Locale;
 
-import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
+import javax.swing.border.EmptyBorder;
 
 import org.daxplore.producer.daxplorelib.metadata.MetaGroup;
 import org.daxplore.producer.daxplorelib.metadata.textreference.TextReference;
@@ -22,7 +24,7 @@ import com.google.common.eventbus.EventBus;
 import com.google.common.eventbus.Subscribe;
 
 @SuppressWarnings("serial")
-public class GroupEditor extends AbstractWidgetEditor<MetaGroup> implements ActionListener {
+public class GroupWidget extends AbstractWidgetEditor<MetaGroup> implements ActionListener {
 
 	private EventBus eventBus;
 	private GuiTexts texts;
@@ -30,18 +32,17 @@ public class GroupEditor extends AbstractWidgetEditor<MetaGroup> implements Acti
 	private JLabel textField;
 	private MetaGroup metaGroup;
 	private Locale locale;
+	private String htmlFormat = "<html><b>{0}</b></html>";
 	
-	public GroupEditor(EventBus eventBus, GuiTexts texts) {
+	public GroupWidget(EventBus eventBus, GuiTexts texts) {
 		this.eventBus = eventBus;
 		this.texts = texts;
 		setLayout(new BorderLayout());
 		eventBus.register(this);
 		locale = Settings.getCurrentDisplayLocale();
 		textField = new JLabel();
+		textField.setBorder(new EmptyBorder(5, 5, 5, 5));
 		add(textField, BorderLayout.WEST);
-		JButton editButton = new JButton("Edit"); //TODO use GuiTexts
-		add(editButton, BorderLayout.EAST);
-		editButton.addActionListener(this);
 	}
 	
 	@Override
@@ -52,30 +53,10 @@ public class GroupEditor extends AbstractWidgetEditor<MetaGroup> implements Acti
 	@Override
 	public void setContent(MetaGroup value) {
 		this.metaGroup = value;
-		textField.setText(getLabelText());
-		//TODO how to handle change texts?
+		textField.setText(MessageFormat.format(htmlFormat, getLabelText()));
+		textField.setForeground(Color.BLACK);
+		
 		eventBus.post(new EmptyEvents.RepaintWindowEvent());
-//		textField.getDocument().addDocumentListener(new DocumentListener() {
-//			@Override
-//			public void removeUpdate(DocumentEvent e) {
-//				if(!Strings.isNullOrEmpty(textField.getText()) && locale != null) {
-//					metaGroup.getTextRef().put(textField.getText(), locale);
-//				}
-//			}
-//			@Override
-//			public void insertUpdate(DocumentEvent e) {
-//				if(locale != null) {
-//					metaGroup.getTextRef().put(textField.getText(), locale);
-//				}
-//			}
-//			@Override
-//			public void changedUpdate(DocumentEvent e) {
-//				if(locale != null) {
-//					metaGroup.getTextRef().put(textField.getText(), locale);
-//				}
-//
-//			}
-//		});
 	}
 	
 	private String getLabelText() {
@@ -96,7 +77,6 @@ public class GroupEditor extends AbstractWidgetEditor<MetaGroup> implements Acti
 	@Subscribe
 	public void on(DisplayLocaleSelectEvent e) {
 		locale = e.getLocale();
-//		textField.setEditable(locale != null);
 	}
 
 	@Override
