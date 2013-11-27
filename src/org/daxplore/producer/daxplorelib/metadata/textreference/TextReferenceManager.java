@@ -22,6 +22,8 @@ import org.daxplore.producer.daxplorelib.DaxploreTable;
 import org.daxplore.producer.daxplorelib.SQLTools;
 import org.daxplore.producer.tools.SmallMap;
 
+import com.google.common.base.Strings;
+
 public class TextReferenceManager {
 	private static final DaxploreTable table = new DaxploreTable("CREATE TABLE texts (ref TEXT NOT NULL, locale TEXT, text TEXT NOT NULL, UNIQUE ( ref, locale) )", "texts");
 
@@ -32,10 +34,14 @@ public class TextReferenceManager {
 	
 	private int nNew = 0;
 	
-	public TextReferenceManager(Connection connection) throws SQLException {
+	public TextReferenceManager(Connection connection) throws DaxploreException {
 		this.connection = connection;
 		
-		SQLTools.createIfNotExists(TextReferenceManager.table, connection);
+		try {
+			SQLTools.createIfNotExists(TextReferenceManager.table, connection);
+		} catch (SQLException e) {
+			throw new DaxploreException("Failed to create the TextReferenceManager SQL table", e);
+		}
 		for(String property: DaxploreProperties.properties) {
 			get(property);
 		}
@@ -46,8 +52,13 @@ public class TextReferenceManager {
 	 * @param refstring
 	 * @return
 	 * @throws SQLException
+	 * @throws DaxploreException 
 	 */
-	public TextReference get(String refstring) throws SQLException {
+	public TextReference get(String refstring) throws DaxploreException {
+		if(!TextReferenceManager.isValidTextRefId(refstring)) {
+			throw new DaxploreException("Invalid refstring: '" + refstring + "'");
+		}
+		
 		TextReference tr = textTree.get(refstring);
 		if(tr == null) {
 			boolean newTextReference = true;
@@ -63,6 +74,8 @@ public class TextReferenceManager {
 						newTextReference = false;
 					}
 				}
+			} catch (SQLException e) {
+				throw new DaxploreException("Failed to create a new TextReference for: '" + refstring + "'", e);
 			}
 			if(newTextReference) {
 				nNew++;
@@ -203,5 +216,9 @@ public class TextReferenceManager {
 		textTree.clear();
 		toBeRemoved.clear();
 		nNew = 0;
+	}
+	
+	public static boolean isValidTextRefId(String textRefId) {
+		return !Strings.isNullOrEmpty(textRefId) && textRefId.matches("^[\\pL\\pN_]+$");
 	}
 }

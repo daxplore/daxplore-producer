@@ -17,6 +17,7 @@ import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 
 import org.daxplore.producer.daxplorelib.metadata.textreference.TextReference;
+import org.daxplore.producer.daxplorelib.metadata.textreference.TextReferenceManager;
 import org.daxplore.producer.gui.resources.GuiTexts;
 
 import com.google.common.base.Strings;
@@ -89,8 +90,7 @@ public class EditGroupTextPanel extends JPanel implements DocumentListener {
 	
 	private void updateValidTextRefWarning() {
 		String textRefId = textRefIdField.getText();
-		boolean valid = !Strings.isNullOrEmpty(textRefId) && textRefId.matches("^[a-zA-Z0-9_]*$"); 
-		if(valid) {
+		if(TextReferenceManager.isValidTextRefId(textRefId)) {
 			badTextRefIdLabel.setText(" ");
 		} else {
 			badTextRefIdLabel.setText(texts.get("edit.grouptexts.badtextref"));

@@ -31,6 +31,7 @@ import org.daxplore.producer.daxplorelib.ImportExportManager.L10nFormat;
 import org.daxplore.producer.daxplorelib.metadata.MetaGroup;
 import org.daxplore.producer.daxplorelib.metadata.MetaQuestion;
 import org.daxplore.producer.daxplorelib.metadata.textreference.TextReference;
+import org.daxplore.producer.daxplorelib.metadata.textreference.TextReferenceManager;
 import org.daxplore.producer.gui.Dialogs.FileLocalePair;
 import org.daxplore.producer.gui.event.ChangeMainViewEvent;
 import org.daxplore.producer.gui.event.DaxploreFileUpdateEvent;
@@ -210,7 +211,7 @@ public class MainController {
 				JOptionPane.PLAIN_MESSAGE);
 		if(answer == JOptionPane.OK_OPTION) {
 			String textRefId = editor.getNewTextRefId(); 
-			if(!textRefId.equals(textRef.getRef())) {
+			if(!textRefId.equals(textRef.getRef()) && TextReferenceManager.isValidTextRefId(textRefId)) {
 				//TODO replace with a new textref and add it to MetaGroup
 			}
 			
