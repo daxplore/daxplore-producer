@@ -12,6 +12,7 @@ import java.nio.file.Files;
 import java.nio.file.StandardOpenOption;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import java.util.Stack;
 
 import javax.swing.JDialog;
@@ -34,6 +35,7 @@ import org.daxplore.producer.gui.event.ChangeMainViewEvent;
 import org.daxplore.producer.gui.event.DaxploreFileUpdateEvent;
 import org.daxplore.producer.gui.event.DisplayLocaleSelectEvent;
 import org.daxplore.producer.gui.event.EditQuestionEvent;
+import org.daxplore.producer.gui.event.EditTextRefEvent;
 import org.daxplore.producer.gui.event.EmptyEvents.DiscardChangesEvent;
 import org.daxplore.producer.gui.event.EmptyEvents.ExportTextsEvent;
 import org.daxplore.producer.gui.event.EmptyEvents.ExportUploadEvent;
@@ -49,6 +51,7 @@ import org.daxplore.producer.gui.menu.MenuBarController;
 import org.daxplore.producer.gui.menu.ToolbarController;
 import org.daxplore.producer.gui.resources.GuiTexts;
 import org.daxplore.producer.gui.utility.JLabelSelectable;
+import org.daxplore.producer.gui.view.build.EditTextRefPanel;
 import org.daxplore.producer.gui.view.build.GroupsController;
 import org.daxplore.producer.gui.view.question.QuestionController;
 import org.daxplore.producer.gui.view.text.EditTextController;
@@ -191,6 +194,26 @@ public class MainController {
 			currentHistoryItem = history.pop();
 			eventBus.post(new HistoryAvailableEvent(!history.empty()));
 			setView(currentHistoryItem.view, currentHistoryItem.command);
+		}
+	}
+	
+	@Subscribe
+	public void on(EditTextRefEvent e) {
+		TextReference textRef = e.getTextReference();
+		EditTextRefPanel editor = new EditTextRefPanel(texts, daxploreFile.getAbout().getLocales(), textRef);
+		int answer = JOptionPane.showConfirmDialog(mainWindow,
+				editor,
+				"Edit texts",
+				JOptionPane.OK_CANCEL_OPTION,
+				JOptionPane.PLAIN_MESSAGE);
+		if(answer == JOptionPane.OK_OPTION) {
+			//TODO allow changing the textref id
+			String textRefId = editor.getNewTextRefId(); 
+			
+			Map<Locale, String> newTexts = editor.getNewTexts();
+			for(Locale l : newTexts.keySet()) {
+				textRef.put(newTexts.get(l), l);
+			}
 		}
 	}
 	
