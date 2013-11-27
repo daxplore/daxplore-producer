@@ -201,7 +201,7 @@ public class QuestionController implements TableModelListener, ActionListener  {
 					addOption(pKey+1);
 					scaleTableModel.fireTableStructureChanged();
 				}
-			} catch (SQLException e1) {
+			} catch (SQLException | DaxploreException e1) {
 				// TODO Auto-generated catch block
 				e1.printStackTrace();
 			}
@@ -251,7 +251,7 @@ public class QuestionController implements TableModelListener, ActionListener  {
 		
 	}
 	
-	private void addOption(double value) throws SQLException {
+	private void addOption(double value) throws DaxploreException {
 		int i = -1;
 		for(Option optionText : mq.getScale().getOptions()){
 			String ref = optionText.getTextRef().getRef();

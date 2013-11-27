@@ -353,15 +353,10 @@ public class ImportExportManager {
 			properties.load(reader);
 			
 			Iterator<Entry<Object, Object>> allTexts = properties.entrySet().iterator();
-			try {
-				while(allTexts.hasNext()) {
-					Entry<Object, Object> s = allTexts.next();
-					TextReference tr = daxploreFile.getTextReferenceManager().get((String)s.getKey());
-					tr.put((String)s.getValue(), locale);
-				}
-			}catch (SQLException e) {
-				MyTools.printSQLExeption(e);
-				throw new DaxploreException("Error on Text import", e);
+			while(allTexts.hasNext()) {
+				Entry<Object, Object> s = allTexts.next();
+				TextReference tr = daxploreFile.getTextReferenceManager().get((String)s.getKey());
+				tr.put((String)s.getValue(), locale);
 			}
 			break;
 		case CSV:
@@ -377,9 +372,6 @@ public class ImportExportManager {
 						throw new DaxploreException("Invalid csv row:" + MyTools.join(row, ", "));
 					}
 				}
-			} catch (SQLException e) {
-				MyTools.printSQLExeption(e);
-				throw new DaxploreException("Error on Text import", e);
 			}
 			break;
 		default:
