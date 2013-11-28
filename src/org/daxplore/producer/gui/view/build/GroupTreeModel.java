@@ -63,19 +63,14 @@ class GroupTreeModel implements TreeModel {
 	 * @return The TreePath to the new group
 	 * @throws Exception
 	 */
-	public TreePath addGroup(MetaGroup mg, int atIndex) throws Exception { //TODO: specialize exception
+	public TreePath addGroup(MetaGroup mg, int atIndex) throws IndexOutOfBoundsException {
 		if(atIndex >= 0 && atIndex <= groups.size()) {
 			groups.add(atIndex, mg);
 			mg.setIndex(atIndex);
-//			fireTreeNodesInserted(new TreeModelEvent(this, 
-//					new Object[]{root},
-//					MyTools.range(0, groups.size() -1),
-//					groups.toArray()));
-//			return new TreePath(new Object[]{root, mg});
 			fireTreeStructureChanged(null);
-			return new TreePath(new Object[]{root});
+			return new TreePath(new Object[]{root, mg});
 		}
-		throw new Exception("Not allowed to place this at that");
+		throw new IndexOutOfBoundsException("Tried to add a group with an invalid index");
 	}
 	/**
 	 * Add a new question to the tree

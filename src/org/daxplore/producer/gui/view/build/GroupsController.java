@@ -3,6 +3,8 @@ package org.daxplore.producer.gui.view.build;
 import java.awt.Component;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.io.IOException;
+import java.sql.SQLException;
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -29,6 +31,7 @@ import org.daxplore.producer.gui.event.DisplayLocaleSelectEvent;
 import org.daxplore.producer.gui.event.EditQuestionEvent;
 import org.daxplore.producer.gui.event.EditGroupTextEvent;
 import org.daxplore.producer.gui.event.EmptyEvents;
+import org.daxplore.producer.gui.event.ErrorMessageEvent;
 import org.daxplore.producer.gui.resources.GuiTexts;
 
 import com.google.common.base.Strings;
@@ -137,7 +140,7 @@ public class GroupsController implements ActionListener {
 			break;
 		case GROUP_ADD:
 			String groupName = (String)JOptionPane.showInputDialog(parentComponent, "Name:", "Create new group", JOptionPane.PLAIN_MESSAGE, null, null, "");
-			if(groupName != null && !Strings.isNullOrEmpty(groupName)) {
+			if(!Strings.isNullOrEmpty(groupName)) {
 				try {
 					MetaGroupManager metaGroupManager = daxploreFile.getMetaGroupManager();
 					int nextid = metaGroupManager.getHighestId(); // Assumes perspective group is at index 0, standard groups are 1-indexed
@@ -147,18 +150,9 @@ public class GroupsController implements ActionListener {
 					MetaGroup mg = metaGroupManager.create(tr, Integer.MAX_VALUE, GroupType.QUESTIONS, new LinkedList<MetaQuestion>());
 					TreePath treepath = groupTreeModel.addGroup(mg, groupTreeModel.getChildCount(groupTreeModel.getRoot()));
 					groupTree.setSelectionPath(treepath);
-				} catch (Exception e1) { //TODO: fix proper exception handling
-					JOptionPane.showMessageDialog(parentComponent,
-						    "Something went wrong while creating new group",
-						    "Group creation error",
-						    JOptionPane.ERROR_MESSAGE);
-					e1.printStackTrace();
+				} catch (SQLException | DaxploreException e1) {
+					eventBus.post(new ErrorMessageEvent("Something went wrong while creating the new group", e1));
 				}
-			} else {
-				JOptionPane.showMessageDialog(parentComponent,
-					    "Group has to have a name",
-					    "Group creation error",
-					    JOptionPane.ERROR_MESSAGE);
 			}
 			break;
 		case GROUP_UP:
