@@ -2,6 +2,7 @@ package org.daxplore.producer.gui.widget;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
+import java.awt.GridLayout;
 import java.text.MessageFormat;
 import java.util.Locale;
 
@@ -12,6 +13,7 @@ import javax.swing.border.EmptyBorder;
 import org.daxplore.producer.daxplorelib.metadata.MetaQuestion;
 import org.daxplore.producer.gui.Settings;
 import org.daxplore.producer.gui.event.DisplayLocaleSelectEvent;
+import org.daxplore.producer.gui.resources.Colors;
 
 import com.google.common.base.Strings;
 import com.google.common.eventbus.EventBus;
@@ -23,13 +25,13 @@ public class QuestionWidget extends AbstractWidgetEditor<MetaQuestion> {
 	private MetaQuestion metaQuestion;
 
 	private String idFormat = "<html><b>{0}</b></html>";
-	private JLabel idLabel = new JLabel("placeholder");
+	private JLabel idLabel = new JLabel(MessageFormat.format(idFormat, "placeholder"));
 	
 	private final String shortTextFormat = "<html>{0}</html>";
-	private JLabel shortTextLabel = new JLabel("placeholder");
+	private JLabel shortTextLabel = new JLabel(MessageFormat.format(shortTextFormat, "placeholder"));
 
 	private final String longTextFormat = "{0}";
-	private JLabel longTextLabel = new JLabel("placeholder");
+	private JLabel longTextLabel = new JLabel(MessageFormat.format(longTextFormat, "placeholder"));
 	
 	private Locale locale;
 	boolean compact = false;
@@ -50,17 +52,20 @@ public class QuestionWidget extends AbstractWidgetEditor<MetaQuestion> {
 			shortTextLabel.setBorder(new EmptyBorder(0, 0, 0, 15));
 			topRowPanel.add(shortTextLabel, BorderLayout.WEST);
 			topRowPanel.add(idLabel, BorderLayout.EAST);
+			add(topRowPanel, BorderLayout.NORTH);
 		} else {
+			setLayout(new GridLayout(1, 1));
+			JPanel containerPanel = new JPanel(new BorderLayout(0, 4));
+			containerPanel.setBorder(new EmptyBorder(4, 4, 4, 4));
 			shortTextLabel.setForeground(Color.GRAY);
 			topRowPanel.add(idLabel, BorderLayout.WEST);
 			topRowPanel.add(shortTextLabel, BorderLayout.EAST);
-			
+			topRowPanel.setBackground(Colors.transparent);
+			containerPanel.add(topRowPanel, BorderLayout.NORTH);
 			longTextLabel.setForeground(Color.GRAY);
-			setLayout(new BorderLayout(0, 7));
-			setBorder(new EmptyBorder(9, 7, 8, 7));
-			add(longTextLabel, BorderLayout.CENTER);
+			containerPanel.add(longTextLabel, BorderLayout.SOUTH);
+			add(containerPanel, 0);
 		}
-		add(topRowPanel, BorderLayout.NORTH);
 	}
 	
 	@Override
