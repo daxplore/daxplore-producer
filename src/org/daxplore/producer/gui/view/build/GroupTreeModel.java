@@ -4,7 +4,6 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
 
-import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.event.EventListenerList;
 import javax.swing.event.TreeModelEvent;
@@ -28,7 +27,6 @@ class GroupTreeModel implements TreeModel {
 	
 	public GroupTreeModel(MetaGroupManager metaGroupManager) throws DaxploreException {
 		manager = metaGroupManager;
-		root.add(new JLabel("root object"));
 		List<MetaGroup> allGroups = metaGroupManager.getAll();
 		for(MetaGroup mg: allGroups) {
 			if(mg.getType() == GroupType.QUESTIONS) {
@@ -128,8 +126,11 @@ class GroupTreeModel implements TreeModel {
 	
 	public boolean removeChild(Object child) {
 		if(child instanceof MetaGroup && groups.contains(child)) {
+			MetaGroup mg = (MetaGroup)child;
+			manager.remove(mg.getId());
 			groups.remove(child);
-			fireTreeNodesRemoved(new TreeModelEvent(this, new Object[]{root}));
+			fireTreeStructureChanged(new TreeModelEvent(this, new Object[]{root}));
+			//fireTreeNodesRemoved(new TreeModelEvent(this, new Object[]{root})); //TODO: get tree update function working properly
 			return true;
 		} else if(child instanceof MetaQuestion) {
 			MetaQuestion mq = (MetaQuestion)child;
