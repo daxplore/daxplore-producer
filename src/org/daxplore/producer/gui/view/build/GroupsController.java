@@ -328,6 +328,9 @@ public class GroupsController implements ActionListener {
 				eventBus.post(new EditGroupTextEvent(metaGroup));
 				groupTree.setSelectionPath(null);
 				groupTree.setSelectionPaths(paths);
+			} else if (path.length == 3 && path[2] instanceof MetaQuestion) {
+				//TODO use a different event when the question view is replaced with modular window
+				eventBus.post(new EditQuestionEvent((MetaQuestion)path[2]));
 			}
 			break;
 		case PERSPECTIVE_UP:
