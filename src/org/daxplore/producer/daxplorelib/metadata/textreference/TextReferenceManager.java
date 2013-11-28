@@ -92,6 +92,10 @@ public class TextReferenceManager {
 		toBeRemoved.put(refstring, textTree.remove(refstring));
 	}
 	
+	public void remove(TextReference textReference) {
+		remove(textReference.getRef());
+	}
+	
 	public void saveAll() throws SQLException {
 		int nRemoved = 0, nModified = 0;
 		try (

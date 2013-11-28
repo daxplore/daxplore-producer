@@ -134,7 +134,7 @@ public class MainController {
 		
 		menuBarController = new MenuBarController(actionManager);
 		toolbarController = new ToolbarController(eventBus, actionManager);
-		groupsController = new GroupsController(eventBus, texts, mainWindow);
+		groupsController = new GroupsController(eventBus, texts);
 		editTextController = new EditTextController(eventBus, texts);
 		toolsController = new ToolsController(eventBus, preferences);
 		questionController = new QuestionController(eventBus);
@@ -211,13 +211,25 @@ public class MainController {
 				JOptionPane.PLAIN_MESSAGE);
 		if(answer == JOptionPane.OK_OPTION) {
 			String textRefId = editor.getNewTextRefId(); 
-			if(!textRefId.equals(textRef.getRef()) && TextReferenceManager.isValidTextRefId(textRefId)) {
-				//TODO replace with a new textref and add it to MetaGroup
-			}
 			
 			Map<Locale, String> newTexts = editor.getNewTexts();
 			for(Locale l : newTexts.keySet()) {
 				textRef.put(newTexts.get(l), l);
+			}
+			
+			if(!textRefId.equals(textRef.getRef()) && TextReferenceManager.isValidTextRefId(textRefId)) {
+				TextReferenceManager textManager = daxploreFile.getTextReferenceManager();
+				try {
+					TextReference newTextRef = textManager.get(textRefId);
+					for(Locale l : textRef.getLocales()) {
+						newTextRef.put(textRef.get(l), l);
+					}
+					metaGroup.setTextRef(newTextRef);
+					textManager.remove(textRef);
+				} catch (DaxploreException e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+				}
 			}
 		}
 	}
