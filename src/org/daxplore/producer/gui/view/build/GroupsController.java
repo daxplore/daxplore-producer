@@ -249,21 +249,26 @@ public class GroupsController implements ActionListener {
 			} catch (Exception ex) { ex.printStackTrace(); }
 			break;
 		case GROUP_ADD_ITEM:
-			if(groupTree.getSelectionPath()==null) {
-				break;
-			}
-			path = groupTree.getSelectionPath().getPath();
-			MetaGroup parent;
+			MetaGroup parent = null;
 			int atIndex = 0;
-			if(path.length == 1) { 
-				return; 
-			} else if(path.length == 2) {
-				parent = (MetaGroup)path[1];
+			if(groupTree.getSelectionPath()==null) {
+				Object root = groupTreeModel.getRoot();
+				parent = (MetaGroup)groupTreeModel.getChild(root, groupTreeModel.getChildCount(root)-1);
+				if(parent == null) {
+					eventBus.post(new ErrorMessageEvent("You need to create a group before you add questions"));
+					break;
+				}
 				atIndex = parent.getQuestionCount();
-			} else if(path.length == 3) {
-				parent = (MetaGroup)path[1];
-				atIndex = groupTreeModel.getIndexOfChild(parent, path[2]) + 1;
-			} else {return;}
+			} else {
+				path = groupTree.getSelectionPath().getPath();
+				if(path.length == 2) {
+					parent = (MetaGroup)path[1];
+					atIndex = parent.getQuestionCount();
+				} else if(path.length == 3) {
+					parent = (MetaGroup)path[1];
+					atIndex = groupTreeModel.getIndexOfChild(parent, path[2]) + 1;
+				}
+			}
 			
 			ArrayList<TreePath> pathslist = new ArrayList<>(questionJTable.getSelectedRowCount()); 
 			
@@ -279,7 +284,7 @@ public class GroupsController implements ActionListener {
 						pathslist.add(new TreePath(new Object[]{groupTreeModel.getRoot(), gr, mq}));
 					}
 				}
-				}catch (Exception e2) {
+			}catch (Exception e2) {
 				// TODO: handle exception
 				e2.printStackTrace();
 			}
