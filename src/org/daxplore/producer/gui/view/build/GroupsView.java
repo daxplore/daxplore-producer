@@ -1,6 +1,7 @@
 package org.daxplore.producer.gui.view.build;
 
 import java.awt.BorderLayout;
+import java.awt.Color;
 import java.awt.Component;
 import java.awt.event.ActionListener;
 
@@ -76,6 +77,7 @@ public class GroupsView extends JPanel {
 	
 	private JPanel buildListSection() {
 		JPanel variableListPanel = new JPanel(new BorderLayout(0, 0));
+		questionsScrollPane.getViewport().setBackground(Color.WHITE);
 		variableListPanel.add(new SectionHeader(texts, "variable_list"), BorderLayout.NORTH);
 		variableListPanel.add(questionsScrollPane, BorderLayout.CENTER);
 		return variableListPanel;
@@ -164,6 +166,7 @@ public class GroupsView extends JPanel {
 	
 	private JPanel buildPerspectiveSection() {
 		JPanel perspectivePanel = new JPanel(new BorderLayout());
+		perspectiveScrollPane.getViewport().setBackground(Color.WHITE);
 		
 		JPanel listPanel = new JPanel(new BorderLayout());
 		listPanel.add(new SectionHeader(texts, "perspective_list"), BorderLayout.NORTH);
