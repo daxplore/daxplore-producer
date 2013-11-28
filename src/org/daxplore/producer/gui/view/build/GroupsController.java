@@ -3,7 +3,6 @@ package org.daxplore.producer.gui.view.build;
 import java.awt.Component;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.io.IOException;
 import java.sql.SQLException;
 import java.text.MessageFormat;
 import java.util.ArrayList;
@@ -28,13 +27,11 @@ import org.daxplore.producer.daxplorelib.metadata.textreference.TextReferenceMan
 import org.daxplore.producer.gui.Settings;
 import org.daxplore.producer.gui.event.DaxploreFileUpdateEvent;
 import org.daxplore.producer.gui.event.DisplayLocaleSelectEvent;
-import org.daxplore.producer.gui.event.EditQuestionEvent;
 import org.daxplore.producer.gui.event.EditGroupTextEvent;
-import org.daxplore.producer.gui.event.EmptyEvents;
+import org.daxplore.producer.gui.event.EditQuestionEvent;
 import org.daxplore.producer.gui.event.ErrorMessageEvent;
 import org.daxplore.producer.gui.resources.GuiTexts;
 
-import com.google.common.base.Strings;
 import com.google.common.eventbus.EventBus;
 import com.google.common.eventbus.Subscribe;
 
@@ -47,7 +44,6 @@ public class GroupsController implements ActionListener {
 	
 	private EventBus eventBus;
 	private GuiTexts texts;
-	private Component parentComponent;
 	
 	private DaxploreFile daxploreFile;
 	
@@ -76,10 +72,9 @@ public class GroupsController implements ActionListener {
 		}
 	};
 	
-	public GroupsController(EventBus eventBus, GuiTexts texts, Component parentComponent) {
+	public GroupsController(EventBus eventBus, GuiTexts texts) {
 		this.eventBus = eventBus;
 		this.texts = texts;
-		this.parentComponent = parentComponent;
 		
 		eventBus.register(this);
 		
@@ -139,20 +134,17 @@ public class GroupsController implements ActionListener {
 			eventBus.post(new EditQuestionEvent(selectedMetaQuestion));
 			break;
 		case GROUP_ADD:
-			String groupName = (String)JOptionPane.showInputDialog(parentComponent, "Name:", "Create new group", JOptionPane.PLAIN_MESSAGE, null, null, "");
-			if(!Strings.isNullOrEmpty(groupName)) {
-				try {
-					MetaGroupManager metaGroupManager = daxploreFile.getMetaGroupManager();
-					int nextid = metaGroupManager.getHighestId(); // Assumes perspective group is at index 0, standard groups are 1-indexed
-					TextReferenceManager textReferenceManager = daxploreFile.getTextReferenceManager();
-					TextReference tr = textReferenceManager.get("group_" + nextid);
-					tr.put(groupName, Settings.getDefaultLocale());
-					MetaGroup mg = metaGroupManager.create(tr, Integer.MAX_VALUE, GroupType.QUESTIONS, new LinkedList<MetaQuestion>());
-					TreePath treepath = groupTreeModel.addGroup(mg, groupTreeModel.getChildCount(groupTreeModel.getRoot()));
-					groupTree.setSelectionPath(treepath);
-				} catch (SQLException | DaxploreException e1) {
-					eventBus.post(new ErrorMessageEvent("Something went wrong while creating the new group", e1));
-				}
+			try {
+				MetaGroupManager metaGroupManager = daxploreFile.getMetaGroupManager();
+				int nextid = metaGroupManager.getHighestId(); // Assumes perspective group is at index 0, standard groups are 1-indexed
+				TextReferenceManager textReferenceManager = daxploreFile.getTextReferenceManager();
+				TextReference tr = textReferenceManager.get("group_" + nextid);
+				MetaGroup mg = metaGroupManager.create(tr, Integer.MAX_VALUE, GroupType.QUESTIONS, new LinkedList<MetaQuestion>());
+				eventBus.post(new EditGroupTextEvent(mg));
+				TreePath treepath = groupTreeModel.addGroup(mg, groupTreeModel.getChildCount(groupTreeModel.getRoot()));
+				groupTree.setSelectionPath(treepath);
+			} catch (SQLException | DaxploreException e1) {
+				eventBus.post(new ErrorMessageEvent("Something went wrong while creating the new group", e1));
 			}
 			break;
 		case GROUP_UP:
