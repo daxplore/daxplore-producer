@@ -21,17 +21,22 @@ import com.google.common.eventbus.Subscribe;
 public class GroupWidget extends AbstractWidgetEditor<MetaGroup> {
 
 	private JLabel textField;
+	private JLabel idField;
 	private MetaGroup metaGroup;
 	private Locale locale;
 	private String htmlFormat = "<html><b>{0}</b></html>";
+	private String missingFormat = "<html><i>missing group name</i></html>";
+	private String idFormat = "<html>(<b>{0}</b>)</html>";
 	
 	public GroupWidget(EventBus eventBus) {
 		setLayout(new BorderLayout());
 		eventBus.register(this);
 		locale = Settings.getCurrentDisplayLocale();
 		textField = new JLabel();
-		textField.setBorder(new EmptyBorder(5, 5, 5, 5));
+		textField.setBorder(new EmptyBorder(5, 5, 5, 15));
 		add(textField, BorderLayout.WEST);
+		idField = new JLabel();
+		add(idField, BorderLayout.EAST);
 	}
 	
 	@Override
@@ -42,8 +47,14 @@ public class GroupWidget extends AbstractWidgetEditor<MetaGroup> {
 	@Override
 	public void setContent(MetaGroup value) {
 		this.metaGroup = value;
-		textField.setText(MessageFormat.format(htmlFormat, getLabelText()));
-		textField.setForeground(Color.BLACK);
+		if(metaGroup.getTextRef().has(locale)) {
+			textField.setText(MessageFormat.format(htmlFormat, getLabelText()));
+		} else {
+			textField.setText(missingFormat);
+		}
+		idField.setText(MessageFormat.format(idFormat, value.getTextRef().getRef()));
+		idField.setForeground(Color.GRAY);
+		
 	}
 	
 	private String getLabelText() {
