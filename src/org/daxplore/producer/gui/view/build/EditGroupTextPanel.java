@@ -10,6 +10,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
+import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
@@ -20,18 +21,34 @@ import org.daxplore.producer.daxplorelib.metadata.textreference.TextReference;
 import org.daxplore.producer.daxplorelib.metadata.textreference.TextReferenceManager;
 import org.daxplore.producer.gui.resources.GuiTexts;
 
-import com.google.common.base.Strings;
-
 @SuppressWarnings("serial")
 public class EditGroupTextPanel extends JPanel implements DocumentListener {
 	
 	private GuiTexts texts;
+	private JButton okButton;
 	private JTextField textRefIdField;
 	private Map<Locale, JTextField> localeTextFields = new HashMap<>();
 	private JLabel badTextRefIdLabel;
 	
-	public EditGroupTextPanel(GuiTexts texts, List<Locale> localesToEdit, TextReference textRef) {
+	
+	public EditGroupTextPanel(GuiTexts texts, JButton okButton, List<Locale> localesToEdit, String suggestedId) {
 		this.texts = texts;
+		this.okButton = okButton;
+		buildUI(localesToEdit);
+		textRefIdField.setText(suggestedId);
+	}
+
+	public EditGroupTextPanel(GuiTexts texts, JButton okButton, List<Locale> localesToEdit, TextReference textRef) {
+		this.texts = texts;
+		this.okButton = okButton;
+		buildUI(localesToEdit);
+		textRefIdField.setText(textRef.getRef());
+		for(Locale l : localesToEdit) {
+			localeTextFields.get(l).setText(textRef.get(l));
+		}
+	}
+	
+	private void buildUI(List<Locale> localesToEdit) {
 		setLayout(new BorderLayout(0, 10));
 		add(new JLabel(texts.get("edit.grouptexts.header")), BorderLayout.NORTH);
 		
@@ -39,7 +56,7 @@ public class EditGroupTextPanel extends JPanel implements DocumentListener {
 		
 		int i = 0;
 		editPanel.add(new Label(texts.get("edit.grouptexts.textrefid")), i++);
-		textRefIdField = new JTextField(textRef.getRef());
+		textRefIdField = new JTextField();
 		editPanel.add(textRefIdField, i++);
 		textRefIdField.getDocument().addDocumentListener(this);
 
@@ -48,7 +65,7 @@ public class EditGroupTextPanel extends JPanel implements DocumentListener {
 			Label label = new Label(MessageFormat.format(texts.get("edit.grouptexts.forlang"), l.getDisplayLanguage(Locale.ENGLISH))); 
 			editPanel.add(label, i++);
 			
-			JTextField textField = new JTextField(textRef.get(l));
+			JTextField textField = new JTextField();
 			localeTextFields.put(l, textField);
 			editPanel.add(textField, i++);
 		}
@@ -92,8 +109,10 @@ public class EditGroupTextPanel extends JPanel implements DocumentListener {
 		String textRefId = textRefIdField.getText();
 		if(TextReferenceManager.isValidTextRefId(textRefId)) {
 			badTextRefIdLabel.setText(" ");
+			okButton.setEnabled(true);
 		} else {
 			badTextRefIdLabel.setText(texts.get("edit.grouptexts.badtextref"));
+			okButton.setEnabled(false);
 		}
 	}
 }

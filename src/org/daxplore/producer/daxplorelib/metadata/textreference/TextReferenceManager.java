@@ -222,7 +222,7 @@ public class TextReferenceManager {
 		nNew = 0;
 	}
 	
-	public static boolean isValidTextRefId(String textRefId) {
-		return !Strings.isNullOrEmpty(textRefId) && textRefId.matches("^[\\pL\\pN_]+$");
+	public static boolean isValidTextRefId(String refstring) {
+		return !Strings.isNullOrEmpty(refstring) && refstring.matches("^[\\pL\\pN_]+$");
 	}
 }

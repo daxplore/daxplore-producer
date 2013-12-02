@@ -3,12 +3,10 @@ package org.daxplore.producer.gui.view.build;
 import java.awt.Component;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.sql.SQLException;
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
-import java.util.LinkedList;
 import java.util.Locale;
 
 import javax.swing.JOptionPane;
@@ -19,15 +17,13 @@ import javax.swing.tree.TreePath;
 import org.daxplore.producer.daxplorelib.DaxploreException;
 import org.daxplore.producer.daxplorelib.DaxploreFile;
 import org.daxplore.producer.daxplorelib.metadata.MetaGroup;
-import org.daxplore.producer.daxplorelib.metadata.MetaGroup.GroupType;
 import org.daxplore.producer.daxplorelib.metadata.MetaGroup.MetaGroupManager;
 import org.daxplore.producer.daxplorelib.metadata.MetaQuestion;
-import org.daxplore.producer.daxplorelib.metadata.textreference.TextReference;
 import org.daxplore.producer.daxplorelib.metadata.textreference.TextReferenceManager;
+import org.daxplore.producer.gui.Dialogs;
 import org.daxplore.producer.gui.Settings;
 import org.daxplore.producer.gui.event.DaxploreFileUpdateEvent;
 import org.daxplore.producer.gui.event.DisplayLocaleSelectEvent;
-import org.daxplore.producer.gui.event.EditGroupTextEvent;
 import org.daxplore.producer.gui.event.EditQuestionEvent;
 import org.daxplore.producer.gui.event.ErrorMessageEvent;
 import org.daxplore.producer.gui.resources.GuiTexts;
@@ -133,18 +129,32 @@ public class GroupsController implements ActionListener {
 			//TODO use a different event when the question view is replaced with modular window
 			eventBus.post(new EditQuestionEvent(selectedMetaQuestion));
 			break;
-		case GROUP_ADD:
-			try {
-				MetaGroupManager metaGroupManager = daxploreFile.getMetaGroupManager();
-				int nextid = metaGroupManager.getHighestId(); // Assumes perspective group is at index 0, standard groups are 1-indexed
+		case EDIT_TREE:
+			if(groupTree.getSelectionPath()==null) {
+				break;
+			}
+			path = groupTree.getSelectionPath().getPath();
+			if(path.length == 2 && path[1] instanceof MetaGroup) {
 				TextReferenceManager textReferenceManager = daxploreFile.getTextReferenceManager();
-				TextReference tr = textReferenceManager.get("group_" + nextid);
-				MetaGroup mg = metaGroupManager.create(tr, Integer.MAX_VALUE, GroupType.QUESTIONS, new LinkedList<MetaQuestion>());
-				eventBus.post(new EditGroupTextEvent(mg));
+				paths = groupTree.getSelectionPaths(); 
+				MetaGroup metaGroup = (MetaGroup) path[1];
+				boolean edited = Dialogs.editGroupDialog(getView(), textReferenceManager, texts, daxploreFile.getAbout().getLocales(), metaGroup);
+				if(edited) {
+					groupTree.setSelectionPath(null);
+					groupTree.setSelectionPaths(paths);
+				}
+			} else if (path.length == 3 && path[2] instanceof MetaQuestion) {
+				//TODO use a different event when the question view is replaced with modular window
+				eventBus.post(new EditQuestionEvent((MetaQuestion)path[2]));
+			}
+			break;
+		case GROUP_ADD:
+			TextReferenceManager textReferenceManager = daxploreFile.getTextReferenceManager();
+			MetaGroupManager metaGroupManager = daxploreFile.getMetaGroupManager();
+			MetaGroup mg = Dialogs.createGroupDialog(getView(), textReferenceManager, metaGroupManager, texts, daxploreFile.getAbout().getLocales());
+			if(mg != null) {
 				TreePath treepath = groupTreeModel.addGroup(mg, groupTreeModel.getChildCount(groupTreeModel.getRoot()));
 				groupTree.setSelectionPath(treepath);
-			} catch (SQLException | DaxploreException e1) {
-				eventBus.post(new ErrorMessageEvent("Something went wrong while creating the new group", e1));
 			}
 			break;
 		case GROUP_UP:
@@ -306,22 +316,6 @@ public class GroupsController implements ActionListener {
 						groupTreeModel.removeChild(p.getLastPathComponent());
 					}
 				}
-			}
-			break;
-		case EDIT_TREE:
-			if(groupTree.getSelectionPath()==null) {
-				break;
-			}
-			path = groupTree.getSelectionPath().getPath();
-			if(path.length == 2 && path[1] instanceof MetaGroup) {
-				paths = groupTree.getSelectionPaths(); 
-				MetaGroup metaGroup = (MetaGroup) path[1];
-				eventBus.post(new EditGroupTextEvent(metaGroup));
-				groupTree.setSelectionPath(null);
-				groupTree.setSelectionPaths(paths);
-			} else if (path.length == 3 && path[2] instanceof MetaQuestion) {
-				//TODO use a different event when the question view is replaced with modular window
-				eventBus.post(new EditQuestionEvent((MetaQuestion)path[2]));
 			}
 			break;
 		case PERSPECTIVE_UP:
