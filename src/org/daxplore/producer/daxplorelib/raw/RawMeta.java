@@ -209,7 +209,7 @@ public class RawMeta {
 	public List<RawMetaQuestion> getQuestions() throws SQLException { 
 		List<RawMetaQuestion> rawQuestionList = new LinkedList<>();
 		try(PreparedStatement stmt = connection.prepareStatement("SELECT * FROM rawmeta ORDER BY column ASC");
-			final ResultSet rs = stmt.executeQuery()) {
+			ResultSet rs = stmt.executeQuery()) {
 			while (rs.next()) {
 				RawMetaQuestion rmq = new RawMetaQuestion();
 				rmq.column = rs.getString("column");
@@ -229,6 +229,34 @@ public class RawMeta {
 			}
 		}
 		return rawQuestionList;
+	}
+	
+	public RawMetaQuestion getQuestion(String column) throws DaxploreException {
+		try(PreparedStatement stmt = connection.prepareStatement("SELECT * FROM rawmeta WHERE column = ?")) { 
+			stmt.setString(1, column);
+			try(ResultSet rs = stmt.executeQuery()) {
+				if (rs.next()) {
+					RawMetaQuestion rmq = new RawMetaQuestion();
+					rmq.column = rs.getString("column");
+					rmq.longname = rs.getString("longname");
+					rmq.measure = rs.getString("measure");
+					rmq.qtext = rs.getString("qtext");
+					String qtype = rs.getString("qtype");
+					rmq.qtype = VariableType.valueOf(qtype);
+					rmq.spsstype = rs.getString("spsstype");
+					String cats = rs.getString("valuelabels");
+					if(cats != null && !cats.isEmpty()) {
+						rmq.valuelables = JSONtoCategories(rs.getString("valuelabels"));
+					} else {
+						rmq.valuelables = new LinkedList<>(); 
+					}
+					return rmq;
+				}
+			}
+		} catch (SQLException e) {
+			throw new DaxploreException("Failure to read from rawmeta", e);
+		}
+		return null;
 	}
 	
 	public boolean hasData() {

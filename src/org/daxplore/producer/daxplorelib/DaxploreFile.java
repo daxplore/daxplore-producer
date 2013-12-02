@@ -35,6 +35,8 @@ import org.daxplore.producer.daxplorelib.metadata.textreference.TextReference;
 import org.daxplore.producer.daxplorelib.metadata.textreference.TextReferenceManager;
 import org.daxplore.producer.daxplorelib.raw.RawData;
 import org.daxplore.producer.daxplorelib.raw.RawMeta;
+import org.daxplore.producer.daxplorelib.raw.RawMeta.RawMetaQuestion;
+import org.daxplore.producer.daxplorelib.raw.VariableOptionInfo;
 import org.daxplore.producer.tools.MyTools;
 import org.daxplore.producer.tools.NumberlineCoverage;
 import org.daxplore.producer.tools.Pair;
@@ -205,6 +207,32 @@ public class DaxploreFile implements Closeable {
 	
 	public File getFile() {
 		return file;
+	}
+	
+	public List<VariableOptionInfo> getRawColumnInfo(String column) throws DaxploreException {
+		try {
+			List<VariableOptionInfo> infoList = new LinkedList<>();
+			List<Pair<Double, Integer>> counts = rawData.getColumnValueCount(column);
+			for(Pair<Double, Integer> count: counts) {
+				VariableOptionInfo optionInfo = new VariableOptionInfo(count.getKey());
+				optionInfo.setCount(count.getValue());
+				infoList.add(optionInfo);
+			}
+			RawMetaQuestion rmq = rawMeta.getQuestion(column);
+			for(Pair<String, Double> texts: rmq.valuelables) {
+				double value = texts.getValue();
+				for(VariableOptionInfo info: infoList) {
+					if(value == info.getValue()) {
+						info.setRawText(info.getRawText());
+						break;
+					}
+				}
+			}
+			
+			return infoList;
+		} catch (SQLException e) {
+			throw new DaxploreException("Failure to get raw data things", e);
+		}
 	}
 	
 	//TODO move to a helper file?
