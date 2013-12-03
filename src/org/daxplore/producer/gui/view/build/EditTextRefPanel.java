@@ -19,6 +19,7 @@ import javax.swing.event.DocumentListener;
 
 import org.daxplore.producer.daxplorelib.metadata.textreference.TextReference;
 import org.daxplore.producer.daxplorelib.metadata.textreference.TextReferenceManager;
+import org.daxplore.producer.gui.Settings;
 import org.daxplore.producer.gui.resources.GuiTexts;
 
 @SuppressWarnings("serial")
@@ -82,8 +83,7 @@ public class EditTextRefPanel extends JPanel implements DocumentListener {
 		}
 
 		for(Locale l : localesToEdit) {
-			//TODO use correct locale to display locale
-			Label label = new Label(MessageFormat.format(texts.get("edit.texts.forlang"), l.getDisplayLanguage(Locale.ENGLISH))); 
+			Label label = new Label(MessageFormat.format(texts.get("edit.texts.forlang"), l.getDisplayLanguage(Settings.getProgramLocale()))); 
 			editPanel.add(label, i++);
 			
 			JTextField textField = new JTextField();

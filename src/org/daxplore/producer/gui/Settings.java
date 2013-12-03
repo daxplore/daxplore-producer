@@ -6,6 +6,7 @@ import java.util.Locale;
 
 public class Settings {
 	
+	private static Locale programLocale = Locale.ENGLISH;
 	private final static Locale[] availableLocales = new Locale[]{new Locale("sv"), new Locale("en")};
 	private static Locale defaultLocale = new Locale("sv");
 	private static Locale currentLocale;
@@ -28,5 +29,9 @@ public class Settings {
 	
 	public static Locale getCurrentDisplayLocale() {
 		return currentLocale;
+	}
+	
+	public static Locale getProgramLocale() {
+		return programLocale;
 	}
 }
