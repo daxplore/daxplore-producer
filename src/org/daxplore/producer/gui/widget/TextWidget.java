@@ -1,82 +1,73 @@
 package org.daxplore.producer.gui.widget;
 
 import java.awt.BorderLayout;
-import java.awt.Color;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.Locale;
 
 import javax.swing.JButton;
 import javax.swing.JLabel;
+import javax.swing.JPanel;
 import javax.swing.SwingConstants;
-import javax.swing.border.LineBorder;
 
 import org.daxplore.producer.daxplorelib.metadata.textreference.TextReference;
-import org.daxplore.producer.gui.MainController.Views;
+import org.daxplore.producer.gui.Dialogs;
 import org.daxplore.producer.gui.Settings;
-import org.daxplore.producer.gui.event.ChangeMainViewEvent;
 import org.daxplore.producer.gui.event.DisplayLocaleSelectEvent;
-import org.daxplore.producer.gui.resources.IconResources;
+import org.daxplore.producer.gui.resources.Colors;
+import org.daxplore.producer.gui.resources.GuiTexts;
 
 import com.google.common.base.Strings;
 import com.google.common.eventbus.EventBus;
 import com.google.common.eventbus.Subscribe;
 
 @SuppressWarnings("serial")
-public class TextWidget extends AbstractWidgetEditor<TextReference>{
+public class TextWidget extends AbstractWidgetEditor<TextReference> {
 
 	private TextReference textRef;
 	private JLabel label = new JLabel();
-	private JButton gotoButton;
+	private JButton editButton;
 	
 	private Locale locale; 
 	
-	public TextWidget(final EventBus eventBus) {
+	public TextWidget(final EventBus eventBus, final GuiTexts texts) {
 		eventBus.register(this);
 		setLayout(new BorderLayout(0, 0));
 		locale = Settings.getCurrentDisplayLocale();
-		add(label, BorderLayout.WEST);
+		add(label, BorderLayout.CENTER);
 		label.setHorizontalAlignment(SwingConstants.LEFT);
-		gotoButton = new JButton("");
-		gotoButton.setHideActionText(true);
-		gotoButton.setIcon(IconResources.getIcon("edit_go_32.png"));
-		gotoButton.setOpaque(false);
-		gotoButton.setContentAreaFilled(false);
-		gotoButton.setBorderPainted(false);
-		gotoButton.setEnabled(true);
+		JPanel editPanel = new JPanel();
+		editPanel.setBackground(Colors.transparent);
+		editButton = new JButton(texts.get("general.button.edit"));
+		editButton.setEnabled(false);
+		editPanel.add(editButton);
 
-		gotoButton.addActionListener(new ActionListener() {
+		editButton.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				eventBus.post(new ChangeMainViewEvent(Views.EDITTEXTVIEW, textRef));
+				boolean edited = Dialogs.editTextRefDialog(editButton, texts, textRef.getActiveLocales(), textRef);
+				if (edited) {
+					setContent(textRef);
+				}
 			}
 		});
-		add(gotoButton, BorderLayout.EAST);
-	}
-
-	public void showEdit(boolean show) {
-		gotoButton.setVisible(show);
-		gotoButton.setEnabled(show);
+		add(editPanel, BorderLayout.EAST);
 	}
 	
-	public void setIndependetView(boolean indie) {
-		if(indie) {
-			setBorder(new LineBorder(new Color(0,0,0), 1));
-			setBackground(new Color(255,255,255));
-		} else {
-			setBorder(null);
-		}
+	public void showEdit(boolean show) {
+		editButton.setVisible(show);
 	}
-
+	
 	@Override
 	public TextReference getContent() {
 		return textRef;
 	}
 
 	@Override
-	public void setContent(TextReference value) {
-		this.textRef = value;
+	public void setContent(TextReference textRef) {
+		this.textRef = textRef;
 		label.setText(getLabelText());
+		editButton.setEnabled(true);
 	}
 	
 	private String getLabelText() {

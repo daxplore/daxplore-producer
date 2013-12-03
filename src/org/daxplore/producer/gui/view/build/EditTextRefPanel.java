@@ -22,47 +22,68 @@ import org.daxplore.producer.daxplorelib.metadata.textreference.TextReferenceMan
 import org.daxplore.producer.gui.resources.GuiTexts;
 
 @SuppressWarnings("serial")
-public class EditGroupTextPanel extends JPanel implements DocumentListener {
+public class EditTextRefPanel extends JPanel implements DocumentListener {
 	
 	private GuiTexts texts;
 	private JButton okButton;
 	private JTextField textRefIdField;
+	private JLabel textRefIdLabel;
 	private Map<Locale, JTextField> localeTextFields = new HashMap<>();
 	private JLabel badTextRefIdLabel;
 	
 	
-	public EditGroupTextPanel(GuiTexts texts, JButton okButton, List<Locale> localesToEdit, String suggestedId) {
+	public EditTextRefPanel(GuiTexts texts, JButton okButton, List<Locale> localesToEdit, String suggestedId) {
 		this.texts = texts;
 		this.okButton = okButton;
-		buildUI(localesToEdit);
+		buildUI(localesToEdit, true);
 		textRefIdField.setText(suggestedId);
 	}
 
-	public EditGroupTextPanel(GuiTexts texts, JButton okButton, List<Locale> localesToEdit, TextReference textRef) {
+	public EditTextRefPanel(GuiTexts texts, JButton okButton, List<Locale> localesToEdit, TextReference textRef) {
 		this.texts = texts;
 		this.okButton = okButton;
-		buildUI(localesToEdit);
+		buildUI(localesToEdit, true);
 		textRefIdField.setText(textRef.getRef());
 		for(Locale l : localesToEdit) {
 			localeTextFields.get(l).setText(textRef.get(l));
 		}
 	}
+
+	public EditTextRefPanel(GuiTexts texts, JButton okButton, List<Locale> localesToEdit,
+			TextReference textRef, boolean allowRefstringEdit) {
+		this.texts = texts;
+		this.okButton = okButton;
+		buildUI(localesToEdit, allowRefstringEdit);
+		if(allowRefstringEdit) {
+			textRefIdField.setText(textRef.getRef());
+		} else {
+			textRefIdLabel.setText(textRef.getRef());
+		}
+		for(Locale l : localesToEdit) {
+			localeTextFields.get(l).setText(textRef.get(l));
+		}
+	}
 	
-	private void buildUI(List<Locale> localesToEdit) {
+	private void buildUI(List<Locale> localesToEdit, boolean allowRefstringEdit) {
 		setLayout(new BorderLayout(0, 10));
-		add(new JLabel(texts.get("edit.grouptexts.header")), BorderLayout.NORTH);
+		add(new JLabel(texts.get("edit.texts.header")), BorderLayout.NORTH);
 		
 		JPanel editPanel = new JPanel(new GridLayout(localesToEdit.size()+1, 2));
 		
 		int i = 0;
-		editPanel.add(new Label(texts.get("edit.grouptexts.textrefid")), i++);
-		textRefIdField = new JTextField();
-		editPanel.add(textRefIdField, i++);
-		textRefIdField.getDocument().addDocumentListener(this);
+		editPanel.add(new Label(texts.get("edit.texts.textrefid")), i++);
+		if(allowRefstringEdit) {
+			textRefIdField = new JTextField();
+			editPanel.add(textRefIdField, i++);
+			textRefIdField.getDocument().addDocumentListener(this);
+		} else {
+			textRefIdLabel = new JLabel();
+			editPanel.add(textRefIdLabel, i++);
+		}
 
 		for(Locale l : localesToEdit) {
 			//TODO use correct locale to display locale
-			Label label = new Label(MessageFormat.format(texts.get("edit.grouptexts.forlang"), l.getDisplayLanguage(Locale.ENGLISH))); 
+			Label label = new Label(MessageFormat.format(texts.get("edit.texts.forlang"), l.getDisplayLanguage(Locale.ENGLISH))); 
 			editPanel.add(label, i++);
 			
 			JTextField textField = new JTextField();
@@ -75,7 +96,9 @@ public class EditGroupTextPanel extends JPanel implements DocumentListener {
 		badTextRefIdLabel = new JLabel();
 		badTextRefIdLabel.setForeground(Color.RED);
 		add(badTextRefIdLabel, BorderLayout.SOUTH);
-		updateValidTextRefWarning();
+		if(allowRefstringEdit) {
+			updateValidTextRefWarning();
+		}
 	}
 
 	public String getNewTextRefId() {
@@ -111,7 +134,7 @@ public class EditGroupTextPanel extends JPanel implements DocumentListener {
 			badTextRefIdLabel.setText(" ");
 			okButton.setEnabled(true);
 		} else {
-			badTextRefIdLabel.setText(texts.get("edit.grouptexts.badtextref"));
+			badTextRefIdLabel.setText(texts.get("edit.texts.badtextref"));
 			okButton.setEnabled(false);
 		}
 	}

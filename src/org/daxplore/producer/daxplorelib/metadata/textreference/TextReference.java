@@ -8,6 +8,7 @@ import java.util.Map;
 import com.beust.jcommander.internal.Lists;
 
 public class TextReference extends TextReferenceReference {
+	//TODO using a static list inside a data structure (daxplore file) is highly problematic!
 	private static List<Locale> activeLocales;
 	
 	Map<Locale, String> localeMap;
@@ -55,7 +56,7 @@ public class TextReference extends TextReferenceReference {
 		activeLocales = localelist;
 	}
 	
-	public static List<Locale> getActiveLocales() {
+	public List<Locale> getActiveLocales() {
 		return activeLocales;
 	}
 }

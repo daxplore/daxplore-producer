@@ -51,7 +51,7 @@ public class QuestionWidget extends AbstractWidgetEditor<MetaQuestion> {
 			idLabel.setForeground(Color.GRAY);
 			shortTextLabel.setBorder(new EmptyBorder(0, 0, 0, 15));
 			topRowPanel.add(shortTextLabel, BorderLayout.WEST);
-			topRowPanel.add(idLabel, BorderLayout.EAST);
+			topRowPanel.add(idLabel, BorderLayout.CENTER);
 			add(topRowPanel, BorderLayout.NORTH);
 		} else {
 			setLayout(new GridLayout(1, 1));

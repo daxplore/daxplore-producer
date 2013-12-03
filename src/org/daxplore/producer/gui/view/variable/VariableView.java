@@ -15,6 +15,7 @@ import javax.swing.border.LineBorder;
 import javax.swing.border.TitledBorder;
 
 import org.daxplore.producer.daxplorelib.metadata.MetaQuestion;
+import org.daxplore.producer.gui.resources.GuiTexts;
 import org.daxplore.producer.gui.view.variable.VariableController.QuestionCommand;
 import org.daxplore.producer.gui.widget.TextWidget;
 
@@ -34,14 +35,14 @@ public class VariableView extends JPanel {
 	private TextWidget fullText;
 	private TextWidget shortText;
 
-	public VariableView(EventBus eventBus, ActionListener actionListener, MetaQuestion metaQuestion, JTable scaleTable, JTable beforeTable, JTable afterTable, JTable timePointTable) {
+	public VariableView(EventBus eventBus, GuiTexts texts, ActionListener actionListener, MetaQuestion metaQuestion, JTable scaleTable, JTable beforeTable, JTable afterTable, JTable timePointTable) {
 		scaleScrollPane.setViewportView(scaleTable);
 		beforeScrollPane.setViewportView(beforeTable);
 		afterScrollPane.setViewportView(afterTable);
 		timePointScrollPane.setViewportView(timePointTable);
 		
-		fullText = new TextWidget(eventBus);
-		shortText = new TextWidget(eventBus);
+		fullText = new TextWidget(eventBus, texts);
+		shortText = new TextWidget(eventBus, texts);
 		
 		questionID.setText(metaQuestion.getId());
 		fullText.setContent(metaQuestion.getFullTextRef());
