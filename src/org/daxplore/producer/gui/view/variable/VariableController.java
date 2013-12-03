@@ -86,19 +86,20 @@ public class VariableController implements TableModelListener, ActionListener {
 	
 	
 	void updateCalculatedValues() {
-		LinkedList<Pair<Double, Integer>> afterValues = calculateAfter();
+		LinkedList<Integer> afterValues = calculateAfter();
 		if(afterTableModel == null) {
-			afterTableModel = new ColumnTableModel(afterValues);
+			//afterTableModel = new ColumnTableModel(afterValues);
 		} else {
-			afterTableModel.setValues(afterValues);
+			//afterTableModel.setValues(afterValues);
 		}
 	}
 	
-	LinkedList<Pair<Double, Integer>> calculateAfter() {
+	LinkedList<Integer> calculateAfter() {
 		if(mq==null || mq.getScale()==null) {
 			return new LinkedList<>();
 		}
-		TreeMap<Double, Integer> valueMap = new TreeMap<>();
+		TreeMap<Integer, Integer> valueMap = new TreeMap<>();
+		int i = 0;
 		for(MetaScale.Option option: mq.getScale().getOptions()) {
 			int total = 0;
 			for(Pair<Double, Integer> value: values) {
@@ -108,24 +109,17 @@ public class VariableController implements TableModelListener, ActionListener {
 			}
 			if(valueMap.containsKey(option.getValue())) {
 				Integer p = valueMap.get(option.getValue());
-				valueMap.put(option.getValue(), total + p);
+				valueMap.put(i, total + p);
 			} else {
-				valueMap.put(option.getValue(), total);
+				valueMap.put(i, total);
 			}
+			i++;
 		}
 		
-		LinkedList<Pair<Double, Integer>> list = new LinkedList<>();
-		for(Entry<Double, Integer> entry : valueMap.entrySet()) {
-			list.add(new Pair<>(entry.getKey(), entry.getValue()));
+		LinkedList<Integer> list = new LinkedList<>();
+		for(Entry<Integer, Integer> entry : valueMap.entrySet()) {
+			list.add(entry.getValue());
 		}
-		
-		Collections.sort(list, new Comparator<Pair<Double, Integer>>() {
-
-			@Override
-			public int compare(Pair<Double, Integer> o1, Pair<Double, Integer> o2) {
-				return o1.getKey().compareTo(o2.getKey());
-			}
-		});
 		
 		return list;
 	}
