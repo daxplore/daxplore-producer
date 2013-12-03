@@ -7,9 +7,10 @@ import java.util.Map;
 
 import com.beust.jcommander.internal.Lists;
 
-public class TextReference extends TextReferenceReference{
-	Map<Locale, String> localeMap;
+public class TextReference extends TextReferenceReference {
+	private static List<Locale> activeLocales;
 	
+	Map<Locale, String> localeMap;
 	boolean modified = false;
 	
 	
@@ -48,5 +49,13 @@ public class TextReference extends TextReferenceReference{
 			return false;
 		}
 		return get(locale).equals(other.get(locale));
+	}
+	
+	public static void setActiveLocales(List<Locale> localelist) {
+		activeLocales = localelist;
+	}
+	
+	public static List<Locale> getActiveLocales() {
+		return activeLocales;
 	}
 }

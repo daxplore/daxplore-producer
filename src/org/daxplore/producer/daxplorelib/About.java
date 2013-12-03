@@ -6,6 +6,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.sql.Types;
+import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.LinkedList;
@@ -13,6 +14,8 @@ import java.util.List;
 import java.util.Locale;
 import java.util.SortedSet;
 import java.util.TreeSet;
+
+import org.daxplore.producer.daxplorelib.metadata.textreference.TextReference;
 
 /**
  * This class mirrors the 'about' table in the project file
@@ -94,7 +97,7 @@ public class About {
 				}
 			}
 		}
-
+		TextReference.setActiveLocales(new ArrayList<Locale>(locales));
 		SQLTools.createIfNotExists(table, connection);
 		SQLTools.createIfNotExists(localeTable, connection);
 	}
@@ -232,10 +235,12 @@ public class About {
 	
 	public void addLocale(Locale locale) {
 		localesModified |= locales.add(locale);
+		TextReference.setActiveLocales(new ArrayList<Locale>(locales));
 	}
 	
 	public void removeLocale(Locale locale) {
 		localesModified |= locales.remove(locale);
+		TextReference.setActiveLocales(new ArrayList<Locale>(locales));
 	}
 	
 	public List<Locale> getLocales() {
