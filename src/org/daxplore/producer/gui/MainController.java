@@ -34,6 +34,7 @@ import org.daxplore.producer.gui.event.ChangeMainViewEvent;
 import org.daxplore.producer.gui.event.DaxploreFileUpdateEvent;
 import org.daxplore.producer.gui.event.DisplayLocaleSelectEvent;
 import org.daxplore.producer.gui.event.EditQuestionEvent;
+import org.daxplore.producer.gui.event.EditTextRefEvent;
 import org.daxplore.producer.gui.event.EmptyEvents.DiscardChangesEvent;
 import org.daxplore.producer.gui.event.EmptyEvents.ExportTextsEvent;
 import org.daxplore.producer.gui.event.EmptyEvents.ExportUploadEvent;
@@ -132,8 +133,8 @@ public class MainController {
 		groupsController = new GroupsController(eventBus, texts);
 		editTextController = new EditTextController(eventBus, texts);
 		toolsController = new ToolsController(eventBus, preferences);
-		questionController = new QuestionController(eventBus);
-		timeSeriesController = new TimeSeriesController(eventBus);
+		questionController = new QuestionController(eventBus, texts);
+		timeSeriesController = new TimeSeriesController(eventBus, texts);
 
 		mainView = new MainView(mainWindow);
 		
@@ -273,7 +274,7 @@ public class MainController {
 	
 	@Subscribe
 	public void on(EditQuestionEvent e) {
-		VariableController vc = new VariableController(eventBus, daxploreFile, e.getMetaQuestion());
+		VariableController vc = new VariableController(eventBus, texts, daxploreFile, e.getMetaQuestion());
 		JDialog dialog = vc.getDialog();
 		dialog.setSize(800, 800);
 		dialog.setLocationRelativeTo(mainWindow);

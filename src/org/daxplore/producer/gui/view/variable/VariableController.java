@@ -21,6 +21,7 @@ import org.daxplore.producer.daxplorelib.metadata.MetaQuestion;
 import org.daxplore.producer.daxplorelib.metadata.MetaScale;
 import org.daxplore.producer.daxplorelib.metadata.MetaScale.Option;
 import org.daxplore.producer.daxplorelib.metadata.textreference.TextReference;
+import org.daxplore.producer.gui.resources.GuiTexts;
 import org.daxplore.producer.gui.view.question.ScaleTable;
 import org.daxplore.producer.gui.view.question.ScaleTableModel;
 import org.daxplore.producer.gui.view.question.TimePointTable;
@@ -38,6 +39,7 @@ public class VariableController implements TableModelListener, ActionListener {
 	}
 	
 	private EventBus eventBus;
+	private GuiTexts texts;
 	private DaxploreFile daxploreFile;
 	
 	private VariableView view;
@@ -49,8 +51,9 @@ public class VariableController implements TableModelListener, ActionListener {
 	private ScaleTableModel scaleTableModel;
 	private JTable beforeTable;
 	
-	public VariableController(EventBus eventBus, DaxploreFile daxploreFile, MetaQuestion metaQuestion) {
+	public VariableController(EventBus eventBus, GuiTexts texts, DaxploreFile daxploreFile, MetaQuestion metaQuestion) {
 		this.eventBus = eventBus;
+		this.texts = texts;
 		this.mq = metaQuestion;
 		this.daxploreFile = daxploreFile;
 		eventBus.register(this);
@@ -58,7 +61,7 @@ public class VariableController implements TableModelListener, ActionListener {
 		
 		scaleTableModel = new ScaleTableModel(metaQuestion.getScale());
 		scaleTableModel.addTableModelListener(this);
-		scaleTable = new ScaleTable(eventBus, scaleTableModel);
+		scaleTable = new ScaleTable(eventBus, texts, scaleTableModel);
 		
 		try {
 			values = daxploreFile.getRawData().getColumnValueCount(metaQuestion.getId());
@@ -73,9 +76,9 @@ public class VariableController implements TableModelListener, ActionListener {
 					daxploreFile.getAbout(),
 					metaQuestion);
 			
-			TimePointTable timePointTable = new TimePointTable(eventBus, timePointTableModel);
+			TimePointTable timePointTable = new TimePointTable(eventBus, texts, timePointTableModel);
 			
-			view = new VariableView(eventBus, this, metaQuestion, scaleTable, beforeTable, afterTable, timePointTable);
+			view = new VariableView(eventBus, texts, this, metaQuestion, scaleTable, beforeTable, afterTable, timePointTable);
 			
 		} catch (SQLException | DaxploreException e) {
 			// TODO Auto-generated catch block
@@ -141,7 +144,7 @@ public class VariableController implements TableModelListener, ActionListener {
 				if(mq.getScale()==null){
 					mq.setScale(daxploreFile.getMetaScaleManager().create(new LinkedList<Option>(), new NumberlineCoverage()));
 					scaleTableModel = new ScaleTableModel(mq.getScale());
-					scaleTable = new ScaleTable(eventBus, scaleTableModel);
+					scaleTable = new ScaleTable(eventBus, texts, scaleTableModel);
 					//view.getScaleScrollPane().setViewportView(scaleTable);
 					view.validate();
 				    view.repaint();

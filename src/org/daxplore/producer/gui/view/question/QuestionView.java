@@ -21,6 +21,7 @@ import javax.swing.border.TitledBorder;
 import org.daxplore.producer.daxplorelib.metadata.MetaQuestion;
 import org.daxplore.producer.daxplorelib.metadata.MetaScale;
 import org.daxplore.producer.daxplorelib.metadata.MetaScale.Option;
+import org.daxplore.producer.gui.resources.GuiTexts;
 import org.daxplore.producer.gui.view.question.QuestionController.QuestionCommand;
 import org.daxplore.producer.gui.widget.TextWidget;
 
@@ -57,9 +58,9 @@ public class QuestionView extends JPanel {
 		}
 	}
 	
-	public QuestionView(EventBus eventBus, ActionListener actionListener) {
-		fullText = new TextWidget(eventBus);
-		shortText = new TextWidget(eventBus);
+	public QuestionView(EventBus eventBus, GuiTexts texts, ActionListener actionListener) {
+		fullText = new TextWidget(eventBus, texts);
+		shortText = new TextWidget(eventBus, texts);
 		
 		setLayout(new BorderLayout(0, 0));
 		

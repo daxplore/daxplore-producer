@@ -27,15 +27,41 @@ import org.daxplore.producer.daxplorelib.metadata.textreference.TextReference;
 import org.daxplore.producer.daxplorelib.metadata.textreference.TextReferenceManager;
 import org.daxplore.producer.gui.resources.GuiTexts;
 import org.daxplore.producer.gui.utility.DisplayLocale;
-import org.daxplore.producer.gui.view.build.EditGroupTextPanel;
+import org.daxplore.producer.gui.view.build.EditTextRefPanel;
 
 public class Dialogs {
+	
+	public static boolean editTextRefDialog(Component parent, GuiTexts texts,
+			List<Locale> locales, TextReference textRef) {
+		JButton[] buttons = getOkCancelOptions(texts);
+		
+		EditTextRefPanel editor = new EditTextRefPanel(texts, buttons[0], locales, textRef, false);
+		int answer = JOptionPane.showOptionDialog(parent,
+				editor,
+				"Edit texts",
+				JOptionPane.OK_CANCEL_OPTION,
+				JOptionPane.PLAIN_MESSAGE,
+				null,
+				buttons,
+				buttons[0]);
+		
+		if(answer == 0) { // 0 == index of okButton in buttons array
+			
+			Map<Locale, String> newTexts = editor.getNewTexts();
+			for(Locale l : newTexts.keySet()) {
+				textRef.put(newTexts.get(l), l);
+			}
+			
+			return true;
+		}
+		return false;
+	}
 	
 	public static boolean editGroupDialog(Component parent, TextReferenceManager textManager, GuiTexts texts, List<Locale> locales, MetaGroup metaGroup) {
 		TextReference textRef = metaGroup.getTextRef();
 		JButton[] buttons = getOkCancelOptions(texts);
 		
-		EditGroupTextPanel editor = new EditGroupTextPanel(texts, buttons[0], locales, textRef);
+		EditTextRefPanel editor = new EditTextRefPanel(texts, buttons[0], locales, textRef);
 		int answer = JOptionPane.showOptionDialog(parent,
 				editor,
 				"Edit group",
@@ -45,7 +71,7 @@ public class Dialogs {
 				buttons,
 				buttons[0]);
 		
-		if(answer == 0) { // 0 == index of okayButton in buttons array
+		if(answer == 0) { // 0 == index of okButton in buttons array
 			String textRefId = editor.getNewTextRefId(); 
 			
 			Map<Locale, String> newTexts = editor.getNewTexts();
@@ -83,7 +109,7 @@ public class Dialogs {
 		
 		JButton[] buttons = getOkCancelOptions(texts);
 
-		EditGroupTextPanel editor = new EditGroupTextPanel(texts, buttons[0], locales, "group_" + nextid);
+		EditTextRefPanel editor = new EditTextRefPanel(texts, buttons[0], locales, "group_" + nextid);
 		
 		int answer = JOptionPane.showOptionDialog(parent,
 				editor,
@@ -94,7 +120,7 @@ public class Dialogs {
 				buttons,
 				buttons[0]);
 		
-		if(answer == 0) { // 0 == index of okayButton in buttons array
+		if(answer == 0) { // 0 == index of okButton in buttons array
 			String textRefId = editor.getNewTextRefId();
 			try {
 				TextReference textRef = textManager.get(textRefId);

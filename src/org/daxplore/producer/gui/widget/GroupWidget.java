@@ -36,7 +36,7 @@ public class GroupWidget extends AbstractWidgetEditor<MetaGroup> {
 		textField.setBorder(new EmptyBorder(5, 5, 5, 15));
 		add(textField, BorderLayout.WEST);
 		idField = new JLabel();
-		add(idField, BorderLayout.EAST);
+		add(idField, BorderLayout.CENTER);
 	}
 	
 	@Override

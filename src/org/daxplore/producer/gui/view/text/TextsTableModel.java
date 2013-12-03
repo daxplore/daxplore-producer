@@ -8,6 +8,7 @@ import javax.swing.table.DefaultTableModel;
 
 import org.daxplore.producer.daxplorelib.metadata.textreference.TextReference;
 import org.daxplore.producer.daxplorelib.metadata.textreference.TextTree;
+import org.daxplore.producer.gui.Settings;
 
 @SuppressWarnings("serial")
 class TextsTableModel extends DefaultTableModel implements TableModelListener {
@@ -29,7 +30,7 @@ class TextsTableModel extends DefaultTableModel implements TableModelListener {
 		case 2:
 			Locale locale = controller.getCurrentLocale(col-1);
 			if(locale != null) {
-				return locale.getDisplayLanguage(Locale.ENGLISH);
+				return locale.getDisplayLanguage(Settings.getProgramLocale());
 			}
 			return "";
 		default:

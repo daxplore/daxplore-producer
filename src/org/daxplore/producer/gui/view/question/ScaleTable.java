@@ -15,6 +15,7 @@ import javax.swing.table.TableCellEditor;
 import javax.swing.table.TableCellRenderer;
 
 import org.daxplore.producer.daxplorelib.metadata.textreference.TextReference;
+import org.daxplore.producer.gui.resources.GuiTexts;
 import org.daxplore.producer.gui.widget.AbstractWidget;
 import org.daxplore.producer.gui.widget.AbstractWidgetEditor;
 import org.daxplore.producer.gui.widget.AbstractWidgetEditor.InvalidContentException;
@@ -35,14 +36,14 @@ public class ScaleTable extends JTable {
 	private int mouseOverRow;
 	private int mouseOverColumn;
 
-	public ScaleTable(EventBus eventBus, ScaleTableModel model) {
+	public ScaleTable(EventBus eventBus, GuiTexts texts, ScaleTableModel model) {
 		super(model);
 		
 		setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
         mouseOverRow = -1;
         mouseOverColumn = -1;
         
-        ScaleCellRenderer cellRenderer = new ScaleCellRenderer(eventBus);
+        ScaleCellRenderer cellRenderer = new ScaleCellRenderer(eventBus, texts);
         setDefaultRenderer(TextReference.class, cellRenderer);
         setDefaultEditor(TextReference.class, cellRenderer);
         setDefaultRenderer(NumberlineCoverage.class, cellRenderer);
@@ -80,9 +81,9 @@ public class ScaleTable extends JTable {
 		private NumberLineRenderer numberRenderer = new NumberLineRenderer();
 		private NumberLineEditor numberEditor = new NumberLineEditor();
 		
-		public ScaleCellRenderer(EventBus eventBus) {
-			textRenderer = new TextWidget(eventBus);
-			textEditor = new TextWidget(eventBus);
+		public ScaleCellRenderer(EventBus eventBus, GuiTexts texts) {
+			textRenderer = new TextWidget(eventBus, texts);
+			textEditor = new TextWidget(eventBus, texts);
 		}
 		
 	    @Override

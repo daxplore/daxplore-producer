@@ -20,6 +20,7 @@ import org.daxplore.producer.daxplorelib.metadata.textreference.TextReferenceMan
 import org.daxplore.producer.daxplorelib.raw.RawData;
 import org.daxplore.producer.daxplorelib.raw.RawMeta;
 import org.daxplore.producer.gui.event.DaxploreFileUpdateEvent;
+import org.daxplore.producer.gui.resources.GuiTexts;
 import org.daxplore.producer.gui.widget.ColumnTableModel;
 import org.daxplore.producer.tools.Pair;
 
@@ -33,14 +34,16 @@ public class TimeSeriesController implements ActionListener, DocumentListener {
 	}
 	
 	private EventBus eventBus;
+	private GuiTexts texts;
 	private DaxploreFile daxploreFile;
 	
 	private TimeSeriesTableModel timeSeriesTableModel;
 	private TimeSeriesTable timeSeriesTable;
 	private TimeSeriesView timeSeriesView;
 	
-	public TimeSeriesController(EventBus eventBus) {
+	public TimeSeriesController(EventBus eventBus, GuiTexts texts) {
 		this.eventBus = eventBus; 
+		this.texts = texts;
 		eventBus.register(this);
 		timeSeriesView = new TimeSeriesView(this);
 	}
@@ -167,7 +170,7 @@ public class TimeSeriesController implements ActionListener, DocumentListener {
 	public void loadData() {
 		if(daxploreFile != null) {
 			timeSeriesTableModel = new TimeSeriesTableModel(daxploreFile.getMetaTimepointShortManager());
-			timeSeriesTable = new TimeSeriesTable(eventBus, timeSeriesTableModel);
+			timeSeriesTable = new TimeSeriesTable(eventBus, texts, timeSeriesTableModel);
 			timeSeriesView.getTimeSeriesScrollPane().setViewportView(timeSeriesTable);
 			timeSeriesView.setTimeSeriesColumn(daxploreFile.getAbout().getTimeSeriesShortColumn());
 		}

@@ -6,7 +6,6 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
 import java.io.IOException;
-import java.util.Locale;
 
 import javax.swing.JButton;
 import javax.swing.JFileChooser;
@@ -90,7 +89,7 @@ public class WelcomeDialog {
 		welcomeFrame = new JFrame();
 		eventBus = new EventBus();
 		eventBus.register(this);
-		texts = new GuiTexts(Locale.ENGLISH); //TODO handle locale choice
+		texts = new GuiTexts(Settings.getProgramLocale());
 		preferences = new DaxplorePreferences();
 		
 		welcomeFrame.setSize(500, 300);
