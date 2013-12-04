@@ -42,6 +42,8 @@ import org.daxplore.producer.tools.NumberlineCoverage;
 import org.daxplore.producer.tools.Pair;
 import org.xml.sax.SAXException;
 
+import com.google.common.primitives.Doubles;
+
 public class DaxploreFile implements Closeable {
 	private Connection connection;
 	private About about;
@@ -220,9 +222,9 @@ public class DaxploreFile implements Closeable {
 			}
 			RawMetaQuestion rmq = rawMeta.getQuestion(column);
 			for(Pair<String, Double> texts: rmq.valuelables) {
-				double value = texts.getValue();
+				Double value = texts.getValue();
 				for(VariableOptionInfo info: infoList) {
-					if(value == info.getValue()) {
+					if(value == info.getValue() || (value!=null && value.equals(info.getValue()))) {
 						info.setRawText(info.getRawText());
 						break;
 					}

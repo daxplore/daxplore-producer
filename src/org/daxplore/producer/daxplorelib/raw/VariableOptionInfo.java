@@ -1,15 +1,15 @@
 package org.daxplore.producer.daxplorelib.raw;
 
 public class VariableOptionInfo {
-	private double value;
+	private Double value;
 	private String rawText;
 	private int count;
 	
-	public VariableOptionInfo(double value) {
+	public VariableOptionInfo(Double value) {
 		this.value = value;
 	}
 	
-	public double getValue() {
+	public Double getValue() {
 		return value;
 	}
 	

@@ -306,7 +306,7 @@ public class MetaScale {
 	}
 	
 	
-	/** Each Option's position is defined by the order of this list */
+	/** Each Option's position is defined by the order of this list */ //TODO change to explicit ordering
 	private List<Option> options;
 	private NumberlineCoverage ignore;
 
