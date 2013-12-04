@@ -180,7 +180,7 @@ public class RawVariableTable extends JTable {
 		public void setAvailibleNumbers(List<Integer> list) {
 			availableNumbers = list;
 			removeAllItems();
-			addItem("-- none --");
+			addItem("none");
 			for(Integer c: availableNumbers) {
 				addItem(c.toString());
 			}

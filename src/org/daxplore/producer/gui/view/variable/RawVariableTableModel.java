@@ -6,6 +6,7 @@ import java.util.Map;
 
 import javax.swing.table.DefaultTableModel;
 
+import org.daxplore.producer.daxplorelib.metadata.MetaScale;
 import org.daxplore.producer.daxplorelib.raw.VariableOptionInfo;
 import org.daxplore.producer.tools.NumberlineCoverage;
 
@@ -14,16 +15,21 @@ public class RawVariableTableModel extends DefaultTableModel {
 	
 	private List<VariableOptionInfo> variableList;
 	private Map<Double, Integer> toNumberMap = new HashMap<>();
+	private MetaScale ms;
 	
 	List<Integer> availableToNumbers;
 
-	public RawVariableTableModel(List<VariableOptionInfo> variableList, List<Integer> availibleToNumbers) {
+	public RawVariableTableModel(List<VariableOptionInfo> variableList, MetaScale ms, List<Integer> availableToNumbers) {
 		this.variableList = variableList;
-		this.availableToNumbers = availibleToNumbers;
+		this.ms = ms;
+		this.availableToNumbers = availableToNumbers;
 		
-		for(Map.Entry<Double, Integer> entry: toNumberMap.entrySet()) {
-			if(!availableToNumbers.contains(entry.getValue())) {
-				toNumberMap.put(entry.getKey(), null);
+		for(VariableOptionInfo info: variableList) {
+			if(info.getValue() != null) {
+				int index = ms.matchIndex(info.getValue());
+				if(index != -1 && availableToNumbers.contains(index)) {
+					toNumberMap.put(info.getValue(), index);
+				}
 			}
 		}
 	}
@@ -80,10 +86,32 @@ public class RawVariableTableModel extends DefaultTableModel {
 	public void setValueAt(Object aValue, int row, int column) {
 		if(column == 3) {
 			Integer val = (Integer)aValue;
-			if(availableToNumbers.contains(val) || val == null) {
+			if(val == null) {
+				Double value = (Double)getValueAt(row, 0);
+				int oldIndex = toNumberMap.get(value);
+				
+				NumberlineCoverage oldPlace = ms.getOptions().get(oldIndex).getTransformation();
+				oldPlace.removeNumber(value);
+				ms.getOptions().get(oldIndex).setTransformation(oldPlace);
+				
+				fireTableCellUpdated(row, column);
+				
+			}else if(availableToNumbers.contains(val) ) {
+				Double value = (Double)getValueAt(row, 0);
+				int oldIndex = toNumberMap.get(value);
+				
+				NumberlineCoverage oldPlace = ms.getOptions().get(oldIndex).getTransformation();
+				oldPlace.removeNumber(value);
+				ms.getOptions().get(oldIndex).setTransformation(oldPlace);
+				
+				NumberlineCoverage newPlace = ms.getOptions().get(val).getTransformation();
+				newPlace.addNumber(value);
+				ms.getOptions().get(val).setTransformation(newPlace);
+				
 				toNumberMap.put(variableList.get(row).getValue(), val);
-				//TODO alert someone
-			}
+				
+				fireTableCellUpdated(row, column);
+			} 
 		}
 	}
 	
@@ -92,12 +120,17 @@ public class RawVariableTableModel extends DefaultTableModel {
 		boolean modified = false;
 		for(Map.Entry<Double, Integer> entry: toNumberMap.entrySet()) {
 			if(!availableToNumbers.contains(entry.getValue())) {
+				Double value = entry.getKey();
+				int oldIndex = entry.getValue();
+				
+				NumberlineCoverage oldPlace = ms.getOptions().get(oldIndex).getTransformation();
+				oldPlace.removeNumber(value);
+				ms.getOptions().get(oldIndex).setTransformation(oldPlace);
+				
 				toNumberMap.put(entry.getKey(), null);
-				modified = true;
+				
+				fireTableDataChanged();
 			}
-		}
-		if(modified) {
-			//TODO alert someone
 		}
 	}
 	

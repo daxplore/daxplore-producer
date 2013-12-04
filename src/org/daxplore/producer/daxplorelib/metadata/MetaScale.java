@@ -133,7 +133,7 @@ public class MetaScale {
 				PreparedStatement deleteOptionStmt = connection.prepareStatement("DELETE FROM metascaleoption WHERE scaleid = ?");
 				//PreparedStatement updateOptionStmt = connection.prepareStatement("UPDATE metascaleoption SET textref = ?, value = ?, transform = ? WHERE scaleid = ? AND ord = ?");
 			) {
-				int nNew = 0, nModified = 0, nRemoved = 0, nOptionModified = 0;
+				int nNew = 0, nModified = 0, nRemoved = 0;
 				
 				for(MetaScale ms: toBeAdded) {
 					nNew++;
@@ -151,8 +151,7 @@ public class MetaScale {
 						addOptionStmt.addBatch();
 						ord++;
 					}
-					ms.modified = false;
-					ms.structureChanged = false;
+					ms.setSaved();
 				}
 				toBeAdded.clear();
 				insertScaleStmt.executeBatch();
@@ -160,38 +159,17 @@ public class MetaScale {
 				addDelta = 0;
 				
 				for(MetaScale ms: scaleMap.values()) {
-					if(ms.modified) {
+					if(ms.isModified()) {
 						nModified++;
 						updateScaleStmt.setInt(2, ms.id);
 						updateScaleStmt.setString(1, ms.ignore.toString());
 						updateScaleStmt.addBatch();
 						
-						if(ms.structureChanged) {
-							deleteOptionStmt.setInt(1, ms.id);
-							deleteOptionStmt.addBatch();
-							
-							int ord = 0;
-							for(Option opt: ms.options) {
-								nOptionModified++;
-								addOptionStmt.setInt(1, ms.id);
-								addOptionStmt.setString(2, opt.textRef.getRef());
-								addOptionStmt.setInt(3, ord);
-								addOptionStmt.setDouble(4, opt.value);
-								addOptionStmt.setString(5, opt.transformation.toString());
-								addOptionStmt.addBatch();
-								ord++;
-							}
-							ms.structureChanged = false;
-						}
-						ms.modified = false;
-					}
-					if(ms.structureChanged) {
 						deleteOptionStmt.setInt(1, ms.id);
 						deleteOptionStmt.addBatch();
 						
 						int ord = 0;
 						for(Option opt: ms.options) {
-							nOptionModified++;
 							addOptionStmt.setInt(1, ms.id);
 							addOptionStmt.setString(2, opt.textRef.getRef());
 							addOptionStmt.setInt(3, ord);
@@ -200,7 +178,8 @@ public class MetaScale {
 							addOptionStmt.addBatch();
 							ord++;
 						}
-						ms.structureChanged = false;
+						
+						ms.setSaved();
 					}
 				}
 				updateScaleStmt.executeBatch();
@@ -218,24 +197,21 @@ public class MetaScale {
 				deleteOptionStmt.executeBatch();
 				toBeRemoved.clear();
 				
-				if(nModified != 0 || nNew != 0 || nRemoved != 0 || nOptionModified != 0) {
-					String logString = String.format("MetaScale: Saved %d (%d new), %d removed, %d options changed", nModified, nNew, nRemoved, nOptionModified);
+				if(nModified != 0 || nNew != 0 || nRemoved != 0) {
+					String logString = String.format("MetaScale: Saved %d (%d new), %d removed", nModified, nNew, nRemoved);
 					Logger.getGlobal().log(Level.INFO, logString);
 				}
 			}
 		}
 		
 		public int getUnsavedChangesCount() {
-			int nModified = 0, nOptionModified = 0;
+			int nModified = 0;
 			for(MetaScale ms: scaleMap.values()) {
-				if(ms.modified) {
+				if(ms.isModified()) {
 					nModified++;
 				}
-				if(ms.structureChanged) {
-					nOptionModified++;
-				}
 			}			
-			return toBeRemoved.size() + nModified + nOptionModified;
+			return toBeRemoved.size() + nModified;
 		}
 		
 		public List<MetaScale> getAll() throws SQLException, DaxploreException {
@@ -264,8 +240,7 @@ public class MetaScale {
 		private TextReference textRef;
 		private double value;
 		private NumberlineCoverage transformation;
-		private boolean modified = false; //TODO remove modified tag as it's never read and Options are overwritten in saveall anyway?
-		//TODO remove unused setters
+		private boolean modified = false;
 		
 		public Option(TextReference textRef, double value, NumberlineCoverage transformation, boolean setNew) {
 			this.textRef = textRef; this.value = value; this.transformation = transformation; this.modified = setNew;
@@ -294,7 +269,7 @@ public class MetaScale {
 		}
 
 		public NumberlineCoverage getTransformation() {
-			return transformation;
+			return transformation.clone();
 		}
 
 		public void setTransformation(NumberlineCoverage transformation) {
@@ -312,14 +287,12 @@ public class MetaScale {
 
 	private int id;
 	private boolean modified = false;
-	private boolean structureChanged = false;
 	
 	private MetaScale(int id, List<Option> options, NumberlineCoverage ignore, boolean newScale) {
 		this.id = id;
 		this.options = options;
 		this.ignore = ignore;
 		this.modified = newScale;
-		this.structureChanged = newScale;
 	}
 	
 	public int getId() {
@@ -337,7 +310,6 @@ public class MetaScale {
 	public void setOptions(List<Option> options) {
 		if(!options.equals(this.options)) {
 			this.options = options;
-			structureChanged = true;
 			modified = true;
 		}
 	}
@@ -384,6 +356,25 @@ public class MetaScale {
 	
 	public boolean ignored(double value) {
 		return ignore.contains(value);
+	}
+	
+	public boolean isModified() {
+		if(modified) {
+			return true; 
+		}
+		for(Option opt: options) {
+			if(opt.modified) {
+				return true;
+			}
+		}
+		return false;
+	}
+	
+	public void setSaved() {
+		modified = false;
+		for(Option opt: options) {
+			opt.modified = false;
+		}
 	}
 	
 	public boolean equalsLocale(MetaScale other, Locale byLocale) {

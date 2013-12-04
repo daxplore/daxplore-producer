@@ -3,15 +3,16 @@ package org.daxplore.producer.tools;
 import java.util.LinkedList;
 import java.util.List;
 
+import com.google.common.primitives.Doubles;
 
-/**
- * @author Axel Winkler, Daniel Dunér
- */
-public class NumberlineCoverage {
+public class NumberlineCoverage implements Cloneable {
 	
-	protected class Interval implements Cloneable{
-		double low, high;
-		boolean lowInclusive, highInclusive;
+	/**
+	 * Interval defines an interval and is immutable.
+	 */
+	protected class Interval implements Cloneable {
+		final double low, high;
+		final boolean lowInclusive, highInclusive;
 		
 		public Interval(double low, boolean lowInclusive, double high, boolean highInclusive) throws NumberlineCoverageException {
 			if(high == low & !lowInclusive & ! highInclusive) {
@@ -24,11 +25,11 @@ public class NumberlineCoverage {
 		}
 		
 		public Interval(String inter) throws NumberlineCoverageException {
-			try { // really an if-statement: if(inter is double)
-				Double value = Double.valueOf(inter);
+			Double value = Doubles.tryParse(inter);
+			if(value != null) {
 				low = value;high = value; 
 				lowInclusive = true; highInclusive = true;
-			} catch (NumberFormatException e) {
+			} else {
 				if(inter == null || inter.length() < 5) {
 					throw new NumberlineCoverageException("Malformed interval string: " + inter);
 				}
@@ -234,6 +235,10 @@ public class NumberlineCoverage {
 		intervals = interlist;
 	}
 	
+	public void removeNumber(double number) {
+		removeInterval(number, true, number, true);
+	}
+	
 	protected Interval combine(Interval interval1, Interval interval2) {
 		boolean lowIncluded = interval1.contains(interval2.low);
 		boolean highIncluded = interval1.contains(interval2.high);
@@ -312,6 +317,14 @@ public class NumberlineCoverage {
 			}
 		}
 		return false;
+	}
+	
+	public NumberlineCoverage clone() {
+		NumberlineCoverage clone = new NumberlineCoverage();
+		for(Interval in: intervals) {
+			clone.intervals.add(in);
+		}
+		return clone;
 	}
 	
 	@Override

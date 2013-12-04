@@ -225,7 +225,7 @@ public class DaxploreFile implements Closeable {
 				Double value = texts.getValue();
 				for(VariableOptionInfo info: infoList) {
 					if(value == info.getValue() || (value!=null && value.equals(info.getValue()))) {
-						info.setRawText(info.getRawText());
+						info.setRawText(texts.getKey());
 						break;
 					}
 				}

@@ -66,7 +66,7 @@ public class VariableController implements TableModelListener, ActionListener {
 			varaibleModel.addTableModelListener(this);
 			List<Integer> availebleToNumbers = varaibleModel.getAvailebleToNumbers();
 			
-			rawModel = new RawVariableTableModel(rawVariableList, availebleToNumbers);
+			rawModel = new RawVariableTableModel(rawVariableList, metaQuestion.getScale(), availebleToNumbers);
 			rawTable = new RawVariableTable(eventBus, rawModel);
 			rawModel.addTableModelListener(this);
 			
@@ -104,7 +104,7 @@ public class VariableController implements TableModelListener, ActionListener {
 		for(MetaScale.Option option: mq.getScale().getOptions()) {
 			int total = 0;
 			for(VariableOptionInfo info: rawVariableList) {
-				if(option.getTransformation().contains(i)) {
+				if(info.getValue() != null && option.getTransformation().contains(info.getValue())) {
 					total += info.getCount();
 				}
 			}
