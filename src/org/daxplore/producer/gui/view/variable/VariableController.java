@@ -21,6 +21,7 @@ import org.daxplore.producer.daxplorelib.metadata.MetaQuestion;
 import org.daxplore.producer.daxplorelib.metadata.MetaScale;
 import org.daxplore.producer.daxplorelib.metadata.MetaScale.Option;
 import org.daxplore.producer.daxplorelib.metadata.textreference.TextReference;
+import org.daxplore.producer.daxplorelib.raw.VariableOptionInfo;
 import org.daxplore.producer.gui.resources.GuiTexts;
 import org.daxplore.producer.gui.view.question.ScaleTable;
 import org.daxplore.producer.gui.view.question.ScaleTableModel;
@@ -43,13 +44,12 @@ public class VariableController implements TableModelListener, ActionListener {
 	private DaxploreFile daxploreFile;
 	
 	private VariableView view;
-	private LinkedList<Pair<Double, Integer>> values;
 	private MetaQuestion mq;
-	private ColumnTableModel afterTableModel;
-	private JTable afterTable;
-	private ScaleTable scaleTable;
-	private ScaleTableModel scaleTableModel;
-	private JTable beforeTable;
+	private RawVariableTableModel rawModel;
+	private RawVariableTable rawTable;
+	private VariableTableModel varaibleModel;
+	private VariableTable variableTable;
+	private List<VariableOptionInfo> rawVariableList;
 	
 	public VariableController(EventBus eventBus, GuiTexts texts, DaxploreFile daxploreFile, MetaQuestion metaQuestion) {
 		this.eventBus = eventBus;
@@ -58,18 +58,18 @@ public class VariableController implements TableModelListener, ActionListener {
 		this.daxploreFile = daxploreFile;
 		eventBus.register(this);
 		
-		
-		scaleTableModel = new ScaleTableModel(metaQuestion.getScale());
-		scaleTableModel.addTableModelListener(this);
-		scaleTable = new ScaleTable(eventBus, texts, scaleTableModel);
-		
 		try {
-			values = daxploreFile.getRawData().getColumnValueCount(metaQuestion.getId());
-			beforeTable = new JTable(new ColumnTableModel(values));
-		
-			updateCalculatedValues();
-			afterTable = new JTable(afterTableModel);
+			rawVariableList = daxploreFile.getRawColumnInfo(metaQuestion.getId());
 
+			varaibleModel = new VariableTableModel(metaQuestion.getScale(), calculateAfter());
+			variableTable = new VariableTable(eventBus, texts, varaibleModel);
+			varaibleModel.addTableModelListener(this);
+			List<Integer> availebleToNumbers = varaibleModel.getAvailebleToNumbers();
+			
+			rawModel = new RawVariableTableModel(rawVariableList, availebleToNumbers);
+			rawTable = new RawVariableTable(eventBus, rawModel);
+			rawModel.addTableModelListener(this);
+			
 			TimePointTableModel timePointTableModel = new TimePointTableModel(
 					daxploreFile.getMetaTimepointShortManager(),
 					daxploreFile.getRawData(),
@@ -78,7 +78,7 @@ public class VariableController implements TableModelListener, ActionListener {
 			
 			TimePointTable timePointTable = new TimePointTable(eventBus, texts, timePointTableModel);
 			
-			view = new VariableView(eventBus, texts, this, metaQuestion, scaleTable, beforeTable, afterTable, timePointTable);
+			view = new VariableView(eventBus, texts, this, metaQuestion, rawTable, variableTable, timePointTable);
 			
 		} catch (SQLException | DaxploreException e) {
 			// TODO Auto-generated catch block
@@ -88,12 +88,10 @@ public class VariableController implements TableModelListener, ActionListener {
 	}
 	
 	
-	void updateCalculatedValues() {
+	private void updateCalculatedValues() {
 		LinkedList<Integer> afterValues = calculateAfter();
-		if(afterTableModel == null) {
-			//afterTableModel = new ColumnTableModel(afterValues);
-		} else {
-			//afterTableModel.setValues(afterValues);
+		if(varaibleModel != null) {
+			varaibleModel.setAfterValues(afterValues);
 		}
 	}
 	
@@ -102,16 +100,16 @@ public class VariableController implements TableModelListener, ActionListener {
 			return new LinkedList<>();
 		}
 		TreeMap<Integer, Integer> valueMap = new TreeMap<>();
-		int i = 0;
+		int i = 0; //TODO: when metascales changes to explicit ordering, fix this too
 		for(MetaScale.Option option: mq.getScale().getOptions()) {
 			int total = 0;
-			for(Pair<Double, Integer> value: values) {
-				if(value.getKey() != null && option.getTransformation().contains(value.getKey())) {
-					total += value.getValue();
+			for(VariableOptionInfo info: rawVariableList) {
+				if(option.getTransformation().contains(i)) {
+					total += info.getCount();
 				}
 			}
-			if(valueMap.containsKey(option.getValue())) {
-				Integer p = valueMap.get(option.getValue());
+			if(valueMap.containsKey(i)) {
+				Integer p = valueMap.get(i);
 				valueMap.put(i, total + p);
 			} else {
 				valueMap.put(i, total);
@@ -137,7 +135,7 @@ public class VariableController implements TableModelListener, ActionListener {
 	 */
 	@Override
 	public void actionPerformed(ActionEvent e) {
-		switch(QuestionCommand.valueOf(e.getActionCommand())) {
+/*		switch(QuestionCommand.valueOf(e.getActionCommand())) {
 		case ADD:
 			//TODO add even if there are no unused o.getTransformation().contains(p.getKey())
 			try {
@@ -217,10 +215,10 @@ public class VariableController implements TableModelListener, ActionListener {
 		default:
 			throw new AssertionError("Undefined action command: " + e.getActionCommand());
 		}
-		
+		*/
 	}
 	
-	private void addOption(double value) throws DaxploreException {
+	/*private void addOption(double value) throws DaxploreException {
 		int i = -1;
 		for(Option optionText : mq.getScale().getOptions()){
 			String ref = optionText.getTextRef().getRef();
@@ -236,7 +234,7 @@ public class VariableController implements TableModelListener, ActionListener {
 		scale.add(new Option(textRef, value, transformation, setNew));
 		mq.getScale().setOptions(scale);
 		scaleTableModel.fireTableStructureChanged();
-	}
+	}*/
 	
 	public VariableView getView() {
 		return view;

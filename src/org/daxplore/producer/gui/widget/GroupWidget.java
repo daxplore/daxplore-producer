@@ -6,6 +6,7 @@ import java.text.MessageFormat;
 import java.util.Locale;
 
 import javax.swing.JLabel;
+import javax.swing.JPanel;
 import javax.swing.border.EmptyBorder;
 
 import org.daxplore.producer.daxplorelib.metadata.MetaGroup;
@@ -18,7 +19,7 @@ import com.google.common.eventbus.EventBus;
 import com.google.common.eventbus.Subscribe;
 
 @SuppressWarnings("serial")
-public class GroupWidget extends AbstractWidgetEditor<MetaGroup> {
+public class GroupWidget extends JPanel implements AbstractWidgetEditor<MetaGroup> {
 
 	private JLabel textField;
 	private JLabel idField;

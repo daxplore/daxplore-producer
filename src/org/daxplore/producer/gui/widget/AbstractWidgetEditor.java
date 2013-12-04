@@ -3,7 +3,7 @@ package org.daxplore.producer.gui.widget;
 import org.daxplore.producer.tools.NumberlineCoverage.NumberlineCoverageException;
 
 @SuppressWarnings("serial")
-public abstract class AbstractWidgetEditor<T> extends AbstractWidget<T> {
+public interface AbstractWidgetEditor<T> extends AbstractWidget<T> {
 	
 	public static class InvalidContentException extends Exception {
 
@@ -12,6 +12,6 @@ public abstract class AbstractWidgetEditor<T> extends AbstractWidget<T> {
 		}
 	}
 	
-	public abstract T getContent() throws InvalidContentException;
+	public T getContent() throws InvalidContentException;
 	
 }

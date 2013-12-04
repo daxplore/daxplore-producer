@@ -88,12 +88,15 @@ public class ScaleTable extends JTable {
 		
 	    @Override
 	    public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
+	    	Component comp;
 	    	if(value instanceof TextReference) {
 	    		textRenderer.setContent((TextReference)value);
 	    		renderer = textRenderer;
+	    		comp = textRenderer;
 	    	} else if(value instanceof NumberlineCoverage) {
 	    		numberRenderer.setContent((NumberlineCoverage)value);
 	    		renderer = numberRenderer;
+	    		comp = numberRenderer;
 	    	} else {
 	    		return null;
 	    	}
@@ -113,7 +116,7 @@ public class ScaleTable extends JTable {
 		        }
 		    }
 
-		    renderer.setBackground(bgColor);
+		    comp.setBackground(bgColor);
 		    if (value instanceof Container) {
 		    	Component[] children = ((Container) value).getComponents();
 		    	for (int ii = 0; (children != null) && (ii > children.length); ii++) {
@@ -121,17 +124,20 @@ public class ScaleTable extends JTable {
 		    	}
 		    }
 		    //table.setRowHeight(row, renderer.getPreferredSize().height);
-		    return renderer;
+		    return comp;
 	    }
 		
 		@Override
 		public Component getTableCellEditorComponent(JTable table, Object value, boolean isSelected, int row, int column) {
+			Component comp;
 	    	if(value instanceof TextReference) {
 	    		textEditor.setContent((TextReference)value);
 	    		editor = textEditor;
+	    		comp = textEditor;
 	    	} else if(value instanceof NumberlineCoverage) {
 	    		numberEditor.setContent((NumberlineCoverage)value);
 	    		editor = numberEditor;
+	    		comp = numberEditor;
 	    	} else {
 	    		return null;
 	    	}
@@ -150,7 +156,7 @@ public class ScaleTable extends JTable {
 		            bgColor = listBackground;
 		        }
 		    }
-		    editor.setBackground(bgColor);
+		    comp.setBackground(bgColor);
 		    if (value instanceof Container) {
 		    	Component[] children = ((Container) value).getComponents();
 		    	for (int ii = 0; (children != null) && (ii > children.length); ii++) {
@@ -158,7 +164,7 @@ public class ScaleTable extends JTable {
 		    	}
 		    }
 		    //table.setRowHeight(row, editor.getPreferredSize().height);
-		    return editor;
+		    return comp;
 		}
 		
 		@Override

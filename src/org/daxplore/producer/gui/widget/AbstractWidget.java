@@ -1,10 +1,8 @@
 package org.daxplore.producer.gui.widget;
 
-import javax.swing.JPanel;
 
-@SuppressWarnings("serial")
-public abstract class AbstractWidget<T> extends JPanel {
+public interface AbstractWidget<T> {
 
-	public abstract void setContent(T value);
+	public void setContent(T value);
 	
 }

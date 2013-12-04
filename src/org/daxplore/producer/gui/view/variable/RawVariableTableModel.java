@@ -1,7 +1,6 @@
 package org.daxplore.producer.gui.view.variable;
 
 import java.util.HashMap;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
@@ -13,19 +12,26 @@ import org.daxplore.producer.tools.NumberlineCoverage;
 @SuppressWarnings("serial")
 public class RawVariableTableModel extends DefaultTableModel {
 	
-	private List<VariableOptionInfo> data;
+	private List<VariableOptionInfo> variableList;
 	private Map<Double, Integer> toNumberMap = new HashMap<>();
 	
-	private List<Integer> availableToNumbers = new LinkedList<>();
+	List<Integer> availableToNumbers;
 
-	public RawVariableTableModel(List<VariableOptionInfo> data) {
-		this.data = data;
+	public RawVariableTableModel(List<VariableOptionInfo> variableList, List<Integer> availibleToNumbers) {
+		this.variableList = variableList;
+		this.availableToNumbers = availibleToNumbers;
+		
+		for(Map.Entry<Double, Integer> entry: toNumberMap.entrySet()) {
+			if(!availableToNumbers.contains(entry.getValue())) {
+				toNumberMap.put(entry.getKey(), null);
+			}
+		}
 	}
 	
 	@Override
 	public int getRowCount() {
-		if(data == null) return 0;
-		return data.size();
+		if(variableList == null) return 0;
+		return variableList.size();
 	}
 
 	@Override
@@ -75,7 +81,7 @@ public class RawVariableTableModel extends DefaultTableModel {
 		if(column == 3) {
 			Integer val = (Integer)aValue;
 			if(availableToNumbers.contains(val) || val == null) {
-				toNumberMap.put(data.get(row).getValue(), val);
+				toNumberMap.put(variableList.get(row).getValue(), val);
 				//TODO alert someone
 			}
 		}
@@ -107,7 +113,7 @@ public class RawVariableTableModel extends DefaultTableModel {
 
 	@Override
 	public Object getValueAt(int rowIndex, int columnIndex) {
-		VariableOptionInfo opt = data.get(rowIndex);
+		VariableOptionInfo opt = variableList.get(rowIndex);
 		switch(columnIndex) {
 		case 0:
 			return opt.getValue();

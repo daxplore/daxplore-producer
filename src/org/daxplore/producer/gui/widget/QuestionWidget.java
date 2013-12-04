@@ -20,7 +20,7 @@ import com.google.common.eventbus.EventBus;
 import com.google.common.eventbus.Subscribe;
 
 @SuppressWarnings("serial")
-public class QuestionWidget extends AbstractWidgetEditor<MetaQuestion> {
+public class QuestionWidget extends JPanel implements AbstractWidgetEditor<MetaQuestion> {
 	
 	private MetaQuestion metaQuestion;
 

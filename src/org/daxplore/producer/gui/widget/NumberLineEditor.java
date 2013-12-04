@@ -1,12 +1,13 @@
 package org.daxplore.producer.gui.widget;
 
+import javax.swing.JPanel;
 import javax.swing.JTextField;
 
 import org.daxplore.producer.tools.NumberlineCoverage;
 import org.daxplore.producer.tools.NumberlineCoverage.NumberlineCoverageException;
 
 @SuppressWarnings("serial")
-public class NumberLineEditor extends AbstractWidgetEditor<NumberlineCoverage> {
+public class NumberLineEditor extends JPanel implements AbstractWidgetEditor<NumberlineCoverage> {
 	
 	JTextField textField;
 	NumberlineCoverage numberline;

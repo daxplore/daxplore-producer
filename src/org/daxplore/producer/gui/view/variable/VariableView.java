@@ -3,6 +3,7 @@ package org.daxplore.producer.gui.view.variable;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dimension;
+import java.awt.GridLayout;
 import java.awt.event.ActionListener;
 
 import javax.swing.BoxLayout;
@@ -24,9 +25,8 @@ import com.google.common.eventbus.EventBus;
 @SuppressWarnings("serial")
 public class VariableView extends JPanel {
 	
-	private JScrollPane scaleScrollPane = new JScrollPane();
-	private JScrollPane beforeScrollPane = new JScrollPane();
-	private JScrollPane afterScrollPane = new JScrollPane();
+	private JScrollPane variableScrollPane = new JScrollPane();
+	private JScrollPane rawScrollPane = new JScrollPane();
 	private JScrollPane timePointScrollPane = new JScrollPane();
 	
 	private JLabel questionID = new JLabel();
@@ -35,10 +35,11 @@ public class VariableView extends JPanel {
 	private TextWidget fullText;
 	private TextWidget shortText;
 
-	public VariableView(EventBus eventBus, GuiTexts texts, ActionListener actionListener, MetaQuestion metaQuestion, JTable scaleTable, JTable beforeTable, JTable afterTable, JTable timePointTable) {
-		scaleScrollPane.setViewportView(scaleTable);
-		beforeScrollPane.setViewportView(beforeTable);
-		afterScrollPane.setViewportView(afterTable);
+	public VariableView(EventBus eventBus, GuiTexts texts, ActionListener actionListener, 
+			MetaQuestion metaQuestion, JTable rawTable, JTable variableTable, JTable timePointTable) {
+		
+		rawScrollPane.setViewportView(rawTable);
+		variableScrollPane.setViewportView(variableTable);
 		timePointScrollPane.setViewportView(timePointTable);
 		
 		fullText = new TextWidget(eventBus, texts);
@@ -65,21 +66,18 @@ public class VariableView extends JPanel {
 		
 		add(topPanel, BorderLayout.NORTH);
 		
-		JPanel scalePanel = new JPanel();
+		JPanel scalePanel = new JPanel(new GridLayout(1, 2));
 		add(scalePanel, BorderLayout.CENTER);
-		scalePanel.setLayout(new BoxLayout(scalePanel, BoxLayout.X_AXIS));
+		scalePanel.add(rawScrollPane, 0);
 		
-		beforeScrollPane.setPreferredSize(new Dimension(100, 3));
-		scalePanel.add(beforeScrollPane);
+		JPanel rightPanel = new JPanel();
+		scalePanel.add(rightPanel, 1);
+		rightPanel.setLayout(new BorderLayout(0, 0));
 		
-		JPanel midPanel = new JPanel();
-		scalePanel.add(midPanel);
-		midPanel.setLayout(new BorderLayout(0, 0));
-		
-		midPanel.add(scaleScrollPane, BorderLayout.CENTER);
+		rightPanel.add(variableScrollPane, BorderLayout.CENTER);
 		
 		JPanel avcionButtonPanel = new JPanel();
-		midPanel.add(avcionButtonPanel, BorderLayout.SOUTH);
+		rightPanel.add(avcionButtonPanel, BorderLayout.SOUTH);
 		
 		JButton addButton = new JButton("Add");
 		addButton.setActionCommand(QuestionCommand.ADD.toString());
@@ -105,9 +103,6 @@ public class VariableView extends JPanel {
 		invertButton.setActionCommand(QuestionCommand.INVERT.toString());
 		invertButton.addActionListener(actionListener);
 		avcionButtonPanel.add(invertButton);
-		
-		afterScrollPane.setPreferredSize(new Dimension(100, 3));
-		scalePanel.add(afterScrollPane);
 		
 		add(scalePanel, BorderLayout.CENTER);
 		

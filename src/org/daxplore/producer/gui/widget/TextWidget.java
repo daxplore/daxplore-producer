@@ -22,7 +22,7 @@ import com.google.common.eventbus.EventBus;
 import com.google.common.eventbus.Subscribe;
 
 @SuppressWarnings("serial")
-public class TextWidget extends AbstractWidgetEditor<TextReference> {
+public class TextWidget extends JPanel implements AbstractWidgetEditor<TextReference> {
 
 	private TextReference textRef;
 	private JLabel label = new JLabel();
@@ -32,6 +32,7 @@ public class TextWidget extends AbstractWidgetEditor<TextReference> {
 	
 	public TextWidget(final EventBus eventBus, final GuiTexts texts) {
 		eventBus.register(this);
+		locale = Settings.getCurrentDisplayLocale();
 		setLayout(new BorderLayout(0, 0));
 		locale = Settings.getCurrentDisplayLocale();
 		add(label, BorderLayout.CENTER);

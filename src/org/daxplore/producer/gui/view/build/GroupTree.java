@@ -101,25 +101,30 @@ public class GroupTree extends JTree {
 
 		@Override
 		public Component getTreeCellEditorComponent(JTree tree, Object value, boolean isSelected, boolean expanded, boolean leaf, int row) {
+			Component comp;
 			if(value instanceof MetaQuestion) {
 				questionWidget.setContent((MetaQuestion)value);
 				editor = questionWidget;
+				comp = questionWidget;
 			} else if(value instanceof MetaGroup) {
 				groupEditor.setContent((MetaGroup)value);
 				editor = groupEditor;
+				comp = groupEditor;
 			} else {
 				throw new AssertionError(); 
 			}
 			
 			Color bgColor = Colors.transparent;
-			editor.setBackground(bgColor);
+			comp.setBackground(bgColor);
 		    
-		    Component[] children = editor.getComponents();
-	    	for (int ii = 0; (children != null) && (ii < children.length); ii++) {
-	    		children[ii].setBackground(bgColor);
-	    	}
+			if(comp instanceof Container) {
+			    Component[] children = ((Container)comp).getComponents();
+		    	for (int ii = 0; (children != null) && (ii < children.length); ii++) {
+		    		children[ii].setBackground(bgColor);
+		    	}
+			}
 			
-			return editor;
+			return comp;
 		}
 		
 		@Override
