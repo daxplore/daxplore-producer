@@ -7,28 +7,27 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseMotionAdapter;
 import java.util.EventObject;
-import java.util.List;
 
 import javax.swing.AbstractCellEditor;
 import javax.swing.JLabel;
 import javax.swing.JTable;
 import javax.swing.ListSelectionModel;
+import javax.swing.SwingUtilities;
 import javax.swing.table.TableCellEditor;
 import javax.swing.table.TableCellRenderer;
 
 import org.daxplore.producer.daxplorelib.metadata.textreference.TextReference;
 import org.daxplore.producer.gui.resources.Colors;
 import org.daxplore.producer.gui.resources.GuiTexts;
-import org.daxplore.producer.gui.view.variable.RawVariableTable.ChoiceEditor;
 import org.daxplore.producer.gui.widget.AbstractWidgetEditor;
-import org.daxplore.producer.gui.widget.TextWidget;
 import org.daxplore.producer.gui.widget.AbstractWidgetEditor.InvalidContentException;
-import org.daxplore.producer.gui.widget.QuestionWidget;
+import org.daxplore.producer.gui.widget.TextWidget;
+import org.jdesktop.swingx.JXTable;
 
 import com.google.common.eventbus.EventBus;
 
 @SuppressWarnings("serial")
-public class VariableTable extends JTable {
+public class VariableTable extends JXTable {
 	
 	private int mouseOverRow;
 	private VariableCellRenderer cellRenderer;
@@ -45,8 +44,10 @@ public class VariableTable extends JTable {
         setDefaultRenderer(Integer.class, cellRenderer);
         setDefaultEditor(Integer.class, cellRenderer);
         
-        //TODO should we have to create a QuestionWidget here?
-        setRowHeight(new QuestionWidget(eventBus).getPreferredSize().height);
+        //TODO should we have to create a TextWidget here?
+        setRowHeight(new TextWidget(eventBus, texts).getPreferredSize().height);
+        packAll();
+        this.
         
         addMouseMotionListener(new MouseMotionAdapter() {
             @Override

@@ -67,7 +67,7 @@ public class VariableController implements TableModelListener, ActionListener {
 			List<Integer> availebleToNumbers = varaibleModel.getAvailebleToNumbers();
 			
 			rawModel = new RawVariableTableModel(rawVariableList, metaQuestion.getScale(), availebleToNumbers);
-			rawTable = new RawVariableTable(eventBus, rawModel);
+			rawTable = new RawVariableTable(eventBus, texts, rawModel);
 			rawModel.addTableModelListener(this);
 			
 			TimePointTableModel timePointTableModel = new TimePointTableModel(

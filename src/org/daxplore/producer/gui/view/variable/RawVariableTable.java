@@ -3,43 +3,40 @@ package org.daxplore.producer.gui.view.variable;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.Container;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseMotionAdapter;
 import java.util.EventObject;
-import java.util.LinkedList;
 import java.util.List;
 
 import javax.swing.AbstractCellEditor;
 import javax.swing.JComboBox;
 import javax.swing.JLabel;
-import javax.swing.JPanel;
 import javax.swing.JTable;
 import javax.swing.ListSelectionModel;
 import javax.swing.table.TableCellEditor;
 import javax.swing.table.TableCellRenderer;
 
 import org.daxplore.producer.gui.resources.Colors;
-import org.daxplore.producer.gui.widget.AbstractWidget;
+import org.daxplore.producer.gui.resources.GuiTexts;
 import org.daxplore.producer.gui.widget.AbstractWidgetEditor;
+import org.daxplore.producer.gui.widget.TextWidget;
 import org.daxplore.producer.gui.widget.AbstractWidgetEditor.InvalidContentException;
-import org.daxplore.producer.gui.widget.QuestionWidget;
+import org.jdesktop.swingx.JXTable;
 
 import com.google.common.eventbus.EventBus;
 import com.google.common.primitives.Ints;
 
 @SuppressWarnings("serial")
-public class RawVariableTable extends JTable {
+public class RawVariableTable extends JXTable {
 	
 	private int mouseOverRow;
 	private RawVariableCellRenderer cellRenderer;
 	RawVariableTableModel model;
 	
-	public RawVariableTable(EventBus eventBus, RawVariableTableModel model) {
+	public RawVariableTable(EventBus eventBus, GuiTexts texts, RawVariableTableModel model) {
 		super(model);
 		this.model = model;
 		
@@ -54,8 +51,9 @@ public class RawVariableTable extends JTable {
         setDefaultRenderer(Integer.class, cellRenderer);
         setDefaultEditor(Integer.class, cellRenderer);
         
-        //TODO should we have to create a QuestionWidget here?
-        setRowHeight(new QuestionWidget(eventBus).getPreferredSize().height);
+        //TODO should we have to create a TextWidget here?
+        setRowHeight(new TextWidget(eventBus, texts).getPreferredSize().height);
+        packAll();
         
         addMouseMotionListener(new MouseMotionAdapter() {
             @Override
