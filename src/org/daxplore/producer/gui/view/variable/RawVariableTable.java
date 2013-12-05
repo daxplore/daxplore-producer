@@ -14,6 +14,7 @@ import java.util.List;
 import javax.swing.AbstractCellEditor;
 import javax.swing.JComboBox;
 import javax.swing.JLabel;
+import javax.swing.JPanel;
 import javax.swing.JTable;
 import javax.swing.ListSelectionModel;
 import javax.swing.table.TableCellEditor;
@@ -82,11 +83,13 @@ public class RawVariableTable extends JXTable {
 		private AbstractWidgetEditor<?> editor;
 		private ChoiceEditor cEditor;
 		private ChoiceEditor cRenderer;
-		private JLabel label = new JLabel();
+		private JPanel cellTextWrapper = new JPanel();
+		private JLabel cellTextLabel = new JLabel();
 		
 		public RawVariableCellRenderer(EventBus eventBus, List<Integer> availableToNumbers) {
 			cEditor = new ChoiceEditor(availableToNumbers);
 			cRenderer = new ChoiceEditor(availableToNumbers);
+			cellTextWrapper.add(cellTextLabel);
 		}
 		
 		public void setAvailableNumbers(List<Integer> list) {
@@ -101,11 +104,11 @@ public class RawVariableTable extends JXTable {
 	    		comp = cRenderer;
 	    		cRenderer.setContent((Integer)value);
 	    	} else if(value == null) {
-	    		label.setText("<html><b>null</b></html>");
-	    		comp = label;
+	    		cellTextLabel.setText("<html><b>null</b></html>");
+	    		comp = cellTextWrapper;
 	    	} else {
-	    		label.setText(value.toString());
-	    		comp = label;
+	    		cellTextLabel.setText(value.toString());
+	    		comp = cellTextWrapper;
 	    	}
 	    	
 	    	Color bgColor = Colors.getRowColor(isSelected, mouseOverRow==row, row%2==0);
@@ -191,7 +194,7 @@ public class RawVariableTable extends JXTable {
 		}
 		
 		@Override
-		public Integer getContent() throws InvalidContentException {
+		public Integer getContent() {
 			return content;
 		}
 

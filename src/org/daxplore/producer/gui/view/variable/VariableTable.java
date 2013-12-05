@@ -10,9 +10,9 @@ import java.util.EventObject;
 
 import javax.swing.AbstractCellEditor;
 import javax.swing.JLabel;
+import javax.swing.JPanel;
 import javax.swing.JTable;
 import javax.swing.ListSelectionModel;
-import javax.swing.SwingUtilities;
 import javax.swing.table.TableCellEditor;
 import javax.swing.table.TableCellRenderer;
 
@@ -47,7 +47,6 @@ public class VariableTable extends JXTable {
         //TODO should we have to create a TextWidget here?
         setRowHeight(new TextWidget(eventBus, texts).getPreferredSize().height);
         packAll();
-        this.
         
         addMouseMotionListener(new MouseMotionAdapter() {
             @Override
@@ -71,11 +70,13 @@ public class VariableTable extends JXTable {
 		private AbstractWidgetEditor<?> editor;
 		private TextWidget textEditor;
 		private TextWidget textRenderer;
-		private JLabel label = new JLabel();
+		private JPanel cellTextWrapper = new JPanel();
+		private JLabel cellTextLabel = new JLabel();
 		
 		public VariableCellRenderer(EventBus eventBus, GuiTexts texts) {
 			textEditor = new TextWidget(eventBus, texts);
 			textRenderer = new TextWidget(eventBus, texts);
+			cellTextWrapper.add(cellTextLabel);
 		}
 				
 	    @Override
@@ -85,8 +86,8 @@ public class VariableTable extends JXTable {
 	    		comp = textRenderer;
 	    		textRenderer.setContent((TextReference)value);
 	    	} else {
-	    		label.setText(value.toString());
-	    		comp = label;
+	    		cellTextLabel.setText(value.toString());
+	    		comp = cellTextWrapper;
 	    	}
 	    	
 	    	Color bgColor = Colors.getRowColor(isSelected, mouseOverRow==row, row%2==0);
@@ -98,32 +99,30 @@ public class VariableTable extends JXTable {
 		    		children[ii].setBackground(bgColor);
 		    	}
 		    }
-		    //table.setRowHeight(row, renderer.getPreferredSize().height);
+		    
 		    return comp;
 	    }
 		
 		@Override
 		public Component getTableCellEditorComponent(JTable table, Object value, boolean isSelected, int row, int column) {
-			Component comp;
-			if(value instanceof TextReference) {
-				textEditor.setContent((TextReference)value);
-				comp = textEditor;
-				editor = textEditor;
-	    	} else {
-	    		return null;
-	    	}
+			if(!(value instanceof TextReference)) {
+				return null;
+			}
+			
+			textEditor.setContent((TextReference)value);
+			editor = textEditor;
 			
 	    	Color bgColor = Colors.getRowColor(isSelected, mouseOverRow==row, row%2==0);
 	    	
-	    	comp.setBackground(bgColor);
+	    	textEditor.setBackground(bgColor);
 		    if (value instanceof Container) {
 		    	Component[] children = ((Container) value).getComponents();
 		    	for (int ii = 0; (children != null) && (ii > children.length); ii++) {
 		    		children[ii].setBackground(bgColor);
 		    	}
 		    }
-		    //table.setRowHeight(row, editor.getPreferredSize().height);
-		    return comp;
+		    
+		    return textEditor;
 		}
 		
 		@Override
