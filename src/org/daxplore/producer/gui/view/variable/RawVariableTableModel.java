@@ -86,9 +86,16 @@ public class RawVariableTableModel extends DefaultTableModel {
 	public void setValueAt(Object aValue, int row, int column) {
 		if(column == 3) {
 			Integer val = (Integer)aValue;
+			Integer oldVal = (Integer)getValueAt(row, column);
+			if(val == oldVal){
+				return;
+			}
 			if(val == null) {
 				Double value = (Double)getValueAt(row, 0);
-				int oldIndex = toNumberMap.get(value);
+				if(value == null){
+					return;
+				}
+ 				int oldIndex = toNumberMap.get(value);
 				
 				NumberlineCoverage oldPlace = ms.getOptions().get(oldIndex).getTransformation();
 				oldPlace.removeNumber(value);

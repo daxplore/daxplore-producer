@@ -17,6 +17,7 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JTable;
 import javax.swing.ListSelectionModel;
+import javax.swing.SwingUtilities;
 import javax.swing.table.TableCellEditor;
 import javax.swing.table.TableCellRenderer;
 
@@ -76,6 +77,21 @@ public class RawVariableTable extends JXTable {
 	public void setAvailableNumbers(List<Integer> list) {
 		model.setAvailableToNumbers(list);
 		cellRenderer.setAvailableNumbers(list);
+	}
+	
+	@Override
+	public Component prepareEditor(TableCellEditor editor, int row, int col) {
+	    final Component c = super.prepareEditor(editor, row, col);
+	    c.setBackground(Colors.getRowColor(true, false, row%2==0));
+	    if(c instanceof ChoiceEditor) {
+	    	SwingUtilities.invokeLater(new Runnable() {
+				@Override
+				public void run() {
+					((ChoiceEditor)c).showPopup();
+				}
+			});
+	    }
+	    return c;
 	}
 	
 	class RawVariableCellRenderer extends AbstractCellEditor implements TableCellRenderer, TableCellEditor {
