@@ -13,6 +13,7 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JTable;
 import javax.swing.ListSelectionModel;
+import javax.swing.SwingUtilities;
 import javax.swing.table.TableCellEditor;
 import javax.swing.table.TableCellRenderer;
 
@@ -65,6 +66,13 @@ public class VariableTable extends JXTable {
         });
 	}
 	
+	@Override
+	public Component prepareEditor(TableCellEditor editor, int row, int col) {
+	    Component c = super.prepareEditor(editor, row, col);
+	    c.setBackground(Colors.getRowColor(true, false, row%2==0));
+	    return c;
+	}
+	
 	class VariableCellRenderer extends AbstractCellEditor implements TableCellRenderer, TableCellEditor {
 		
 		private AbstractWidgetEditor<?> editor;
@@ -90,7 +98,7 @@ public class VariableTable extends JXTable {
 	    		comp = cellTextWrapper;
 	    	}
 	    	
-	    	Color bgColor = Colors.getRowColor(isSelected, mouseOverRow==row, row%2==0);
+	    	Color bgColor = Colors.getRowColor(isSelected, !isSelected && mouseOverRow==row, row%2==0);
 
 	    	comp.setBackground(bgColor);
 		    if (value instanceof Container) {
@@ -112,8 +120,9 @@ public class VariableTable extends JXTable {
 			textEditor.setContent((TextReference)value);
 			editor = textEditor;
 			
-	    	Color bgColor = Colors.getRowColor(isSelected, mouseOverRow==row, row%2==0);
+	    	Color bgColor = Colors.getRowColor(isSelected, !isSelected && mouseOverRow==row, row%2==0);
 	    	
+	    	textRenderer.setBackground(bgColor);
 	    	textEditor.setBackground(bgColor);
 		    if (value instanceof Container) {
 		    	Component[] children = ((Container) value).getComponents();
