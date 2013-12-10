@@ -24,11 +24,13 @@ public class RawVariableTableModel extends DefaultTableModel {
 		this.ms = ms;
 		this.availableToNumbers = availableToNumbers;
 		
-		for(VariableOptionInfo info: variableList) {
-			if(info.getValue() != null) {
-				int index = ms.matchIndex(info.getValue());
-				if(index != -1 && availableToNumbers.contains(index)) {
-					toNumberMap.put(info.getValue(), index);
+		if(ms != null) {
+			for(VariableOptionInfo info: variableList) {
+				if(info.getValue() != null) {
+					int index = ms.matchIndex(info.getValue());
+					if(index != -1 && availableToNumbers.contains(index)) {
+						toNumberMap.put(info.getValue(), index);
+					}
 				}
 			}
 		}

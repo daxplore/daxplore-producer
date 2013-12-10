@@ -1,6 +1,7 @@
 package org.daxplore.producer.gui.view.variable;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Vector;
@@ -28,6 +29,9 @@ public class VariableTableModel extends DefaultTableModel{
 	}
 	
 	public List<Integer> getAvailebleToNumbers() {
+		if(ms == null) {
+			return Collections.emptyList();
+		}
 		List<Integer> list = new ArrayList<>(ms.getOptionCount());
 		for(int i = 0; i < ms.getOptionCount(); i++) {
 			list.add(i);
