@@ -79,7 +79,7 @@ public class RawVariableTableModel extends DefaultTableModel {
 
 	@Override
 	public boolean isCellEditable(int rowIndex, int columnIndex) {
-		return columnIndex == 3;
+		return columnIndex == 3 && variableList.get(rowIndex).getValue() != null;
 	}
 	
 	@Override
@@ -136,8 +136,11 @@ public class RawVariableTableModel extends DefaultTableModel {
 				
 				toNumberMap.put(entry.getKey(), null);
 				
-				fireTableDataChanged();
+				modified = true;
 			}
+		}
+		if(modified) {
+			fireTableDataChanged();
 		}
 	}
 	

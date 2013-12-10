@@ -1,5 +1,6 @@
 package org.daxplore.producer.gui.view.variable;
 
+import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.Container;
@@ -13,7 +14,6 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JTable;
 import javax.swing.ListSelectionModel;
-import javax.swing.SwingUtilities;
 import javax.swing.table.TableCellEditor;
 import javax.swing.table.TableCellRenderer;
 
@@ -84,7 +84,8 @@ public class VariableTable extends JXTable {
 		public VariableCellRenderer(EventBus eventBus, GuiTexts texts) {
 			textEditor = new TextWidget(eventBus, texts);
 			textRenderer = new TextWidget(eventBus, texts);
-			cellTextWrapper.add(cellTextLabel);
+			cellTextWrapper.setLayout(new BorderLayout());
+			cellTextWrapper.add(cellTextLabel, BorderLayout.CENTER);
 		}
 				
 	    @Override

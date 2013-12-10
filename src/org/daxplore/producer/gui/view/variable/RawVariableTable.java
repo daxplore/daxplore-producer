@@ -1,5 +1,6 @@
 package org.daxplore.producer.gui.view.variable;
 
+import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.Container;
@@ -36,7 +37,7 @@ public class RawVariableTable extends JXTable {
 	
 	private int mouseOverRow;
 	private RawVariableCellRenderer cellRenderer;
-	RawVariableTableModel model;
+	private RawVariableTableModel model;
 	
 	public RawVariableTable(EventBus eventBus, GuiTexts texts, RawVariableTableModel model) {
 		super(model);
@@ -45,7 +46,7 @@ public class RawVariableTable extends JXTable {
 		setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
         mouseOverRow = -1;
         
-        cellRenderer = new RawVariableCellRenderer(eventBus, model.availableToNumbers);
+        cellRenderer = new RawVariableCellRenderer(model.availableToNumbers);
         setDefaultRenderer(Double.class, cellRenderer);
         setDefaultEditor(Double.class, cellRenderer);
         setDefaultRenderer(String.class, cellRenderer);
@@ -102,10 +103,11 @@ public class RawVariableTable extends JXTable {
 		private JPanel cellTextWrapper = new JPanel();
 		private JLabel cellTextLabel = new JLabel();
 		
-		public RawVariableCellRenderer(EventBus eventBus, List<Integer> availableToNumbers) {
+		public RawVariableCellRenderer(List<Integer> availableToNumbers) {
 			cEditor = new ChoiceEditor(availableToNumbers);
 			cRenderer = new ChoiceEditor(availableToNumbers);
-			cellTextWrapper.add(cellTextLabel);
+			cellTextWrapper.setLayout(new BorderLayout());
+			cellTextWrapper.add(cellTextLabel, BorderLayout.CENTER);
 		}
 		
 		public void setAvailableNumbers(List<Integer> list) {
@@ -116,11 +118,11 @@ public class RawVariableTable extends JXTable {
 	    @Override
 	    public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
 	    	Component comp;
-	    	if(column == 3) {
+	    	if(column == 3 && model.getValueAt(row, 0) != null) {
 	    		comp = cRenderer;
 	    		cRenderer.setContent((Integer)value);
 	    	} else if(value == null) {
-	    		cellTextLabel.setText("<html><b>null</b></html>");
+	    		cellTextLabel.setText("<html><i>null</i></html>");
 	    		comp = cellTextWrapper;
 	    	} else {
 	    		cellTextLabel.setText(value.toString());
@@ -136,7 +138,7 @@ public class RawVariableTable extends JXTable {
 		    		children[ii].setBackground(bgColor);
 		    	}
 		    }
-		    //table.setRowHeight(row, renderer.getPreferredSize().height);
+
 		    return comp;
 	    }
 		
@@ -160,7 +162,7 @@ public class RawVariableTable extends JXTable {
 		    		children[ii].setBackground(bgColor);
 		    	}
 		    }
-		    //table.setRowHeight(row, editor.getPreferredSize().height);
+
 		    return comp;
 		}
 		
