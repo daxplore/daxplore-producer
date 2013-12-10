@@ -28,7 +28,7 @@ public class VariableTableModel extends DefaultTableModel{
 	}
 	
 	public List<Integer> getAvailebleToNumbers() {
-		List<Integer> list = new ArrayList<Integer>(ms.getOptionCount());
+		List<Integer> list = new ArrayList<>(ms.getOptionCount());
 		for(int i = 0; i < ms.getOptionCount(); i++) {
 			list.add(i);
 		}
