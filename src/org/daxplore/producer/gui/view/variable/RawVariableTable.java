@@ -46,7 +46,7 @@ public class RawVariableTable extends JXTable {
 		setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
         mouseOverRow = -1;
         
-        cellRenderer = new RawVariableCellRenderer(model.availableToNumbers);
+        cellRenderer = new RawVariableCellRenderer(texts, model.availableToNumbers);
         setDefaultRenderer(Double.class, cellRenderer);
         setDefaultEditor(Double.class, cellRenderer);
         setDefaultRenderer(String.class, cellRenderer);
@@ -97,15 +97,17 @@ public class RawVariableTable extends JXTable {
 	
 	class RawVariableCellRenderer extends AbstractCellEditor implements TableCellRenderer, TableCellEditor {
 		
+		private GuiTexts texts;
 		private AbstractWidgetEditor<?> editor;
 		private ChoiceEditor cEditor;
 		private ChoiceEditor cRenderer;
 		private JPanel cellTextWrapper = new JPanel();
 		private JLabel cellTextLabel = new JLabel();
 		
-		public RawVariableCellRenderer(List<Integer> availableToNumbers) {
-			cEditor = new ChoiceEditor(availableToNumbers);
-			cRenderer = new ChoiceEditor(availableToNumbers);
+		public RawVariableCellRenderer(GuiTexts texts, List<Integer> availableToNumbers) {
+			this.texts = texts;
+			cEditor = new ChoiceEditor(texts, availableToNumbers);
+			cRenderer = new ChoiceEditor(texts, availableToNumbers);
 			cellTextWrapper.setLayout(new BorderLayout());
 			cellTextWrapper.add(cellTextLabel, BorderLayout.CENTER);
 		}
@@ -120,12 +122,19 @@ public class RawVariableTable extends JXTable {
 	    	Component comp;
 	    	if(column == 3 && model.getValueAt(row, 0) != null) {
 	    		comp = cRenderer;
+	    		if(value!=null) {
+	    			cRenderer.setToolTipText(value.toString());
+	    		} else {
+	    			cRenderer.setToolTipText(texts.get("table.tooltip.to_nothing"));
+	    		}
 	    		cRenderer.setContent((Integer)value);
 	    	} else if(value == null) {
-	    		cellTextLabel.setText("<html><i>null</i></html>");
+	    		cellTextLabel.setText(texts.get("table.text.null"));
+	    		cellTextWrapper.setToolTipText(texts.get("table.tooltip.null"));
 	    		comp = cellTextWrapper;
 	    	} else {
 	    		cellTextLabel.setText(value.toString());
+	    		cellTextWrapper.setToolTipText(value.toString());
 	    		comp = cellTextWrapper;
 	    	}
 	    	
@@ -147,6 +156,13 @@ public class RawVariableTable extends JXTable {
 			Component comp;
 			if(column == 3) {
 				cEditor.setContent((Integer)value);
+				
+				if(value!=null) {
+					cEditor.setToolTipText(value.toString());
+	    		} else {
+	    			cEditor.setToolTipText(texts.get("table.tooltip.to_nothing"));
+	    		}
+				
 				comp = cEditor;
 				editor = cEditor;
 	    	} else {
@@ -188,10 +204,12 @@ public class RawVariableTable extends JXTable {
 	
 	class ChoiceEditor extends JComboBox<String> implements AbstractWidgetEditor<Integer>, ItemListener {
 		
-		List<Integer> availableNumbers;
-		Integer content;
+		private GuiTexts texts;
+		private List<Integer> availableNumbers;
+		private Integer content;
 		
-		public ChoiceEditor(List<Integer> availableNumbers) {
+		public ChoiceEditor(GuiTexts texts, List<Integer> availableNumbers) {
+			this.texts = texts;
 			addItemListener(this);
 			setAvailibleNumbers(availableNumbers);
 		}
@@ -199,7 +217,7 @@ public class RawVariableTable extends JXTable {
 		public void setAvailibleNumbers(List<Integer> list) {
 			availableNumbers = list;
 			removeAllItems();
-			addItem("none");
+			addItem(texts.get("table.text.to_nothing"));
 			for(Integer c: availableNumbers) {
 				addItem(c.toString());
 			}

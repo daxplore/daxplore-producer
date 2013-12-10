@@ -88,4 +88,9 @@ public class TextWidget extends JPanel implements AbstractWidgetEditor<TextRefer
 	public void on(DisplayLocaleSelectEvent e) {
 		locale = e.getLocale();
 	}
+	
+	@Override
+	public String getToolTipText() {
+		return label.getText();
+	}
 }

@@ -92,10 +92,12 @@ public class VariableTable extends JXTable {
 	    public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
 	    	Component comp;
 	    	if(value instanceof TextReference) {
-	    		comp = textRenderer;
 	    		textRenderer.setContent((TextReference)value);
+	    		textRenderer.setToolTipText(value.toString());
+	    		comp = textRenderer;
 	    	} else {
 	    		cellTextLabel.setText(value.toString());
+	    		cellTextWrapper.setToolTipText(value.toString());
 	    		comp = cellTextWrapper;
 	    	}
 	    	
