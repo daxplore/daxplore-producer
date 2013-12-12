@@ -135,87 +135,105 @@ public class VariableController implements TableModelListener, ActionListener {
 	 */
 	@Override
 	public void actionPerformed(ActionEvent e) {
-/*		switch(QuestionCommand.valueOf(e.getActionCommand())) {
-		case ADD:
-			//TODO add even if there are no unused o.getTransformation().contains(p.getKey())
-			try {
-				if(mq.getScale()==null){
-					mq.setScale(daxploreFile.getMetaScaleManager().create(new LinkedList<Option>(), new NumberlineCoverage()));
-					scaleTableModel = new ScaleTableModel(mq.getScale());
-					scaleTable = new ScaleTable(eventBus, texts, scaleTableModel);
-					//view.getScaleScrollPane().setViewportView(scaleTable);
-					view.validate();
-				    view.repaint();
-					scaleTableModel.fireTableStructureChanged();
-				}
-				boolean added = false;
-				double pKey = 0;
-				AddLabel: for(Pair<Double, Integer> p : values) {
-					if(p.getKey()!=null) {
-						pKey = p.getKey();
-						for(Option o : mq.getScale().getOptions()) {
-							if(o.getTransformation().contains(p.getKey())){
-								continue AddLabel;
-							}
-						}
-						addOption(p.getKey());
-						added = true;
-						scaleTableModel.fireTableStructureChanged();
-						break AddLabel;
-					}
-				}
-				if(!added) {
-					addOption(pKey+1);
-					scaleTableModel.fireTableStructureChanged();
-				}
-			} catch (DaxploreException | SQLException e1) {
-				// TODO Auto-generated catch block
-				e1.printStackTrace();
-			}
-			break;
-		case REMOVE:
-			int[] selectedRows = scaleTable.getSelectedRows();
-			List<Option> options = mq.getScale().getOptions();
-			for(int i = selectedRows.length-1; i>=0; i--) {
-				options.remove(selectedRows[i]);
-			}
-			mq.getScale().setOptions(options);
-			scaleTableModel.fireTableStructureChanged();
-			break;
+		switch(QuestionCommand.valueOf(e.getActionCommand())) {
+//		case ADD:
+//			//TODO add even if there are no unused o.getTransformation().contains(p.getKey())
+//			try {
+//				if(mq.getScale()==null){
+//					mq.setScale(daxploreFile.getMetaScaleManager().create(new LinkedList<Option>(), new NumberlineCoverage()));
+//					scaleTableModel = new ScaleTableModel(mq.getScale());
+//					scaleTable = new ScaleTable(eventBus, texts, scaleTableModel);
+//					//view.getScaleScrollPane().setViewportView(scaleTable);
+//					view.validate();
+//				    view.repaint();
+//					scaleTableModel.fireTableStructureChanged();
+//				}
+//				boolean added = false;
+//				double pKey = 0;
+//				AddLabel: for(Pair<Double, Integer> p : values) {
+//					if(p.getKey()!=null) {
+//						pKey = p.getKey();
+//						for(Option o : mq.getScale().getOptions()) {
+//							if(o.getTransformation().contains(p.getKey())){
+//								continue AddLabel;
+//							}
+//						}
+//						addOption(p.getKey());
+//						added = true;
+//						scaleTableModel.fireTableStructureChanged();
+//						break AddLabel;
+//					}
+//				}
+//				if(!added) {
+//					addOption(pKey+1);
+//					scaleTableModel.fireTableStructureChanged();
+//				}
+//			} catch (DaxploreException | SQLException e1) {
+//				// TODO Auto-generated catch block
+//				e1.printStackTrace();
+//			}
+//			break;
+//		case REMOVE:
+//			int[] selectedRows = variableTable.getSelectedRows();
+//			List<Option> options = mq.getScale().getOptions();
+//			for(int i = selectedRows.length-1; i>=0; i--) {
+//				options.remove(selectedRows[i]);
+//			}
+//			mq.getScale().setOptions(options);
+//			rawTable.setAvailableNumbers(varaibleModel.getAvailebleToNumbers());
+//			varaibleModel.fireTableStructureChanged();
+//			variableTable.packAll();
+//			rawModel.remapFromMetaScale();
+//			rawModel.fireTableStructureChanged();
+//			rawTable.packAll();
+//			break;
 		case UP:
-			selectedRows = scaleTable.getSelectedRows();
+			int[] selectedRows = variableTable.getSelectedRows();
 			if(selectedRows.length < 1 || selectedRows[0] == 0) break;
-			scaleTable.clearSelection();
-			scaleTable.removeEditor();
+			variableTable.clearSelection();
+			variableTable.removeEditor();
 			for(int i = 0; i < selectedRows.length; i++) {
-				scaleTableModel.moveRow(selectedRows[i], selectedRows[i], selectedRows[i]-1);
-				scaleTable.getSelectionModel().addSelectionInterval(selectedRows[i]-1, selectedRows[i]-1);
+				varaibleModel.moveRow(selectedRows[i], selectedRows[i], selectedRows[i]-1);
+				variableTable.getSelectionModel().addSelectionInterval(selectedRows[i]-1, selectedRows[i]-1);
 			}
+			variableTable.packAll();
+			rawModel.remapFromMetaScale();
+			rawModel.fireTableStructureChanged();
+			rawTable.packAll();
 			break;
 		case DOWN:
-			selectedRows = scaleTable.getSelectedRows();
-			if(selectedRows.length < 1 || selectedRows[selectedRows.length-1] == scaleTableModel.getRowCount() -1) break;
-			scaleTable.clearSelection();
-			scaleTable.removeEditor();
+			selectedRows = variableTable.getSelectedRows();
+			if(selectedRows.length < 1 || selectedRows[selectedRows.length-1] == varaibleModel.getRowCount() -1) break;
+			variableTable.clearSelection();
+			variableTable.removeEditor();
 			for(int i = selectedRows.length-1; i >= 0; i--) {
 				//perspectivesTable.changeSelection(selectedRows[i], 1, true, true);
-				scaleTableModel.moveRow(selectedRows[i], selectedRows[i], selectedRows[i]+1);
-				scaleTable.getSelectionModel().addSelectionInterval(selectedRows[i]+1, selectedRows[i]+1);
+				varaibleModel.moveRow(selectedRows[i], selectedRows[i], selectedRows[i]+1);
+				variableTable.getSelectionModel().addSelectionInterval(selectedRows[i]+1, selectedRows[i]+1);
 			}
+			variableTable.packAll();
+			rawModel.remapFromMetaScale();
+			rawModel.fireTableStructureChanged();
+			rawTable.packAll();
 			break;
 		case INVERT:
-			options = mq.getScale().getOptions();
+			List<Option> options = mq.getScale().getOptions();
 			List<Option> invertedOptions = new LinkedList<>();
 			for(Option option : options) {
 				invertedOptions.add(0, option);
 			}
+
 			mq.getScale().setOptions(invertedOptions);
-			scaleTableModel.fireTableStructureChanged();
+			varaibleModel.fireTableStructureChanged();
+			variableTable.packAll();
+			rawModel.remapFromMetaScale();
+			rawModel.fireTableStructureChanged();
+			rawTable.packAll();
 			break;
 		default:
 			throw new AssertionError("Undefined action command: " + e.getActionCommand());
 		}
-		*/
+		
 	}
 	
 	/*private void addOption(double value) throws DaxploreException {

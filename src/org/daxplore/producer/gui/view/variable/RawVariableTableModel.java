@@ -24,7 +24,12 @@ public class RawVariableTableModel extends DefaultTableModel {
 		this.ms = ms;
 		this.availableToNumbers = availableToNumbers;
 		
+		remapFromMetaScale();
+	}
+	
+	public void remapFromMetaScale() {
 		if(ms != null) {
+			toNumberMap.clear();
 			for(VariableOptionInfo info: variableList) {
 				if(info.getValue() != null) {
 					int index = ms.matchIndex(info.getValue());
