@@ -158,12 +158,13 @@ public class WelcomeDialog {
 			public void run() {
 				try {
 					JFrame window = new JFrame();
-					//TODO add specific "start program"/"run"/"show" method to MainController?
 					MainController mainController = new MainController(window, eventBus, texts, preferences, event.getDaxploreFile());
+					mainController.setVisible(true);
 					
 					welcomeFrame.setVisible(false);
 					welcomeFrame.dispose();
 				} catch (Exception e1) {
+					//TODO communicate error to user
 					e1.printStackTrace();
 				}
 			}

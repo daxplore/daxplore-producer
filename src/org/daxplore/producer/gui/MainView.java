@@ -44,7 +44,6 @@ public class MainView {
 		panel.add(mainPanel, BorderLayout.CENTER);
 		
 		mainPanel.setRequestFocusEnabled(true);
-		mainWindow.setVisible(true);
 	}
 	
 	
@@ -76,5 +75,9 @@ public class MainView {
 	
 	Views getSelectedView() {
 		return viewsMap.inverse().get(mainPanel.getSelectedComponent());
+	}
+	
+	void setVisibe(boolean visible) {
+		mainWindow.setVisible(visible);
 	}
 }

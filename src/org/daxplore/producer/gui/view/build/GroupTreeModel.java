@@ -66,7 +66,6 @@ class GroupTreeModel implements TreeModel {
 	 * @param The MetaGroup to add
 	 * @param The index at witch to insert the new group
 	 * @return The TreePath to the new group
-	 * @throws Exception
 	 */
 	public TreePath addGroup(MetaGroup mg, int atIndex) throws IndexOutOfBoundsException {
 		if(atIndex >= 0 && atIndex <= groups.size()) {
@@ -83,12 +82,11 @@ class GroupTreeModel implements TreeModel {
 	 * @param The group to which the question will be added
 	 * @param The index at which the question will be added
 	 * @return The TreePath to the added question
-	 * @throws Exception
 	 */
-	public TreePath addQuestion(MetaQuestion mq, MetaGroup parent, int atIndex) throws Exception { //TODO: specialize exception
+	public TreePath addQuestion(MetaQuestion mq, MetaGroup parent, int atIndex) throws IllegalArgumentException, IndexOutOfBoundsException {
 		for(MetaGroup mg: groups){
 			if(mg.getQuestions().contains(mq)) {
-				throw new Exception("Can't have duplicate of that");
+				throw new IllegalArgumentException("Can't add duplicate of MetaQuestion: '" + mq.getId() + "'");
 			}
 		}
 		
@@ -100,14 +98,14 @@ class GroupTreeModel implements TreeModel {
 					new Object[]{mq}));
 			return new TreePath(new Object[]{root, parent, mq});
 		}
-		throw new Exception("Not allowed to place this at that");
+		throw new IndexOutOfBoundsException("Index out of bounds: '" + atIndex);
 	}
 	
 	public MetaGroup getGroupFor(MetaQuestion metaQuestion) throws DaxploreException {
 		return manager.getGroupFor(metaQuestion); 
 	}
 	
-	public void moveChild(Object child, Object toParent, int atIndex) throws Exception { //TODO: specialize exception
+	public void moveChild(Object child, Object toParent, int atIndex) throws IllegalArgumentException {
 		if(child instanceof MetaGroup && toParent == root && groups.contains(child)
 				&& atIndex >= 0 && atIndex < groups.size()) {
 			groups.remove(child);
@@ -128,7 +126,7 @@ class GroupTreeModel implements TreeModel {
 			return;
 
 		}
-		throw new Exception("Couldn't move this to that");
+		throw new IllegalArgumentException("Invalid move instruction");
 	}
 	
 	public boolean removeChild(Object child) {

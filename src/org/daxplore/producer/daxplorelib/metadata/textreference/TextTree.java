@@ -50,7 +50,7 @@ public class TextTree extends SortedList<TextReferenceReference> implements Rand
 		return tr;
 	}
 	
-	public int indexOf(TextReference tr) { //TODO: forkzor and implements for realz
+	public int indexOf(TextReference tr) { //TODO: implement properly as a tree search
 		return Collections.binarySearch(this, tr);
 	}
 	

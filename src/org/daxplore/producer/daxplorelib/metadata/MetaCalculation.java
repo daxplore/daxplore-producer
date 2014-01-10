@@ -16,7 +16,6 @@ import org.daxplore.producer.daxplorelib.DaxploreTable;
 import org.daxplore.producer.daxplorelib.SQLTools;
 
 public class MetaCalculation {
-	//TODO make table private and let MetaCaluculation to create itself?
 	private static final DaxploreTable table = new DaxploreTable("CREATE TABLE metacalc (id INTEGER NOT NULL, column TEXT)", "metacalc");
 	private int id;
 	private Connection connection;

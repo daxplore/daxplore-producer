@@ -165,6 +165,10 @@ public class MainController {
 		toolbarController.updateSelectedLocale();
 	}
 	
+	public void setVisible(boolean visible) {
+		mainView.setVisibe(visible);
+	}
+	
 	@Subscribe
 	public void on(DaxploreFileUpdateEvent e) {
 		this.daxploreFile = e.getDaxploreFile();

@@ -207,7 +207,7 @@ public class GroupsController implements ActionListener {
 					}
 				}
 				groupTree.setSelectionPaths(paths);
-			} catch (Exception ex) { ex.printStackTrace(); }
+			} catch (IllegalArgumentException ex) { ex.printStackTrace(); }
 			break;
 		case GROUP_DOWN:
 			paths = groupTree.getSelectionPaths();
@@ -293,7 +293,7 @@ public class GroupsController implements ActionListener {
 						pathslist.add(new TreePath(new Object[]{groupTreeModel.getRoot(), gr, mq}));
 					}
 				}
-			}catch (Exception e2) {
+			}catch (DaxploreException e2) {
 				// TODO: handle exception
 				e2.printStackTrace();
 			}
