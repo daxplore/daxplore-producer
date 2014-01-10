@@ -19,6 +19,7 @@ import java.util.TreeMap;
 
 import javax.swing.JDialog;
 import javax.swing.JTable;
+import javax.swing.WindowConstants;
 import javax.swing.event.TableModelEvent;
 import javax.swing.event.TableModelListener;
 
@@ -274,7 +275,7 @@ public class VariableController implements TableModelListener, ActionListener {
 		dialog.setTitle(mq.getId());
 		dialog.setContentPane(getView());
 		dialog.setModal(true);
-		dialog.setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
+		dialog.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
 		return dialog;
 	}
 	

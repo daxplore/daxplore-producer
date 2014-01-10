@@ -49,8 +49,6 @@ import org.daxplore.producer.tools.NumberlineCoverage;
 import org.daxplore.producer.tools.Pair;
 import org.xml.sax.SAXException;
 
-import com.google.common.primitives.Doubles;
-
 public class DaxploreFile implements Closeable {
 	private Connection connection;
 	private About about;

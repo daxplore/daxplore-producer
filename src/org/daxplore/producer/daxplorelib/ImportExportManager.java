@@ -231,7 +231,7 @@ public class ImportExportManager {
 		}
 	}
 	
-	private JsonElement getPropertiesJson(Locale locale) throws SQLException, DaxploreException {
+	private JsonElement getPropertiesJson(Locale locale) throws DaxploreException {
 		JsonObject json = new JsonObject();
 		for(String property: DaxploreProperties.properties) {
 			json.addProperty(property, daxploreFile.getTextReferenceManager().get(property).get(locale));

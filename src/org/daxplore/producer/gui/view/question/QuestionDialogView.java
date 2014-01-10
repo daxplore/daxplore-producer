@@ -20,6 +20,7 @@ import org.daxplore.producer.gui.widget.TextWidget;
 
 import com.google.common.eventbus.EventBus;
 
+@SuppressWarnings("serial")
 public class QuestionDialogView extends JDialog{
 
 	

@@ -41,7 +41,6 @@ import org.daxplore.producer.gui.event.ChangeMainViewEvent;
 import org.daxplore.producer.gui.event.DaxploreFileUpdateEvent;
 import org.daxplore.producer.gui.event.DisplayLocaleSelectEvent;
 import org.daxplore.producer.gui.event.EditQuestionEvent;
-import org.daxplore.producer.gui.event.EditTextRefEvent;
 import org.daxplore.producer.gui.event.EmptyEvents.DiscardChangesEvent;
 import org.daxplore.producer.gui.event.EmptyEvents.ExportTextsEvent;
 import org.daxplore.producer.gui.event.EmptyEvents.ExportUploadEvent;

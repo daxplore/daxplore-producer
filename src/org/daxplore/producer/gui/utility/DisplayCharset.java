@@ -23,6 +23,7 @@ public class DisplayCharset {
 		alternativeText = text;
 	}
 	
+	@Override
 	public String toString() {
 		if(charset!=null) {
 			return charset.displayName(Settings.getProgramLocale());

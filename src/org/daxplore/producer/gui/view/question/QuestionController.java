@@ -71,7 +71,8 @@ public class QuestionController implements TableModelListener, ActionListener  {
 		try {
 			final QuestionTable table = new QuestionTable(eventBus, new QuestionTableModel(daxploreFile.getMetaQuestionManager()));
 			table.getSelectionModel().addListSelectionListener(new ListSelectionListener(){
-		        public void valueChanged(ListSelectionEvent event) {
+		        @Override
+				public void valueChanged(ListSelectionEvent event) {
 		        	if(!event.getValueIsAdjusting()) {
 		        		openMetaQuestion((MetaQuestion)table.getValueAt(table.getSelectedRow(), 0));
 		        	}

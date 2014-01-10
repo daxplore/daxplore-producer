@@ -91,8 +91,7 @@ public class CreateFileWizard extends Wizard {
 			
 			int returnVal = jfc.showSaveDialog(this);
 			
-			switch(returnVal) {
-			case JFileChooser.APPROVE_OPTION:
+			if(returnVal == JFileChooser.APPROVE_OPTION) {
 				preferences.setWorkingDirectory(jfc.getCurrentDirectory());
 				setCanFinish(false);
 				setProblem("No file selected");
@@ -119,7 +118,6 @@ public class CreateFileWizard extends Wizard {
 					data.put("daxploreFile", fileToCreate);
 					setCanFinish(true);
 				}
-				break;
 			}
 		}
 		
@@ -346,6 +344,8 @@ public class CreateFileWizard extends Wizard {
 					data.put("spssFile", spssFile);
 					setProblem(null);
 				}
+				break;
+			default:
 				break;
 			}
 		}

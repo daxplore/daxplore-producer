@@ -293,7 +293,7 @@ public class MetaGroup implements Comparable<MetaGroup> {
 			return SQLTools.maxId(groupTable.name, "id", connection) + addDelta;
 		}
 		
-		public JsonElement getQuestionGroupsJSON(Locale locale) throws SQLException, DaxploreException {
+		public JsonElement getQuestionGroupsJSON(Locale locale) throws DaxploreException {
 			JsonArray json = new JsonArray(); 
 			for(MetaGroup group : getQuestionGroups()) {
 				json.add(group.toJSONObject(locale));

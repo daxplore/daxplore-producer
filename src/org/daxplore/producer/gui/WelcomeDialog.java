@@ -158,6 +158,7 @@ public class WelcomeDialog {
 			public void run() {
 				try {
 					JFrame window = new JFrame();
+					//TODO add specific "start program"/"run"/"show" method to MainController?
 					MainController mainController = new MainController(window, eventBus, texts, preferences, event.getDaxploreFile());
 					
 					welcomeFrame.setVisible(false);

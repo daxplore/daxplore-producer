@@ -16,7 +16,6 @@ import java.awt.event.MouseMotionAdapter;
 import java.util.EventObject;
 
 import javax.swing.AbstractCellEditor;
-import javax.swing.DefaultCellEditor;
 import javax.swing.JTable;
 import javax.swing.ListSelectionModel;
 import javax.swing.table.TableCellEditor;

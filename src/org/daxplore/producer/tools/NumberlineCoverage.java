@@ -326,6 +326,7 @@ public class NumberlineCoverage implements Cloneable {
 		return false;
 	}
 	
+	@Override
 	public NumberlineCoverage clone() {
 		NumberlineCoverage clone = new NumberlineCoverage();
 		for(Interval in: intervals) {
