@@ -47,7 +47,7 @@ public class VariableController implements TableModelListener, ActionListener {
 	private MetaQuestion mq;
 	private RawVariableTableModel rawModel;
 	private RawVariableTable rawTable;
-	private VariableTableModel varaibleModel;
+	private VariableTableModel variableModel;
 	private VariableTable variableTable;
 	private List<VariableOptionInfo> rawVariableList;
 	
@@ -61,10 +61,10 @@ public class VariableController implements TableModelListener, ActionListener {
 		try {
 			rawVariableList = daxploreFile.getRawColumnInfo(metaQuestion.getId());
 
-			varaibleModel = new VariableTableModel(metaQuestion.getScale(), calculateAfter());
-			variableTable = new VariableTable(eventBus, texts, varaibleModel);
-			varaibleModel.addTableModelListener(this);
-			List<Integer> availebleToNumbers = varaibleModel.getAvailebleToNumbers();
+			variableModel = new VariableTableModel(metaQuestion.getScale(), calculateAfter());
+			variableTable = new VariableTable(eventBus, texts, variableModel);
+			variableModel.addTableModelListener(this);
+			List<Integer> availebleToNumbers = variableModel.getAvailebleToNumbers();
 			
 			rawModel = new RawVariableTableModel(rawVariableList, metaQuestion.getScale(), availebleToNumbers);
 			rawTable = new RawVariableTable(eventBus, texts, rawModel);
@@ -90,8 +90,8 @@ public class VariableController implements TableModelListener, ActionListener {
 	
 	private void updateCalculatedValues() {
 		LinkedList<Integer> afterValues = calculateAfter();
-		if(varaibleModel != null) {
-			varaibleModel.setAfterValues(afterValues);
+		if(variableModel != null) {
+			variableModel.setAfterValues(afterValues);
 		}
 	}
 	
@@ -173,27 +173,29 @@ public class VariableController implements TableModelListener, ActionListener {
 //				e1.printStackTrace();
 //			}
 //			break;
-//		case REMOVE:
-//			int[] selectedRows = variableTable.getSelectedRows();
-//			List<Option> options = mq.getScale().getOptions();
-//			for(int i = selectedRows.length-1; i>=0; i--) {
-//				options.remove(selectedRows[i]);
-//			}
-//			mq.getScale().setOptions(options);
-//			rawTable.setAvailableNumbers(varaibleModel.getAvailebleToNumbers());
-//			varaibleModel.fireTableStructureChanged();
-//			variableTable.packAll();
-//			rawModel.remapFromMetaScale();
-//			rawModel.fireTableStructureChanged();
-//			rawTable.packAll();
-//			break;
-		case UP:
+		case REMOVE:
 			int[] selectedRows = variableTable.getSelectedRows();
+			List<Option> options = mq.getScale().getOptions();
+			variableTable.clearSelection();
+			variableTable.removeEditor();
+			for(int i = selectedRows.length-1; i>=0; i--) {
+				options.remove(selectedRows[i]);
+			}
+			mq.getScale().setOptions(options);
+			rawTable.setAvailableNumbers(variableModel.getAvailebleToNumbers());
+			variableModel.fireTableRowsDeleted(selectedRows[0], selectedRows[0]);
+			variableTable.packAll();
+			rawModel.remapFromMetaScale();
+			rawModel.fireTableStructureChanged();
+			rawTable.packAll();
+			break;
+		case UP:
+			selectedRows = variableTable.getSelectedRows();
 			if(selectedRows.length < 1 || selectedRows[0] == 0) break;
 			variableTable.clearSelection();
 			variableTable.removeEditor();
 			for(int i = 0; i < selectedRows.length; i++) {
-				varaibleModel.moveRow(selectedRows[i], selectedRows[i], selectedRows[i]-1);
+				variableModel.moveRow(selectedRows[i], selectedRows[i], selectedRows[i]-1);
 				variableTable.getSelectionModel().addSelectionInterval(selectedRows[i]-1, selectedRows[i]-1);
 			}
 			variableTable.packAll();
@@ -203,12 +205,12 @@ public class VariableController implements TableModelListener, ActionListener {
 			break;
 		case DOWN:
 			selectedRows = variableTable.getSelectedRows();
-			if(selectedRows.length < 1 || selectedRows[selectedRows.length-1] == varaibleModel.getRowCount() -1) break;
+			if(selectedRows.length < 1 || selectedRows[selectedRows.length-1] == variableModel.getRowCount() -1) break;
 			variableTable.clearSelection();
 			variableTable.removeEditor();
 			for(int i = selectedRows.length-1; i >= 0; i--) {
 				//perspectivesTable.changeSelection(selectedRows[i], 1, true, true);
-				varaibleModel.moveRow(selectedRows[i], selectedRows[i], selectedRows[i]+1);
+				variableModel.moveRow(selectedRows[i], selectedRows[i], selectedRows[i]+1);
 				variableTable.getSelectionModel().addSelectionInterval(selectedRows[i]+1, selectedRows[i]+1);
 			}
 			variableTable.packAll();
@@ -217,14 +219,14 @@ public class VariableController implements TableModelListener, ActionListener {
 			rawTable.packAll();
 			break;
 		case INVERT:
-			List<Option> options = mq.getScale().getOptions();
+			options = mq.getScale().getOptions();
 			List<Option> invertedOptions = new LinkedList<>();
 			for(Option option : options) {
 				invertedOptions.add(0, option);
 			}
 
 			mq.getScale().setOptions(invertedOptions);
-			varaibleModel.fireTableStructureChanged();
+			variableModel.fireTableStructureChanged();
 			variableTable.packAll();
 			rawModel.remapFromMetaScale();
 			rawModel.fireTableStructureChanged();
