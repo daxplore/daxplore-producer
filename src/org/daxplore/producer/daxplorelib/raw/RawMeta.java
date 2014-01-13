@@ -1,3 +1,10 @@
+/*******************************************************************************
+ * Copyright (c) 2013-2014 Daniel Dunér, Axel Winkler.
+ * All rights reserved. This program is free software: it is made
+ * available under the terms of the GNU Public License v2.0 (or later)
+ * which accompanies this distribution, and is available at
+ * http://www.gnu.org/licenses/old-licenses/gpl-2.0.html
+ ******************************************************************************/
 package org.daxplore.producer.daxplorelib.raw;
 
 import java.sql.Connection;
@@ -81,14 +88,12 @@ public class RawMeta {
 		return columns;
 	}
 	
-	public void importSPSS(SPSSFile spssFile) throws SQLException {
+	public void importSPSS(SPSSFile spssFile) throws DaxploreException {
 		Map<String, String> columns = new LinkedHashMap<>();
 		try {
 			clearRawMetaTable(connection);
 		} catch (SQLException e) {
-			System.out.println("error clearing table");
-			MyTools.printSQLExeption(e);
-			throw e; //TODO both catching and throwing SQLException!?
+			throw new DaxploreException("Failed to clear RawMetaTable", e);
 		}
 		for(int i = 0; i < spssFile.getVariableCount(); i++){
 			SPSSVariable var = spssFile.getVariable(i);
@@ -122,9 +127,7 @@ public class RawMeta {
 						measure
 						);
 			} catch (SQLException e) {
-				System.out.println("Error adding row");
-				MyTools.printSQLExeption(e);
-				throw e; //TODO both catching and throwing SQLException!?
+				throw new DaxploreException("Failed to add new RawMeta row", e);
 			}
 		}
 	}

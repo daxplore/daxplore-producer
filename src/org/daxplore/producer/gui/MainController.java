@@ -1,3 +1,10 @@
+/*******************************************************************************
+ * Copyright (c) 2013-2014 Daniel Dunér, Axel Winkler.
+ * All rights reserved. This program is free software: it is made
+ * available under the terms of the GNU Public License v2.0 (or later)
+ * which accompanies this distribution, and is available at
+ * http://www.gnu.org/licenses/old-licenses/gpl-2.0.html
+ ******************************************************************************/
 package org.daxplore.producer.gui;
 
 import java.awt.BorderLayout;
@@ -34,7 +41,6 @@ import org.daxplore.producer.gui.event.ChangeMainViewEvent;
 import org.daxplore.producer.gui.event.DaxploreFileUpdateEvent;
 import org.daxplore.producer.gui.event.DisplayLocaleSelectEvent;
 import org.daxplore.producer.gui.event.EditQuestionEvent;
-import org.daxplore.producer.gui.event.EditTextRefEvent;
 import org.daxplore.producer.gui.event.EmptyEvents.DiscardChangesEvent;
 import org.daxplore.producer.gui.event.EmptyEvents.ExportTextsEvent;
 import org.daxplore.producer.gui.event.EmptyEvents.ExportUploadEvent;
@@ -157,6 +163,10 @@ public class MainController {
 		
 		eventBus.post(new DaxploreFileUpdateEvent(daxploreFile));
 		toolbarController.updateSelectedLocale();
+	}
+	
+	public void setVisible(boolean visible) {
+		mainView.setVisibe(visible);
 	}
 	
 	@Subscribe

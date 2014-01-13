@@ -1,3 +1,10 @@
+/*******************************************************************************
+ * Copyright (c) 2013-2014 Daniel Dunér, Axel Winkler.
+ * All rights reserved. This program is free software: it is made
+ * available under the terms of the GNU Public License v2.0 (or later)
+ * which accompanies this distribution, and is available at
+ * http://www.gnu.org/licenses/old-licenses/gpl-2.0.html
+ ******************************************************************************/
 package org.daxplore.producer.gui.view.question;
 
 import java.awt.Component;
@@ -64,7 +71,8 @@ public class QuestionController implements TableModelListener, ActionListener  {
 		try {
 			final QuestionTable table = new QuestionTable(eventBus, new QuestionTableModel(daxploreFile.getMetaQuestionManager()));
 			table.getSelectionModel().addListSelectionListener(new ListSelectionListener(){
-		        public void valueChanged(ListSelectionEvent event) {
+		        @Override
+				public void valueChanged(ListSelectionEvent event) {
 		        	if(!event.getValueIsAdjusting()) {
 		        		openMetaQuestion((MetaQuestion)table.getValueAt(table.getSelectedRow(), 0));
 		        	}

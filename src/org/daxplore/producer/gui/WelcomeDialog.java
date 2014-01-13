@@ -1,3 +1,10 @@
+/*******************************************************************************
+ * Copyright (c) 2013-2014 Daniel Dunér, Axel Winkler.
+ * All rights reserved. This program is free software: it is made
+ * available under the terms of the GNU Public License v2.0 (or later)
+ * which accompanies this distribution, and is available at
+ * http://www.gnu.org/licenses/old-licenses/gpl-2.0.html
+ ******************************************************************************/
 package org.daxplore.producer.gui;
 
 import java.awt.EventQueue;
@@ -152,10 +159,12 @@ public class WelcomeDialog {
 				try {
 					JFrame window = new JFrame();
 					MainController mainController = new MainController(window, eventBus, texts, preferences, event.getDaxploreFile());
+					mainController.setVisible(true);
 					
 					welcomeFrame.setVisible(false);
 					welcomeFrame.dispose();
 				} catch (Exception e1) {
+					//TODO communicate error to user
 					e1.printStackTrace();
 				}
 			}

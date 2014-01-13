@@ -1,3 +1,10 @@
+/*******************************************************************************
+ * Copyright (c) 2013-2014 Daniel Dunér, Axel Winkler.
+ * All rights reserved. This program is free software: it is made
+ * available under the terms of the GNU Public License v2.0 (or later)
+ * which accompanies this distribution, and is available at
+ * http://www.gnu.org/licenses/old-licenses/gpl-2.0.html
+ ******************************************************************************/
 package org.daxplore.producer.daxplorelib;
 
 import java.io.File;
@@ -224,7 +231,7 @@ public class ImportExportManager {
 		}
 	}
 	
-	private JsonElement getPropertiesJson(Locale locale) throws SQLException, DaxploreException {
+	private JsonElement getPropertiesJson(Locale locale) throws DaxploreException {
 		JsonObject json = new JsonObject();
 		for(String property: DaxploreProperties.properties) {
 			json.addProperty(property, daxploreFile.getTextReferenceManager().get(property).get(locale));

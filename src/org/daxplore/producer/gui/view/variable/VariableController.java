@@ -1,3 +1,10 @@
+/*******************************************************************************
+ * Copyright (c) 2013-2014 Daniel Dunér, Axel Winkler.
+ * All rights reserved. This program is free software: it is made
+ * available under the terms of the GNU Public License v2.0 (or later)
+ * which accompanies this distribution, and is available at
+ * http://www.gnu.org/licenses/old-licenses/gpl-2.0.html
+ ******************************************************************************/
 package org.daxplore.producer.gui.view.variable;
 
 import java.awt.event.ActionEvent;
@@ -12,6 +19,7 @@ import java.util.TreeMap;
 
 import javax.swing.JDialog;
 import javax.swing.JTable;
+import javax.swing.WindowConstants;
 import javax.swing.event.TableModelEvent;
 import javax.swing.event.TableModelListener;
 
@@ -269,7 +277,7 @@ public class VariableController implements TableModelListener, ActionListener {
 		dialog.setTitle(mq.getId());
 		dialog.setContentPane(getView());
 		dialog.setModal(true);
-		dialog.setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
+		dialog.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
 		return dialog;
 	}
 	

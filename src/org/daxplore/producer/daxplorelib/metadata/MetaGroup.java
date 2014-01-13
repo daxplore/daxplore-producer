@@ -1,3 +1,10 @@
+/*******************************************************************************
+ * Copyright (c) 2013-2014 Daniel Dunér, Axel Winkler.
+ * All rights reserved. This program is free software: it is made
+ * available under the terms of the GNU Public License v2.0 (or later)
+ * which accompanies this distribution, and is available at
+ * http://www.gnu.org/licenses/old-licenses/gpl-2.0.html
+ ******************************************************************************/
 package org.daxplore.producer.daxplorelib.metadata;
 
 import java.sql.Connection;
@@ -286,7 +293,7 @@ public class MetaGroup implements Comparable<MetaGroup> {
 			return SQLTools.maxId(groupTable.name, "id", connection) + addDelta;
 		}
 		
-		public JsonElement getQuestionGroupsJSON(Locale locale) throws SQLException, DaxploreException {
+		public JsonElement getQuestionGroupsJSON(Locale locale) throws DaxploreException {
 			JsonArray json = new JsonArray(); 
 			for(MetaGroup group : getQuestionGroups()) {
 				json.add(group.toJSONObject(locale));
