@@ -355,7 +355,7 @@ public class CreateFileWizard extends Wizard {
 			
 			for(int i = 0; i < sf.getVariableCount(); i++){
 				SPSSVariable var = sf.getVariable(i);
-				columns[i] = var.getShortName();
+				columns[i] = var.getName();
 			}
 
 			Object[][] data =  new Object[sf.getRecordCount()][sf.getVariableCount()];

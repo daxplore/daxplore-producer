@@ -65,10 +65,10 @@ public class RawData {
 			VariableType qtype;
 			if(var instanceof SPSSNumericVariable){
 				qtype = VariableType.NUMERIC;
-				columns.put(var.getShortName(), qtype);
+				columns.put(var.getName(), qtype);
 			} else if (var instanceof SPSSStringVariable){
 				qtype = VariableType.TEXT;
-				columns.put(var.getShortName(), qtype);
+				columns.put(var.getName(), qtype);
 			} else throw new Error("shuoldn't happen");
 		}
 		

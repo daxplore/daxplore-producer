@@ -103,11 +103,11 @@ public class RawMeta {
 			if(var instanceof SPSSNumericVariable){
 				spsstype = "Numeric";
 				qtype = VariableType.NUMERIC.toString();
-				columns.put(var.getShortName(), "real");
+				columns.put(var.getName(), "real");
 			} else if (var instanceof SPSSStringVariable){
 				spsstype = "String";
 				qtype = VariableType.TEXT.toString();
-				columns.put(var.getShortName(), "text");
+				columns.put(var.getName(), "text");
 			} else throw new Error("shuoldn't happen");
 			if(var.hasValueLabels()){
 				qtype = VariableType.MAPPED.toString();
@@ -118,7 +118,7 @@ public class RawMeta {
 					"INSERT INTO rawmeta values (?, ?, ?, ?, ?, ?, ?)")) {
 				addColumnMeta(
 						stmt,
-						var.getShortName(),
+						var.getName(),
 						var.getName(),
 						var.getLabel(),
 						qtype,
