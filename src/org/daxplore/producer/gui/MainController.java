@@ -37,6 +37,7 @@ import org.daxplore.producer.daxplorelib.ImportExportManager.L10nFormat;
 import org.daxplore.producer.daxplorelib.metadata.MetaQuestion;
 import org.daxplore.producer.daxplorelib.metadata.textreference.TextReference;
 import org.daxplore.producer.gui.Dialogs.FileLocalePair;
+import org.daxplore.producer.gui.Dialogs.FileLocaleUsedTriplet;
 import org.daxplore.producer.gui.event.ChangeMainViewEvent;
 import org.daxplore.producer.gui.event.DaxploreFileUpdateEvent;
 import org.daxplore.producer.gui.event.DisplayLocaleSelectEvent;
@@ -209,10 +210,13 @@ public class MainController {
 	public void on(ExportTextsEvent e) {
 		try {
 			List<Locale> localeList = daxploreFile.getTextReferenceManager().getAllLocales();
-			FileLocalePair fileLocalePair = Dialogs.showExportDialog(mainWindow, localeList, preferences);
-			File file = fileLocalePair.file;
-			Locale locale = fileLocalePair.locale;
-			if(fileLocalePair.file == null) {
+			FileLocaleUsedTriplet fileLocaleUsedTriplet = Dialogs.showExportDialog(preferences, texts, mainWindow, localeList);
+			if(fileLocaleUsedTriplet == null) {
+				return;
+			}
+			File file = fileLocaleUsedTriplet.file;
+			Locale locale = fileLocaleUsedTriplet.locale;
+			if(fileLocaleUsedTriplet.file == null) {
 				System.out.println("File is null");
 				return; //TODO communicate error properly
 			} 
@@ -231,6 +235,7 @@ public class MainController {
 			
 			if(file.exists() && file.canWrite()) {
 				try (BufferedWriter writer = Files.newBufferedWriter(file.toPath(), Charsets.UTF_8, StandardOpenOption.WRITE, StandardOpenOption.TRUNCATE_EXISTING)) {
+					//TODO use fileLocaleUsedTriplet.usedXXX
 					daxploreFile.exportL10n(writer, format, locale);
 				}
 			} else if (!file.exists()) {
@@ -251,7 +256,7 @@ public class MainController {
 	@Subscribe
 	public void on(ImportTextsEvent e) {
 		List<Locale> localeList = Settings.availableLocales();
-		FileLocalePair fileLocalePair = Dialogs.showImportDialog(mainWindow, localeList, preferences);
+		FileLocalePair fileLocalePair = Dialogs.showImportDialog(preferences, texts, mainWindow, localeList);
 		File file = fileLocalePair.file;
 		Locale locale = fileLocalePair.locale;
 		if(file != null && file.exists() && file.canRead()) {

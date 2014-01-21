@@ -16,6 +16,8 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.nio.charset.Charset;
 import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Locale;
 import java.util.Set;
 
@@ -23,9 +25,11 @@ import javax.swing.BorderFactory;
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
+import javax.swing.JDialog;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JList;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
@@ -42,6 +46,7 @@ import org.daxplore.producer.gui.resources.GuiTexts;
 import org.daxplore.producer.gui.utility.DisplayCharset;
 import org.daxplore.producer.gui.utility.DisplayLocale;
 import org.daxplore.producer.tools.CharsetTest;
+import org.daxplore.producer.tools.MyTools;
 import org.daxplore.producer.tools.SPSSTools;
 import org.opendatafoundation.data.spss.SPSSFile;
 import org.opendatafoundation.data.spss.SPSSFileException;
@@ -315,6 +320,7 @@ public class CreateFileWizard extends Wizard {
 			int returnVal = jfc.showSaveDialog(this);
 			switch(returnVal) {
 			case JFileChooser.APPROVE_OPTION:
+				setProblem(null);
 				File spssFile = jfc.getSelectedFile();
 				preferences.setWorkingDirectory(jfc.getCurrentDirectory());
 				try {
@@ -342,7 +348,6 @@ public class CreateFileWizard extends Wizard {
 						break;
 					}
 					data.put("spssFile", spssFile);
-					setProblem(null);
 				}
 				break;
 			default:
@@ -350,11 +355,15 @@ public class CreateFileWizard extends Wizard {
 			}
 		}
 		
-		private static TableModel spssTable(SPSSFile sf) throws FileNotFoundException, IOException, SPSSFileException {
+		private TableModel spssTable(SPSSFile sf) throws FileNotFoundException, IOException, SPSSFileException {
 			String[] columns = new String[sf.getVariableCount()];
-			
+			List<String> problemVars = new LinkedList<>();
 			for(int i = 0; i < sf.getVariableCount(); i++){
 				SPSSVariable var = sf.getVariable(i);
+				if(!DaxploreFile.isValidColumnName(var.getName())) {
+					problemVars.add(var.getName());
+					//setProblem("\""+ var.getName() + "\" is not an allowed variable name");
+				}
 				columns[i] = var.getName();
 			}
 
@@ -366,11 +375,16 @@ public class CreateFileWizard extends Wizard {
 				i++;
 			}
 			
+			if(!problemVars.isEmpty()) {
+				setProblem("Illegal variable name" + (problemVars.size() > 1 ? "s":"") + ": '" + MyTools.join(problemVars, "', '") + "'");
+			}
+			
 			return new DefaultTableModel(data, columns);
 		}
 	}
 
 	private EventBus eventBus;
+	private JFrame window;
 	// static variable access for use by the screen subclasses 
 	static GuiTexts texts;
 	static DaxplorePreferences preferences;
@@ -378,6 +392,7 @@ public class CreateFileWizard extends Wizard {
 	public CreateFileWizard(JFrame window, EventBus eventBus, GuiTexts texts, DaxplorePreferences preferences) {
 		super(new Wizard.Builder("Create new project", OpenSPSSPanel.class, window));
 		this.eventBus = eventBus;
+		this.window = window;
 		CreateFileWizard.texts = texts;
 		CreateFileWizard.preferences = preferences;
 		data.put("preferences", preferences);
@@ -418,8 +433,7 @@ public class CreateFileWizard extends Wizard {
 			
 			eventBus.post(new DaxploreFileUpdateEvent(daxploreFile));
 		} catch (DaxploreException | IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			JOptionPane.showMessageDialog(window, e.getMessage());
 		}
 		
 	}

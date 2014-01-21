@@ -24,8 +24,8 @@ import javax.swing.JTextField;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 
+import org.daxplore.producer.daxplorelib.DaxploreFile;
 import org.daxplore.producer.daxplorelib.metadata.textreference.TextReference;
-import org.daxplore.producer.daxplorelib.metadata.textreference.TextReferenceManager;
 import org.daxplore.producer.gui.Settings;
 import org.daxplore.producer.gui.resources.GuiTexts;
 
@@ -137,7 +137,7 @@ public class EditTextRefPanel extends JPanel implements DocumentListener {
 	
 	private void updateValidTextRefWarning() {
 		String textRefId = textRefIdField.getText();
-		if(TextReferenceManager.isValidTextRefId(textRefId)) {
+		if(DaxploreFile.isValidColumnName(textRefId)) {
 			badTextRefIdLabel.setText(" ");
 			okButton.setEnabled(true);
 		} else {

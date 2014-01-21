@@ -7,7 +7,11 @@
  ******************************************************************************/
 package org.daxplore.producer.gui;
 
+import java.awt.BorderLayout;
 import java.awt.Component;
+import java.awt.GridBagLayout;
+import java.awt.GridLayout;
+import java.awt.Label;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
@@ -20,12 +24,15 @@ import java.util.Map;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JComponent;
+import javax.swing.JDialog;
 import javax.swing.JFileChooser;
 import javax.swing.JOptionPane;
+import javax.swing.JPanel;
 import javax.swing.filechooser.FileFilter;
 import javax.swing.filechooser.FileNameExtensionFilter;
 
 import org.daxplore.producer.daxplorelib.DaxploreException;
+import org.daxplore.producer.daxplorelib.DaxploreFile;
 import org.daxplore.producer.daxplorelib.metadata.MetaGroup;
 import org.daxplore.producer.daxplorelib.metadata.MetaQuestion;
 import org.daxplore.producer.daxplorelib.metadata.MetaGroup.GroupType;
@@ -86,7 +93,7 @@ public class Dialogs {
 				textRef.put(newTexts.get(l), l);
 			}
 			
-			if(!textRefId.equals(textRef.getRef()) && TextReferenceManager.isValidTextRefId(textRefId)) {
+			if(!textRefId.equals(textRef.getRef()) && DaxploreFile.isValidColumnName(textRefId)) {
 				try {
 					TextReference newTextRef = textManager.get(textRefId);
 					for(Locale l : textRef.getLocales()) {
@@ -199,30 +206,56 @@ public class Dialogs {
 		}
 	}
 	
-	public static FileLocalePair showImportDialog(Component parent, List<Locale> localeList, DaxplorePreferences preferences) {
-		LocalizationFileChooser ifc = new LocalizationFileChooser(localeList, preferences);
-		
+	public static FileLocalePair showImportDialog(DaxplorePreferences preferences, GuiTexts texts, Component parent, List<Locale> localeList) {
+		TextImportPanel importPanel = new TextImportPanel(localeList, preferences);
+		JButton[] buttons = getOkCancelOptions(texts);
+		int returnVal = JOptionPane.showOptionDialog(parent,
+				importPanel,
+				"Import texts",
+				JOptionPane.OK_CANCEL_OPTION,
+				JOptionPane.PLAIN_MESSAGE,
+				null,
+				buttons,
+				buttons[0]);
+		if(returnVal != JOptionPane.OK_OPTION) {
+			return null;
+		}
+		JFileChooser fc = new JFileChooser(preferences.getWorkingDirectory());
 		FileFilter filter = new FileNameExtensionFilter("language files", "csv", "properties");
-		ifc.addChoosableFileFilter(filter);
-		ifc.setFileFilter(filter);
+		fc.addChoosableFileFilter(filter);
+		fc.setFileFilter(filter);
 		
-		int returnVal = ifc.showOpenDialog(parent);
+		returnVal = fc.showOpenDialog(parent);
 		switch(returnVal) {
 		case JFileChooser.APPROVE_OPTION:
-			preferences.setWorkingDirectory(ifc.getCurrentDirectory());
-			return new FileLocalePair(ifc.getSelectedFile(), ifc.getSelectedLocale());
+			preferences.setWorkingDirectory(fc.getCurrentDirectory());
+			return new FileLocalePair(fc.getSelectedFile(), importPanel.getImportLocale());
 		default:
 			return null;
 		}
 	}
 	
-	public static FileLocalePair showExportDialog(Component parent, List<Locale> localeList, DaxplorePreferences preferences) {
-		LocalizationFileChooser efc = new LocalizationFileChooser(localeList, preferences);
-		int returnVal = efc.showSaveDialog(parent);
+	public static FileLocaleUsedTriplet showExportDialog(DaxplorePreferences preferences, GuiTexts texts, Component parent, List<Locale> localeList) {
+		TextExportPanel exportPanel = new TextExportPanel(localeList, preferences);
+		JButton[] buttons = getOkCancelOptions(texts);
+		int returnVal = JOptionPane.showOptionDialog(parent,
+				exportPanel,
+				"Export texts",
+				JOptionPane.OK_CANCEL_OPTION,
+				JOptionPane.PLAIN_MESSAGE,
+				null,
+				buttons,
+				buttons[0]);
+		if(returnVal != JOptionPane.OK_OPTION) {
+			return null;
+		}
+		
+		JFileChooser fc = new JFileChooser(preferences.getWorkingDirectory());
+		returnVal = fc.showSaveDialog(parent);
 		switch(returnVal) {
 		case JFileChooser.APPROVE_OPTION:
-			preferences.setWorkingDirectory(efc.getCurrentDirectory());
-			return new FileLocalePair(efc.getSelectedFile(), efc.getSelectedLocale());
+			preferences.setWorkingDirectory(fc.getCurrentDirectory());
+			return new FileLocaleUsedTriplet(fc.getSelectedFile(), exportPanel.getExportLocale(), exportPanel.isOnlyExportUsed());
 		default:
 			return null;
 		}
@@ -237,34 +270,73 @@ public class Dialogs {
 		}
 	}
 	
+	public static class FileLocaleUsedTriplet {
+		public final File file;
+		public final Locale locale;
+		public final boolean onlyExportUsed;
+		public FileLocaleUsedTriplet(File file, Locale locale, boolean onlyExportUsed) {
+			this.file = file;
+			this.locale = locale;
+			this.onlyExportUsed = onlyExportUsed;
+		}
+	}
+	
 	@SuppressWarnings("serial")
-	private static class LocalizationFileChooser extends JFileChooser {
+	private static class TextExportPanel extends JPanel {
 		private JComboBox<DisplayLocale> localeBox;
-		private Locale selectedLocale;
+		private JComboBox<String> filterBox;
 		
-		public LocalizationFileChooser(List<Locale> localeList, DaxplorePreferences preferences) {
-			super(preferences.getWorkingDirectory());
+		public TextExportPanel(List<Locale> localeList, DaxplorePreferences preferences) {
+			setLayout(new GridLayout(0,2));
+			
+			add(new Label("Locale "), 0);
+			
 			localeBox = new JComboBox<>();
 			localeBox.addItem(null);
 			for(Locale loc: localeList) {
 				localeBox.addItem(new DisplayLocale(loc));
 			}
-			setAccessory(localeBox);
+			
+			add(localeBox, 1);
+			
+			add(new Label("Export "), 2);
+			
+			filterBox = new JComboBox<>();
+			filterBox.addItem("Only export used texts");
+			filterBox.addItem("Export all texts");
+			
+			add(filterBox, 3);
 		}
 		
-		@Override
-		public void approveSelection() {
-			if(localeBox.getSelectedItem() != null) {
-				selectedLocale = ((DisplayLocale)localeBox.getSelectedItem()).locale;
-				super.approveSelection();
-			} else {
-				System.out.println("No locale selected during import");
-			}
+		public Locale getExportLocale() {
+			return ((DisplayLocale)(localeBox.getSelectedItem())).locale;
 		}
 		
-		public Locale getSelectedLocale() {
-			return selectedLocale;
+		public boolean isOnlyExportUsed() {
+			return filterBox.getSelectedIndex() == 0;
 		}
 	}
 	
+	@SuppressWarnings("serial")
+	private static class TextImportPanel extends JPanel {
+		private JComboBox<DisplayLocale> localeBox;
+
+		public TextImportPanel(List<Locale> localeList, DaxplorePreferences preferences) {
+			setLayout(new GridLayout(0, 2));
+
+			add(new Label("Locale "), 0);
+
+			localeBox = new JComboBox<>();
+			localeBox.addItem(null);
+			for (Locale loc : localeList) {
+				localeBox.addItem(new DisplayLocale(loc));
+			}
+
+			add(localeBox, 1);
+		}
+
+		public Locale getImportLocale() {
+			return ((DisplayLocale) (localeBox.getSelectedItem())).locale;
+		}
+	}
 }

@@ -49,6 +49,8 @@ import org.daxplore.producer.tools.NumberlineCoverage;
 import org.daxplore.producer.tools.Pair;
 import org.xml.sax.SAXException;
 
+import com.google.common.base.Strings;
+
 public class DaxploreFile implements Closeable {
 	private Connection connection;
 	private About about;
@@ -361,6 +363,10 @@ public class DaxploreFile implements Closeable {
 			throw new DaxploreException("Error when discarding changes", e);
 		}
 		
+	}
+
+	public static boolean isValidColumnName(String refstring) {
+		return !Strings.isNullOrEmpty(refstring) && refstring.matches("^[\\pL\\pN_\\.]+$");
 	}
 
 }

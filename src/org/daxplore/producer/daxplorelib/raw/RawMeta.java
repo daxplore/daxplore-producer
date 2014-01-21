@@ -21,6 +21,7 @@ import java.util.Map;
 import java.util.Set;
 
 import org.daxplore.producer.daxplorelib.DaxploreException;
+import org.daxplore.producer.daxplorelib.DaxploreFile;
 import org.daxplore.producer.daxplorelib.DaxploreTable;
 import org.daxplore.producer.daxplorelib.SQLTools;
 import org.daxplore.producer.tools.MyTools;
@@ -97,6 +98,9 @@ public class RawMeta {
 		}
 		for(int i = 0; i < spssFile.getVariableCount(); i++){
 			SPSSVariable var = spssFile.getVariable(i);
+			if(!DaxploreFile.isValidColumnName(var.getName())) {
+				throw new DaxploreException("\"" + var.getName() + "\" is not a valid variable name");
+			}
 			String spsstype;
 			String valuelabels = null;
 			String qtype;

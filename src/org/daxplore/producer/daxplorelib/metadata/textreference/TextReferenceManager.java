@@ -24,12 +24,11 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.daxplore.producer.daxplorelib.DaxploreException;
+import org.daxplore.producer.daxplorelib.DaxploreFile;
 import org.daxplore.producer.daxplorelib.DaxploreProperties;
 import org.daxplore.producer.daxplorelib.DaxploreTable;
 import org.daxplore.producer.daxplorelib.SQLTools;
 import org.daxplore.producer.tools.SmallMap;
-
-import com.google.common.base.Strings;
 
 public class TextReferenceManager {
 	private static final DaxploreTable table = new DaxploreTable("CREATE TABLE texts (ref TEXT NOT NULL, locale TEXT, text TEXT NOT NULL, UNIQUE ( ref, locale) )", "texts");
@@ -62,7 +61,7 @@ public class TextReferenceManager {
 	 * @throws DaxploreException 
 	 */
 	public TextReference get(String refstring) throws DaxploreException {
-		if(!TextReferenceManager.isValidTextRefId(refstring)) {
+		if(!DaxploreFile.isValidColumnName(refstring)) {
 			throw new DaxploreException("Invalid refstring: '" + refstring + "'");
 		}
 		
@@ -227,9 +226,5 @@ public class TextReferenceManager {
 		textTree.clear();
 		toBeRemoved.clear();
 		nNew = 0;
-	}
-	
-	public static boolean isValidTextRefId(String refstring) {
-		return !Strings.isNullOrEmpty(refstring) && refstring.matches("^[\\pL\\pN_]+$");
 	}
 }

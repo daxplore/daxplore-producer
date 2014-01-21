@@ -20,6 +20,7 @@ import java.util.LinkedList;
 import java.util.Map;
 
 import org.daxplore.producer.daxplorelib.DaxploreException;
+import org.daxplore.producer.daxplorelib.DaxploreFile;
 import org.daxplore.producer.daxplorelib.DaxploreTable;
 import org.daxplore.producer.daxplorelib.SQLTools;
 import org.daxplore.producer.tools.MyTools;
@@ -62,6 +63,9 @@ public class RawData {
 		
 		for(int i = 0; i < spssFile.getVariableCount(); i++){
 			SPSSVariable var = spssFile.getVariable(i);
+			if(!DaxploreFile.isValidColumnName(var.getName())) {
+				throw new DaxploreException("\"" + var.getName() + "\" is not a valid variable name");
+			}
 			VariableType qtype;
 			if(var instanceof SPSSNumericVariable){
 				qtype = VariableType.NUMERIC;
@@ -95,11 +99,7 @@ public class RawData {
 		sb.append("create table " + tablename + " (");
 		while(iter.hasNext()){
 			String s = iter.next();
-			if(s.contains("\"") || s.contains("'") || s.contains("$")){
-				continue;
-			}
-			sb.append(s);
-			sb.append(" ");
+			sb.append("[" + s + "] ");
 			sb.append(columns.get(s).sqltype());
 			if(iter.hasNext()){
 				sb.append(", ");
