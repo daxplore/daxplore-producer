@@ -8,7 +8,6 @@
 package org.daxplore.producer.gui;
 
 import java.awt.BorderLayout;
-import java.awt.Label;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
@@ -27,6 +26,7 @@ import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
+import javax.swing.JLabel;
 import javax.swing.JList;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
@@ -172,7 +172,7 @@ public class CreateFileWizard extends Wizard {
 			
 			JPanel encodingPanel = new JPanel(new BorderLayout());
 			JPanel encodingPickerPanel = new JPanel(new BorderLayout());
-			Label instruction = new Label(SELECT_CHARSET_INSTRUCTION);
+			JLabel instruction = new JLabel(SELECT_CHARSET_INSTRUCTION);
 			encodingPickerPanel.add(instruction, BorderLayout.NORTH);
 			
 			encodingPanel.setBorder(BorderFactory.createTitledBorder("Select character encoding"));
