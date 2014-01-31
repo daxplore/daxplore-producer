@@ -199,10 +199,9 @@ public class CreateFileWizard extends Wizard {
 			JPanel tablePanel = new JPanel();
 			encodingListPanel.setViewportView(tablePanel);
 			encodingPanel.add(encodingListPanel, BorderLayout.CENTER);
-
 			add(encodingPanel, BorderLayout.CENTER);
-			encodingComboBox.setSelectedItem(Charsets.UTF_8.name());
 			
+			actionPerformed(new ActionEvent(encodingComboBox, ActionEvent.ACTION_PERFORMED, TextCommand.ENCODING.toString()));
 			updateWizardProblem();
 		}
 
