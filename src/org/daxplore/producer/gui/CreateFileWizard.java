@@ -25,7 +25,6 @@ import javax.swing.BorderFactory;
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
-import javax.swing.JDialog;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JList;
@@ -317,7 +316,7 @@ public class CreateFileWizard extends Wizard {
 			jfc.addChoosableFileFilter(filter);
 			jfc.setFileFilter(filter);
 			
-			int returnVal = jfc.showSaveDialog(this);
+			int returnVal = jfc.showOpenDialog(this);
 			switch(returnVal) {
 			case JFileChooser.APPROVE_OPTION:
 				setProblem(null);
