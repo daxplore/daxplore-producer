@@ -32,9 +32,10 @@ public class TextReference extends TextReferenceReference {
 	}
 	
 	public void put(String text, Locale locale) {
+		String value = (text==null ? "" : text);
 		String currentValue = localeMap.get(locale);
-		if(!text.equals(currentValue)) {
-			localeMap.put(locale, text);
+		if(!value.equals(currentValue)) {
+			localeMap.put(locale, value);
 			modified = true;
 		}
 	}
