@@ -262,6 +262,14 @@ public class GroupsController implements ActionListener {
 			int atIndex = 0;
 			if(groupTree.getSelectionPath()==null) {
 				Object root = groupTreeModel.getRoot();
+				// if there are no groups, create a new one
+				if(groupTreeModel.getChildCount(root)==0) {
+					actionPerformed(new ActionEvent(this, ActionEvent.ACTION_PERFORMED, GroupsCommand.GROUP_ADD.name()));
+					if(groupTreeModel.getChildCount(root)==0) {
+						// break if the user didn't create a new group
+						break;
+					}
+				}
 				parent = (MetaGroup)groupTreeModel.getChild(root, groupTreeModel.getChildCount(root)-1);
 				if(parent == null) {
 					eventBus.post(new ErrorMessageEvent("You need to create a group before you add questions"));
