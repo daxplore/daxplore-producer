@@ -271,10 +271,6 @@ public class GroupsController implements ActionListener {
 					}
 				}
 				parent = (MetaGroup)groupTreeModel.getChild(root, groupTreeModel.getChildCount(root)-1);
-				if(parent == null) {
-					eventBus.post(new ErrorMessageEvent("You need to create a group before you add questions"));
-					break;
-				}
 				atIndex = parent.getQuestionCount();
 			} else {
 				path = groupTree.getSelectionPath().getPath();
@@ -289,21 +285,16 @@ public class GroupsController implements ActionListener {
 			
 			ArrayList<TreePath> pathslist = new ArrayList<>(questionJTable.getSelectedRowCount()); 
 			
-			try {
-				for(int i : questionJTable.getSelectedRows()) {
-					MetaQuestion mq = (MetaQuestion)questionJTable.getValueAt(i, 0);
-					MetaGroup gr = groupTreeModel.getGroupFor(mq);
-					if(gr == null) {
-						TreePath treepath = groupTreeModel.addQuestion(mq, parent, atIndex);
-						atIndex++;
-						pathslist.add(treepath);
-					} else {
-						pathslist.add(new TreePath(new Object[]{groupTreeModel.getRoot(), gr, mq}));
-					}
+			for(int i : questionJTable.getSelectedRows()) {
+				MetaQuestion question = (MetaQuestion)questionJTable.getValueAt(i, 0);
+				MetaGroup group = groupTreeModel.getGroupFor(question);
+				if(groupTreeModel.containsQuestion(question)) {
+					pathslist.add(new TreePath(new Object[]{groupTreeModel.getRoot(), group, question}));
+				} else {
+					TreePath treepath = groupTreeModel.addQuestion(question, parent, atIndex);
+					atIndex++;
+					pathslist.add(treepath);
 				}
-			}catch (DaxploreException e2) {
-				// TODO: handle exception
-				e2.printStackTrace();
 			}
 			groupTree.setSelectionPaths(pathslist.toArray(new TreePath[pathslist.size()]));
 			break;

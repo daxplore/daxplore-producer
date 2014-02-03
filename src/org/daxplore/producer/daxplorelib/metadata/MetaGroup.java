@@ -263,16 +263,6 @@ public class MetaGroup implements Comparable<MetaGroup> {
 			return groupList;
 		}
 		
-		public MetaGroup getGroupFor(MetaQuestion metaQuestion) throws DaxploreException {
-			List<MetaGroup> groups = getQuestionGroups();
-			for(MetaGroup g: groups) {
-				if(g.contains(metaQuestion)) {
-					return g;
-				}
-			}
-			return null;
-		}
-		
 		public MetaGroup getPerspectiveGroup() throws DaxploreException {
 			try (Statement stmt =connection.createStatement();
 					ResultSet rs = stmt.executeQuery("SELECT id FROM metagroup WHERE type = " + GroupType.PERSPECTIVE.type)) {

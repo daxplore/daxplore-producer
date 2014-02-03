@@ -84,10 +84,8 @@ class GroupTreeModel implements TreeModel {
 	 * @return The TreePath to the added question
 	 */
 	public TreePath addQuestion(MetaQuestion mq, MetaGroup parent, int atIndex) throws IllegalArgumentException, IndexOutOfBoundsException {
-		for(MetaGroup mg: groups){
-			if(mg.getQuestions().contains(mq)) {
-				throw new IllegalArgumentException("Can't add duplicate of MetaQuestion: '" + mq.getId() + "'");
-			}
+		if(containsQuestion(mq)) {
+			throw new IllegalArgumentException("Can't add duplicate of MetaQuestion: '" + mq.getId() + "'");
 		}
 		
 		if(groups.contains(parent) && atIndex >= 0 && atIndex <= getChildCount(parent)) {
@@ -101,8 +99,22 @@ class GroupTreeModel implements TreeModel {
 		throw new IndexOutOfBoundsException("Index out of bounds: '" + atIndex);
 	}
 	
-	public MetaGroup getGroupFor(MetaQuestion metaQuestion) throws DaxploreException {
-		return manager.getGroupFor(metaQuestion); 
+	public boolean containsQuestion(MetaQuestion mq) {
+		for(MetaGroup mg : groups){
+			if(mg.getQuestions().contains(mq)) {
+				return true;
+			}
+		}
+		return false;
+	}
+	
+	public MetaGroup getGroupFor(MetaQuestion metaQuestion) {
+		for(MetaGroup mg : groups){
+			if(mg.getQuestions().contains(metaQuestion)) {
+				return mg;
+			}
+		}
+		return null;
 	}
 	
 	public void moveChild(Object child, Object toParent, int atIndex) throws IllegalArgumentException {
