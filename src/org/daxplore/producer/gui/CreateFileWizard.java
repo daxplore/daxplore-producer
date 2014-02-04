@@ -65,12 +65,12 @@ public class CreateFileWizard extends Wizard {
 		
 		@Override
 		public String getName() {
-			return "Choose file to create";
+			return texts.get("wizard.createfile.name");
 		}
 
 		@Override
 		public String getDescription() {
-			return "Create a new daxplore file that will contain your project";
+			return texts.get("wizard.createfile.description");
 		}
 
 		@Override
@@ -78,18 +78,19 @@ public class CreateFileWizard extends Wizard {
 			setCanFinish(false);
 			fileNameTextField = new JTextField(30);
 			fileNameTextField.setEditable(false);
-			JButton chooseButton = new JButton("Select file");
+			JButton chooseButton = new JButton(texts.get("wizard.createfile.selectfile"));
 			chooseButton.addActionListener(this);
 			add(fileNameTextField);
 			add(chooseButton);
-			setProblem("No file selected");
+			setProblem(texts.get("wizard.createfile.nofile"));
 		}
 
 		@Override
 		public void actionPerformed(ActionEvent e) {
 			JFileChooser jfc = new JFileChooser(CreateFileWizard.preferences.getWorkingDirectory());
 			
-			FileFilter filter = new FileNameExtensionFilter("Daxplore files", "daxplore");
+			FileFilter filter = new FileNameExtensionFilter(
+					texts.get("general.filetype.daxplorefile"), "daxplore");
 			jfc.addChoosableFileFilter(filter);
 			jfc.setFileFilter(filter);
 			
@@ -98,7 +99,7 @@ public class CreateFileWizard extends Wizard {
 			if(returnVal == JFileChooser.APPROVE_OPTION) {
 				preferences.setWorkingDirectory(jfc.getCurrentDirectory());
 				setCanFinish(false);
-				setProblem("No file selected");
+				setProblem(texts.get("wizard.createfile.nofile"));
 				File fileToCreate = jfc.getSelectedFile();
 				
 				String filename = fileToCreate.toString();
@@ -109,9 +110,9 @@ public class CreateFileWizard extends Wizard {
 				
 				if(fileToCreate.exists()) {
 					int selectedOption = JOptionPane.showConfirmDialog(this,
-							"A file named '" + fileToCreate.getName()
-							+ "' already exists. Are you sure you want to overwrite it?",
-							"Overwrite file?", JOptionPane.OK_CANCEL_OPTION);
+							texts.format("dialog.overwrite.question", fileToCreate.getName()),
+							texts.get("dialog.overwrite.title"),
+							JOptionPane.OK_CANCEL_OPTION);
 					if(selectedOption != JOptionPane.OK_OPTION) {
 						return;
 					}
@@ -124,12 +125,12 @@ public class CreateFileWizard extends Wizard {
 				}
 				
 				if(fileToCreate.isDirectory()) {
-					setProblem("File can't be directory");
+					setProblem(texts.get("wizard.createfile.directory"));
 					return;
 				}
 				
 				if(!fileToCreate.exists() && !canCreate(fileToCreate)) {
-					setProblem("Can't create file");
+					setProblem(texts.get("wizard.createfile.cantcreate "));
 					return;
 				}
 				
@@ -147,10 +148,6 @@ public class CreateFileWizard extends Wizard {
 			ENCODING, LOCALE
 		}
 
-		private static final String LOCALE_COMBO_BOX_LIST_LABEL = "<Select a language>"; //TODO: externalize
-		private static final String COMBO_BOX_SEPARATOR =  "----------------------";
-		private static final String SELECT_CHARSET_INSTRUCTION = "If you don't know what character set to use, try different ones until the strings below look right";
-		
 		private boolean validLocale = false;
 		private boolean validEncoding = false;
 		
@@ -158,13 +155,12 @@ public class CreateFileWizard extends Wizard {
 		
 		@Override
 		public String getName() {
-			return "Choose encoding and language";
+			return texts.get("wizard.textimport.name");
 		}
 
 		@Override
 		public String getDescription() {
-			return "To import metadata correctly we need to know what language and character encoding the SPSS file uses.";
-					
+			return texts.get("wizard.textimport.description");
 		}
 		
 		@Override
@@ -172,11 +168,11 @@ public class CreateFileWizard extends Wizard {
 			setLayout(new BorderLayout(0, 0));
 			
 			JPanel localePanel = new JPanel();
-			localePanel.setBorder(BorderFactory.createTitledBorder("Select language"));
+			localePanel.setBorder(BorderFactory.createTitledBorder(texts.get("wizard.textimport.languageborder")));
 			JComboBox<DisplayLocale> localeComboBox = new JComboBox<>();
 			localePanel.add(localeComboBox);
 			//TODO better locale handling
-			localeComboBox.addItem(new DisplayLocale(LOCALE_COMBO_BOX_LIST_LABEL));
+			localeComboBox.addItem(new DisplayLocale(texts.get("wizard.textimport.selectlanguage")));
 			localeComboBox.addItem(new DisplayLocale(new Locale("sv")));
 			localeComboBox.addItem(new DisplayLocale(Locale.ENGLISH));
 			localeComboBox.setActionCommand(TextCommand.LOCALE.toString());
@@ -186,17 +182,17 @@ public class CreateFileWizard extends Wizard {
 			
 			JPanel encodingPanel = new JPanel(new BorderLayout());
 			JPanel encodingPickerPanel = new JPanel(new BorderLayout());
-			JLabel instruction = new JLabel(SELECT_CHARSET_INSTRUCTION);
+			JLabel instruction = new JLabel(texts.get("wizard.textimport.encodetext"));
 			encodingPickerPanel.add(instruction, BorderLayout.NORTH);
 			
-			encodingPanel.setBorder(BorderFactory.createTitledBorder("Select character encoding"));
+			encodingPanel.setBorder(BorderFactory.createTitledBorder(texts.get("wizard.textimport.encodingborder")));
 			JComboBox<DisplayCharset> encodingComboBox = new JComboBox<>();
 			encodingComboBox.addItem(new DisplayCharset(Charsets.UTF_8));
 			encodingComboBox.addItem(new DisplayCharset(Charsets.ISO_8859_1));
 			if(Charset.isSupported("windows-1252")) {
 				encodingComboBox.addItem(new DisplayCharset(Charset.forName("windows-1252")));
 			}
-			encodingComboBox.addItem(new DisplayCharset(COMBO_BOX_SEPARATOR));
+			encodingComboBox.addItem(new DisplayCharset(texts.get("wizard.textimport.comboseparator")));
 			for(Charset charset: Charset.availableCharsets().values()) {
 				if(CharsetTest.charset8bitTest(charset) && CharsetTest.charsetSPSSTest(charset)){
 					encodingComboBox.addItem(new DisplayCharset(charset));
@@ -254,7 +250,7 @@ public class CreateFileWizard extends Wizard {
 						encodingListPanel.validate();
 						validEncoding = true;
 					} catch (DaxploreException e1) {
-						setProblem("Unsupported encoding");
+						setProblem(texts.get("wizard.textimport.badencoding"));
 					}
 				}
 				break;
@@ -267,9 +263,9 @@ public class CreateFileWizard extends Wizard {
 		
 		private void updateWizardProblem() {
 			if(!validLocale) {
-				setProblem("Select a language");
+				setProblem(texts.get("wizard.textimport.selectlanguage"));
 			} else if(!validEncoding) {
-				setProblem("Select an encoding");
+				setProblem(texts.get("wizard.textimport.selectencoding"));
 			} else {
 				setProblem(null);
 			}
@@ -283,12 +279,12 @@ public class CreateFileWizard extends Wizard {
 		
 		@Override
 		public String getName() {
-			return "Choose a SPSS file to import";
+			return texts.get("wizard.opendata.name");
 		}
 
 		@Override
 		public String getDescription() {
-			return "Import data from a SPSS to your project";
+			return texts.get("wizard.opendata.description");
 		}
 
 		@Override
@@ -297,7 +293,7 @@ public class CreateFileWizard extends Wizard {
 			JPanel fileChoosePanel = new JPanel();
 			fileNameTextField = new JTextField(30);
 			fileNameTextField.setEditable(false);
-			JButton chooseButton = new JButton("Select file");
+			JButton chooseButton = new JButton(texts.get("wizard.opendata.selectfile"));
 			chooseButton.addActionListener(this);
 			fileChoosePanel.add(fileNameTextField);
 			fileChoosePanel.add(chooseButton);
@@ -317,7 +313,7 @@ public class CreateFileWizard extends Wizard {
 			JScrollPane scrollPane = new JScrollPane(reviewTable);
 			add(scrollPane, BorderLayout.CENTER);
 			
-			setProblem("No file selected");
+			setProblem(texts.get("wizard.opendata.nofile"));
 		}
 
 		@Override
@@ -325,7 +321,7 @@ public class CreateFileWizard extends Wizard {
 			
 			JFileChooser jfc = new JFileChooser(CreateFileWizard.preferences.getWorkingDirectory());
 			
-			FileFilter filter = new FileNameExtensionFilter("SPSS files", "sav");
+			FileFilter filter = new FileNameExtensionFilter(texts.get("wizard.opendata.spssfilter"), "sav");
 			jfc.addChoosableFileFilter(filter);
 			jfc.setFileFilter(filter);
 			
@@ -341,11 +337,11 @@ public class CreateFileWizard extends Wizard {
 					fileNameTextField.setText(spssFile.getAbsolutePath());
 				}
 				if(spssFile.isDirectory()) {
-					setProblem("File can't be directory");
+					setProblem(texts.get("wizard.opendata.directory"));
 				} else if(!spssFile.exists()) {
-					setProblem("File doesn't exist");
+					setProblem(texts.get("wizard.opendata.filenotexist"));
 				} else if(!spssFile.canRead()) {
-					setProblem("Can't read the selected file");
+					setProblem(texts.get("wizard.opendata.cantread"));
 				} else {
 					try (SPSSFile importSPSSFile = new SPSSFile(spssFile, Charsets.UTF_8)) {
 						importSPSSFile.logFlag = false;
@@ -355,7 +351,7 @@ public class CreateFileWizard extends Wizard {
 						reviewTable.setModel(model);
 						
 					} catch (IOException | SPSSFileException e1) {
-						setProblem("Selected file is not a valid SPSS file");
+						setProblem(texts.get("wizard.opendata.notvalidspss"));
 						e1.printStackTrace();
 						break;
 					}
@@ -388,7 +384,11 @@ public class CreateFileWizard extends Wizard {
 			}
 			
 			if(!problemVars.isEmpty()) {
-				setProblem("Illegal variable name" + (problemVars.size() > 1 ? "s":"") + ": '" + MyTools.join(problemVars, "', '") + "'");
+				if(problemVars.size() == 1) {
+					setProblem(texts.format("wizard.opendata.illegalvariable", problemVars.get(0)));
+				} else {
+					setProblem(texts.format("wizard.opendata.illegalvariables", MyTools.join(problemVars, "', '")));
+				}
 			}
 			
 			return new DefaultTableModel(data, columns);
@@ -402,7 +402,7 @@ public class CreateFileWizard extends Wizard {
 	static DaxplorePreferences preferences;
 	
 	public CreateFileWizard(JFrame window, EventBus eventBus, GuiTexts texts, DaxplorePreferences preferences) {
-		super(new Wizard.Builder("Create new project", OpenSPSSPanel.class, window));
+		super(new Wizard.Builder(texts.get("wizard.general.title"), OpenSPSSPanel.class, window));
 		this.eventBus = eventBus;
 		this.window = window;
 		CreateFileWizard.texts = texts;
