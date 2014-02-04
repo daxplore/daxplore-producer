@@ -106,22 +106,36 @@ public class CreateFileWizard extends Wizard {
 					filename += ".daxplore";
 					fileToCreate = new File(filename);
 				}
+				
+				if(fileToCreate.exists()) {
+					int selectedOption = JOptionPane.showConfirmDialog(this,
+							"A file named '" + fileToCreate.getName()
+							+ "' already exists. Are you sure you want to overwrite it?",
+							"Overwrite file?", JOptionPane.OK_CANCEL_OPTION);
+					if(selectedOption != JOptionPane.OK_OPTION) {
+						return;
+					}
+				}
+				
 				try {
 					fileNameTextField.setText(fileToCreate.getCanonicalPath());
 				} catch (IOException e1) {
 					fileNameTextField.setText(fileToCreate.getAbsolutePath());
 				}
+				
 				if(fileToCreate.isDirectory()) {
 					setProblem("File can't be directory");
-				} else if(fileToCreate.exists()) {
-					setProblem("File already exists");
-				} else if(!canCreate(fileToCreate)) {
-					setProblem("Can't create file");
-				} else {
-					setProblem(null);
-					data.put("daxploreFile", fileToCreate);
-					setCanFinish(true);
+					return;
 				}
+				
+				if(!fileToCreate.exists() && !canCreate(fileToCreate)) {
+					setProblem("Can't create file");
+					return;
+				}
+				
+				setProblem(null);
+				data.put("daxploreFile", fileToCreate);
+				setCanFinish(true);
 			}
 		}
 		

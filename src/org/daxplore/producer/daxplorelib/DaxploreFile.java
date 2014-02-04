@@ -88,6 +88,7 @@ public class DaxploreFile implements Closeable {
 		}
 		
 		try {
+			file.delete();
 			Connection connection =  DriverManager.getConnection("jdbc:sqlite:" + file.getAbsolutePath());
 			return new DaxploreFile(connection, true, file);
 		} catch (SQLException e) {
