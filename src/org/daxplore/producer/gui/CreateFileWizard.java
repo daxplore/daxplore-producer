@@ -109,11 +109,7 @@ public class CreateFileWizard extends Wizard {
 				}
 				
 				if(fileToCreate.exists()) {
-					int selectedOption = JOptionPane.showConfirmDialog(this,
-							texts.format("dialog.overwrite.question", fileToCreate.getName()),
-							texts.get("dialog.overwrite.title"),
-							JOptionPane.OK_CANCEL_OPTION);
-					if(selectedOption != JOptionPane.OK_OPTION) {
+					if(!Dialogs.confirmOverwrite(this, texts, fileToCreate.getName())) {
 						return;
 					}
 				}

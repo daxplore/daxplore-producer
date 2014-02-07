@@ -7,9 +7,7 @@
  ******************************************************************************/
 package org.daxplore.producer.gui;
 
-import java.awt.BorderLayout;
 import java.awt.Component;
-import java.awt.GridBagLayout;
 import java.awt.GridLayout;
 import java.awt.Label;
 import java.awt.event.ActionEvent;
@@ -24,7 +22,6 @@ import java.util.Map;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JComponent;
-import javax.swing.JDialog;
 import javax.swing.JFileChooser;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
@@ -44,6 +41,20 @@ import org.daxplore.producer.gui.utility.DisplayLocale;
 import org.daxplore.producer.gui.view.build.EditTextRefPanel;
 
 public class Dialogs {
+	
+	public static boolean confirmOverwrite(Component parent, GuiTexts texts, String fileName) {
+		String[] options = {texts.get("dialog.options.overwrite"), texts.get("dialog.options.cancel")};
+		int answer = JOptionPane.showOptionDialog(parent,
+				texts.format("dialog.overwrite.question", fileName),
+				texts.get("dialog.overwrite.title"),
+				JOptionPane.YES_NO_OPTION,
+				JOptionPane.QUESTION_MESSAGE,
+				null,
+				options,
+				options[1]);
+		
+		return answer == 0; // 0 == index of overwrite in array
+	}
 	
 	public static boolean editTextRefDialog(Component parent, GuiTexts texts,
 			List<Locale> locales, TextReference textRef) {
@@ -207,7 +218,7 @@ public class Dialogs {
 	}
 	
 	public static FileLocalePair showImportDialog(DaxplorePreferences preferences, GuiTexts texts, Component parent, List<Locale> localeList) {
-		TextImportPanel importPanel = new TextImportPanel(localeList, preferences);
+		TextImportPanel importPanel = new TextImportPanel(localeList);
 		JButton[] buttons = getOkCancelOptions(texts);
 		int returnVal = JOptionPane.showOptionDialog(parent,
 				importPanel,
@@ -236,7 +247,7 @@ public class Dialogs {
 	}
 	
 	public static FileLocaleUsedTriplet showExportDialog(DaxplorePreferences preferences, GuiTexts texts, Component parent, List<Locale> localeList) {
-		TextExportPanel exportPanel = new TextExportPanel(localeList, preferences);
+		TextExportPanel exportPanel = new TextExportPanel(localeList);
 		JButton[] buttons = getOkCancelOptions(texts);
 		int returnVal = JOptionPane.showOptionDialog(parent,
 				exportPanel,
@@ -286,7 +297,7 @@ public class Dialogs {
 		private JComboBox<DisplayLocale> localeBox;
 		private JComboBox<String> filterBox;
 		
-		public TextExportPanel(List<Locale> localeList, DaxplorePreferences preferences) {
+		public TextExportPanel(List<Locale> localeList) {
 			setLayout(new GridLayout(0,2));
 			
 			add(new Label("Locale "), 0);
@@ -321,7 +332,7 @@ public class Dialogs {
 	private static class TextImportPanel extends JPanel {
 		private JComboBox<DisplayLocale> localeBox;
 
-		public TextImportPanel(List<Locale> localeList, DaxplorePreferences preferences) {
+		public TextImportPanel(List<Locale> localeList) {
 			setLayout(new GridLayout(0, 2));
 
 			add(new Label("Locale "), 0);
