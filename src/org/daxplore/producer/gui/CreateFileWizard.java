@@ -163,10 +163,11 @@ public class CreateFileWizard extends Wizard {
 		public void initUI() {
 			setLayout(new BorderLayout(0, 0));
 			
-			JPanel localePanel = new JPanel();
+			JPanel localePanel = new JPanel(new BorderLayout());
 			localePanel.setBorder(BorderFactory.createTitledBorder(texts.get("wizard.textimport.languageborder")));
 			JComboBox<DisplayLocale> localeComboBox = new JComboBox<>();
-			localePanel.add(localeComboBox);
+			localePanel.add(new JLabel(texts.get("wizard.textimport.languageexplain")), BorderLayout.NORTH);
+			localePanel.add(localeComboBox, BorderLayout.CENTER);
 			//TODO better locale handling
 			localeComboBox.addItem(new DisplayLocale(texts.get("wizard.textimport.selectlanguagebox")));
 			localeComboBox.addItem(new DisplayLocale(new Locale("sv")));
