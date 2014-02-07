@@ -168,7 +168,7 @@ public class CreateFileWizard extends Wizard {
 			JComboBox<DisplayLocale> localeComboBox = new JComboBox<>();
 			localePanel.add(localeComboBox);
 			//TODO better locale handling
-			localeComboBox.addItem(new DisplayLocale(texts.get("wizard.textimport.selectlanguage")));
+			localeComboBox.addItem(new DisplayLocale(texts.get("wizard.textimport.selectlanguagebox")));
 			localeComboBox.addItem(new DisplayLocale(new Locale("sv")));
 			localeComboBox.addItem(new DisplayLocale(Locale.ENGLISH));
 			localeComboBox.setActionCommand(TextCommand.LOCALE.toString());
