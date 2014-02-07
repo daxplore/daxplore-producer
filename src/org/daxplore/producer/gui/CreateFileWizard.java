@@ -163,10 +163,23 @@ public class CreateFileWizard extends Wizard {
 		public void initUI() {
 			setLayout(new BorderLayout(0, 0));
 			
+			boolean hasTexts = false;
+			try {
+				hasTexts = SPSSTools.getNonAsciiStrings((File)data.get("spssFile"), Charsets.UTF_8).size() > 0;
+			} catch (DaxploreException e) {
+				setProblem(texts.get("wizard.textimport.badfile"));
+			}
+			
 			JPanel localePanel = new JPanel(new BorderLayout());
 			localePanel.setBorder(BorderFactory.createTitledBorder(texts.get("wizard.textimport.languageborder")));
 			JComboBox<DisplayLocale> localeComboBox = new JComboBox<>();
-			localePanel.add(new JLabel(texts.get("wizard.textimport.languageexplain")), BorderLayout.NORTH);
+			
+			if (hasTexts) {
+				localePanel.add(new JLabel(texts.get("wizard.textimport.languageexplain")), BorderLayout.NORTH);
+			} else {
+				localePanel.add(new JLabel(texts.get("wizard.textimport.languageexplain.notexts")), BorderLayout.NORTH);
+			}
+			
 			localePanel.add(localeComboBox, BorderLayout.CENTER);
 			//TODO better locale handling
 			localeComboBox.addItem(new DisplayLocale(texts.get("wizard.textimport.selectlanguagebox")));
@@ -179,10 +192,15 @@ public class CreateFileWizard extends Wizard {
 			
 			JPanel encodingPanel = new JPanel(new BorderLayout());
 			JPanel encodingPickerPanel = new JPanel(new BorderLayout());
-			JLabel instruction = new JLabel(texts.get("wizard.textimport.encodetext"));
-			encodingPickerPanel.add(instruction, BorderLayout.NORTH);
+			JLabel encodingExplain = new JLabel(texts.get("wizard.textimport.encodeexplain"));
+			encodingPickerPanel.add(encodingExplain, BorderLayout.NORTH);
 			
-			encodingPanel.setBorder(BorderFactory.createTitledBorder(texts.get("wizard.textimport.encodingborder")));
+			if(hasTexts) {
+				encodingPanel.setBorder(BorderFactory.createTitledBorder(texts.get("wizard.textimport.encodingborder")));
+			} else {
+				encodingPanel.setBorder(BorderFactory.createTitledBorder(texts.get("wizard.textimport.encodingborder.notexts")));
+			}
+			
 			JComboBox<DisplayCharset> encodingComboBox = new JComboBox<>();
 			encodingComboBox.addItem(new DisplayCharset(Charsets.UTF_8));
 			encodingComboBox.addItem(new DisplayCharset(Charsets.ISO_8859_1));
@@ -207,6 +225,10 @@ public class CreateFileWizard extends Wizard {
 			encodingListPanel.setViewportView(tablePanel);
 			encodingPanel.add(encodingListPanel, BorderLayout.CENTER);
 			add(encodingPanel, BorderLayout.CENTER);
+			
+			encodingExplain.setEnabled(hasTexts);
+			encodingComboBox.setEnabled(hasTexts);
+			encodingListPanel.setEnabled(hasTexts);
 			
 			actionPerformed(new ActionEvent(encodingComboBox, ActionEvent.ACTION_PERFORMED, TextCommand.ENCODING.toString()));
 			updateWizardProblem();
