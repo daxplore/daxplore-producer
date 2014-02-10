@@ -259,9 +259,7 @@ public class ImportExportManager {
 		}
 		
 		try {
-			System.out.print("\n");
 			for(RawMetaQuestion rmq : daxploreFile.getRawMeta().getQuestions()) {
-				System.out.print(".");
 				TextReference fulltext = daxploreFile.getTextReferenceManager().get(rmq.column + "_fulltext");
 				fulltext.put(rmq.qtext, locale);
 				MetaCalculation calc = new MetaCalculation(rmq.column, connection);

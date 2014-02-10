@@ -19,6 +19,8 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import org.daxplore.producer.daxplorelib.DaxploreException;
 import org.daxplore.producer.daxplorelib.DaxploreFile;
@@ -35,6 +37,8 @@ import org.opendatafoundation.data.spss.SPSSNumericVariable;
 import org.opendatafoundation.data.spss.SPSSStringVariable;
 import org.opendatafoundation.data.spss.SPSSVariable;
 import org.opendatafoundation.data.spss.SPSSVariableCategory;
+
+import com.google.common.primitives.Doubles;
 
 
 public class RawMeta {
@@ -209,7 +213,7 @@ public class RawMeta {
 	    	Map.Entry entry = (Map.Entry)iter.next();
 			list.add(new Pair<>((String)entry.getValue(), Double.parseDouble((String) entry.getKey())));
 	    }
-	    
+    
 		return list;
 	}
 	
@@ -228,7 +232,13 @@ public class RawMeta {
 				rmq.spsstype = rs.getString("spsstype");
 				String cats = rs.getString("valuelabels");
 				if(cats != null && !cats.isEmpty()) {
-					rmq.valuelables = JSONtoCategories(rs.getString("valuelabels"));
+					try {
+						rmq.valuelables = JSONtoCategories(rs.getString("valuelabels"));
+					} catch (NumberFormatException e) {
+						//TODO: send message to client
+						Logger.getGlobal().log(Level.SEVERE, "Variable \"" + rmq.column + "\" was ignored");
+						continue;
+					}
 				} else {
 					rmq.valuelables = new LinkedList<>(); 
 				}
