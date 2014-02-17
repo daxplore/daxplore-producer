@@ -141,7 +141,7 @@ public class GroupsController implements ActionListener, MouseListener {
 			if(groupTree.getSelectionPath()==null) {
 				break;
 			}
-			editTree(groupTree.getSelectionPath());
+			editNode(groupTree.getSelectionPath());
 			break;
 		case GROUP_ADD:
 			TextReferenceManager textReferenceManager = daxploreFile.getTextReferenceManager();
@@ -368,7 +368,12 @@ public class GroupsController implements ActionListener, MouseListener {
 		}
 	}
 	
-	private void editTree(TreePath path) {
+	/**
+	 * Edit the {@link MetaGroup} or {@link MetaGroup} described by the path.
+	 * 
+	 * @param path The path to the node to be edited
+	 */
+	private void editNode(TreePath path) {
 		if (path != null) {
 			Object[] pathObjects = path.getPath();
 			if(pathObjects.length == 2 && pathObjects[1] instanceof MetaGroup) {
@@ -389,7 +394,7 @@ public class GroupsController implements ActionListener, MouseListener {
 	public Component getView() {
 		return groupsView;
 	}
-
+	
 	@Override
 	public void mouseClicked(MouseEvent e) {
 	}
@@ -408,7 +413,7 @@ public class GroupsController implements ActionListener, MouseListener {
     @Override
     public void mousePressed(MouseEvent e) {
     	if(e.getClickCount() == 2) {
-    		editTree(groupTree.getPathForLocation(e.getX(), e.getY()));
+    		editNode(groupTree.getPathForLocation(e.getX(), e.getY()));
         }
     }
 
