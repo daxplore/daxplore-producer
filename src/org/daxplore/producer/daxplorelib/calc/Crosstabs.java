@@ -84,7 +84,7 @@ public class Crosstabs {
 		rawColnames = new String[tempRawColnames.size()];
 		
 		for(int col = 0; col < tempRawColnames.size(); col++) {
-			rawColnames[col] = tempRawColnames.get(col).getKey();
+			rawColnames[col] = tempRawColnames.get(col).getKey().toUpperCase();
 		}
 		
 		rawTimePointIndex = Arrays.binarySearch(rawColnames, about.getTimeSeriesShortColumn().toUpperCase());
@@ -128,7 +128,7 @@ public class Crosstabs {
 			}
 			
 			return stats;
-		} catch (SQLException | NullPointerException e) {
+		} catch (SQLException | NullPointerException | ArrayIndexOutOfBoundsException e) {
 			throw new DaxploreException("Failed to generate crosstabs for question: " + question.getId() + ", perspective: " + perspective.getId(), e);
 		}
 	}
@@ -144,8 +144,8 @@ public class Crosstabs {
 		
 		if(hasLoadedRawdata) {
 			
-			int questionColIndex = Arrays.binarySearch(rawColnames, question.getId());
-			int perspectiveColIndex = Arrays.binarySearch(rawColnames, perspective.getId());
+			int questionColIndex = Arrays.binarySearch(rawColnames, question.getId().toUpperCase());
+			int perspectiveColIndex = Arrays.binarySearch(rawColnames, perspective.getId().toUpperCase());
 			
 			MetaScale questionScale = question.getScale();
 			MetaScale perspectiveScale = perspective.getScale();
@@ -200,7 +200,7 @@ public class Crosstabs {
 		if(hasLoadedRawdata) {
 			MetaScale scale = question.getScale();
 			
-			int questionColIndex = Arrays.binarySearch(rawColnames, question.getId());
+			int questionColIndex = Arrays.binarySearch(rawColnames, question.getId().toUpperCase());
 			
 			for(int row = 0; row < rawdataTable[0].length; row++) {
 				if(rawdataTable[rawTimePointIndex][row] == timepoint.getValue()) {
