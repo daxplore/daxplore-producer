@@ -141,7 +141,7 @@ public class MainController {
 		toolbarController = new ToolbarController(eventBus, actionManager);
 		groupsController = new GroupsController(eventBus, texts);
 		editTextController = new EditTextController(eventBus, texts);
-		toolsController = new ToolsController(eventBus, preferences);
+		toolsController = new ToolsController(eventBus);
 		questionController = new QuestionController(eventBus, texts);
 		timeSeriesController = new TimeSeriesController(eventBus, texts);
 
@@ -410,6 +410,13 @@ public class MainController {
 	@Subscribe
 	public void on(ExportUploadEvent e) {
 		File exportTo = Dialogs.showExportDialog(mainWindow, preferences);
+		if(exportTo.exists()) {
+			if(Dialogs.confirmOverwrite(mainWindow, texts, exportTo.getName())) {
+				exportTo.delete();
+			} else {
+				return;
+			}
+		}
 		try {
 			daxploreFile.writeUploadFile(exportTo);
 		} catch (DaxploreException e1) {

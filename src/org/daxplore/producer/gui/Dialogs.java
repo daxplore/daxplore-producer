@@ -211,7 +211,13 @@ public class Dialogs {
 		switch(returnVal) {
 		case JFileChooser.APPROVE_OPTION:
 			preferences.setWorkingDirectory(fc.getCurrentDirectory());
-			return fc.getSelectedFile();
+			File fileToCreate = fc.getSelectedFile();
+			String filename = fileToCreate.toString();
+			if(!filename.toLowerCase().endsWith(".zip")) {
+				filename += ".zip";
+				fileToCreate = new File(filename);
+			}
+			return fileToCreate;
 		default:
 			return null;
 		}
