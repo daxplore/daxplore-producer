@@ -9,7 +9,6 @@ package org.daxplore.producer.gui.view.build;
 
 import java.awt.Color;
 import java.awt.Component;
-import java.awt.Point;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseMotionAdapter;
@@ -26,6 +25,7 @@ import javax.swing.table.TableCellRenderer;
 import javax.swing.table.TableModel;
 
 import org.daxplore.producer.daxplorelib.metadata.MetaQuestion;
+import org.daxplore.producer.gui.event.EditQuestionEvent;
 import org.daxplore.producer.gui.resources.Colors;
 import org.daxplore.producer.gui.widget.QuestionWidget;
 
@@ -36,7 +36,7 @@ public class QuestionTable extends JTable {
 	
 	protected int mouseOver;
 	
-	public QuestionTable(EventBus eventBus, TableModel model) {
+	public QuestionTable(final EventBus eventBus, final TableModel model) {
 		super(model);
 		setTableHeader(null);
 		
@@ -52,16 +52,33 @@ public class QuestionTable extends JTable {
         addMouseMotionListener(new MouseMotionAdapter() {
             @Override
 			public void mouseMoved(MouseEvent e) {
-            	mouseOver = rowAtPoint(new Point(e.getX(), e.getY()));
+            	mouseOver = rowAtPoint(e.getPoint());
                 repaint();
             }
         });
 
         addMouseListener(new MouseAdapter() {
+        	/**
+        	 * Stop showing mouse over highlighting when mouse exits
+        	 */
             @Override
 			public void mouseExited(MouseEvent e) {
                 mouseOver = -1;
                 repaint();
+            }
+            
+            /**
+             * Edit a variable that is double clicked
+             */
+            @Override
+            public void mousePressed(MouseEvent e) {
+            	if(e.getClickCount() == 2) {
+            		int row = rowAtPoint(e.getPoint());
+            		Object clickedObject = model.getValueAt(row, 0);
+            		if(clickedObject instanceof MetaQuestion) {
+            			eventBus.post(new EditQuestionEvent((MetaQuestion)clickedObject));
+            		}
+            	}
             }
         });
 	}
