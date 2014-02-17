@@ -20,6 +20,8 @@ import java.nio.file.StandardOpenOption;
 import java.util.List;
 import java.util.Locale;
 import java.util.Stack;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import javax.swing.JDialog;
 import javax.swing.JFrame;
@@ -310,6 +312,8 @@ public class MainController {
 		} else {
 			JLabelSelectable message = new JLabelSelectable(
 					texts.format("dialog.error.message", e.getUserMessage(), e.getCause().getLocalizedMessage()));
+			Logger.getGlobal().log(Level.SEVERE, e.getUserMessage());
+			e.getCause().printStackTrace();
 			int answer = JOptionPane.showOptionDialog(mainWindow,
 					message,
 					texts.get("dialog.error.title"),
