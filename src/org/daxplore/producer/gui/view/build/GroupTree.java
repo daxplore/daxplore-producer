@@ -42,7 +42,7 @@ import com.google.common.eventbus.EventBus;
 @SuppressWarnings("serial")
 public class GroupTree extends JTree {
 	
-    public GroupTree(EventBus eventBus, GroupTreeModel groupTreeModel) {
+    public GroupTree(final EventBus eventBus, GroupTreeModel groupTreeModel) {
     	super(groupTreeModel);
     	setRootVisible(false);
     	GroupTreeCellRendererEditor groupTreeCellRendererEditor = new GroupTreeCellRendererEditor(eventBus);

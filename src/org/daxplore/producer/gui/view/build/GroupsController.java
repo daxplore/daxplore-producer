@@ -10,6 +10,8 @@ package org.daxplore.producer.gui.view.build;
 import java.awt.Component;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -37,7 +39,7 @@ import org.daxplore.producer.gui.resources.GuiTexts;
 import com.google.common.eventbus.EventBus;
 import com.google.common.eventbus.Subscribe;
 
-public class GroupsController implements ActionListener {
+public class GroupsController implements ActionListener, MouseListener {
 
 	enum GroupsCommand {
 		EDIT_VARIABLE, GROUP_ADD, GROUP_UP, GROUP_DOWN, GROUP_REMOVE, GROUP_ADD_ITEM,
@@ -104,6 +106,7 @@ public class GroupsController implements ActionListener {
 			//get groups and perspectives
 			groupTreeModel = new GroupTreeModel(daxploreFile.getMetaGroupManager());
 			groupTree = new GroupTree(eventBus, groupTreeModel);
+			groupTree.addMouseListener(this);
 			groupsView.setQuestionTree(groupTree);
 			
 			MetaGroup perspectives = daxploreFile.getMetaGroupManager().getPerspectiveGroup();
@@ -132,27 +135,13 @@ public class GroupsController implements ActionListener {
 		int[] selectedRows;
 		switch(GroupsCommand.valueOf(e.getActionCommand())) {
 		case EDIT_VARIABLE:
-			//TODO use a different event when the question view is replaced with modular window
 			eventBus.post(new EditQuestionEvent(selectedMetaQuestion));
 			break;
 		case EDIT_TREE:
 			if(groupTree.getSelectionPath()==null) {
 				break;
 			}
-			path = groupTree.getSelectionPath().getPath();
-			if(path.length == 2 && path[1] instanceof MetaGroup) {
-				TextReferenceManager textReferenceManager = daxploreFile.getTextReferenceManager();
-				paths = groupTree.getSelectionPaths(); 
-				MetaGroup metaGroup = (MetaGroup) path[1];
-				boolean edited = Dialogs.editGroupDialog(getView(), textReferenceManager, texts, daxploreFile.getAbout().getLocales(), metaGroup);
-				if(edited) {
-					groupTree.setSelectionPath(null);
-					groupTree.setSelectionPaths(paths);
-				}
-			} else if (path.length == 3 && path[2] instanceof MetaQuestion) {
-				//TODO use a different event when the question view is replaced with modular window
-				eventBus.post(new EditQuestionEvent((MetaQuestion)path[2]));
-			}
+			editTree(groupTree.getSelectionPath());
 			break;
 		case GROUP_ADD:
 			TextReferenceManager textReferenceManager = daxploreFile.getTextReferenceManager();
@@ -378,8 +367,50 @@ public class GroupsController implements ActionListener {
 			groupsView.setVariableInfo(id, "", "");
 		}
 	}
-
+	
+	private void editTree(TreePath path) {
+		Object[] pathObjects = path.getPath();
+		if(pathObjects.length == 2 && pathObjects[1] instanceof MetaGroup) {
+			TextReferenceManager textReferenceManager = daxploreFile.getTextReferenceManager();
+			TreePath[] paths = groupTree.getSelectionPaths(); 
+			MetaGroup metaGroup = (MetaGroup) pathObjects[1];
+			boolean edited = Dialogs.editGroupDialog(getView(), textReferenceManager, texts, daxploreFile.getAbout().getLocales(), metaGroup);
+			if(edited) {
+				groupTree.setSelectionPath(null);
+				groupTree.setSelectionPaths(paths);
+			}
+		} else if (pathObjects.length == 3 && pathObjects[2] instanceof MetaQuestion) {
+			eventBus.post(new EditQuestionEvent((MetaQuestion)pathObjects[2]));
+		}
+	}
+	
 	public Component getView() {
 		return groupsView;
+	}
+
+	@Override
+	public void mouseClicked(MouseEvent e) {
+	}
+
+	@Override
+	public void mouseEntered(MouseEvent e) {
+	}
+
+	@Override
+	public void mouseExited(MouseEvent e) {
+	}
+
+	/**
+	 * Edit tree on double click
+	 */
+    @Override
+    public void mousePressed(MouseEvent e) {
+    	if(e.getClickCount() == 2) {
+    		editTree(groupTree.getPathForLocation(e.getX(), e.getY()));
+        }
+    }
+
+	@Override
+	public void mouseReleased(MouseEvent e) {
 	}
 }
