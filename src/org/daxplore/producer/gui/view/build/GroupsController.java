@@ -369,18 +369,20 @@ public class GroupsController implements ActionListener, MouseListener {
 	}
 	
 	private void editTree(TreePath path) {
-		Object[] pathObjects = path.getPath();
-		if(pathObjects.length == 2 && pathObjects[1] instanceof MetaGroup) {
-			TextReferenceManager textReferenceManager = daxploreFile.getTextReferenceManager();
-			TreePath[] paths = groupTree.getSelectionPaths(); 
-			MetaGroup metaGroup = (MetaGroup) pathObjects[1];
-			boolean edited = Dialogs.editGroupDialog(getView(), textReferenceManager, texts, daxploreFile.getAbout().getLocales(), metaGroup);
-			if(edited) {
-				groupTree.setSelectionPath(null);
-				groupTree.setSelectionPaths(paths);
+		if (path != null) {
+			Object[] pathObjects = path.getPath();
+			if(pathObjects.length == 2 && pathObjects[1] instanceof MetaGroup) {
+				TextReferenceManager textReferenceManager = daxploreFile.getTextReferenceManager();
+				TreePath[] paths = groupTree.getSelectionPaths(); 
+				MetaGroup metaGroup = (MetaGroup) pathObjects[1];
+				boolean edited = Dialogs.editGroupDialog(getView(), textReferenceManager, texts, daxploreFile.getAbout().getLocales(), metaGroup);
+				if(edited) {
+					groupTree.setSelectionPath(null);
+					groupTree.setSelectionPaths(paths);
+				}
+			} else if (pathObjects.length == 3 && pathObjects[2] instanceof MetaQuestion) {
+				eventBus.post(new EditQuestionEvent((MetaQuestion)pathObjects[2]));
 			}
-		} else if (pathObjects.length == 3 && pathObjects[2] instanceof MetaQuestion) {
-			eventBus.post(new EditQuestionEvent((MetaQuestion)pathObjects[2]));
 		}
 	}
 	
