@@ -205,7 +205,7 @@ class GroupTreeModel implements TreeModel {
 
 	@Override
 	public void valueForPathChanged(TreePath path, Object newValue) {
-		// TODO Should this do anything?!?
+		fireTreeNodesChanged(new TreeModelEvent(this, path));
 	}
 
 	@Override
@@ -222,12 +222,10 @@ class GroupTreeModel implements TreeModel {
 	    }
 	}
 	
-	@SuppressWarnings("unused")
 	private void fireTreeNodesChanged(TreeModelEvent e) {
 		for(TreeModelListener tml: listeners.getListeners(TreeModelListener.class)) {
 			tml.treeNodesChanged(e);
 		}
-		//fireTreeStructureChanged(e);
 	}
 	
 	private void fireTreeNodesInserted(TreeModelEvent e) {

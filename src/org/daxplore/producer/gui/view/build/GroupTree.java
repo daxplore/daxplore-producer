@@ -47,15 +47,14 @@ public class GroupTree extends JTree {
     	setRootVisible(false);
     	GroupTreeCellRendererEditor groupTreeCellRendererEditor = new GroupTreeCellRendererEditor(eventBus);
     	setCellRenderer(groupTreeCellRendererEditor);
-    	setCellEditor(groupTreeCellRendererEditor);
     	setUI(new GroupTreeUI());
-    	setEditable(true);
+    	setEditable(false);
     	ToolTipManager.sharedInstance().registerComponent(this);
     }
     
     @Override
     public String getToolTipText(MouseEvent event) {
-    	TreePath path = getPathForLocation(event.getX(),event.getY());
+    	TreePath path = getPathForLocation(event.getX(), event.getY());
     	if(path != null && path.getLastPathComponent() instanceof MetaQuestion) {
     		MetaQuestion mq = (MetaQuestion)path.getLastPathComponent();
     		return mq.getFullTextRef().get(Settings.getCurrentDisplayLocale());
@@ -77,7 +76,8 @@ public class GroupTree extends JTree {
 		}
 		
 		@Override
-		public Component getTreeCellRendererComponent(JTree tree, Object value, boolean selected, boolean expanded, boolean leaf, int row, boolean hasFocus) {
+		public Component getTreeCellRendererComponent(JTree tree, Object value, boolean selected,
+				boolean expanded, boolean leaf, int row, boolean hasFocus) {
 			Container container;
 			if(value instanceof MetaQuestion) {
 				MetaQuestion mq = (MetaQuestion)value;
@@ -107,7 +107,8 @@ public class GroupTree extends JTree {
 		}
 
 		@Override
-		public Component getTreeCellEditorComponent(JTree tree, Object value, boolean isSelected, boolean expanded, boolean leaf, int row) {
+		public Component getTreeCellEditorComponent(JTree tree, Object value, boolean isSelected,
+				boolean expanded, boolean leaf, int row) {
 			Component comp;
 			if(value instanceof MetaQuestion) {
 				questionWidget.setContent((MetaQuestion)value);

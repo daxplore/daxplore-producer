@@ -59,7 +59,7 @@ public class QuestionWidget extends JPanel implements AbstractWidgetEditor<MetaQ
 			shortTextLabel.setBorder(new EmptyBorder(0, 0, 0, 15));
 			topRowPanel.add(shortTextLabel, BorderLayout.WEST);
 			topRowPanel.add(idLabel, BorderLayout.CENTER);
-			add(topRowPanel, BorderLayout.NORTH);
+			add(topRowPanel, BorderLayout.WEST);
 		} else {
 			setLayout(new GridLayout(1, 1));
 			JPanel containerPanel = new JPanel(new BorderLayout(0, 4));
