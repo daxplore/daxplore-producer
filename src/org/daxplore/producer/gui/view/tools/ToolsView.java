@@ -32,23 +32,12 @@ public class ToolsView extends JPanel {
 	ToolsView(ActionListener listener) {
 		setLayout(null);
 		
-		textField = new JTextField();
-		textField.setBounds(147, 10, 114, 19);
-		add(textField);
-		textField.setColumns(10);
-		
 		JButton addTimepointsButton = new JButton("Replace timepoints");
 		addTimepointsButton.setBounds(27, 189, 185, 47);
 		addTimepointsButton.setActionCommand(ToolsCommand.REPLACE_TIMEPOINTS.toString());
 		addTimepointsButton.addActionListener(listener);
 		add(addTimepointsButton);
-		
-		JButton generateDataButton = new JButton("Generate Data");
-		generateDataButton.setBounds(247, 101, 191, 25);
-		generateDataButton.setActionCommand(ToolsCommand.GENERATE_DATA.toString());
-		generateDataButton.addActionListener(listener);
-		add(generateDataButton);
-		
+
 		scrollPane = new JScrollPane();
 		scrollPane.setBounds(301, 234, 294, 204);
 		add(scrollPane);
