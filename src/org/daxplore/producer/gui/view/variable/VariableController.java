@@ -10,15 +10,12 @@ package org.daxplore.producer.gui.view.variable;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.sql.SQLException;
-import java.util.Collections;
-import java.util.Comparator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map.Entry;
 import java.util.TreeMap;
 
 import javax.swing.JDialog;
-import javax.swing.JTable;
 import javax.swing.WindowConstants;
 import javax.swing.event.TableModelEvent;
 import javax.swing.event.TableModelListener;
@@ -28,16 +25,10 @@ import org.daxplore.producer.daxplorelib.DaxploreFile;
 import org.daxplore.producer.daxplorelib.metadata.MetaQuestion;
 import org.daxplore.producer.daxplorelib.metadata.MetaScale;
 import org.daxplore.producer.daxplorelib.metadata.MetaScale.Option;
-import org.daxplore.producer.daxplorelib.metadata.textreference.TextReference;
 import org.daxplore.producer.daxplorelib.raw.VariableOptionInfo;
 import org.daxplore.producer.gui.resources.GuiTexts;
-import org.daxplore.producer.gui.view.question.ScaleTable;
-import org.daxplore.producer.gui.view.question.ScaleTableModel;
 import org.daxplore.producer.gui.view.question.TimePointTable;
 import org.daxplore.producer.gui.view.question.TimePointTableModel;
-import org.daxplore.producer.gui.widget.ColumnTableModel;
-import org.daxplore.producer.tools.NumberlineCoverage;
-import org.daxplore.producer.tools.Pair;
 
 import com.google.common.eventbus.EventBus;
 

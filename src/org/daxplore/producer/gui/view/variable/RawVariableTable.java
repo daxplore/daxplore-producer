@@ -32,8 +32,8 @@ import javax.swing.table.TableCellRenderer;
 import org.daxplore.producer.gui.resources.Colors;
 import org.daxplore.producer.gui.resources.GuiTexts;
 import org.daxplore.producer.gui.widget.AbstractWidgetEditor;
-import org.daxplore.producer.gui.widget.TextWidget;
 import org.daxplore.producer.gui.widget.AbstractWidgetEditor.InvalidContentException;
+import org.daxplore.producer.gui.widget.TextWidget;
 import org.jdesktop.swingx.JXTable;
 
 import com.google.common.eventbus.EventBus;

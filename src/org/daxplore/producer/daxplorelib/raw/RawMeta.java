@@ -26,7 +26,6 @@ import org.daxplore.producer.daxplorelib.DaxploreException;
 import org.daxplore.producer.daxplorelib.DaxploreFile;
 import org.daxplore.producer.daxplorelib.DaxploreTable;
 import org.daxplore.producer.daxplorelib.SQLTools;
-import org.daxplore.producer.tools.MyTools;
 import org.daxplore.producer.tools.Pair;
 import org.json.simple.JSONValue;
 import org.json.simple.parser.ContainerFactory;
@@ -37,8 +36,6 @@ import org.opendatafoundation.data.spss.SPSSNumericVariable;
 import org.opendatafoundation.data.spss.SPSSStringVariable;
 import org.opendatafoundation.data.spss.SPSSVariable;
 import org.opendatafoundation.data.spss.SPSSVariableCategory;
-
-import com.google.common.primitives.Doubles;
 
 
 public class RawMeta {
