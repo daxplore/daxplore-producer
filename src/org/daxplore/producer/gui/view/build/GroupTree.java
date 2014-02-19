@@ -22,6 +22,7 @@ import javax.swing.AbstractCellEditor;
 import javax.swing.Icon;
 import javax.swing.JPanel;
 import javax.swing.JTree;
+import javax.swing.SwingUtilities;
 import javax.swing.ToolTipManager;
 import javax.swing.plaf.basic.BasicTreeUI;
 import javax.swing.tree.TreeCellEditor;
@@ -31,6 +32,9 @@ import javax.swing.tree.TreePath;
 import org.daxplore.producer.daxplorelib.metadata.MetaGroup;
 import org.daxplore.producer.daxplorelib.metadata.MetaQuestion;
 import org.daxplore.producer.gui.Settings;
+import org.daxplore.producer.gui.MainController.Views;
+import org.daxplore.producer.gui.event.ChangeMainViewEvent;
+import org.daxplore.producer.gui.event.DisplayLocaleSelectEvent;
 import org.daxplore.producer.gui.resources.Colors;
 import org.daxplore.producer.gui.widget.AbstractWidgetEditor;
 import org.daxplore.producer.gui.widget.AbstractWidgetEditor.InvalidContentException;
@@ -38,18 +42,50 @@ import org.daxplore.producer.gui.widget.GroupWidget;
 import org.daxplore.producer.gui.widget.QuestionWidget;
 
 import com.google.common.eventbus.EventBus;
+import com.google.common.eventbus.Subscribe;
 
 @SuppressWarnings("serial")
 public class GroupTree extends JTree {
 	
+	private final EventBus eventBus;
+	
     public GroupTree(final EventBus eventBus, GroupTreeModel groupTreeModel) {
     	super(groupTreeModel);
+    	this.eventBus = eventBus;
     	setRootVisible(false);
-    	GroupTreeCellRendererEditor groupTreeCellRendererEditor = new GroupTreeCellRendererEditor(eventBus);
-    	setCellRenderer(groupTreeCellRendererEditor);
     	setUI(new GroupTreeUI());
     	setEditable(false);
     	ToolTipManager.sharedInstance().registerComponent(this);
+    	
+    	eventBus.register(this);
+    	
+    	setCellRenderer(new GroupTreeCellRendererEditor(eventBus));
+    	
+    	// reset the renderer later, tricking it into rendering widths correctly
+    	SwingUtilities.invokeLater(new Runnable() {
+			@Override
+			public void run() {
+				setCellRenderer(new GroupTreeCellRendererEditor(eventBus));
+			}
+		});
+    }
+    
+    /**
+     * Reset the renderer when the view changes, tricking it into rendering widths correctly
+     */
+    @Subscribe
+    public void on(ChangeMainViewEvent e) {
+    	if(e.getView() == Views.GROUPSVIEW) {
+    		setCellRenderer(new GroupTreeCellRendererEditor(eventBus));
+    	}
+    }
+    
+    /**
+     * Reset the renderer when the locale changes, tricking it into rendering widths correctly
+     */
+    @Subscribe
+    public void on(DisplayLocaleSelectEvent e) {
+		setCellRenderer(new GroupTreeCellRendererEditor(eventBus));
     }
     
     @Override
