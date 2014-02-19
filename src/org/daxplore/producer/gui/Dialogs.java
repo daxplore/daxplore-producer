@@ -68,7 +68,7 @@ public class Dialogs {
 				JOptionPane.PLAIN_MESSAGE,
 				null,
 				buttons,
-				buttons[0]);
+				null);
 		
 		if(answer == 0) { // 0 == index of okButton in buttons array
 			
@@ -94,7 +94,7 @@ public class Dialogs {
 				JOptionPane.PLAIN_MESSAGE,
 				null,
 				buttons,
-				buttons[0]);
+				null);
 		
 		if(answer == 0) { // 0 == index of okButton in buttons array
 			String textRefId = editor.getNewTextRefId(); 
@@ -143,7 +143,7 @@ public class Dialogs {
 				JOptionPane.PLAIN_MESSAGE,
 				null,
 				buttons,
-				buttons[0]);
+				null);
 		
 		if(answer == 0) { // 0 == index of okButton in buttons array
 			String textRefId = editor.getNewTextRefId();

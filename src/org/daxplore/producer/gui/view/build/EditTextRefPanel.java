@@ -11,6 +11,9 @@ import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.GridLayout;
 import java.awt.Label;
+import java.awt.event.ComponentAdapter;
+import java.awt.event.ComponentEvent;
+import java.awt.event.ComponentListener;
 import java.text.MessageFormat;
 import java.util.HashMap;
 import java.util.List;
@@ -21,6 +24,8 @@ import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
+import javax.swing.event.AncestorEvent;
+import javax.swing.event.AncestorListener;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 
@@ -88,7 +93,7 @@ public class EditTextRefPanel extends JPanel implements DocumentListener {
 			textRefIdLabel = new JLabel();
 			editPanel.add(textRefIdLabel, i++);
 		}
-
+		
 		for(Locale l : localesToEdit) {
 			Label label = new Label(MessageFormat.format(texts.get("edit.texts.forlang"), l.getDisplayLanguage(Settings.getProgramLocale()))); 
 			editPanel.add(label, i++);
@@ -98,6 +103,7 @@ public class EditTextRefPanel extends JPanel implements DocumentListener {
 			editPanel.add(textField, i++);
 		}
 		
+
 		add(editPanel, BorderLayout.CENTER);
 		
 		badTextRefIdLabel = new JLabel();
@@ -106,6 +112,19 @@ public class EditTextRefPanel extends JPanel implements DocumentListener {
 		if(allowRefstringEdit) {
 			updateValidTextRefWarning();
 		}
+		
+		JTextField defaultTextField = localeTextFields.get(Settings.getCurrentDisplayLocale());
+		
+		defaultTextField.addAncestorListener(new AncestorListener() {
+			@Override
+			public void ancestorRemoved(AncestorEvent event) {}
+			@Override
+			public void ancestorMoved(AncestorEvent event) {}
+			@Override
+			public void ancestorAdded(AncestorEvent event) {
+				event.getComponent().requestFocusInWindow();
+			}
+		});
 	}
 
 	public String getNewTextRefId() {
