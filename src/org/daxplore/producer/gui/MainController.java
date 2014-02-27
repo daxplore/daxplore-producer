@@ -13,7 +13,6 @@ import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.io.BufferedWriter;
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.StandardOpenOption;
@@ -50,6 +49,7 @@ import org.daxplore.producer.gui.event.EmptyEvents.ExportUploadEvent;
 import org.daxplore.producer.gui.event.EmptyEvents.HistoryGoBackEvent;
 import org.daxplore.producer.gui.event.EmptyEvents.ImportTextsEvent;
 import org.daxplore.producer.gui.event.EmptyEvents.QuitProgramEvent;
+import org.daxplore.producer.gui.event.EmptyEvents.ReloadTextsEvent;
 import org.daxplore.producer.gui.event.EmptyEvents.RepaintWindowEvent;
 import org.daxplore.producer.gui.event.EmptyEvents.SaveFileEvent;
 import org.daxplore.producer.gui.event.ErrorMessageEvent;
@@ -279,12 +279,9 @@ public class MainController {
 			try {
 				daxploreFile.importL10n(
 						Files.newBufferedReader(file.toPath(), Charsets.UTF_8), format, locale);
-			} catch (FileNotFoundException e1) {
-				throw new AssertionError("File exists but is not found");
-			} catch (IOException e1) {
-				e1.printStackTrace();
-			} catch (DaxploreException e1) {
-				e1.printStackTrace();
+				eventBus.post(new ReloadTextsEvent());
+			} catch (IOException | DaxploreException e1) {
+				eventBus.post(new ErrorMessageEvent("Failed to import texts", e1));
 			}
 		}
 	}
@@ -296,6 +293,7 @@ public class MainController {
 		dialog.setSize(800, 800);
 		dialog.setLocationRelativeTo(mainWindow);
 		dialog.setVisible(true);
+		eventBus.post(new ReloadTextsEvent());
 	}
 	
 	@Subscribe

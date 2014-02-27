@@ -20,32 +20,36 @@ import javax.swing.JTable;
 import javax.swing.ListSelectionModel;
 import javax.swing.border.Border;
 import javax.swing.border.EmptyBorder;
+import javax.swing.table.AbstractTableModel;
 import javax.swing.table.TableCellEditor;
 import javax.swing.table.TableCellRenderer;
-import javax.swing.table.TableModel;
 
 import org.daxplore.producer.daxplorelib.metadata.MetaQuestion;
 import org.daxplore.producer.gui.event.EditQuestionEvent;
+import org.daxplore.producer.gui.event.EmptyEvents.ReloadTextsEvent;
 import org.daxplore.producer.gui.resources.Colors;
 import org.daxplore.producer.gui.widget.QuestionWidget;
 
 import com.google.common.eventbus.EventBus;
+import com.google.common.eventbus.Subscribe;
 
 @SuppressWarnings("serial")
 public class QuestionTable extends JTable {
 	
 	protected int mouseOver;
+	private AbstractTableModel model;
 	
-	public QuestionTable(final EventBus eventBus, final TableModel model) {
+	public QuestionTable(final EventBus eventBus, final AbstractTableModel model) {
 		super(model);
+		this.model = model;
+		
+		eventBus.register(this);
 		setTableHeader(null);
 		
 		setSelectionMode(ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
         mouseOver = -1;
         
-        QuestionCellRenderer questionCellRenderer = new QuestionCellRenderer(eventBus);
-        setDefaultRenderer(MetaQuestion.class, questionCellRenderer);
-        setDefaultEditor(MetaQuestion.class, questionCellRenderer);
+        setDefaultRenderer(MetaQuestion.class, new QuestionCellRenderer(eventBus));
         //TODO should we have to create a QuestionWidget here?
         setRowHeight(new QuestionWidget(eventBus).getPreferredSize().height);
         
@@ -81,6 +85,15 @@ public class QuestionTable extends JTable {
             	}
             }
         });
+	}
+	
+	@Subscribe
+	public void on(ReloadTextsEvent e) {
+		int[] selected = getSelectedRows();
+		model.fireTableDataChanged();
+		for(int i=0; i<selected.length; i++) {
+			addRowSelectionInterval(selected[i], selected[i]);
+		}
 	}
 	
 	class QuestionCellRenderer extends AbstractCellEditor implements TableCellRenderer, TableCellEditor {
@@ -121,7 +134,6 @@ public class QuestionTable extends JTable {
 		public Component getTableCellEditorComponent(JTable table, Object value, boolean isSelected, int row, int column) {
 	    	return null;
 		}
-		
 
 		@Override
 		public Object getCellEditorValue() {

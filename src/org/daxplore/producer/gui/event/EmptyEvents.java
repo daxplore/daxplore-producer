@@ -27,6 +27,8 @@ public class EmptyEvents {
 	public static class QuitProgramEvent {}
 	
 	public static class RawImportEvent {}
+
+	public static class ReloadTextsEvent {}
 	
 	public static class RepaintWindowEvent {}
 
