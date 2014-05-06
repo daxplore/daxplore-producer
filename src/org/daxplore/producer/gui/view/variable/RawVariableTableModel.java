@@ -106,15 +106,13 @@ public class RawVariableTableModel extends DefaultTableModel {
 			}
 			if(val == null) {
 				Double value = (Double)getValueAt(row, 0);
-				if(value == null){
-					return;
-				}
  				int oldIndex = toNumberMap.get(value);
 				
 				NumberlineCoverage oldPlace = ms.getOptions().get(oldIndex).getTransformation();
 				oldPlace.removeNumber(value);
 				ms.getOptions().get(oldIndex).setTransformation(oldPlace);
 				
+				toNumberMap.put(variableList.get(row).getValue(), val);
 				fireTableCellUpdated(row, column);
 				
 			}else if(availableToNumbers.contains(val) ) {
@@ -130,7 +128,6 @@ public class RawVariableTableModel extends DefaultTableModel {
 				ms.getOptions().get(val).setTransformation(newPlace);
 				
 				toNumberMap.put(variableList.get(row).getValue(), val);
-				
 				fireTableCellUpdated(row, column);
 			} 
 		}

@@ -11,6 +11,7 @@ import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.Container;
+import java.awt.IllegalComponentStateException;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
 import java.awt.event.MouseAdapter;
@@ -95,7 +96,11 @@ public class RawVariableTable extends JXTable {
 	    	SwingUtilities.invokeLater(new Runnable() {
 				@Override
 				public void run() {
-					((ChoiceEditor)c).showPopup();
+					try {
+						((ChoiceEditor)c).showPopup();
+					} catch(IllegalComponentStateException e){
+						// the component is no longer visible, do nothing
+					}
 				}
 			});
 	    }
@@ -257,6 +262,5 @@ public class RawVariableTable extends JXTable {
 				content = Ints.tryParse(getItemAt(getSelectedIndex()));
 			}
 		}
-		
 	}
 }
