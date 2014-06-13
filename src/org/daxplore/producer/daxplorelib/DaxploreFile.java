@@ -156,7 +156,7 @@ public class DaxploreFile implements Closeable {
 	public void writeUploadFile(File outputFile) throws DaxploreException {
 		try (OutputStream os = new FileOutputStream(outputFile)) {
 			importExport.writeUploadFile(os);
-		} catch (TransformerFactoryConfigurationError | TransformerException | SQLException | DaxploreException
+		} catch (TransformerFactoryConfigurationError | TransformerException | SQLException
 				| SAXException | IOException | ParserConfigurationException e) {
 			throw new DaxploreException("Failed to write output file", e);
 		}
