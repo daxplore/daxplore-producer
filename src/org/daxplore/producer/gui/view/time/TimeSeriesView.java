@@ -18,26 +18,45 @@ import javax.swing.JScrollPane;
 import javax.swing.JTextField;
 import javax.swing.event.DocumentListener;
 
+import org.daxplore.producer.gui.SectionHeader;
+import org.daxplore.producer.gui.resources.GuiTexts;
 import org.daxplore.producer.gui.view.time.TimeSeriesController.TimeSeriesCommand;
 
 @SuppressWarnings("serial")
 public class TimeSeriesView extends JPanel {
 
+	private GuiTexts texts;
+	
+	private JScrollPane columnValueCountPane;
 	private JScrollPane scrollPane;
 	private JTextField timeSeriesTextField;
-	private JScrollPane columnValueCountPane;
-
+	
+	private DocumentListener documentListener;
+	private ActionListener actionListener;
+	
 	/**
 	 * Create the panel.
 	 */
-	public <T extends DocumentListener & ActionListener> TimeSeriesView(T listener) {
-		setLayout(new BorderLayout(0, 0));
+	public <T extends DocumentListener & ActionListener> TimeSeriesView(GuiTexts texts, T listener) {
+		this.texts = texts;
+		documentListener = listener;
+		actionListener = listener;
+
+		setLayout(new BorderLayout());
+		
+		add(new SectionHeader(texts, "timeseries"), BorderLayout.NORTH);
+		add(buildTimepointSelectionPanel(), BorderLayout.CENTER);
+		add(buildUtilityPanel(), BorderLayout.SOUTH);
+	}
+	
+	private JPanel buildTimepointSelectionPanel() {
+		JPanel selectionPanel = new JPanel(new BorderLayout(0, 0));
 		
 		scrollPane = new JScrollPane();
-		add(scrollPane, BorderLayout.CENTER);
+		selectionPanel.add(scrollPane, BorderLayout.CENTER);
 		
 		JPanel panel_1 = new JPanel();
-		add(panel_1, BorderLayout.WEST);
+		selectionPanel.add(panel_1, BorderLayout.WEST);
 		panel_1.setLayout(new BorderLayout(0, 0));
 		
 		JPanel panel_2 = new JPanel();
@@ -52,37 +71,56 @@ public class TimeSeriesView extends JPanel {
 		
 		JButton setColumnButton = new JButton("Set");
 		setColumnButton.setActionCommand(TimeSeriesCommand.SET_COLUMN.toString());
-		setColumnButton.addActionListener(listener);
+		setColumnButton.addActionListener(actionListener);
 		panel_2.add(setColumnButton);
 		
-		timeSeriesTextField.getDocument().addDocumentListener(listener);
+		timeSeriesTextField.getDocument().addDocumentListener(documentListener);
 		
 		columnValueCountPane = new JScrollPane();
 		panel_1.add(columnValueCountPane, BorderLayout.CENTER);
 		
 		JPanel panel = new JPanel();
-		add(panel, BorderLayout.SOUTH);
+		selectionPanel.add(panel, BorderLayout.SOUTH);
 		panel.setLayout(new FlowLayout(FlowLayout.CENTER, 5, 5));
 		
 		JButton addButton = new JButton("Add");
 		addButton.setActionCommand(TimeSeriesCommand.ADD.toString());
-		addButton.addActionListener(listener);
+		addButton.addActionListener(actionListener);
 		panel.add(addButton);
 		
 		JButton removeButton = new JButton("Remove");
 		removeButton.setActionCommand(TimeSeriesCommand.REMOVE.toString());
-		removeButton.addActionListener(listener);
+		removeButton.addActionListener(actionListener);
 		panel.add(removeButton);
 		
 		JButton upButton = new JButton("Up");
 		upButton.setActionCommand(TimeSeriesCommand.UP.toString());
-		upButton.addActionListener(listener);
+		upButton.addActionListener(actionListener);
 		panel.add(upButton);
 		
 		JButton downButton = new JButton("Down");
 		downButton.setActionCommand(TimeSeriesCommand.DOWN.toString());
-		downButton.addActionListener(listener);
+		downButton.addActionListener(actionListener);
 		panel.add(downButton);
+		
+		return selectionPanel;
+	}
+	
+	private JPanel buildUtilityPanel() {
+		JPanel utilityPanel = new JPanel(new BorderLayout());
+		
+		utilityPanel.add(new SectionHeader(texts, "replace_timepoints"), BorderLayout.NORTH);
+		
+		JButton addTimepointsButton = new JButton("Replace timepoints");
+		addTimepointsButton.setBounds(27, 189, 185, 47);
+		addTimepointsButton.setActionCommand(TimeSeriesCommand.REPLACE_TIMEPOINTS.toString());
+		addTimepointsButton.addActionListener(actionListener);
+		
+		JPanel panel = new JPanel(new FlowLayout(FlowLayout.LEADING));
+		panel.add(addTimepointsButton);
+		utilityPanel.add(panel, BorderLayout.CENTER);
+		
+		return utilityPanel;
 	}
 	
 	/**

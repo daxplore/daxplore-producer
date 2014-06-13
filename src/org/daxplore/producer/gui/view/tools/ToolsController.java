@@ -19,12 +19,8 @@ import org.daxplore.producer.gui.event.DaxploreFileUpdateEvent;
 import com.google.common.eventbus.EventBus;
 import com.google.common.eventbus.Subscribe;
 
-public class ToolsController implements ActionListener {
+public class ToolsController {
 
-	enum ToolsCommand {
-		REPLACE_TIMEPOINTS
-	}
-	
 	private EventBus eventBus;
 	private DaxploreFile daxploreFile;
 	private ToolsView toolsView;
@@ -33,29 +29,13 @@ public class ToolsController implements ActionListener {
 		this.eventBus = eventBus;
 		eventBus.register(this);
 		
-		toolsView = new ToolsView(this);
+		toolsView = new ToolsView();
 	}
 	
 	@Subscribe
 	public void on(DaxploreFileUpdateEvent e) {
 		this.daxploreFile = e.getDaxploreFile();
 		loadData();
-	}
-	
-	@Override
-	public void actionPerformed(ActionEvent e) {
-		switch (ToolsCommand.valueOf(e.getActionCommand())) {
-		case REPLACE_TIMEPOINTS:
-			try {
-				daxploreFile.replaceAllTimepointsInQuestions();
-			} catch (DaxploreException|SQLException e1) {
-				// TODO Auto-generated catch block
-				e1.printStackTrace();
-			}
-			break;
-		default:
-			throw new AssertionError("Not a defined command: '" + e.getActionCommand() + "'");
-		}
 	}
 	
 	public void loadData() {

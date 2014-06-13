@@ -14,6 +14,7 @@ import java.sql.SQLException;
 import java.util.LinkedList;
 import java.util.List;
 
+import javax.swing.JOptionPane;
 import javax.swing.JTable;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
@@ -37,7 +38,7 @@ import com.google.common.eventbus.Subscribe;
 public class TimeSeriesController implements ActionListener, DocumentListener {
 	
 	enum TimeSeriesCommand {
-		ADD, UP, DOWN, REMOVE, SET_COLUMN
+		ADD, UP, DOWN, REMOVE, SET_COLUMN, REPLACE_TIMEPOINTS
 	}
 	
 	private EventBus eventBus;
@@ -52,7 +53,7 @@ public class TimeSeriesController implements ActionListener, DocumentListener {
 		this.eventBus = eventBus; 
 		this.texts = texts;
 		eventBus.register(this);
-		timeSeriesView = new TimeSeriesView(this);
+		timeSeriesView = new TimeSeriesView(texts, this);
 	}
 	
 	@Subscribe
@@ -143,6 +144,18 @@ public class TimeSeriesController implements ActionListener, DocumentListener {
 			} catch (SQLException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
+			}
+			break;
+		case REPLACE_TIMEPOINTS:
+			try {
+				daxploreFile.replaceAllTimepointsInQuestions();
+				JOptionPane.showMessageDialog(timeSeriesView,
+						texts.get("dialog.time_replace.text"),
+						texts.get("dialog.time_replace.title"),
+						JOptionPane.INFORMATION_MESSAGE);
+			} catch (DaxploreException|SQLException e1) {
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
 			}
 			break;
 			
