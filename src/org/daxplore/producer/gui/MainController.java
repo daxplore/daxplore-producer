@@ -61,7 +61,6 @@ import org.daxplore.producer.gui.utility.JLabelSelectable;
 import org.daxplore.producer.gui.view.build.GroupsController;
 import org.daxplore.producer.gui.view.text.EditTextController;
 import org.daxplore.producer.gui.view.time.TimeSeriesController;
-import org.daxplore.producer.gui.view.tools.ToolsController;
 import org.daxplore.producer.gui.view.variable.VariableController;
 
 import com.google.common.base.Charsets;
@@ -90,7 +89,6 @@ public class MainController {
 	
 	private GroupsController groupsController;
 	private EditTextController editTextController;
-	private ToolsController toolsController;
 	private TimeSeriesController timeSeriesController;
 	
 	private HistoryItem currentHistoryItem; 
@@ -100,7 +98,6 @@ public class MainController {
 		EDITTEXTVIEW,
 		GROUPSVIEW,
 		TIMESERIESVIEW,
-		TOOLSVIEW,
 	}
 	
 	private class HistoryItem {
@@ -137,7 +134,6 @@ public class MainController {
 		toolbarController = new ToolbarController(eventBus, actionManager);
 		groupsController = new GroupsController(eventBus, texts);
 		editTextController = new EditTextController(eventBus, texts);
-		toolsController = new ToolsController(eventBus);
 		timeSeriesController = new TimeSeriesController(eventBus, texts);
 
 		mainView = new MainView(mainWindow);
@@ -146,7 +142,6 @@ public class MainController {
 		
 		mainView.addTab(texts.get("view.groups.tab"), groupsController.getView(), Views.GROUPSVIEW);
 		mainView.addTab(texts.get("view.edit_text.tab"), editTextController.getView(), Views.EDITTEXTVIEW);
-		mainView.addTab(texts.get("view.tools.tab"), toolsController.getView(), Views.TOOLSVIEW);
 		mainView.addTab(texts.get("view.time_series.tab"), timeSeriesController.getView(), Views.TIMESERIESVIEW);
 		
 		mainView.setToolbar(toolbarController.getView());
@@ -430,8 +425,6 @@ public class MainController {
 				}
 				break;
 			case GROUPSVIEW:
-				break;
-			case TOOLSVIEW:
 				break;
 			case TIMESERIESVIEW:
 			default:

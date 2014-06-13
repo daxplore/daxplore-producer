@@ -17,6 +17,7 @@ import java.util.Locale;
 import javax.swing.JComboBox;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
+import javax.swing.JSplitPane;
 import javax.swing.JTable;
 import javax.swing.JTextField;
 import javax.swing.SwingConstants;
@@ -29,16 +30,38 @@ import org.daxplore.producer.gui.view.text.EditTextController.EditTextCommand;
 
 @SuppressWarnings("serial")
 public class EditTextView extends JPanel {
+	
+	private GuiTexts texts;
+	private ActionListener actionListener;
+	private DocumentListener documentListener;
+	
 	private JTextField textField;
 
 	private JComboBox<DisplayLocale> localeCombo1;
 	private JComboBox<DisplayLocale> localeCombo2;
-	private JScrollPane scrollPane;
+	
+	private JScrollPane textScrollPane;
+	private JScrollPane localeScrollPane;
+	private JTable localeTable;
 	
 	public <T extends DocumentListener & ActionListener> EditTextView(GuiTexts texts, T listener) {
-		setLayout(new BorderLayout(0, 0));
+		this.texts = texts;
+		actionListener = listener;
+		documentListener = listener;
 		
-		add(new SectionHeader(texts, "texts"), BorderLayout.NORTH);
+		setLayout(new BorderLayout());
+		
+		JSplitPane splitPane = new JSplitPane(JSplitPane.VERTICAL_SPLIT);
+		splitPane.setDividerLocation(600);
+		splitPane.setTopComponent(buildEditArea());
+		splitPane.setBottomComponent(buildLocaleSelector());
+		add(splitPane, BorderLayout.CENTER);
+	}
+	
+	private JPanel buildEditArea() {
+		JPanel editPanel = new JPanel(new BorderLayout());
+		
+		editPanel.add(new SectionHeader(texts, "texts"), BorderLayout.NORTH);
 		
 		JPanel textsPanel = new JPanel(new BorderLayout());
 		JPanel searchComboPanel = new JPanel(new GridLayout(0, 3, 0, 0));
@@ -46,29 +69,47 @@ public class EditTextView extends JPanel {
 		textField = new JTextField();
 		textField.setHorizontalAlignment(SwingConstants.LEFT);
 		textField.setColumns(15);
-		textField.getDocument().addDocumentListener(listener);
+		textField.getDocument().addDocumentListener(documentListener);
 		searchComboPanel.add(textField);
 
 		localeCombo1 = new JComboBox<>();
 		localeCombo1.setActionCommand(EditTextCommand.UPDATE_COLUMN_1.toString());
-		localeCombo1.addActionListener(listener);
+		localeCombo1.addActionListener(actionListener);
 		searchComboPanel.add(localeCombo1);
 		
 		localeCombo2 = new JComboBox<>();
 		localeCombo2.setActionCommand(EditTextCommand.UPDATE_COLUMN_2.toString());
-		localeCombo2.addActionListener(listener);
+		localeCombo2.addActionListener(actionListener);
 		searchComboPanel.add(localeCombo2);
 		
 		textsPanel.add(searchComboPanel, BorderLayout.NORTH);
 
-		scrollPane = new JScrollPane();
-		textsPanel.add(scrollPane, BorderLayout.CENTER);
+		textScrollPane = new JScrollPane();
+		textsPanel.add(textScrollPane, BorderLayout.CENTER);
 		
-		add(textsPanel, BorderLayout.CENTER);
+		editPanel.add(textsPanel, BorderLayout.CENTER);
+		
+		return editPanel;
 	}
 	
-	public void setTable(JTable table) {
-		scrollPane.setViewportView(table);
+	private JPanel buildLocaleSelector() {
+		JPanel selectorPanel = new JPanel(new BorderLayout());
+		
+		selectorPanel.add(new SectionHeader(texts, "locale_picker"), BorderLayout.NORTH);
+		
+		localeScrollPane = new JScrollPane();
+		selectorPanel.add(localeScrollPane, BorderLayout.CENTER);
+		
+		return selectorPanel;
+	}
+	
+	public void setTextTable(JTable table) {
+		textScrollPane.setViewportView(table);
+	}
+	
+	void setLocaleTable(SelectedLocalesTableModel tableModel) {
+		localeTable = new JTable(tableModel);
+		localeScrollPane.setViewportView(localeTable);
 	}
 	
 	public void setLocales(List<Locale> localeList) {
@@ -136,10 +177,10 @@ public class EditTextView extends JPanel {
 	}
 	
 	public int getScrollbarPosition() {
-		return scrollPane.getVerticalScrollBar().getValue();
+		return textScrollPane.getVerticalScrollBar().getValue();
 	}
 	
 	public void setScrollbarPosition(int position) {
-		scrollPane.getVerticalScrollBar().setValue(position);
+		textScrollPane.getVerticalScrollBar().setValue(position);
 	}
 }

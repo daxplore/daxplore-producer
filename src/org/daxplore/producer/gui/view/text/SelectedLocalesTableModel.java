@@ -1,7 +1,7 @@
 /**
  * 
  */
-package org.daxplore.producer.gui.view.tools;
+package org.daxplore.producer.gui.view.text;
 
 import javax.swing.table.DefaultTableModel;
 
@@ -12,12 +12,12 @@ import org.daxplore.producer.gui.event.EmptyEvents.LocaleAddedOrRemovedEvent;
 import com.google.common.eventbus.EventBus;
 
 @SuppressWarnings("serial")
-public class LocalesTableModel extends DefaultTableModel {
+public class SelectedLocalesTableModel extends DefaultTableModel {
 
 	private EventBus eventBus;
 	private About about;
 	
-	public LocalesTableModel(EventBus eventBus, About about) {
+	public SelectedLocalesTableModel(EventBus eventBus, About about) {
 		this.eventBus = eventBus;
 		this.about = about;
 	}

@@ -37,6 +37,7 @@ import com.google.common.eventbus.Subscribe;
 
 public class EditTextController implements ActionListener, DocumentListener {
 
+	private EventBus eventBus;
 	private DaxploreFile daxploreFile;
 	
 	private Locale[] currentLocales = new Locale[2];
@@ -51,6 +52,7 @@ public class EditTextController implements ActionListener, DocumentListener {
 	}
 	
 	public EditTextController(EventBus eventBus, GuiTexts texts) {
+		this.eventBus = eventBus;
 		eventBus.register(this);
 		
 		editTextView = new EditTextView(texts, this);
@@ -105,6 +107,9 @@ public class EditTextController implements ActionListener, DocumentListener {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
+
+			SelectedLocalesTableModel localeTableModel = new SelectedLocalesTableModel(eventBus, daxploreFile.getAbout());
+			editTextView.setLocaleTable(localeTableModel);
 		}
 	}
 	
@@ -118,7 +123,7 @@ public class EditTextController implements ActionListener, DocumentListener {
 		table.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
         table.setPreferredScrollableViewportSize(new Dimension(500, 70));
         table.setFillsViewportHeight(true);
-		editTextView.setTable(table);
+		editTextView.setTextTable(table);
 		
 		editTextView.setScrollbarPosition(scrollPosition);
 	}
