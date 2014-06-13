@@ -8,12 +8,14 @@
 package org.daxplore.producer.gui.view.text;
 
 import java.awt.BorderLayout;
+import java.awt.FlowLayout;
 import java.awt.GridLayout;
 import java.awt.event.ActionListener;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
 
+import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
@@ -24,6 +26,7 @@ import javax.swing.SwingConstants;
 import javax.swing.event.DocumentListener;
 
 import org.daxplore.producer.gui.SectionHeader;
+import org.daxplore.producer.gui.menu.ActionManager;
 import org.daxplore.producer.gui.resources.GuiTexts;
 import org.daxplore.producer.gui.utility.DisplayLocale;
 import org.daxplore.producer.gui.view.text.EditTextController.EditTextCommand;
@@ -34,6 +37,7 @@ public class EditTextView extends JPanel {
 	private GuiTexts texts;
 	private ActionListener actionListener;
 	private DocumentListener documentListener;
+	private ActionManager actionManager;
 	
 	private JTextField textField;
 
@@ -44,17 +48,26 @@ public class EditTextView extends JPanel {
 	private JScrollPane localeScrollPane;
 	private JTable localeTable;
 	
-	public <T extends DocumentListener & ActionListener> EditTextView(GuiTexts texts, T listener) {
+	public <T extends DocumentListener & ActionListener>
+	EditTextView(GuiTexts texts, ActionManager actionManager, T listener) {
 		this.texts = texts;
 		actionListener = listener;
 		documentListener = listener;
+		this.actionManager = actionManager;
 		
 		setLayout(new BorderLayout());
 		
 		JSplitPane splitPane = new JSplitPane(JSplitPane.VERTICAL_SPLIT);
-		splitPane.setDividerLocation(600);
+		
+		splitPane.setDividerLocation(650);
 		splitPane.setTopComponent(buildEditArea());
-		splitPane.setBottomComponent(buildLocaleSelector());
+		
+		JPanel bottomPanel = new JPanel(new GridLayout(1, 2, 20, 0));
+		bottomPanel.add(buildLocaleSelector(), 0);
+		bottomPanel.add(buildImportExportPanel(), 1);
+		
+		splitPane.setBottomComponent(bottomPanel);
+		
 		add(splitPane, BorderLayout.CENTER);
 	}
 	
@@ -101,6 +114,20 @@ public class EditTextView extends JPanel {
 		selectorPanel.add(localeScrollPane, BorderLayout.CENTER);
 		
 		return selectorPanel;
+	}
+	
+	private JPanel buildImportExportPanel() {
+		JPanel sectionPanel = new JPanel(new BorderLayout());
+		
+		sectionPanel.add(new SectionHeader(texts, "import_export"), BorderLayout.NORTH);
+		
+		JPanel flowPanel = new JPanel(new FlowLayout());
+		flowPanel.add(new JButton(actionManager.IMPORT_TEXTS));
+		flowPanel.add(new JButton(actionManager.EXPORT_TEXTS));
+		
+		sectionPanel.add(flowPanel, BorderLayout.CENTER);
+		
+		return sectionPanel;
 	}
 	
 	public void setTextTable(JTable table) {

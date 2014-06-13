@@ -133,7 +133,7 @@ public class MainController {
 		menuBarController = new MenuBarController(actionManager);
 		toolbarController = new ToolbarController(eventBus, actionManager);
 		groupsController = new GroupsController(eventBus, texts);
-		editTextController = new EditTextController(eventBus, texts);
+		editTextController = new EditTextController(eventBus, texts, actionManager);
 		timeSeriesController = new TimeSeriesController(eventBus, texts);
 
 		mainView = new MainView(mainWindow);
@@ -248,6 +248,11 @@ public class MainController {
 	public void on(ImportTextsEvent e) {
 		List<Locale> localeList = Settings.availableLocales();
 		FileLocalePair fileLocalePair = Dialogs.showImportDialog(preferences, texts, mainWindow, localeList);
+		
+		if(fileLocalePair == null) {
+			return;
+		}
+		
 		File file = fileLocalePair.file;
 		Locale locale = fileLocalePair.locale;
 		if(file != null && file.exists() && file.canRead()) {
