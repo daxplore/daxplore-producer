@@ -27,8 +27,6 @@ import org.daxplore.producer.daxplorelib.metadata.MetaScale;
 import org.daxplore.producer.daxplorelib.metadata.MetaScale.Option;
 import org.daxplore.producer.daxplorelib.raw.VariableOptionInfo;
 import org.daxplore.producer.gui.resources.GuiTexts;
-import org.daxplore.producer.gui.view.question.TimePointTable;
-import org.daxplore.producer.gui.view.question.TimePointTableModel;
 
 import com.google.common.eventbus.EventBus;
 

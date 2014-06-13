@@ -5,7 +5,7 @@
  * which accompanies this distribution, and is available at
  * http://www.gnu.org/licenses/old-licenses/gpl-2.0.html
  ******************************************************************************/
-package org.daxplore.producer.gui.view.question;
+package org.daxplore.producer.gui.view.variable;
 
 import java.sql.SQLException;
 import java.util.LinkedHashMap;

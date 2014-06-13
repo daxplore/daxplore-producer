@@ -35,7 +35,6 @@ import javax.swing.event.ChangeListener;
 import org.daxplore.producer.daxplorelib.DaxploreException;
 import org.daxplore.producer.daxplorelib.DaxploreFile;
 import org.daxplore.producer.daxplorelib.ImportExportManager.L10nFormat;
-import org.daxplore.producer.daxplorelib.metadata.MetaQuestion;
 import org.daxplore.producer.daxplorelib.metadata.textreference.TextReference;
 import org.daxplore.producer.gui.Dialogs.FileLocalePair;
 import org.daxplore.producer.gui.Dialogs.FileLocaleUsedTriplet;
@@ -60,7 +59,6 @@ import org.daxplore.producer.gui.menu.ToolbarController;
 import org.daxplore.producer.gui.resources.GuiTexts;
 import org.daxplore.producer.gui.utility.JLabelSelectable;
 import org.daxplore.producer.gui.view.build.GroupsController;
-import org.daxplore.producer.gui.view.question.QuestionController;
 import org.daxplore.producer.gui.view.text.EditTextController;
 import org.daxplore.producer.gui.view.time.TimeSeriesController;
 import org.daxplore.producer.gui.view.tools.ToolsController;
@@ -93,7 +91,6 @@ public class MainController {
 	private GroupsController groupsController;
 	private EditTextController editTextController;
 	private ToolsController toolsController;
-	private QuestionController questionController;
 	private TimeSeriesController timeSeriesController;
 	
 	private HistoryItem currentHistoryItem; 
@@ -104,7 +101,6 @@ public class MainController {
 		GROUPSVIEW,
 		TIMESERIESVIEW,
 		TOOLSVIEW,
-		QUESTIONVIEW;
 	}
 	
 	private class HistoryItem {
@@ -142,7 +138,6 @@ public class MainController {
 		groupsController = new GroupsController(eventBus, texts);
 		editTextController = new EditTextController(eventBus, texts);
 		toolsController = new ToolsController(eventBus);
-		questionController = new QuestionController(eventBus, texts);
 		timeSeriesController = new TimeSeriesController(eventBus, texts);
 
 		mainView = new MainView(mainWindow);
@@ -152,7 +147,6 @@ public class MainController {
 		mainView.addTab(texts.get("view.groups.tab"), groupsController.getView(), Views.GROUPSVIEW);
 		mainView.addTab(texts.get("view.edit_text.tab"), editTextController.getView(), Views.EDITTEXTVIEW);
 		mainView.addTab(texts.get("view.tools.tab"), toolsController.getView(), Views.TOOLSVIEW);
-		mainView.addTab(texts.get("view.questions.tab"), questionController.getView(), Views.QUESTIONVIEW);
 		mainView.addTab(texts.get("view.time_series.tab"), timeSeriesController.getView(), Views.TIMESERIESVIEW);
 		
 		mainView.setToolbar(toolbarController.getView());
@@ -438,11 +432,6 @@ public class MainController {
 			case GROUPSVIEW:
 				break;
 			case TOOLSVIEW:
-				break;
-			case QUESTIONVIEW:
-				if(command instanceof MetaQuestion) {
-					questionController.openMetaQuestion((MetaQuestion)command);
-				}
 				break;
 			case TIMESERIESVIEW:
 			default:
