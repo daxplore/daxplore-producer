@@ -27,6 +27,7 @@ import javax.swing.event.DocumentListener;
 
 import org.daxplore.producer.gui.SectionHeader;
 import org.daxplore.producer.gui.menu.ActionManager;
+import org.daxplore.producer.gui.resources.Colors;
 import org.daxplore.producer.gui.resources.GuiTexts;
 import org.daxplore.producer.gui.utility.DisplayLocale;
 import org.daxplore.producer.gui.view.text.EditTextController.EditTextCommand;
@@ -111,6 +112,7 @@ public class EditTextView extends JPanel {
 		selectorPanel.add(new SectionHeader(texts, "locale_picker"), BorderLayout.NORTH);
 		
 		localeScrollPane = new JScrollPane();
+		localeScrollPane.getViewport().setBackground(Colors.listBackgroundEven);
 		selectorPanel.add(localeScrollPane, BorderLayout.CENTER);
 		
 		return selectorPanel;
