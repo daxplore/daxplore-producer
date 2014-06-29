@@ -21,7 +21,6 @@ public class MenuBarView extends JMenuBar {
 		fileMenu.add(actionManager.NEW);
 		fileMenu.add(actionManager.OPEN);
 		fileMenu.add(actionManager.SAVE);
-		fileMenu.add(actionManager.SAVE_AS);
 
 		JMenu importSubMenu = new JMenu("Import");
 		importSubMenu.add(actionManager.IMPORT_SPSS);

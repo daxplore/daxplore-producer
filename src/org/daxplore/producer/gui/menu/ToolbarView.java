@@ -39,7 +39,6 @@ public class ToolbarView extends JPanel {
 		toolbar.add(actionManager.NEW);
 		toolbar.add(actionManager.OPEN);
 		toolbar.add(actionManager.SAVE);
-		toolbar.add(actionManager.SAVE_AS);
 		toolbar.add(actionManager.EXPORT_UPLOAD);
 		
 		add(toolbar, BorderLayout.WEST);
