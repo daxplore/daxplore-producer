@@ -178,8 +178,8 @@ public class VariableController implements TableModelListener, ActionListener {
 			for(int i = selectedRows.length-1; i>=0; i--) {
 				options.remove(selectedRows[i]);
 			}
-			mq.getScale().setOptions(options);
 			rawTable.setAvailableNumbers(variableModel.getAvailebleToNumbers());
+			mq.getScale().setOptions(options);
 			variableModel.fireTableRowsDeleted(selectedRows[0], selectedRows[0]);
 			variableTable.packAll();
 			rawModel.remapFromMetaScale();
