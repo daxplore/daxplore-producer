@@ -87,12 +87,14 @@ public class CreateFileWizard extends Wizard {
 
 		@Override
 		public void actionPerformed(ActionEvent e) {
+			File directory = CreateFileWizard.preferences.getWorkingDirectory();
 			JFileChooser jfc = new JFileChooser(CreateFileWizard.preferences.getWorkingDirectory());
 			
-			FileFilter filter = new FileNameExtensionFilter(
-					texts.get("general.filetype.daxplorefile"), "daxplore");
+			FileFilter filter = new FileNameExtensionFilter(texts.get("general.filetype.daxplorefile"), "daxplore");
 			jfc.addChoosableFileFilter(filter);
 			jfc.setFileFilter(filter);
+			jfc.setDialogTitle(texts.get("wizard.create.dialogtitle"));
+			jfc.setSelectedFile(new File(directory, texts.get("wizard.create.untitledproject")));
 			
 			int returnVal = jfc.showSaveDialog(this);
 			
