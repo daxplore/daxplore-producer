@@ -40,7 +40,7 @@ import com.google.gson.JsonPrimitive;
 public class MetaQuestion {
 	
 	private static final DaxploreTable table = new DaxploreTable(
-			"CREATE TABLE metaquestion (id TEXT PRIMARY KEY, scaleid INTEGER, fulltextref TEXT NOT NULL, shorttextref TEXT NOT NULL, calculation INTEGER, FOREIGN KEY(scaleid) REFERENCES metascale(id))",
+			"CREATE TABLE metaquestion (id TEXT PRIMARY KEY, scaleid INTEGER, fulltextref TEXT NOT NULL, shorttextref TEXT NOT NULL, extratextref TEXT, FOREIGN KEY(scaleid) REFERENCES metascale(id))",
 			"metaquestion");
 	private static final DaxploreTable timePointTable = new DaxploreTable(
 			"CREATE TABLE questtimerel (qid TEXT NOT NULL, timeid INTEGER NOT NULL, FOREIGN KEY(qid) REFERENCES metaquestion(id), FOREIGN KEY(timeid) REFERENCES timepoints(id))", 
@@ -82,9 +82,8 @@ public class MetaQuestion {
 				throw new DaxploreException("No question with id '"+id+"'");
 			}
 			
-			TextReference fullTextRef, shortTextRef;
+			TextReference fullTextRef, shortTextRef, extraTextRef;
 			MetaScale scale = null;
-			MetaCalculation calculation = null;
 			try (PreparedStatement stmt = connection.prepareStatement("SELECT * FROM metaquestion WHERE id = ?")) {
 				stmt.setString(1, id);
 				try(ResultSet rs = stmt.executeQuery()) {
@@ -93,15 +92,16 @@ public class MetaQuestion {
 					}
 					fullTextRef = textsManager.get(rs.getString("fulltextref"));
 					shortTextRef = textsManager.get(rs.getString("shorttextref"));
+					String extraTextRefId = rs.getString("extratextref");
+					if(!rs.wasNull()) {
+						extraTextRef = textsManager.get(extraTextRefId);
+					} else {
+						extraTextRef = null;
+					}
 					
 					int scaleid = rs.getInt("scaleid");
 					if(!rs.wasNull()) {
 						scale = metascaleManager.get(scaleid);
-					}
-					
-					int calculationID = rs.getInt("calculation");
-					if(!rs.wasNull()) {
-						calculation = new MetaCalculation(calculationID, connection);
 					}
 				}
 			}
@@ -116,13 +116,13 @@ public class MetaQuestion {
 					
 				}
 			}
-			MetaQuestion mq = new MetaQuestion(id, shortTextRef, fullTextRef, scale, calculation, timepoints);
+			MetaQuestion mq = new MetaQuestion(id, shortTextRef, fullTextRef, extraTextRef, scale, timepoints);
 			questionMap.put(id, mq);
 			return mq;
 		}
 		
-		public MetaQuestion create(String id, TextReference shortTextRef, TextReference fullTextRef, MetaScale scale, MetaCalculation calculation, List<MetaTimepointShort> timepoints) {
-			MetaQuestion mq = new MetaQuestion(id, shortTextRef, fullTextRef, scale, calculation, timepoints);
+		public MetaQuestion create(String id, TextReference shortTextRef, TextReference fullTextRef, TextReference extraTextRef, MetaScale scale, List<MetaTimepointShort> timepoints) {
+			MetaQuestion mq = new MetaQuestion(id, shortTextRef, fullTextRef, extraTextRef, scale, timepoints);
 			toBeAdded.add(mq);
 			questionMap.put(id, mq);
 			return mq;
@@ -137,8 +137,8 @@ public class MetaQuestion {
 		public void saveAll() throws SQLException {
 			int nNew = 0, nModified = 0, nRemoved = 0, nTimePoint = 0;
 			try (
-			PreparedStatement updateStmt = connection.prepareStatement("UPDATE metaquestion SET scaleid = ?, fulltextref = ?, shorttextref = ?, calculation = ? WHERE id = ?");
-			PreparedStatement insertStmt = connection.prepareStatement("INSERT INTO metaquestion (id, scaleid, fulltextref, shorttextref, calculation) VALUES (?, ?, ?, ? ,?)");
+			PreparedStatement updateStmt = connection.prepareStatement("UPDATE metaquestion SET scaleid = ?, fulltextref = ?, shorttextref = ?, extratextref = ? WHERE id = ?");
+			PreparedStatement insertStmt = connection.prepareStatement("INSERT INTO metaquestion (id, scaleid, fulltextref, shorttextref, extratextref) VALUES (?, ?, ?, ? , ?)");
 			PreparedStatement deleteStmt = connection.prepareStatement("DELETE FROM metaquestion WHERE id = ?");
 			PreparedStatement deleteRelStmt = connection.prepareStatement("DELETE FROM questtimerel WHERE qid = ?");
 			PreparedStatement insertRelStmt = connection.prepareStatement("INSERT INTO questtimerel (qid, timeid) VALUES (?, ?)");
@@ -150,7 +150,11 @@ public class MetaQuestion {
 						updateStmt.setInt(1, mq.scale.getId());
 						updateStmt.setString(2, mq.fullTextRef.getRef());
 						updateStmt.setString(3, mq.shortTextRef.getRef());
-						updateStmt.setInt(4, mq.calculation.getID());
+						if(mq.extraTextRef != null) {
+							updateStmt.setString(4, mq.extraTextRef.getRef());
+						} else {
+							updateStmt.setNull(4, Types.VARCHAR);
+						}
 						updateStmt.setString(5, mq.id);
 						updateStmt.executeUpdate();
 						mq.modified = false;
@@ -182,7 +186,11 @@ public class MetaQuestion {
 					}
 					insertStmt.setString(3, mq.fullTextRef.getRef());
 					insertStmt.setString(4, mq.shortTextRef.getRef());
-					insertStmt.setInt(5, mq.calculation.getID());
+					if(mq.extraTextRef != null) {
+						insertStmt.setString(5, mq.extraTextRef.getRef());
+					} else {
+						insertStmt.setNull(5, Types.VARCHAR);
+					}
 					insertStmt.addBatch();
 					
 					for(MetaTimepointShort timepoint: mq.timepoints) {
@@ -254,20 +262,19 @@ public class MetaQuestion {
 	}
 	
 	private String id;
-	private TextReference shortTextRef, fullTextRef;
+	private TextReference shortTextRef, fullTextRef, extraTextRef;
 	private MetaScale scale;
-	private MetaCalculation calculation;
 	private List<MetaTimepointShort> timepoints;
 	
 	private boolean modified = false;
 	private boolean timemodified = false;
 	
-	private MetaQuestion(String id, TextReference shortTextRef, TextReference fullTextRef, MetaScale scale, MetaCalculation calculation, List<MetaTimepointShort> timepoints) {
+	private MetaQuestion(String id, TextReference shortTextRef, TextReference fullTextRef, TextReference extraTextRef, MetaScale scale, List<MetaTimepointShort> timepoints) {
 		this.id = id;
 		this.shortTextRef = shortTextRef;
 		this.fullTextRef = fullTextRef;
+		this.extraTextRef = extraTextRef;
 		this.scale = scale;
-		this.calculation = calculation;
 		this.timepoints = timepoints;
 	}
 	
@@ -297,6 +304,17 @@ public class MetaQuestion {
 		}
 	}
 	
+	public TextReference getExtraTextRef() {
+		return extraTextRef;
+	}
+	
+	public void setExtraTextRef(TextReference extraTextRef) {
+		if(!extraTextRef.equals(this.extraTextRef)) {
+			this.extraTextRef = extraTextRef;
+			modified = true;
+		}
+	}
+	
 	public MetaScale getScale() {
 		return scale;
 	}
@@ -304,17 +322,6 @@ public class MetaQuestion {
 	public void setScale(MetaScale scale) {
 		if(!scale.equals(this.scale)) {
 			this.scale = scale;
-			modified = true;
-		}
-	}
-	
-	public MetaCalculation getCalculation() {
-		return calculation;
-	}
-	
-	public void setCalculation(MetaCalculation calculation) {
-		if(!calculation.equals(this.calculation)) {
-			this.calculation = calculation;
 			modified = true;
 		}
 	}

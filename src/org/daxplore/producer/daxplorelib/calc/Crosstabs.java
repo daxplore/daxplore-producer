@@ -152,8 +152,8 @@ public class Crosstabs {
 			
 			for(int row = 0; row < rawdataTable[0].length; row++) {
 				if(rawdataTable[rawTimePointIndex][row] == timepoint.getValue()) {
-					int qindex = questionScale.matchIndex(rawdataTable[questionColIndex][row]);
-					int pindex = perspectiveScale.matchIndex(rawdataTable[perspectiveColIndex][row]);
+					int qindex = questionScale.getOptionIndex(rawdataTable[questionColIndex][row]);
+					int pindex = perspectiveScale.getOptionIndex(rawdataTable[perspectiveColIndex][row]);
 					if(qindex == -1 || pindex == -1) {
 						continue;
 					}
@@ -170,9 +170,9 @@ public class Crosstabs {
 					+ " as p FROM rawdata WHERE " + about.getTimeSeriesShortColumn() + " = " + timepoint.getValue())) { //TODO: get query to work with prepared statement
 				while(rs.next()) {
 					Double qvalue = rs.getDouble("q");
-					int qindex = question.getScale().matchIndex(qvalue);
+					int qindex = question.getScale().getOptionIndex(qvalue);
 					Double pvalue = rs.getDouble("p");
-					int pindex = perspective.getScale().matchIndex(pvalue);
+					int pindex = perspective.getScale().getOptionIndex(pvalue);
 					//TODO handle ignore?
 					if(qindex == -1 || pindex == -1) {
 						continue;
@@ -204,7 +204,7 @@ public class Crosstabs {
 			
 			for(int row = 0; row < rawdataTable[0].length; row++) {
 				if(rawdataTable[rawTimePointIndex][row] == timepoint.getValue()) {
-					int index = scale.matchIndex(rawdataTable[questionColIndex][row]);
+					int index = scale.getOptionIndex(rawdataTable[questionColIndex][row]);
 					if(index != -1) {
 						frequencies[index]++;
 						total++;
@@ -221,7 +221,7 @@ public class Crosstabs {
 			
 				while(rs.next()) {
 					Double value = rs.getDouble(question.getId());
-					int index = question.getScale().matchIndex(value);
+					int index = question.getScale().getOptionIndex(value);
 					if(index != -1) {
 						frequencies[index]++;
 						total++;

@@ -17,7 +17,6 @@ import java.util.Collection;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
-import java.util.Map;
 
 import org.daxplore.producer.daxplorelib.DaxploreException;
 import org.daxplore.producer.daxplorelib.DaxploreFile;
@@ -30,6 +29,8 @@ import org.opendatafoundation.data.spss.SPSSFileException;
 import org.opendatafoundation.data.spss.SPSSNumericVariable;
 import org.opendatafoundation.data.spss.SPSSStringVariable;
 import org.opendatafoundation.data.spss.SPSSVariable;
+
+import com.google.common.base.Strings;
 
 
 public class RawData {
@@ -59,7 +60,7 @@ public class RawData {
 			}
 		}
 		
-		Map<String, VariableType> columns = new LinkedHashMap<>();//metadata.getColumnMap();
+		LinkedHashMap<String, VariableType> columns = new LinkedHashMap<>(); //LinkedHashMap has predictable iteration order! 
 		
 		for(int i = 0; i < spssFile.getVariableCount(); i++){
 			SPSSVariable var = spssFile.getVariable(i);
@@ -93,7 +94,7 @@ public class RawData {
 		}
 	}
 	
-	protected static String createRawDataTableString(Map<String, VariableType> columns) {
+	protected static String createRawDataTableString(LinkedHashMap<String, VariableType> columns) {
 		StringBuilder sb = new StringBuilder();
 		Iterator<String> iter = columns.keySet().iterator();
 		sb.append("create table " + tablename + " (");
@@ -109,7 +110,7 @@ public class RawData {
 		return sb.toString();
 	}
 	
-	protected static PreparedStatement addRowStatement(Map<String, VariableType> columns, Connection connection) throws SQLException {
+	protected static PreparedStatement addRowStatement(LinkedHashMap<String, VariableType> columns, Connection connection) throws SQLException {
 		LinkedList<String> qmarks = new LinkedList<>();
 		for(int i = 0; i < columns.size(); i++){
 			qmarks.add("?");
@@ -118,37 +119,31 @@ public class RawData {
 		return ps;
 	}
 	
-	protected static void addRow(Map<String, VariableType> columns, PreparedStatement statement, Object[] data) throws SQLException {
+	protected static void addRow(LinkedHashMap<String, VariableType> columns, PreparedStatement statement, Object[] data) throws SQLException {
 		Collection<VariableType> types= columns.values();
 		int colIndex = 0;
 		for(VariableType type: types){
 			Object datapoint = data[colIndex];
-			if(VariableType.NUMERIC.compareTo(type) == 0 && datapoint instanceof Double){
+			
+			switch (type) {
+			case NUMERIC:
 				Double ddatapoint = (Double)datapoint;
-				if(ddatapoint.isNaN() || ddatapoint.isInfinite()){
+				if(ddatapoint == null || ddatapoint.isNaN() || ddatapoint.isInfinite()){
 					statement.setNull(colIndex+1, java.sql.Types.REAL);
 				} else {
 					statement.setDouble(colIndex+1 , ddatapoint);
 				}
-			} else if(VariableType.TEXT.compareTo(type) == 0 && datapoint instanceof String){
+				break;
+			case TEXT:
 				String sdatapoint = (String)datapoint;
-				statement.setString(colIndex+1, sdatapoint);
-			} else if(VariableType.MAPPED.compareTo(type) == 0 && datapoint instanceof Double){
-				Double ddatapoint = (Double)datapoint;
-				if(ddatapoint.isNaN() || ddatapoint.isInfinite()){
-					statement.setNull(colIndex+1, java.sql.Types.REAL);
+				if(Strings.isNullOrEmpty(sdatapoint)) {
+					statement.setNull(colIndex+1, java.sql.Types.VARCHAR); //TODO: varchar may be wrong. Check!
 				} else {
-					statement.setDouble(colIndex+1 , ddatapoint);
+					statement.setString(colIndex+1, sdatapoint);
 				}
-			} else if (datapoint == null){
-				if(VariableType.NUMERIC.compareTo(type) == 0){
-					statement.setNull(colIndex+1, java.sql.Types.REAL);
-				} else if (VariableType.TEXT.compareTo(type) == 0){
-					statement.setString(colIndex+1, "");
-				}
-			} else {
-				System.err.println("Type is: " + type.toString());
-				throw new Error("Crash and burn");
+				break;
+			default:
+				throw new AssertionError("Unsupported SPSS data type: " + type.toString());
 			}
 			colIndex++;
 		}
@@ -192,22 +187,17 @@ public class RawData {
 	 * @return A list of pairs containing <value, count>
 	 * @throws SQLException
 	 */
-	public LinkedList<Pair<Double, Integer>> getColumnValueCount(String column) throws SQLException {
-		LinkedList<Pair<Double, Integer>> map = new LinkedList<>();
+	public LinkedHashMap<Object, Integer> getColumnValueCount(String column) throws SQLException {
+		LinkedHashMap<Object, Integer> map = new LinkedHashMap<>();
 		//TODO call hasColumn automatically?
 		//Prepared statement doesn't work, but hasColumn is always called first so this should be relatively injection-safe
 		try (Statement stmt = connection.createStatement();
 				ResultSet rs = stmt.executeQuery(
-				"select "+ column + " as val, count(*) as cnt from rawdata group by val order by val")) {
+				"select " + column + " as val, count(*) as cnt from rawdata group by val order by val")) {
 			while(rs.next()) {
-				double val = rs.getDouble("val");
-				boolean nullVal = rs.wasNull();
+				Object val = rs.getObject("val");
 				Integer count = rs.getInt("cnt");
-				if(!nullVal) {
-					map.add(new Pair<>(val, count));
-				} else {
-					map.add(new Pair<Double, Integer>(null, count));
-				}
+				map.put(val, count);
 			}
 		}
 		return map;

@@ -3,21 +3,19 @@
  */
 package org.daxplore.producer.gui.widget;
 
-import java.util.LinkedList;
+import java.util.LinkedHashMap;
 
 import javax.swing.table.DefaultTableModel;
 
-import org.daxplore.producer.tools.Pair;
-
 @SuppressWarnings("serial")
 public class ColumnTableModel extends DefaultTableModel {
-	LinkedList<Pair<Double, Integer>> columnValueList;
+	LinkedHashMap<Object, Integer> columnValueList;
 	
-	public ColumnTableModel(LinkedList<Pair<Double, Integer>> columnValueList) {
+	public ColumnTableModel(LinkedHashMap<Object, Integer> columnValueList) {
 		this.columnValueList = columnValueList;
 	}
 	
-	public void setValues(LinkedList<Pair<Double, Integer>> columnValueList) {
+	public void setValues(LinkedHashMap<Object, Integer> columnValueList) {
 		this.columnValueList = columnValueList;
 		fireTableDataChanged();
 	}
@@ -49,6 +47,7 @@ public class ColumnTableModel extends DefaultTableModel {
 	public Class<?> getColumnClass(int columnIndex) {
 		switch (columnIndex) {
 		case 0:
+			//TODO: fix when string values are supported
 			return Double.class;
 		case 1:
 			return Integer.class;
@@ -70,9 +69,9 @@ public class ColumnTableModel extends DefaultTableModel {
 	public Object getValueAt(int rowIndex, int columnIndex) {
 		switch (columnIndex) {
 		case 0:
-			return columnValueList.get(rowIndex).getKey();
+			return columnValueList.keySet().toArray()[rowIndex];
 		case 1:
-			return columnValueList.get(rowIndex).getValue();
+			return columnValueList.values().toArray()[rowIndex];
 		default:
 			throw new AssertionError("Invalid column");
 		}

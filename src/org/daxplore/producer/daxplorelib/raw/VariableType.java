@@ -13,8 +13,8 @@ package org.daxplore.producer.daxplorelib.raw;
  */
 public enum VariableType {
 	NUMERIC ("real", Double.class), 
-	TEXT ("text", String.class), 
-	MAPPED ("real", Double.class);
+	TEXT ("text", String.class); 
+	//MAPPED ("real", Double.class); //TODO: remove
 	
 	private final String sqltype;
 	private final Class<?> javatype;

@@ -32,7 +32,7 @@ public class ConsolidateCommand {
 			return;
 		}
 		try (DaxploreFile dax = DaxploreFile.createFromExistingFile(file)) {
-			dax.consolidateScales(locale);
+			//dax.consolidateScales(locale);
 		} catch (DaxploreException | IOException e) {
 			System.out.println("Consolidate command failed");
 			System.out.println(e.getMessage());

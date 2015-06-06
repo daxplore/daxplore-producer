@@ -12,11 +12,14 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.Arrays;
+import java.util.Collection;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
+import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -25,19 +28,18 @@ import org.daxplore.producer.daxplorelib.DaxploreTable;
 import org.daxplore.producer.daxplorelib.SQLTools;
 import org.daxplore.producer.daxplorelib.metadata.textreference.TextReference;
 import org.daxplore.producer.daxplorelib.metadata.textreference.TextReferenceManager;
-import org.daxplore.producer.tools.NumberlineCoverage;
-import org.daxplore.producer.tools.NumberlineCoverage.NumberlineCoverageException;
 
 import com.beust.jcommander.internal.Lists;
+import com.google.gson.Gson;
 
 public class MetaScale {
 	
-	private static final DaxploreTable maintable = new DaxploreTable(
-			"CREATE TABLE metascale (id INTEGER PRIMARY KEY, ignore STRING NOT NULL)"
+	/*private static final DaxploreTable maintable = new DaxploreTable(
+			"CREATE TABLE metascale (id INTEGER PRIMARY KEY, valmap STRING NOT NULL)"
+			, "metascale");*/
+	private static final DaxploreTable scaletable = new DaxploreTable(
+			"CREATE TABLE metascale (scaleid INTEGER NOT NULL, textref STRING NOT NULL, pos INTEGER NOT NULL, mappedvals TEXT NOT NULL, UNIQUE(scaleid, textref) ON CONFLICT REPLACE)"
 			, "metascale");
-	private static final DaxploreTable optiontable = new DaxploreTable(
-			"CREATE TABLE metascaleoption (scaleid INTEGER NOT NULL, textref STRING NOT NULL, ord INTEGER NOT NULL, value REAL NOT NULL, transform STRING NOT NULL, FOREIGN KEY(scaleid) REFERENCES metascale(id))" /*, UNIQUE(scaleid, textref) ON CONFLICT REPLACE)" */
-			, "metascaleoption");
 	
 	public static class MetaScaleManager {
 		private Map<Integer, MetaScale> scaleMap = new HashMap<>();
@@ -53,14 +55,9 @@ public class MetaScale {
 			this.connection = connection;
 			this.textsManager = textsManager;
 
-			if(!SQLTools.tableExists(maintable.name, connection)) {
+			if(!SQLTools.tableExists(scaletable.name, connection)) {
 				try (Statement stmt = connection.createStatement()) {
-					stmt.executeUpdate(maintable.sql);
-				}
-			}
-			if(!SQLTools.tableExists(optiontable.name, connection)) {
-				try (Statement stmt = connection.createStatement()) {
-					stmt.executeUpdate(optiontable.sql);
+					stmt.executeUpdate(scaletable.sql);
 				}
 			}
 		}
@@ -71,43 +68,21 @@ public class MetaScale {
 			} else if(toBeRemoved.containsKey(id)) {
 				return null; // TODO: handle non-scales in a more structured way?
 			} else {
-				NumberlineCoverage ignore;
-				try(PreparedStatement stmt = connection.prepareStatement("SELECT * FROM metascale WHERE id = ?")) {
-					stmt.setInt(1, id);
-					try(ResultSet rs = stmt.executeQuery()) {
-						if(rs.next()) {
-							try {
-								ignore = new NumberlineCoverage(rs.getString("ignore"));
-							} catch (NumberlineCoverageException e) {
-								throw new DaxploreException("Corrupt numberline coverage in metascale", e);
-							}
-						} else {
-							return null; // TODO: handle non-scales in a more structured way?
-						}
-					}
-				}
-						
-				try(PreparedStatement stmt = connection.prepareStatement("SELECT * FROM metascaleoption WHERE scaleid = ? ORDER BY ord")) {
+				Gson gson = new Gson();
+				try(PreparedStatement stmt = connection.prepareStatement("SELECT * FROM metascale WHERE scaleid = ? ORDER BY pos")) {
 					stmt.setInt(1, id);
 					try(ResultSet rs  = stmt.executeQuery()) {
 						List<Option> options = new LinkedList<>();
 						
 						while(rs.next()) {
-							NumberlineCoverage numberlineCoverage;
-							try {
-								numberlineCoverage = new NumberlineCoverage(rs.getString("transform"));
-							} catch (NumberlineCoverageException e) {
-								numberlineCoverage = new NumberlineCoverage(); //TODO: do something if corrupt data is stored in database?
-							}
-							
+							Double[] dArray = gson.fromJson(rs.getString("mappedvals"), Double[].class);
 							options.add(
 									new Option(
 											textsManager.get(rs.getString("textref")), 
-											rs.getDouble("value"), 
-											numberlineCoverage,
+											Arrays.asList(dArray),
 											false));
 						}
-						MetaScale ms = new MetaScale(id, options, ignore, false);
+						MetaScale ms = new MetaScale(id, options, false);
 						scaleMap.put(id, ms);
 						return ms;
 					}
@@ -115,10 +90,10 @@ public class MetaScale {
 			}
 		}
 		
-		public MetaScale create(List<Option> options, NumberlineCoverage ignore) throws SQLException {
+		public MetaScale create(List<Option> options) throws SQLException {
 			addDelta++;
-			int id = SQLTools.maxId(maintable.name, "id", connection) + addDelta;
-			MetaScale scale = new MetaScale(id, options, ignore, true);
+			int id = SQLTools.maxId(scaletable.name, "scaleid", connection) + addDelta;
+			MetaScale scale = new MetaScale(id, options, true);
 			toBeAdded.add(scale);
 			scaleMap.put(id, scale);
 			return scale;
@@ -131,46 +106,34 @@ public class MetaScale {
 		}
 		
 		public void saveAll() throws SQLException {
+			Gson gson = new Gson();
 			try (
-				PreparedStatement updateScaleStmt = connection.prepareStatement("UPDATE metascale SET ignore = ? WHERE id = ? ");
-				PreparedStatement insertScaleStmt = connection.prepareStatement("INSERT INTO metascale (id, ignore) VALUES (?, ?)");
-				PreparedStatement deleteStmt = connection.prepareStatement("DELETE FROM metascale WHERE id = ?");
-				
-				PreparedStatement addOptionStmt = connection.prepareStatement("INSERT INTO metascaleoption (scaleid, textref, ord, value, transform) VALUES (?, ?, ?, ?, ?)");
-				PreparedStatement deleteOptionStmt = connection.prepareStatement("DELETE FROM metascaleoption WHERE scaleid = ?");
+				PreparedStatement addOptionStmt = connection.prepareStatement("INSERT INTO metascale (scaleid, textref, pos, mappedvals) VALUES (?, ?, ?, ?)");
+				PreparedStatement deleteOptionStmt = connection.prepareStatement("DELETE FROM metascale WHERE scaleid = ?");
 				//PreparedStatement updateOptionStmt = connection.prepareStatement("UPDATE metascaleoption SET textref = ?, value = ?, transform = ? WHERE scaleid = ? AND ord = ?");
 			) {
 				int nNew = 0, nModified = 0, nRemoved = 0;
 				
 				for(MetaScale ms: toBeAdded) {
 					nNew++;
-					insertScaleStmt.setInt(1, ms.id);
-					insertScaleStmt.setString(2, ms.ignore.toString());
-					insertScaleStmt.addBatch();
-					
 					int ord = 0;
 					for(Option opt: ms.options) {
 						addOptionStmt.setInt(1, ms.id);
 						addOptionStmt.setString(2, opt.textRef.getRef());
 						addOptionStmt.setInt(3, ord);
-						addOptionStmt.setDouble(4, opt.value);
-						addOptionStmt.setString(5, opt.transformation.toString());
+						addOptionStmt.setString(4, gson.toJson(opt.getValues()));
 						addOptionStmt.addBatch();
 						ord++;
 					}
 					ms.setSaved();
 				}
 				toBeAdded.clear();
-				insertScaleStmt.executeBatch();
 				addOptionStmt.executeBatch();
 				addDelta = 0;
 				
 				for(MetaScale ms: scaleMap.values()) {
 					if(ms.isModified()) {
 						nModified++;
-						updateScaleStmt.setInt(2, ms.id);
-						updateScaleStmt.setString(1, ms.ignore.toString());
-						updateScaleStmt.addBatch();
 						
 						deleteOptionStmt.setInt(1, ms.id);
 						deleteOptionStmt.addBatch();
@@ -180,8 +143,7 @@ public class MetaScale {
 							addOptionStmt.setInt(1, ms.id);
 							addOptionStmt.setString(2, opt.textRef.getRef());
 							addOptionStmt.setInt(3, ord);
-							addOptionStmt.setDouble(4, opt.value);
-							addOptionStmt.setString(5, opt.transformation.toString());
+							addOptionStmt.setString(4, gson.toJson(opt.getValues()));
 							addOptionStmt.addBatch();
 							ord++;
 						}
@@ -189,18 +151,14 @@ public class MetaScale {
 						ms.setSaved();
 					}
 				}
-				updateScaleStmt.executeBatch();
 				deleteOptionStmt.executeBatch();
 				addOptionStmt.executeBatch();
 				
 				for(MetaScale ms: toBeRemoved.values()) {
 					nRemoved++;
-					deleteStmt.setInt(1, ms.id);
-					deleteStmt.addBatch();
 					deleteOptionStmt.setInt(1, ms.id);
 					deleteOptionStmt.addBatch();
 				}
-				deleteStmt.executeBatch();
 				deleteOptionStmt.executeBatch();
 				toBeRemoved.clear();
 				
@@ -245,12 +203,13 @@ public class MetaScale {
 	
 	public static class Option {
 		private TextReference textRef;
-		private double value;
-		private NumberlineCoverage transformation;
+		private Set<Double> values = new HashSet<Double>();
 		private boolean modified = false;
 		
-		public Option(TextReference textRef, double value, NumberlineCoverage transformation, boolean setNew) {
-			this.textRef = textRef; this.value = value; this.transformation = transformation; this.modified = setNew;
+		public Option(TextReference textRef, Collection<Double> values, boolean setNew) {
+			this.textRef = textRef;
+			this.values.addAll(values);
+			this.modified = setNew;
 		}
 
 		public TextReference getTextRef() {
@@ -264,41 +223,38 @@ public class MetaScale {
 			}
 		}
 
-		public double getValue() {
-			return value;
+		public Set<Double> getValues() {
+			return values;
 		}
 
-		public void setValue(double value) {
-			if(value != this.value) {
-				this.value = value;
-				modified = true;
-			}
+		public void addValue(Double value) {
+			values.add(value);
 		}
-
-		public NumberlineCoverage getTransformation() {
-			return transformation.clone();
+		
+		public void removeValue(Double value) {
+			values.remove(value);
 		}
-
-		public void setTransformation(NumberlineCoverage transformation) {
-			if(!transformation.equals(this.transformation)) {
-				this.transformation = transformation;
-				modified = true;
-			}
+		
+		public boolean containsValue(Double value) {
+			return values.contains(value);
+		}
+		
+		public void setValues(Collection<Double> values) {
+			values.clear();
+			values.addAll(values);
 		}
 	}
 	
 	
 	/** Each Option's position is defined by the order of this list */ //TODO change to explicit ordering
 	private List<Option> options;
-	private NumberlineCoverage ignore;
 
 	private int id;
 	private boolean modified = false;
 	
-	private MetaScale(int id, List<Option> options, NumberlineCoverage ignore, boolean newScale) {
+	private MetaScale(int id, List<Option> options, boolean newScale) {
 		this.id = id;
 		this.options = options;
-		this.ignore = ignore;
 		this.modified = newScale;
 	}
 	
@@ -320,49 +276,20 @@ public class MetaScale {
 			modified = true;
 		}
 	}
-
-	public NumberlineCoverage getIgnoreOption() {
-		return ignore;
-	}
-	
-	public void setIgnoreOption(NumberlineCoverage ignore) {
-		if(!ignore.equals(this.ignore)) {
-			this.ignore = ignore;
-			modified = true;
-		}
-	}
 	
 	/**
-	 * 
-	 * @param value
-	 * @return Output value Double.NaN if not found
-	 * @throws Exception
-	 */
-	public double transform(double value) {
-		for(Option opt: options) {
-			if(opt.transformation.contains(value)) {
-				return opt.value;
-			}
-		}
-		return Double.NaN;
-	}
-	
-	/**
-	 * 
+	 * Finds the index of the option that maps to this value
 	 * @param value
 	 * @return index of value, -1 if not found
 	 */
-	public int matchIndex(double value) {
+	public int getOptionIndex(Double value) {
+		//TODO: optimize with better data structure
 		for(int i = 0; i < options.size(); i++ ) {
-			if(options.get(i).transformation.contains(value)) {
+			if(options.get(i).getValues().contains(value)) {
 				return i;
 			}
 		}
 		return -1;
-	}
-	
-	public boolean ignored(double value) {
-		return ignore.contains(value);
 	}
 	
 	public boolean isModified() {
@@ -384,14 +311,12 @@ public class MetaScale {
 		}
 	}
 	
-	public boolean equalsLocale(MetaScale other, Locale byLocale) {
+	/*public boolean equalsLocale(MetaScale other, Locale byLocale) {
 		if(options.size() != other.options.size()) { return false; }
 		for(int i = 0; i < options.size(); i++) {
 			if(!options.get(i).textRef.get(byLocale).trim().equals(other.options.get(i).textRef.get(byLocale).trim())) { return false; }
 			if(options.get(i).value != other.options.get(i).value) { return false; }
-			if(!options.get(i).transformation.toString().equals(other.options.get(i).transformation.toString())) { return false; }
 		}
-		if(!ignore.toString().equals(other.ignore.toString())) { return false; }
 		return true;
-	}
+	}*/
 }

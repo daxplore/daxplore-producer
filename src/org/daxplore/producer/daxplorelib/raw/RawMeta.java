@@ -26,7 +26,6 @@ import org.daxplore.producer.daxplorelib.DaxploreException;
 import org.daxplore.producer.daxplorelib.DaxploreFile;
 import org.daxplore.producer.daxplorelib.DaxploreTable;
 import org.daxplore.producer.daxplorelib.SQLTools;
-import org.daxplore.producer.tools.Pair;
 import org.json.simple.JSONValue;
 import org.json.simple.parser.ContainerFactory;
 import org.json.simple.parser.JSONParser;
@@ -44,7 +43,7 @@ public class RawMeta {
 	public class RawMetaQuestion {
 		public String column, longname, qtext, spsstype, measure;
 		public VariableType qtype = null;
-		public List<Pair<String, Double>> valuelables;
+		public LinkedHashMap<Object, String> valuelables;
 	}
 	
 	Connection connection;
@@ -77,7 +76,7 @@ public class RawMeta {
 		}
 	}
 	
-	public Map<String, VariableType> getColumnMap() throws SQLException{
+	/*public Map<String, VariableType> getColumnMap() throws SQLException{
 		Map<String, VariableType> columns = new LinkedHashMap<>();
 		try (Statement stmt = connection.createStatement();
 				ResultSet rs = stmt.executeQuery("SELECT column, qtype FROM rawmeta")) {
@@ -88,7 +87,7 @@ public class RawMeta {
 			}
 		}
 		return columns;
-	}
+	}*/
 	
 	public void importSPSS(SPSSFile spssFile) throws DaxploreException {
 		Map<String, String> columns = new LinkedHashMap<>();
@@ -103,7 +102,6 @@ public class RawMeta {
 				throw new DaxploreException("\"" + var.getName() + "\" is not a valid variable name");
 			}
 			String spsstype;
-			String valuelabels = null;
 			String qtype;
 			if(var instanceof SPSSNumericVariable){
 				spsstype = "Numeric";
@@ -113,9 +111,12 @@ public class RawMeta {
 				spsstype = "String";
 				qtype = VariableType.TEXT.toString();
 				columns.put(var.getName(), "text");
-			} else throw new Error("shuoldn't happen");
-			if(var.hasValueLabels()){
-				qtype = VariableType.MAPPED.toString();
+			} else {
+				throw new Error("shuoldn't happen");
+			}
+			
+			String valuelabels = null;
+			if(var.hasValueLabels()){ //Mapped stored implicitly as valuelabels != null
 				valuelabels = categoriesToJSON(var.categoryMap);
 			}
 			String measure = var.getMeasureLabel();
@@ -137,83 +138,6 @@ public class RawMeta {
 		}
 	}
 	
-	protected static void clearRawMetaTable(Connection conn) throws SQLException {
-		try(Statement stmt = conn.createStatement()) {
-			stmt.executeUpdate("DELETE FROM rawmeta");
-		}
-	}
-	
-	protected static void addColumnMeta(PreparedStatement stmt, String column, String longname, String qtext, String qtype, String spsstype, String valuelabels, String measure) throws SQLException {
-		
-		if(column != null)stmt.setString(1, column);
-		else throw new NullPointerException();
-		
-		if(longname != null) stmt.setString(2, longname);
-		else stmt.setNull(2, java.sql.Types.VARCHAR);
-		
-		if(qtext != null) stmt.setString(3, qtext);
-		else stmt.setNull(3, java.sql.Types.VARCHAR);
-		
-		if(qtype != null) stmt.setString(4, qtype);
-		else stmt.setNull(4, java.sql.Types.VARCHAR);
-		
-		if(spsstype != null) stmt.setString(5, spsstype);
-		else stmt.setNull(5, java.sql.Types.VARCHAR);
-		
-		if(valuelabels != null) stmt.setString(6, valuelabels);
-		else stmt.setNull(6, java.sql.Types.VARCHAR);
-
-		if(measure != null) stmt.setString(7, measure);
-		else stmt.setNull(7, java.sql.Types.VARCHAR);
-		
-		stmt.executeUpdate();
-	}
-	
-	protected static String categoriesToJSON(Map<String, SPSSVariableCategory> categories){
-		Set<String> keyset = categories.keySet();
-		Map<Object,String> catObj = new LinkedHashMap<>();
-		for(String key : keyset){
-			//if(categories.get(key).value != Double.NaN){
-			//	catObj.put(new Double(categories.get(key).value), categories.get(key).label);
-			//} else {
-				catObj.put(categories.get(key).strValue, categories.get(key).label);
-			//}
-		}
-		return JSONValue.toJSONString(catObj);
-	}
-	
-	@SuppressWarnings("rawtypes")
-	protected static List<Pair<String, Double>> JSONtoCategories(String jsonstring) {
-		List<Pair<String, Double>> list = new LinkedList<>();
-		
-		JSONParser parser = new JSONParser();
-		ContainerFactory containerFactory = new ContainerFactory(){
-			@Override
-			public List creatArrayContainer() {
-				return new LinkedList();
-			}
-			@Override
-			public Map createObjectContainer() {
-				return new LinkedHashMap();
-			}
-		};
-		Map json;
-		try {
-			json = (Map)parser.parse(jsonstring, containerFactory);
-		} catch (ParseException e) {
-			e.printStackTrace();
-			return null;
-		}
-	    Iterator iter = json.entrySet().iterator();
-	    
-	    while(iter.hasNext()) {
-	    	Map.Entry entry = (Map.Entry)iter.next();
-			list.add(new Pair<>((String)entry.getValue(), Double.parseDouble((String) entry.getKey())));
-	    }
-    
-		return list;
-	}
-	
 	public List<RawMetaQuestion> getQuestions() throws SQLException { 
 		List<RawMetaQuestion> rawQuestionList = new LinkedList<>();
 		try(PreparedStatement stmt = connection.prepareStatement("SELECT * FROM rawmeta ORDER BY column ASC");
@@ -229,15 +153,25 @@ public class RawMeta {
 				rmq.spsstype = rs.getString("spsstype");
 				String cats = rs.getString("valuelabels");
 				if(cats != null && !cats.isEmpty()) {
-					try {
-						rmq.valuelables = JSONtoCategories(rs.getString("valuelabels"));
-					} catch (NumberFormatException e) {
-						//TODO: send message to client
-						Logger.getGlobal().log(Level.SEVERE, "Variable \"" + rmq.column + "\" was ignored");
-						continue;
+					switch (rmq.qtype) {
+					case NUMERIC:
+						try {
+							rmq.valuelables = JSONtoCategoriesDoubles(rs.getString("valuelabels"));
+						} catch (NumberFormatException e) {
+							//TODO: send message to client
+							Logger.getGlobal().log(Level.SEVERE, "Variable \"" + rmq.column + "\" was ignored");
+							continue;
+						}
+						break;
+					case TEXT:
+						rmq.valuelables = JSONtoCategoriesStrings(rs.getString("valuelabels"));
+						break;
+					default:
+						break;
+						
 					}
 				} else {
-					rmq.valuelables = new LinkedList<>(); 
+					rmq.valuelables = null; 
 				}
 				rawQuestionList.add(rmq);
 			}
@@ -260,9 +194,19 @@ public class RawMeta {
 					rmq.spsstype = rs.getString("spsstype");
 					String cats = rs.getString("valuelabels");
 					if(cats != null && !cats.isEmpty()) {
-						rmq.valuelables = JSONtoCategories(rs.getString("valuelabels"));
+						switch (rmq.qtype) {
+						case NUMERIC:
+							rmq.valuelables = JSONtoCategoriesDoubles(rs.getString("valuelabels"));
+							break;
+						case TEXT:
+							rmq.valuelables = JSONtoCategoriesStrings(rs.getString("valuelabels"));
+							break;
+						default:
+							break;
+							
+						}
 					} else {
-						rmq.valuelables = new LinkedList<>(); 
+						rmq.valuelables = null; 
 					}
 					return rmq;
 				}
@@ -308,4 +252,114 @@ public class RawMeta {
 		}
 		return columnMap;
 	}
+	
+	protected static void clearRawMetaTable(Connection conn) throws SQLException {
+		try(Statement stmt = conn.createStatement()) {
+			stmt.executeUpdate("DELETE FROM rawmeta");
+		}
+	}
+	
+	protected static void addColumnMeta(PreparedStatement stmt, String column, String longname, String qtext, String qtype, String spsstype, String valuelabels, String measure) throws SQLException {
+		
+		if(column != null)stmt.setString(1, column);
+		else throw new NullPointerException();
+		
+		if(longname != null) stmt.setString(2, longname);
+		else stmt.setNull(2, java.sql.Types.VARCHAR);
+		
+		if(qtext != null) stmt.setString(3, qtext);
+		else stmt.setNull(3, java.sql.Types.VARCHAR);
+		
+		if(qtype != null) stmt.setString(4, qtype);
+		else stmt.setNull(4, java.sql.Types.VARCHAR);
+		
+		if(spsstype != null) stmt.setString(5, spsstype);
+		else stmt.setNull(5, java.sql.Types.VARCHAR);
+		
+		if(valuelabels != null) stmt.setString(6, valuelabels);
+		else stmt.setNull(6, java.sql.Types.VARCHAR);
+		
+		if(measure != null) stmt.setString(7, measure);
+		else stmt.setNull(7, java.sql.Types.VARCHAR);
+		
+		stmt.executeUpdate();
+	}
+	
+	protected static String categoriesToJSON(Map<String, SPSSVariableCategory> categories){
+		Set<String> keyset = categories.keySet();
+		Map<Object,String> catObj = new LinkedHashMap<>();
+		for(String key : keyset){
+			//if(categories.get(key).value != Double.NaN){
+			//	catObj.put(new Double(categories.get(key).value), categories.get(key).label);
+			//} else {
+			catObj.put(categories.get(key).strValue, categories.get(key).label);
+			//}
+		}
+		return JSONValue.toJSONString(catObj);
+	}
+	
+	@SuppressWarnings("rawtypes")
+	protected static LinkedHashMap<Object, String> JSONtoCategoriesDoubles(String jsonstring) {
+		LinkedHashMap<Object, String> list = new LinkedHashMap<>();
+		
+		JSONParser parser = new JSONParser();
+		ContainerFactory containerFactory = new ContainerFactory(){
+			@Override
+			public List creatArrayContainer() {
+				return new LinkedList();
+			}
+			@Override
+			public Map createObjectContainer() {
+				return new LinkedHashMap();
+			}
+		};
+		Map json;
+		try {
+			json = (Map)parser.parse(jsonstring, containerFactory);
+		} catch (ParseException e) {
+			e.printStackTrace();
+			return null;
+		}
+		Iterator iter = json.entrySet().iterator();
+		
+		while(iter.hasNext()) {
+			Map.Entry entry = (Map.Entry)iter.next();
+			list.put(Double.parseDouble((String)entry.getKey()), (String) entry.getValue());
+		}
+		
+		return list;
+	}
+	
+	@SuppressWarnings("rawtypes")
+	protected static LinkedHashMap<Object, String> JSONtoCategoriesStrings(String jsonstring) {
+		LinkedHashMap<Object, String> list = new LinkedHashMap<>();
+		
+		JSONParser parser = new JSONParser();
+		ContainerFactory containerFactory = new ContainerFactory(){
+			@Override
+			public List creatArrayContainer() {
+				return new LinkedList();
+			}
+			@Override
+			public Map createObjectContainer() {
+				return new LinkedHashMap();
+			}
+		};
+		Map json;
+		try {
+			json = (Map)parser.parse(jsonstring, containerFactory);
+		} catch (ParseException e) {
+			e.printStackTrace();
+			return null;
+		}
+		Iterator iter = json.entrySet().iterator();
+		
+		while(iter.hasNext()) {
+			Map.Entry entry = (Map.Entry)iter.next();
+			list.put((String)entry.getKey(), (String) entry.getValue());
+		}
+		
+		return list;
+	}
 }
+

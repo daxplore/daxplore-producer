@@ -18,11 +18,13 @@ import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.util.Collection;
 import java.util.Comparator;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Properties;
 import java.util.SortedSet;
@@ -47,7 +49,6 @@ import javax.xml.validation.Schema;
 import javax.xml.validation.SchemaFactory;
 
 import org.daxplore.producer.daxplorelib.calc.Crosstabs;
-import org.daxplore.producer.daxplorelib.metadata.MetaCalculation;
 import org.daxplore.producer.daxplorelib.metadata.MetaGroup;
 import org.daxplore.producer.daxplorelib.metadata.MetaQuestion;
 import org.daxplore.producer.daxplorelib.metadata.MetaScale;
@@ -55,10 +56,7 @@ import org.daxplore.producer.daxplorelib.metadata.MetaTimepointShort;
 import org.daxplore.producer.daxplorelib.metadata.textreference.TextReference;
 import org.daxplore.producer.daxplorelib.metadata.textreference.TextTree;
 import org.daxplore.producer.daxplorelib.raw.RawMeta.RawMetaQuestion;
-import org.daxplore.producer.daxplorelib.raw.VariableType;
 import org.daxplore.producer.tools.MyTools;
-import org.daxplore.producer.tools.NumberlineCoverage;
-import org.daxplore.producer.tools.Pair;
 import org.daxplore.producer.tools.SortedProperties;
 import org.opendatafoundation.data.FileFormatInfo;
 import org.opendatafoundation.data.FileFormatInfo.ASCIIFormat;
@@ -262,22 +260,29 @@ public class ImportExportManager {
 			for(RawMetaQuestion rmq : daxploreFile.getRawMeta().getQuestions()) {
 				TextReference fulltext = daxploreFile.getTextReferenceManager().get(rmq.column + "_fulltext");
 				fulltext.put(rmq.qtext, locale);
-				MetaCalculation calc = new MetaCalculation(rmq.column, connection);
 				MetaScale scale = null;
-				if(rmq.qtype == VariableType.MAPPED) {
+				if(rmq.valuelables != null) {
 					LinkedList<MetaScale.Option> scaleOptions = new LinkedList<>();
-					for(int i = 0; i < rmq.valuelables.size(); i++) {
-						Pair<String, Double> s = rmq.valuelables.get(i);
+					int i = 0; //TODO change to 1-indexed options
+					for(Map.Entry<Object, String> s: rmq.valuelables.entrySet()) {
 						TextReference ref = daxploreFile.getTextReferenceManager().get(rmq.column + "_option_" + i);
-						ref.put(s.getKey(), locale);
-						scaleOptions.add(new MetaScale.Option(ref, s.getValue(), new NumberlineCoverage(s.getValue()), true));
+						ref.put(s.getValue(), locale);
+						if(s.getKey() instanceof Double) {
+							Collection<Double> vals = new LinkedList<Double>();
+							vals.add((Double)s.getKey());
+							scaleOptions.add(new MetaScale.Option(ref, vals, true));
+						} else {
+							//TODO: Add support for string values
+							Logger.getGlobal().log(Level.WARNING, "Trying to add a non number as an option");
+						}
+						i++;
 					}
-					scale = daxploreFile.getMetaScaleManager().create(scaleOptions, new NumberlineCoverage());
+					scale = daxploreFile.getMetaScaleManager().create(scaleOptions);
 				}
 				
 				TextReference shorttext = daxploreFile.getTextReferenceManager().get(rmq.column + "_shorttext");
 				List<MetaTimepointShort> timepoints = new LinkedList<>();
-				daxploreFile.getMetaQuestionManager().create(rmq.column, shorttext, fulltext, scale, calc, timepoints);
+				daxploreFile.getMetaQuestionManager().create(rmq.column, shorttext, fulltext, null, scale, timepoints);
 			}
 		} catch (SQLException e) {
 			throw new DaxploreException("Failed to transfer metadata from raw", e);
@@ -309,7 +314,7 @@ public class ImportExportManager {
 				int isolation = connection.getTransactionIsolation();
 				connection.setTransactionIsolation(Connection.TRANSACTION_READ_UNCOMMITTED);
 				
-				daxploreFile.getRawMeta().importSPSS(importSPSSFile);
+				daxploreFile.getRawMeta().importSPSS(importSPSSFile); //Order important, meta before data
 				daxploreFile.getRawData().importSPSS(importSPSSFile);
 					
 				daxploreFile.getAbout().setImport(importSPSSFile.file.getName());
@@ -340,18 +345,7 @@ public class ImportExportManager {
 	 * @throws IOException
 	 * @throws DaxploreException 
 	 */
-	void importL10n(Reader reader, L10nFormat format, Locale locale) throws IOException, DaxploreException { //TODO don't write directly to database, talk to managers
-		boolean autocommit = true;
-		try {
-			//save = sqliteDatabase.setSavepoint();
-			autocommit = connection.getAutoCommit();
-			connection.setAutoCommit(false);
-			connection.setTransactionIsolation(Connection.TRANSACTION_READ_UNCOMMITTED);
-		} catch (SQLException e) {
-			MyTools.printSQLExeption(e);
-			throw new DaxploreException("Failed to disable autocommit", e);
-		}
-		
+	void importL10n(Reader reader, L10nFormat format, Locale locale) throws IOException, DaxploreException {
 		switch(format) {
 		case PROPERTIES:
 			Properties properties = new Properties();
@@ -381,13 +375,6 @@ public class ImportExportManager {
 			break;
 		default:
 			throw new AssertionError("Unsupported format: " + format);	
-		}
-		
-		try {
-			connection.setAutoCommit(autocommit);
-		} catch (SQLException e) {
-			MyTools.printSQLExeption(e);
-			throw new DaxploreException("Failed to reenable autocommit", e);
 		}
 	}
 	

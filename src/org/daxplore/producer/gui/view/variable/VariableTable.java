@@ -43,6 +43,8 @@ public class VariableTable extends JXTable {
 	public VariableTable(EventBus eventBus, GuiTexts texts, VariableTableModel model) {
 		super(model);
 		
+		setSortable(false);
+
 		setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
         mouseOverRow = -1;
         

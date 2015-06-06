@@ -19,6 +19,8 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Set;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import javax.swing.BorderFactory;
 import javax.swing.DefaultComboBoxModel;
@@ -464,6 +466,7 @@ public class CreateFileWizard extends Wizard {
 			
 			eventBus.post(new DaxploreFileUpdateEvent(daxploreFile));
 		} catch (DaxploreException | IOException e) {
+			Logger.getGlobal().log(Level.SEVERE, e.getMessage(), e);
 			JOptionPane.showMessageDialog(window, e.getMessage());
 		}
 		

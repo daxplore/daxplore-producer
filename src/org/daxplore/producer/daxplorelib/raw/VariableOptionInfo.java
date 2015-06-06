@@ -8,15 +8,16 @@
 package org.daxplore.producer.daxplorelib.raw;
 
 public class VariableOptionInfo {
-	private Double value;
+	private Object value;
 	private String rawText;
 	private int count;
 	
-	public VariableOptionInfo(Double value) {
+	public VariableOptionInfo(Object value, int count) {
 		this.value = value;
+		this.count = count;
 	}
 	
-	public Double getValue() {
+	public Object getValue() {
 		return value;
 	}
 	
@@ -30,9 +31,5 @@ public class VariableOptionInfo {
 	
 	public int getCount() {
 		return count;
-	}
-	
-	public void setCount(int count) {
-		this.count = count;
 	}
 }

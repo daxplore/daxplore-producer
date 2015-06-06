@@ -25,6 +25,7 @@ import org.daxplore.producer.daxplorelib.DaxploreFile;
 import org.daxplore.producer.daxplorelib.metadata.MetaQuestion;
 import org.daxplore.producer.daxplorelib.metadata.MetaScale;
 import org.daxplore.producer.daxplorelib.metadata.MetaScale.Option;
+import org.daxplore.producer.daxplorelib.raw.RawMeta.RawMetaQuestion;
 import org.daxplore.producer.daxplorelib.raw.VariableOptionInfo;
 import org.daxplore.producer.gui.resources.GuiTexts;
 
@@ -47,6 +48,7 @@ public class VariableController implements TableModelListener, ActionListener {
 	private VariableTableModel variableModel;
 	private VariableTable variableTable;
 	private List<VariableOptionInfo> rawVariableList;
+	private RawMetaQuestion rawMetaQuestion;
 	
 	public VariableController(EventBus eventBus, GuiTexts texts, DaxploreFile daxploreFile, MetaQuestion metaQuestion) {
 		this.eventBus = eventBus;
@@ -56,14 +58,16 @@ public class VariableController implements TableModelListener, ActionListener {
 		eventBus.register(this);
 		
 		try {
-			rawVariableList = daxploreFile.getRawColumnInfo(metaQuestion.getId());
+			
+			rawMetaQuestion = daxploreFile.getRawMeta().getQuestion(metaQuestion.getId());
+			rawVariableList = daxploreFile.getRawColumnInfo(rawMetaQuestion.column);
 
 			variableModel = new VariableTableModel(metaQuestion.getScale(), calculateAfter());
 			variableTable = new VariableTable(eventBus, texts, variableModel);
 			variableModel.addTableModelListener(this);
 			List<Integer> availebleToNumbers = variableModel.getAvailebleToNumbers();
 			
-			rawModel = new RawVariableTableModel(rawVariableList, metaQuestion.getScale(), availebleToNumbers);
+			rawModel = new RawVariableTableModel(rawMetaQuestion, rawVariableList, metaQuestion.getScale(), availebleToNumbers);
 			rawTable = new RawVariableTable(eventBus, texts, rawModel);
 			rawModel.addTableModelListener(this);
 			
@@ -101,7 +105,8 @@ public class VariableController implements TableModelListener, ActionListener {
 		for(MetaScale.Option option: mq.getScale().getOptions()) {
 			int total = 0;
 			for(VariableOptionInfo info: rawVariableList) {
-				if(info.getValue() != null && option.getTransformation().contains(info.getValue())) {
+				//TODO: remove cast when adding string value support
+				if(info.getValue() != null && option.containsValue((Double)info.getValue())) {
 					total += info.getCount();
 				}
 			}

@@ -23,6 +23,7 @@ import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -34,18 +35,14 @@ import org.daxplore.producer.daxplorelib.ImportExportManager.L10nFormat;
 import org.daxplore.producer.daxplorelib.metadata.MetaGroup.MetaGroupManager;
 import org.daxplore.producer.daxplorelib.metadata.MetaQuestion;
 import org.daxplore.producer.daxplorelib.metadata.MetaQuestion.MetaQuestionManager;
-import org.daxplore.producer.daxplorelib.metadata.MetaScale;
 import org.daxplore.producer.daxplorelib.metadata.MetaScale.MetaScaleManager;
 import org.daxplore.producer.daxplorelib.metadata.MetaTimepointShort;
 import org.daxplore.producer.daxplorelib.metadata.MetaTimepointShort.MetaTimepointShortManager;
-import org.daxplore.producer.daxplorelib.metadata.textreference.TextReference;
 import org.daxplore.producer.daxplorelib.metadata.textreference.TextReferenceManager;
 import org.daxplore.producer.daxplorelib.raw.RawData;
 import org.daxplore.producer.daxplorelib.raw.RawMeta;
 import org.daxplore.producer.daxplorelib.raw.RawMeta.RawMetaQuestion;
 import org.daxplore.producer.daxplorelib.raw.VariableOptionInfo;
-import org.daxplore.producer.tools.MyTools;
-import org.daxplore.producer.tools.NumberlineCoverage;
 import org.daxplore.producer.tools.Pair;
 import org.xml.sax.SAXException;
 
@@ -221,30 +218,47 @@ public class DaxploreFile implements Closeable {
 	
 	public List<VariableOptionInfo> getRawColumnInfo(String column) throws DaxploreException {
 		try {
+			if(!rawMeta.hasColumn(column)){
+				throw new DaxploreException("Tried to get data for non-existing column: " + column);
+			}
 			List<VariableOptionInfo> infoList = new LinkedList<>();
-			List<Pair<Double, Integer>> counts = rawData.getColumnValueCount(column);
-			for(Pair<Double, Integer> count: counts) {
-				VariableOptionInfo optionInfo = new VariableOptionInfo(count.getKey());
-				optionInfo.setCount(count.getValue());
+			LinkedHashMap<Object, Integer> counts = rawData.getColumnValueCount(column);
+			for(Map.Entry<Object, Integer> count: counts.entrySet()) {
+				VariableOptionInfo optionInfo = new VariableOptionInfo(count.getKey(), count.getValue());
 				infoList.add(optionInfo);
 			}
 			RawMetaQuestion rmq = rawMeta.getQuestion(column);
-			for(Pair<String, Double> texts: rmq.valuelables) {
-				Double value = texts.getValue();
-				for(VariableOptionInfo info: infoList) {
-					if(value == info.getValue() || (value!=null && value.equals(info.getValue()))) {
-						info.setRawText(texts.getKey());
-						break;
+			switch (rmq.qtype) {
+			case NUMERIC:
+				for(Map.Entry<Object, String> texts: rmq.valuelables.entrySet()) {
+					Double value = (Double)texts.getKey();
+					for(VariableOptionInfo info: infoList) {
+						if(value == info.getValue() || (value!=null && value.equals(info.getValue()))) {
+							info.setRawText(texts.getValue());
+							break;
+						}
 					}
 				}
+				break;
+			case TEXT:
+				for(Map.Entry<Object, String> texts: rmq.valuelables.entrySet()) {
+					String value = (String)texts.getKey();
+					for(VariableOptionInfo info: infoList) {
+						if(value == info.getValue() || (value!=null && value.equals(info.getValue()))) {
+							info.setRawText(texts.getValue());
+							break;
+						}
+					}
+				}
+				break;
 			}
-			
 			return infoList;
 		} catch (SQLException e) {
 			throw new DaxploreException("Failure to get raw data things", e);
 		}
 	}
 	
+	/*
 	//TODO move to a helper file?
 	public void consolidateScales(Locale bylocale) throws DaxploreException {
 		boolean autocommit = true;
@@ -280,7 +294,7 @@ public class DaxploreFile implements Closeable {
 							}
 							newrefs.add(new MetaScale.Option(tr, oldrefs.get(i).getValue(), oldrefs.get(i).getTransformation(), true));
 						}
-						MetaScale gs = metaScaleManager.create(newrefs, new NumberlineCoverage());
+						MetaScale gs = metaScaleManager.create(newrefs);
 						//System.out.println("\n" + us.toJSONString() +" -> " + gs.toJSONString());
 						genericScales.add(gs);
 						scaleMap.put(s, gs);
@@ -326,7 +340,7 @@ public class DaxploreFile implements Closeable {
 		}
 		
 	}
-	
+	*/
 	//TODO move to a helper file?
 	public void replaceAllTimepointsInQuestions() throws DaxploreException, SQLException {
 		List<MetaTimepointShort> timepoints = metaTimepointShortManager.getAll();

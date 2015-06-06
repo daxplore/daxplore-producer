@@ -11,8 +11,9 @@ import java.awt.Component;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.sql.SQLException;
-import java.util.LinkedList;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 
 import javax.swing.JOptionPane;
 import javax.swing.JTable;
@@ -30,7 +31,6 @@ import org.daxplore.producer.daxplorelib.raw.RawMeta;
 import org.daxplore.producer.gui.event.DaxploreFileUpdateEvent;
 import org.daxplore.producer.gui.resources.GuiTexts;
 import org.daxplore.producer.gui.widget.ColumnTableModel;
-import org.daxplore.producer.tools.Pair;
 
 import com.google.common.eventbus.EventBus;
 import com.google.common.eventbus.Subscribe;
@@ -82,8 +82,8 @@ public class TimeSeriesController implements ActionListener, DocumentListener {
 				Double value = 0.0;
 				RawData rawData = daxploreFile.getRawData();
 				String column = daxploreFile.getAbout().getTimeSeriesShortColumn();
-				List<Pair<Double, Integer>> columnValueCounts= rawData.getColumnValueCount(column);
-				L: for(Pair<Double, Integer> valuePair: columnValueCounts) {
+				LinkedHashMap<Object, Integer> columnValueCounts= rawData.getColumnValueCount(column);
+				L: for(Map.Entry<Object, Integer> valuePair: columnValueCounts.entrySet()) {
 					if(valuePair.getKey() == null) {
 						continue L;
 					}
@@ -93,7 +93,8 @@ public class TimeSeriesController implements ActionListener, DocumentListener {
 							continue L;
 						}
 					}
-					value = valuePair.getKey();
+					//TODO: fix cast when string values are supported
+					value = (Double)valuePair.getKey();
 					break;
 				}
 				
@@ -201,7 +202,7 @@ public class TimeSeriesController implements ActionListener, DocumentListener {
 			RawData rawData = daxploreFile.getRawData();
 			RawMeta rawMeta = daxploreFile.getRawMeta();
 			if(rawMeta.hasColumn(text)) {
-				LinkedList<Pair<Double, Integer>> columnValueList = rawData.getColumnValueCount(text);
+				LinkedHashMap<Object, Integer> columnValueList = rawData.getColumnValueCount(text);
 				ColumnTableModel model = new ColumnTableModel(columnValueList);
 				JTable columnValueTable = new JTable(model);
 				timeSeriesView.getColumnValueCountPane().setViewportView(columnValueTable);
