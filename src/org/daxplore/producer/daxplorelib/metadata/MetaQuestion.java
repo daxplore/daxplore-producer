@@ -19,12 +19,14 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.daxplore.producer.daxplorelib.DaxploreException;
 import org.daxplore.producer.daxplorelib.DaxploreTable;
 import org.daxplore.producer.daxplorelib.SQLTools;
+import org.daxplore.producer.daxplorelib.metadata.MetaMean.MetaMeanManager;
 import org.daxplore.producer.daxplorelib.metadata.MetaScale.MetaScaleManager;
 import org.daxplore.producer.daxplorelib.metadata.MetaScale.Option;
 import org.daxplore.producer.daxplorelib.metadata.MetaTimepointShort.MetaTimepointShortManager;
@@ -32,6 +34,8 @@ import org.daxplore.producer.daxplorelib.metadata.textreference.TextReference;
 import org.daxplore.producer.daxplorelib.metadata.textreference.TextReferenceManager;
 
 import com.beust.jcommander.internal.Lists;
+import com.google.common.collect.Sets;
+import com.google.gson.Gson;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
@@ -40,27 +44,33 @@ import com.google.gson.JsonPrimitive;
 public class MetaQuestion {
 	
 	private static final DaxploreTable table = new DaxploreTable(
-			"CREATE TABLE metaquestion (id TEXT PRIMARY KEY, scaleid INTEGER, fulltextref TEXT NOT NULL, shorttextref TEXT NOT NULL, extratextref TEXT, FOREIGN KEY(scaleid) REFERENCES metascale(id))",
+			"CREATE TABLE metaquestion (id TEXT PRIMARY KEY, scaleid INTEGER, displaytypes STRING NOT NULL, fulltextref TEXT NOT NULL, shorttextref TEXT NOT NULL, extratextref TEXT, FOREIGN KEY(scaleid) REFERENCES metascale(id))",
 			"metaquestion");
 	private static final DaxploreTable timePointTable = new DaxploreTable(
 			"CREATE TABLE questtimerel (qid TEXT NOT NULL, timeid INTEGER NOT NULL, FOREIGN KEY(qid) REFERENCES metaquestion(id), FOREIGN KEY(timeid) REFERENCES timepoints(id))", 
 			"questtimerel");
+	
+	private enum DisplayTypes {
+		FREQUENCIES, MEAN
+	}
 	
 	public static class MetaQuestionManager {
 		
 		private Connection connection;
 		private MetaScaleManager metascaleManager;
 		private TextReferenceManager textsManager;
+		private MetaMeanManager metaMeanManager;
 		private MetaTimepointShortManager timePointManager;
 		private Map<String, MetaQuestion> questionMap = new HashMap<>();
 		private LinkedList<MetaQuestion> toBeAdded= new LinkedList<>();
 		private Map<String, MetaQuestion> toBeRemoved = new HashMap<>();
 		
 		public MetaQuestionManager(Connection connection, TextReferenceManager textsManager,
-				MetaScaleManager metaScaleManager, MetaTimepointShortManager timePointManager) throws SQLException {
+				MetaScaleManager metaScaleManager, MetaMeanManager metaMeanManager, MetaTimepointShortManager timePointManager) throws SQLException {
 			this.connection = connection;
 			this.metascaleManager = metaScaleManager;
 			this.textsManager = textsManager;
+			this.metaMeanManager = metaMeanManager;
 			this.timePointManager = timePointManager;
 
 			if(!SQLTools.tableExists(table.name, connection)) {
@@ -79,16 +89,17 @@ public class MetaQuestion {
 			if(questionMap.containsKey(id)) {
 				return questionMap.get(id);
 			} else if(toBeRemoved.containsKey(id)) {
-				throw new DaxploreException("No question with id '"+id+"'");
+				throw new DaxploreException("No metaquestion with id '"+id+"'");
 			}
 			
 			TextReference fullTextRef, shortTextRef, extraTextRef;
 			MetaScale scale = null;
+			boolean useFrequencies, useMean;
 			try (PreparedStatement stmt = connection.prepareStatement("SELECT * FROM metaquestion WHERE id = ?")) {
 				stmt.setString(1, id);
 				try(ResultSet rs = stmt.executeQuery()) {
 					if(!rs.next()) {
-						throw new IllegalArgumentException("QuestionID does not exist?");
+						throw new DaxploreException("MetaQuestion '" + id + "' does not exist?");
 					}
 					fullTextRef = textsManager.get(rs.getString("fulltextref"));
 					shortTextRef = textsManager.get(rs.getString("shorttextref"));
@@ -99,13 +110,20 @@ public class MetaQuestion {
 						extraTextRef = null;
 					}
 					
+					String displayTypesJson = rs.getString("displaytypes");
+					Gson gson = new Gson();
+					Set<String> displayTypes = Sets.newHashSet(gson.fromJson(displayTypesJson, String[].class));
+					useFrequencies = displayTypes.contains(DisplayTypes.FREQUENCIES.name());
+					useMean = displayTypes.contains(DisplayTypes.MEAN.name());
+					
 					int scaleid = rs.getInt("scaleid");
 					if(!rs.wasNull()) {
 						scale = metascaleManager.get(scaleid);
 					}
 				}
 			}
-					
+			
+			MetaMean metaMean = metaMeanManager.get(id);
 			List<MetaTimepointShort> timepoints = new LinkedList<>();
 			try(PreparedStatement stmt2 = connection.prepareStatement("SELECT timeid FROM questtimerel WHERE qid = ?")) {
 				stmt2.setString(1, id);
@@ -116,13 +134,14 @@ public class MetaQuestion {
 					
 				}
 			}
-			MetaQuestion mq = new MetaQuestion(id, shortTextRef, fullTextRef, extraTextRef, scale, timepoints);
+			MetaQuestion mq = new MetaQuestion(id, shortTextRef, fullTextRef, extraTextRef, scale, useFrequencies, metaMean, useMean, timepoints);
 			questionMap.put(id, mq);
 			return mq;
 		}
 		
-		public MetaQuestion create(String id, TextReference shortTextRef, TextReference fullTextRef, TextReference extraTextRef, MetaScale scale, List<MetaTimepointShort> timepoints) {
-			MetaQuestion mq = new MetaQuestion(id, shortTextRef, fullTextRef, extraTextRef, scale, timepoints);
+		public MetaQuestion create(String id, TextReference shortTextRef, TextReference fullTextRef, TextReference extraTextRef, MetaScale scale, MetaMean metaMean, List<MetaTimepointShort> timepoints) {
+			boolean useMean = metaMean != null;
+			MetaQuestion mq = new MetaQuestion(id, shortTextRef, fullTextRef, extraTextRef, scale, true, metaMean, useMean, timepoints);
 			toBeAdded.add(mq);
 			questionMap.put(id, mq);
 			return mq;
@@ -137,28 +156,36 @@ public class MetaQuestion {
 		public void saveAll() throws SQLException {
 			int nNew = 0, nModified = 0, nRemoved = 0, nTimePoint = 0;
 			try (
-			PreparedStatement updateStmt = connection.prepareStatement("UPDATE metaquestion SET scaleid = ?, fulltextref = ?, shorttextref = ?, extratextref = ? WHERE id = ?");
-			PreparedStatement insertStmt = connection.prepareStatement("INSERT INTO metaquestion (id, scaleid, fulltextref, shorttextref, extratextref) VALUES (?, ?, ?, ? , ?)");
+			PreparedStatement updateStmt = connection.prepareStatement("UPDATE metaquestion SET scaleid = ?, displaytypes = ?, fulltextref = ?, shorttextref = ?, extratextref = ? WHERE id = ?");
+			PreparedStatement insertStmt = connection.prepareStatement("INSERT INTO metaquestion (id, scaleid, displaytypes, fulltextref, shorttextref, extratextref) VALUES (?, ?, ?, ?, ?, ?)");
 			PreparedStatement deleteStmt = connection.prepareStatement("DELETE FROM metaquestion WHERE id = ?");
 			PreparedStatement deleteRelStmt = connection.prepareStatement("DELETE FROM questtimerel WHERE qid = ?");
 			PreparedStatement insertRelStmt = connection.prepareStatement("INSERT INTO questtimerel (qid, timeid) VALUES (?, ?)");
 			) {
-			
 				for(MetaQuestion mq: questionMap.values()) {
 					if(mq.modified) {
 						nModified++;
 						updateStmt.setInt(1, mq.scale.getId());
-						updateStmt.setString(2, mq.fullTextRef.getRef());
-						updateStmt.setString(3, mq.shortTextRef.getRef());
-						if(mq.extraTextRef != null) {
-							updateStmt.setString(4, mq.extraTextRef.getRef());
+						
+						String displayTypes = mq.displayTypesAsJSON().toString();
+						if (displayTypes != null) {
+							updateStmt.setString(2, displayTypes);
 						} else {
-							updateStmt.setNull(4, Types.VARCHAR);
+							updateStmt.setString(2, "");
 						}
-						updateStmt.setString(5, mq.id);
+						
+						updateStmt.setString(3, mq.fullTextRef.getRef());
+						updateStmt.setString(4, mq.shortTextRef.getRef());
+						if(mq.extraTextRef != null) {
+							updateStmt.setString(5, mq.extraTextRef.getRef());
+						} else {
+							updateStmt.setNull(6, Types.VARCHAR);
+						}
+						updateStmt.setString(7, mq.id);
 						updateStmt.executeUpdate();
 						mq.modified = false;
 					}
+					
 					if(mq.timemodified) {
 						deleteRelStmt.setString(1, mq.id);
 						deleteRelStmt.executeUpdate();
@@ -176,20 +203,29 @@ public class MetaQuestion {
 					}
 				}
 				//TODO: add new ones before changing the modified ones and set modified flag to false??
-				for(MetaQuestion mq: toBeAdded) {
+				for(MetaQuestion mq : toBeAdded) {
 					nNew++;
 					insertStmt.setString(1, mq.id);
+					
 					if(mq.scale != null) {
 						insertStmt.setInt(2, mq.scale.getId());
 					} else {
 						insertStmt.setNull(2, Types.INTEGER);
 					}
-					insertStmt.setString(3, mq.fullTextRef.getRef());
-					insertStmt.setString(4, mq.shortTextRef.getRef());
-					if(mq.extraTextRef != null) {
-						insertStmt.setString(5, mq.extraTextRef.getRef());
+					
+					String displayTypes = mq.displayTypesAsJSON().toString();
+					if (displayTypes != null) {
+						insertStmt.setString(3, displayTypes);
 					} else {
-						insertStmt.setNull(5, Types.VARCHAR);
+						insertStmt.setString(3, "");
+					}
+					
+					insertStmt.setString(4, mq.fullTextRef.getRef());
+					insertStmt.setString(5, mq.shortTextRef.getRef());
+					if(mq.extraTextRef != null) {
+						insertStmt.setString(6, mq.extraTextRef.getRef());
+					} else {
+						insertStmt.setNull(6, Types.VARCHAR);
 					}
 					insertStmt.addBatch();
 					
@@ -263,18 +299,25 @@ public class MetaQuestion {
 	
 	private String id;
 	private TextReference shortTextRef, fullTextRef, extraTextRef;
+	private boolean useFrequencies, useMean;
 	private MetaScale scale;
+	private MetaMean metaMean;
 	private List<MetaTimepointShort> timepoints;
 	
 	private boolean modified = false;
 	private boolean timemodified = false;
 	
-	private MetaQuestion(String id, TextReference shortTextRef, TextReference fullTextRef, TextReference extraTextRef, MetaScale scale, List<MetaTimepointShort> timepoints) {
+	private MetaQuestion(String id, TextReference shortTextRef, TextReference fullTextRef,
+			TextReference extraTextRef,	MetaScale scale, boolean useFrequencies,
+			MetaMean metaMean, boolean useMean, List<MetaTimepointShort> timepoints) {
 		this.id = id;
 		this.shortTextRef = shortTextRef;
 		this.fullTextRef = fullTextRef;
 		this.extraTextRef = extraTextRef;
+		this.useFrequencies = useFrequencies;
 		this.scale = scale;
+		this.useMean = useMean;
+		this.metaMean = metaMean;
 		this.timepoints = timepoints;
 	}
 	
@@ -315,6 +358,15 @@ public class MetaQuestion {
 		}
 	}
 	
+	public boolean useFrequencies() {
+		return useFrequencies;
+	}
+
+	public void setUseFrequencies(boolean useFrequencies) {
+		this.useFrequencies = useFrequencies;
+		modified = true;
+	}
+	
 	public MetaScale getScale() {
 		return scale;
 	}
@@ -324,6 +376,21 @@ public class MetaQuestion {
 			this.scale = scale;
 			modified = true;
 		}
+	}
+	
+	public boolean useMean() {
+		return useMean;
+	}
+
+	public void setUseMean(boolean useMean) {
+		if(metaMean != null) {
+			this.useMean = useMean;
+			modified = true;
+		}
+	}
+	
+	public MetaMean getMetaMean() {
+		return metaMean;
 	}
 
 	public List<MetaTimepointShort> getTimepoints() {
@@ -361,7 +428,21 @@ public class MetaQuestion {
 			tps.add(new JsonPrimitive(tp.getTimeindex()));
 		}
 		json.add("timepoints", tps);
+		
+		json.add("displaytypes", displayTypesAsJSON());
 
 		return json;
+	}
+	
+	
+	private JsonElement displayTypesAsJSON() {
+		JsonArray displayTypesJson = new JsonArray();
+		if (useFrequencies) {
+			displayTypesJson.add(new JsonPrimitive(DisplayTypes.FREQUENCIES.name()));
+		}
+		if (useMean) {
+			displayTypesJson.add(new JsonPrimitive(DisplayTypes.MEAN.name()));
+		}
+		return displayTypesJson;
 	}
 }

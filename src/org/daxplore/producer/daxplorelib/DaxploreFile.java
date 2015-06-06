@@ -33,6 +33,7 @@ import javax.xml.transform.TransformerFactoryConfigurationError;
 
 import org.daxplore.producer.daxplorelib.ImportExportManager.L10nFormat;
 import org.daxplore.producer.daxplorelib.metadata.MetaGroup.MetaGroupManager;
+import org.daxplore.producer.daxplorelib.metadata.MetaMean.MetaMeanManager;
 import org.daxplore.producer.daxplorelib.metadata.MetaQuestion;
 import org.daxplore.producer.daxplorelib.metadata.MetaQuestion.MetaQuestionManager;
 import org.daxplore.producer.daxplorelib.metadata.MetaScale.MetaScaleManager;
@@ -58,6 +59,7 @@ public class DaxploreFile implements Closeable {
 	
 	private TextReferenceManager textReferenceManager;
 	private MetaScaleManager metaScaleManager;
+	private MetaMeanManager metaMeanManager;
 	private MetaTimepointShortManager metaTimepointShortManager;
 	private MetaQuestionManager metaQuestionManager;
 	private MetaGroupManager metaGroupManager;
@@ -104,8 +106,9 @@ public class DaxploreFile implements Closeable {
 			
 			textReferenceManager = new TextReferenceManager(connection);
 			metaScaleManager = new MetaScaleManager(connection, textReferenceManager);
+			metaMeanManager = new MetaMeanManager(connection);
 			metaTimepointShortManager = new MetaTimepointShortManager(connection, textReferenceManager);
-			metaQuestionManager = new MetaQuestionManager(connection, textReferenceManager, metaScaleManager, metaTimepointShortManager);
+			metaQuestionManager = new MetaQuestionManager(connection, textReferenceManager, metaScaleManager, metaMeanManager, metaTimepointShortManager);
 			metaGroupManager = new MetaGroupManager(connection, textReferenceManager, metaQuestionManager);
 			
 			importExport = new ImportExportManager(connection, this);
@@ -141,7 +144,11 @@ public class DaxploreFile implements Closeable {
 	public MetaScaleManager getMetaScaleManager() {
 		return metaScaleManager;
 	}
-
+	
+	public MetaMeanManager getMetaMeanManager() {
+		return metaMeanManager;
+	}
+	
 	public MetaTimepointShortManager getMetaTimepointShortManager() {
 		return metaTimepointShortManager;
 	}
@@ -182,6 +189,7 @@ public class DaxploreFile implements Closeable {
 			textReferenceManager.saveAll();
 			metaScaleManager.saveAll();
 			metaQuestionManager.saveAll();
+			metaMeanManager.saveAll(); // run after metaQuestionmanager's saveAll (foreign key)
 			metaGroupManager.saveAll();
 			metaTimepointShortManager.saveAll();
 			
@@ -198,6 +206,7 @@ public class DaxploreFile implements Closeable {
 		return metaGroupManager.getUnsavedChangesCount() + 
 				metaQuestionManager.getUnsavedChangesCount() + 
 				metaScaleManager.getUnsavedChangesCount() + 
+				metaMeanManager.getUnsavedChangesCount() +
 				metaTimepointShortManager.getUnsavedChangesCount() + 
 				textReferenceManager.getUnsavedChangesCount() + 
 				about.getUnsavedChangesCount();
@@ -372,6 +381,7 @@ public class DaxploreFile implements Closeable {
 			metaGroupManager.discardChanges();
 			metaQuestionManager.discardChanges();
 			metaScaleManager.discardChanges();
+			metaMeanManager.discardChanges();
 			metaTimepointShortManager.discardChanges();
 			textReferenceManager.discardChanges();
 		} catch (SQLException e) {
@@ -383,5 +393,4 @@ public class DaxploreFile implements Closeable {
 	public static boolean isValidColumnName(String refstring) {
 		return !Strings.isNullOrEmpty(refstring) && refstring.matches("^[\\pL\\pN_\\.]+$");
 	}
-
 }

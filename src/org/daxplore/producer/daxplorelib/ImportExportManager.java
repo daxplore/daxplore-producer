@@ -20,6 +20,7 @@ import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.Collection;
 import java.util.Comparator;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
@@ -27,6 +28,7 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Properties;
+import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
 import java.util.logging.Level;
@@ -50,12 +52,14 @@ import javax.xml.validation.SchemaFactory;
 
 import org.daxplore.producer.daxplorelib.calc.Crosstabs;
 import org.daxplore.producer.daxplorelib.metadata.MetaGroup;
+import org.daxplore.producer.daxplorelib.metadata.MetaMean;
 import org.daxplore.producer.daxplorelib.metadata.MetaQuestion;
 import org.daxplore.producer.daxplorelib.metadata.MetaScale;
 import org.daxplore.producer.daxplorelib.metadata.MetaTimepointShort;
 import org.daxplore.producer.daxplorelib.metadata.textreference.TextReference;
 import org.daxplore.producer.daxplorelib.metadata.textreference.TextTree;
 import org.daxplore.producer.daxplorelib.raw.RawMeta.RawMetaQuestion;
+import org.daxplore.producer.daxplorelib.raw.VariableType;
 import org.daxplore.producer.tools.MyTools;
 import org.daxplore.producer.tools.SortedProperties;
 import org.opendatafoundation.data.FileFormatInfo;
@@ -257,8 +261,10 @@ public class ImportExportManager {
 		}
 		
 		try {
+			
 			for(RawMetaQuestion rmq : daxploreFile.getRawMeta().getQuestions()) {
-				TextReference fulltext = daxploreFile.getTextReferenceManager().get(rmq.column + "_fulltext");
+				String id = rmq.column;
+				TextReference fulltext = daxploreFile.getTextReferenceManager().get(id + "_fulltext");
 				fulltext.put(rmq.qtext, locale);
 				MetaScale scale = null;
 				if(rmq.valuelables != null) {
@@ -280,9 +286,18 @@ public class ImportExportManager {
 					scale = daxploreFile.getMetaScaleManager().create(scaleOptions);
 				}
 				
-				TextReference shorttext = daxploreFile.getTextReferenceManager().get(rmq.column + "_shorttext");
+				
+				TextReference shorttext = daxploreFile.getTextReferenceManager().get(id + "_shorttext");
+				MetaMean metaMean = null;
+				if (rmq.qtype == VariableType.NUMERIC) {
+					Set<Double> includedValues = new HashSet<Double>();
+					for(Object o : rmq.valuelables.keySet()) {
+						includedValues.add((Double)o);
+					}
+					metaMean = daxploreFile.getMetaMeanManager().create(id, includedValues);
+				}
 				List<MetaTimepointShort> timepoints = new LinkedList<>();
-				daxploreFile.getMetaQuestionManager().create(rmq.column, shorttext, fulltext, null, scale, timepoints);
+				daxploreFile.getMetaQuestionManager().create(id, shorttext, fulltext, null, scale, metaMean, timepoints);
 			}
 		} catch (SQLException e) {
 			throw new DaxploreException("Failed to transfer metadata from raw", e);
