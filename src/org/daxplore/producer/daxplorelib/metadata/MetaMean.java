@@ -11,6 +11,7 @@ import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.Map;
 import java.util.Set;
+import java.util.TreeSet;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -18,6 +19,7 @@ import org.daxplore.producer.daxplorelib.DaxploreException;
 import org.daxplore.producer.daxplorelib.DaxploreTable;
 import org.daxplore.producer.daxplorelib.SQLTools;
 
+import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Sets;
 import com.google.gson.Gson;
 
@@ -158,7 +160,7 @@ public class MetaMean {
 	
 	private MetaMean(String questionid, Set<Double> includedValues, boolean setNew) {
 		this.questionid = questionid;
-		this.includedValues = includedValues;
+		this.includedValues = new TreeSet<>(includedValues); //TreeSet gives natural ordering
 		modified = setNew;
 	}
 		
@@ -167,7 +169,7 @@ public class MetaMean {
 	}
 	
 	public Set<Double> getIncludedValues() {
-		return includedValues;
+		return ImmutableSet.copyOf(includedValues);
 	}
 	
 	public void setIncludedValues(Collection<Double> values) {
