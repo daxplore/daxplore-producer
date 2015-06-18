@@ -268,7 +268,7 @@ public class ImportExportManager {
 				fulltext.put(rmq.qtext, locale);
 				List<MetaScale.Option<?>> scaleOptions = new LinkedList<MetaScale.Option<?>>();
 				if(rmq.valuelables != null) {
-					int i = 0; //TODO change to 1-indexed options
+					int i = 1;
 					switch(type) {
 					case NUMERIC:
 //						LinkedList<MetaScale.Option<Double>> scaleOptionsDouble = new LinkedList<>();

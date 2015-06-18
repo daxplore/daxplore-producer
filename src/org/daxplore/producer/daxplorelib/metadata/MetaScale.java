@@ -355,8 +355,7 @@ public class MetaScale<T> {
 			String[] textRefElements = o.textRef.getRef().split("_");
 			usedRefIndex.add(Integer.parseInt(textRefElements[textRefElements.length-1]));
 		}
-		//TODO change to i = 1 when using 1-indexed refs
-		for(int i = 0;; i++) {
+		for(int i = 1;; i++) {
 			if(!usedRefIndex.contains(i)) {
 				return i;
 			}
