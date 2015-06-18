@@ -20,6 +20,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.TreeSet;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -349,7 +350,7 @@ public class MetaScale<T> {
 	}
 	
 	public int getLowestUnusedTextrefIndex() {
-		Set<Integer> usedRefIndex = new HashSet<>(); 
+		Set<Integer> usedRefIndex = new TreeSet<>(); 
 		for(Option<T> o : options) {
 			String[] textRefElements = o.textRef.getRef().split("_");
 			usedRefIndex.add(Integer.parseInt(textRefElements[textRefElements.length-1]));
