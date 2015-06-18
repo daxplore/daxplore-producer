@@ -68,8 +68,8 @@ public class BarStats {
 	
 	public JsonElement toJSONObject() {
 		JsonObject json = new JsonObject();
-		json.add("q", new JsonPrimitive(question.getId()));
-		json.add("p", new JsonPrimitive(perspective.getId()));
+		json.add("q", new JsonPrimitive(question.getColumn()));
+		json.add("p", new JsonPrimitive(perspective.getColumn()));
 		
 		JsonObject values = new JsonObject();
 		for(Map.Entry<MetaTimepointShort, BarGroups> entry: data.entrySet()) {
