@@ -303,6 +303,10 @@ public class MetaScale<T> {
 		return type;
 	}
 
+	public void addOption(Option<T> option) {
+		modified = options.add(option);
+	}
+	
 	public void setOptions(List<Option<T>> options) {
 		if(!options.equals(this.options)) {
 			this.options = options;
@@ -341,6 +345,20 @@ public class MetaScale<T> {
 		modified = false;
 		for(Option<T> opt: options) {
 			opt.modified = false;
+		}
+	}
+	
+	public int getLowestUnusedTextrefIndex() {
+		Set<Integer> usedRefIndex = new HashSet<>(); 
+		for(Option<T> o : options) {
+			String[] textRefElements = o.textRef.getRef().split("_");
+			usedRefIndex.add(Integer.parseInt(textRefElements[textRefElements.length-1]));
+		}
+		//TODO change to i = 1 when using 1-indexed refs
+		for(int i = 0;; i++) {
+			if(!usedRefIndex.contains(i)) {
+				return i;
+			}
 		}
 	}
 	

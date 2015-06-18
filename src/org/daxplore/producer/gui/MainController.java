@@ -246,37 +246,42 @@ public class MainController {
 	
 	@Subscribe
 	public void on(ImportTextsEvent e) {
-		List<Locale> localeList = Settings.availableLocales();
-		FileLocalePair fileLocalePair = Dialogs.showImportDialog(preferences, texts, mainWindow, localeList);
-		
-		if(fileLocalePair == null) {
-			return;
-		}
-		
-		File file = fileLocalePair.file;
-		Locale locale = fileLocalePair.locale;
-		if(file != null && file.exists() && file.canRead()) {
+		try {
+			List<Locale> localeList = Settings.availableLocales();
+			FileLocalePair fileLocalePair = Dialogs.showImportDialog(preferences, texts, mainWindow, localeList);
 			
-			L10nFormat format;
-			String filename = file.toPath().getFileName().toString().toLowerCase();
-			//TODO allow different suffixes and user selection of type?
-			if(filename.endsWith(".csv")) {
-				format = L10nFormat.CSV;
-			} else if(filename.endsWith(".properties")) {
-				format = L10nFormat.PROPERTIES;
-			} else {
-				System.out.println("Unsupported file suffix: " + filename); //TODO communicate error properly
+			if(fileLocalePair == null) {
 				return;
 			}
 			
-			daxploreFile.getAbout().addLocale(locale);
-			try {
-				daxploreFile.importL10n(
-						Files.newBufferedReader(file.toPath(), Charsets.UTF_8), format, locale);
-				eventBus.post(new ReloadTextsEvent());
-			} catch (IOException | DaxploreException e1) {
-				eventBus.post(new ErrorMessageEvent("Failed to import texts", e1));
+			File file = fileLocalePair.file;
+			Locale locale = fileLocalePair.locale;
+			if(file != null && file.exists() && file.canRead()) {
+				
+				L10nFormat format;
+				String filename = file.toPath().getFileName().toString().toLowerCase();
+				//TODO allow different suffixes and user selection of type?
+				if(filename.endsWith(".csv")) {
+					format = L10nFormat.CSV;
+				} else if(filename.endsWith(".properties")) {
+					format = L10nFormat.PROPERTIES;
+				} else {
+					System.out.println("Unsupported file suffix: " + filename); //TODO communicate error properly
+					return;
+				}
+				
+				daxploreFile.getAbout().addLocale(locale);
+				try {
+					daxploreFile.importL10n(
+							Files.newBufferedReader(file.toPath(), Charsets.UTF_8), format, locale);
+					eventBus.post(new ReloadTextsEvent());
+				} catch (IOException | DaxploreException e1) {
+					eventBus.post(new ErrorMessageEvent("Failed to import texts", e1));
+				}
 			}
+		} catch (Exception e2) {
+			// TODO: handle exception
+			e2.printStackTrace();
 		}
 	}
 	
@@ -289,48 +294,59 @@ public class MainController {
 			dialog.setLocationRelativeTo(mainWindow);
 			dialog.setVisible(true);
 			eventBus.post(new ReloadTextsEvent());
-		} catch (Exception ex) {
-			ex.printStackTrace();
+		} catch (Exception e2) {
+			// TODO: handle exception
+			e2.printStackTrace();
 		}
 	}
 	
 	@Subscribe
 	public void on(DisplayLocaleSelectEvent e) {
-		Settings.setCurrentDisplayLocale(e.getLocale());
+		try {
+			Settings.setCurrentDisplayLocale(e.getLocale());
+		} catch (Exception e2) {
+			// TODO: handle exception
+			e2.printStackTrace();
+		}
 	}
 	
 	@Subscribe
 	public void on(ErrorMessageEvent e) {
-		Object[] options = {texts.get("dialog.error.continue"), texts.get("dialog.error.show_debug")};
-		if(e.getCause() == null) {
-			JLabelSelectable message = new JLabelSelectable(e.getUserMessage());
-			JOptionPane.showMessageDialog(mainWindow, message);
-		} else {
-			JLabelSelectable message = new JLabelSelectable(
-					texts.format("dialog.error.message", e.getUserMessage(), e.getCause().getLocalizedMessage()));
-			Logger.getGlobal().log(Level.SEVERE, e.getUserMessage());
-			e.getCause().printStackTrace();
-			int answer = JOptionPane.showOptionDialog(mainWindow,
-					message,
-					texts.get("dialog.error.title"),
-			        JOptionPane.DEFAULT_OPTION,
-			        JOptionPane.ERROR_MESSAGE,
-			        null,
-			        options,
-			        options[0]);
-			if(answer == 1) {
-				JPanel debugMessage = new JPanel(new BorderLayout(0, 10));
-				debugMessage.add(message, BorderLayout.NORTH);
-				JTextArea stacktraceText = new JTextArea(Throwables.getStackTraceAsString(e.getCause()));
-				stacktraceText.setEditable(false);
-				JScrollPane stacktraceScrollPane = new JScrollPane(stacktraceText);
-				stacktraceScrollPane.setPreferredSize(new Dimension((int)stacktraceScrollPane.getPreferredSize().getWidth()+30, 300));
-				debugMessage.add(stacktraceScrollPane, BorderLayout.CENTER);
-				JOptionPane.showMessageDialog(mainWindow, 
-						debugMessage, 
-						texts.get("dialog.error.debug_title"),
-						JOptionPane.PLAIN_MESSAGE);
+		try {
+			Object[] options = {texts.get("dialog.error.continue"), texts.get("dialog.error.show_debug")};
+			if(e.getCause() == null) {
+				JLabelSelectable message = new JLabelSelectable(e.getUserMessage());
+				JOptionPane.showMessageDialog(mainWindow, message);
+			} else {
+				JLabelSelectable message = new JLabelSelectable(
+						texts.format("dialog.error.message", e.getUserMessage(), e.getCause().getLocalizedMessage()));
+				Logger.getGlobal().log(Level.SEVERE, e.getUserMessage());
+				e.getCause().printStackTrace();
+				int answer = JOptionPane.showOptionDialog(mainWindow,
+						message,
+						texts.get("dialog.error.title"),
+				        JOptionPane.DEFAULT_OPTION,
+				        JOptionPane.ERROR_MESSAGE,
+				        null,
+				        options,
+				        options[0]);
+				if(answer == 1) {
+					JPanel debugMessage = new JPanel(new BorderLayout(0, 10));
+					debugMessage.add(message, BorderLayout.NORTH);
+					JTextArea stacktraceText = new JTextArea(Throwables.getStackTraceAsString(e.getCause()));
+					stacktraceText.setEditable(false);
+					JScrollPane stacktraceScrollPane = new JScrollPane(stacktraceText);
+					stacktraceScrollPane.setPreferredSize(new Dimension((int)stacktraceScrollPane.getPreferredSize().getWidth()+30, 300));
+					debugMessage.add(stacktraceScrollPane, BorderLayout.CENTER);
+					JOptionPane.showMessageDialog(mainWindow, 
+							debugMessage, 
+							texts.get("dialog.error.debug_title"),
+							JOptionPane.PLAIN_MESSAGE);
+				}
 			}
+		} catch (Exception e2) {
+			// TODO: handle exception
+			e2.printStackTrace();
 		}
 	}
 	
@@ -346,43 +362,8 @@ public class MainController {
 	
 	@Subscribe
 	public void on(QuitProgramEvent e) {
-		if(daxploreFile.getUnsavedChangesCount() == 0) {
-			try {
-				daxploreFile.close();
-			} catch (IOException e1) {
-				// TODO Auto-generated catch block
-				e1.printStackTrace();
-			}
-			mainWindow.dispose();
-		} else {
-			Object[] options = {texts.get("dialog.quit.save_and_quit"),
-					texts.get("dialog.quit.discard_and_quit"),
-					texts.get("dialog.quit.do_not_quit")};
-			int choice = JOptionPane.showOptionDialog(mainWindow,
-					texts.get("dialog.quit.question"),
-					texts.get("dialog.quit.title"),
-					JOptionPane.YES_NO_CANCEL_OPTION,
-					JOptionPane.QUESTION_MESSAGE,
-					null,
-					options,
-					options[2]);
-			switch(choice) {
-			case JOptionPane.YES_OPTION:
-				try {
-					daxploreFile.saveAll();
-				} catch (DaxploreException e1) {
-					// TODO Auto-generated catch block
-					e1.printStackTrace();
-				}
-				try {
-					daxploreFile.close();
-				} catch (IOException e2) {
-					// TODO Auto-generated catch block
-					e2.printStackTrace();
-				}
-				mainWindow.dispose();
-				break;
-			case JOptionPane.NO_OPTION:
+		try {
+			if(daxploreFile.getUnsavedChangesCount() == 0) {
 				try {
 					daxploreFile.close();
 				} catch (IOException e1) {
@@ -390,35 +371,84 @@ public class MainController {
 					e1.printStackTrace();
 				}
 				mainWindow.dispose();
-				break;
-			case JOptionPane.CANCEL_OPTION:
-			default:
-				// do nothing
+			} else {
+				Object[] options = {texts.get("dialog.quit.save_and_quit"),
+						texts.get("dialog.quit.discard_and_quit"),
+						texts.get("dialog.quit.do_not_quit")};
+				int choice = JOptionPane.showOptionDialog(mainWindow,
+						texts.get("dialog.quit.question"),
+						texts.get("dialog.quit.title"),
+						JOptionPane.YES_NO_CANCEL_OPTION,
+						JOptionPane.QUESTION_MESSAGE,
+						null,
+						options,
+						options[2]);
+				switch(choice) {
+				case JOptionPane.YES_OPTION:
+					try {
+						daxploreFile.saveAll();
+					} catch (DaxploreException e1) {
+						// TODO Auto-generated catch block
+						e1.printStackTrace();
+					}
+					try {
+						daxploreFile.close();
+					} catch (IOException e2) {
+						// TODO Auto-generated catch block
+						e2.printStackTrace();
+					}
+					mainWindow.dispose();
+					break;
+				case JOptionPane.NO_OPTION:
+					try {
+						daxploreFile.close();
+					} catch (IOException e1) {
+						// TODO Auto-generated catch block
+						e1.printStackTrace();
+					}
+					mainWindow.dispose();
+					break;
+				case JOptionPane.CANCEL_OPTION:
+				default:
+					// do nothing
+				}
 			}
+		} catch (Exception e2) {
+			// TODO: handle exception
+			e2.printStackTrace();
 		}
 	}
 	
 	@Subscribe
 	public void on(RepaintWindowEvent e) {
-		mainWindow.repaint();
+		try {
+			mainWindow.repaint();
+		} catch (Exception e2) {
+			// TODO: handle exception
+			e2.printStackTrace();
+		}
 	}
 	
 	@Subscribe
 	public void on(ExportUploadEvent e) {
-		File exportTo = Dialogs.showExportDialog(mainWindow, preferences);
-		if(exportTo.exists()) {
-			if(Dialogs.confirmOverwrite(mainWindow, texts, exportTo.getName())) {
-				exportTo.delete();
-			} else {
-				return;
-			}
-		}
 		try {
-			daxploreFile.writeUploadFile(exportTo);
-		} catch (DaxploreException e1) {
-			eventBus.post(new ErrorMessageEvent("Error while generating export file", e1));
+			File exportTo = Dialogs.showExportDialog(mainWindow, preferences);
+			if(exportTo.exists()) {
+				if(Dialogs.confirmOverwrite(mainWindow, texts, exportTo.getName())) {
+					exportTo.delete();
+				} else {
+					return;
+				}
+			}
+			try {
+				daxploreFile.writeUploadFile(exportTo);
+			} catch (DaxploreException e1) {
+				eventBus.post(new ErrorMessageEvent("Error while generating export file", e1));
+			}
+		} catch (Exception e2) {
+			// TODO: handle exception
+			e2.printStackTrace();
 		}
-		
 	}
 	
 	private void setView(Views view, Object command) {

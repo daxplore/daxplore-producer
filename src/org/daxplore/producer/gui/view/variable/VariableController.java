@@ -10,6 +10,7 @@ package org.daxplore.producer.gui.view.variable;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.sql.SQLException;
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map.Entry;
@@ -25,6 +26,7 @@ import org.daxplore.producer.daxplorelib.DaxploreFile;
 import org.daxplore.producer.daxplorelib.metadata.MetaQuestion;
 import org.daxplore.producer.daxplorelib.metadata.MetaScale;
 import org.daxplore.producer.daxplorelib.metadata.MetaScale.Option;
+import org.daxplore.producer.daxplorelib.metadata.textreference.TextReference;
 import org.daxplore.producer.daxplorelib.raw.RawMeta.RawMetaQuestion;
 import org.daxplore.producer.daxplorelib.raw.VariableOptionInfo;
 import org.daxplore.producer.gui.resources.GuiTexts;
@@ -46,11 +48,12 @@ public class VariableController implements TableModelListener, ActionListener {
 	private VariableTable variableTable;
 	private List<VariableOptionInfo> rawVariableList;
 	private RawMetaQuestion rawMetaQuestion;
-	private EventBus eventBus;
+	private DaxploreFile daxploreFile;
 	
 	public VariableController(EventBus eventBus, GuiTexts texts, DaxploreFile daxploreFile, MetaQuestion metaQuestion) {
 		this.mq = metaQuestion;
-		this.eventBus = eventBus;
+		this.daxploreFile = daxploreFile;
+		
 		eventBus.register(this);
 		
 		try {
@@ -102,8 +105,7 @@ public class VariableController implements TableModelListener, ActionListener {
 		for(MetaScale.Option option: mq.getScale().getOptions()) {
 			int total = 0;
 			for(VariableOptionInfo info: rawVariableList) {
-				//TODO: remove cast when adding string value support
-				if(info.getValue() != null && option.containsValue((Double)info.getValue())) {
+				if(info.getValue() != null && option.containsValue(info.getValue())) {
 					total += info.getCount();
 				}
 			}
@@ -136,43 +138,32 @@ public class VariableController implements TableModelListener, ActionListener {
 	@Override
 	public void actionPerformed(ActionEvent e) {
 		switch(QuestionCommand.valueOf(e.getActionCommand())) {
-//		case ADD:
-//			//TODO add even if there are no unused o.getTransformation().contains(p.getKey())
-//			try {
-//				if(mq.getScale()==null){
-//					mq.setScale(daxploreFile.getMetaScaleManager().create(new LinkedList<Option>(), new NumberlineCoverage()));
-//					scaleTableModel = new ScaleTableModel(mq.getScale());
-//					scaleTable = new ScaleTable(eventBus, texts, scaleTableModel);
-//					//view.getScaleScrollPane().setViewportView(scaleTable);
-//					view.validate();
-//				    view.repaint();
-//					scaleTableModel.fireTableStructureChanged();
-//				}
-//				boolean added = false;
-//				double pKey = 0;
-//				AddLabel: for(Pair<Double, Integer> p : values) {
-//					if(p.getKey()!=null) {
-//						pKey = p.getKey();
-//						for(Option o : mq.getScale().getOptions()) {
-//							if(o.getTransformation().contains(p.getKey())){
-//								continue AddLabel;
-//							}
-//						}
-//						addOption(p.getKey());
-//						added = true;
-//						scaleTableModel.fireTableStructureChanged();
-//						break AddLabel;
-//					}
-//				}
-//				if(!added) {
-//					addOption(pKey+1);
-//					scaleTableModel.fireTableStructureChanged();
-//				}
-//			} catch (DaxploreException | SQLException e1) {
-//				// TODO Auto-generated catch block
-//				e1.printStackTrace();
-//			}
-//			break;
+		case ADD:
+			int refIndex = mq.getScale().getLowestUnusedTextrefIndex();
+			try {
+				TextReference textRef = daxploreFile.getTextReferenceManager().get(mq.getColumn() + "_option_" + refIndex);
+				switch (mq.getType()) {
+				case NUMERIC:
+					MetaScale<Double> msDouble = (MetaScale<Double>) mq.getScale();
+					msDouble.addOption(new Option<Double>(textRef, new HashSet<Double>(), true));
+					break;
+				case TEXT:
+					MetaScale<String> msString = (MetaScale<String>) mq.getScale();
+					msString.addOption(new Option<String>(textRef, new HashSet<String>(), true));
+					break;
+				}
+				
+				variableModel.fireTableStructureChanged();
+				variableTable.packAll();
+				rawTable.setAvailableNumbers(variableModel.getAvailebleToNumbers());
+				rawModel.remapFromMetaScale();
+				rawModel.fireTableStructureChanged();
+				rawTable.packAll();
+			} catch (DaxploreException de) {
+				// TODO Auto-generated catch block
+				de.printStackTrace();
+			}
+			break;
 		case REMOVE:
 			int[] selectedRows = variableTable.getSelectedRows();
 			variableTable.clearSelection();

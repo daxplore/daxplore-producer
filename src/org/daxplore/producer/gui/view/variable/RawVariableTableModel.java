@@ -47,7 +47,7 @@ public class RawVariableTableModel extends DefaultTableModel {
 				if(info.getValue() != null) {
 					int index = ms.getOptionIndex(info.getValue());
 					if(index != -1 && availableToNumbers.contains(index)) {
-						toNumberMap.put((Double)info.getValue(), index);
+						toNumberMap.put(info.getValue(), index);
 					}
 				}
 			}
