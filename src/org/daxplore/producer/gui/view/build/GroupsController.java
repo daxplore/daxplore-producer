@@ -342,11 +342,13 @@ public class GroupsController implements ActionListener, MouseListener {
 			}
 			break;
 		case PERSPECTIVE_ADD_ITEM:
-			int index = perspectivesTable.getSelectedRow() != -1? perspectivesTable.getSelectedRow(): perspectivesTable.getRowCount();
+			int index = perspectivesTable.getSelectedRow() != -1 ? perspectivesTable.getSelectedRow() : perspectivesTable.getRowCount();
 			for(int i : questionJTable.getSelectedRows()) {
 				MetaQuestion mq = (MetaQuestion)questionJTable.getValueAt(i, 0);
-				perspectivesTableModel.insertRow(index, new Object[]{mq});
-				index++;
+				if(!perspectivesTableModel.mg.contains(mq)) {
+					perspectivesTableModel.insertRow(index, new Object[]{mq});
+					index++;
+				}
 			}
 			break;
 		default:
@@ -357,14 +359,14 @@ public class GroupsController implements ActionListener, MouseListener {
 	
 	private void viewMetaQuestionInfo(MetaQuestion question) {
 		selectedMetaQuestion = question;
-		String id = question.getId();
+		String column = question.getColumn();
 		if(selectedLocale != null) {
 			
 			String shorttext = question.getShortTextRef().get(selectedLocale);
 			String fulltext = question.getFullTextRef().get(selectedLocale);
-			groupsView.setVariableInfo(id, shorttext, fulltext);
+			groupsView.setVariableInfo(column, shorttext, fulltext);
 		} else {
-			groupsView.setVariableInfo(id, "", "");
+			groupsView.setVariableInfo(column, "", "");
 		}
 	}
 	

@@ -66,8 +66,8 @@ public class GroupsView extends JPanel {
 		add(mainSplitPanel);
 	}
 	
-	void setVariableInfo(String id, String shorttext, String fulltext) {
-		infoIdText.setText(texts.format("variable_info.label.id", id));
+	void setVariableInfo(String column, String shorttext, String fulltext) {
+		infoIdText.setText(texts.format("variable_info.label.column", column));
 		
 		String shortDisplay = shorttext;
 		if(Strings.isNullOrEmpty(shortDisplay)) {

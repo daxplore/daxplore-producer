@@ -23,6 +23,16 @@ public enum VariableType {
 		this.sqltype = sqltype;
 		this.javatype = javatype;
 	}
+	
+	public static VariableType fromSqltype(String type) {
+		for(VariableType t: VariableType.values()) {
+			if(t.sqltype.equalsIgnoreCase(type)) {
+				return t;
+			}
+		}
+		return null;
+	}
+	
 	public String sqltype(){ return sqltype; }
 	
 	public Class<?> javatype() {return javatype;}

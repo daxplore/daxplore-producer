@@ -10,7 +10,6 @@ import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.logging.Level;
@@ -21,15 +20,30 @@ import org.daxplore.producer.daxplorelib.DaxploreException;
 import org.daxplore.producer.daxplorelib.metadata.MetaQuestion;
 import org.daxplore.producer.daxplorelib.metadata.MetaScale;
 import org.daxplore.producer.daxplorelib.metadata.MetaTimepointShort;
-import org.daxplore.producer.tools.Pair;
+import org.daxplore.producer.daxplorelib.raw.VariableType;
 
 public class Crosstabs {
 
+	private class RawColumnInfo implements Comparable<RawColumnInfo>{
+		String column;
+		int index;
+		VariableType type;
+		public RawColumnInfo(String column, int index, VariableType type) {
+			this.column = column; this.index = index; this.type = type;
+		}
+		@Override
+		public int compareTo(RawColumnInfo o) {
+			return column.compareTo(o.column);
+		}
+		
+	}
+	
 	private Connection connection;
 	private About about;
 	
-	private double[][] rawdataTable;
+	private Object[][] rawdataTable;
 	private String[] rawColnames;
+			
 	private int rawTimePointIndex;
 	
 	private boolean hasLoadedRawdata = false;
@@ -41,42 +55,44 @@ public class Crosstabs {
 	
 	public void loadRawToMem() throws SQLException {
 		long time = System.nanoTime();
-		ArrayList<Pair<String, Integer>> tempRawColnames = new ArrayList<>();
+		List<RawColumnInfo> tempRawColnames = new ArrayList<>();
 		
 		try (Statement stmt = connection.createStatement();
 				ResultSet rs = stmt.executeQuery("PRAGMA TABLE_INFO(rawdata)")) {
 			for(int colIndex = 0; rs.next(); colIndex++) {
-				String type = rs.getString("type");
-				if(type.equalsIgnoreCase("real")) {
-					tempRawColnames.add(new Pair<>(rs.getString("name"), colIndex));
-				}
+				String rawtype = rs.getString("type");
+				VariableType type = VariableType.fromSqltype(rawtype);
+				tempRawColnames.add(new RawColumnInfo(rs.getString("name"), colIndex, type));
 			}
 		}
 		
 		int colCount = tempRawColnames.size();
-		Collections.sort(tempRawColnames, new Comparator<Pair<String, Integer>>() {
-			@Override
-			public int compare(Pair<String, Integer> o1, Pair<String, Integer> o2) {
-				return o1.getKey().compareTo(o2.getKey());
-			}
-		});
+		Collections.sort(tempRawColnames);
 		
 		try (Statement stmt = connection.createStatement();
 				ResultSet rs = stmt.executeQuery("SELECT count(*) as cnt from rawdata")) {
 			rs.next();
 			int rowCount = rs.getInt("cnt");
-			rawdataTable = new double[colCount][rowCount];
+			rawdataTable = new Object[colCount][rowCount];
 		}
 		
 		try(Statement stmt = connection.createStatement();
 				ResultSet rs = stmt.executeQuery("SELECT * FROM rawdata")) {
 			for(int row = 0; rs.next(); row++) {
 				for(int col = 0; col < tempRawColnames.size(); col++) {
-					double val = rs.getDouble(tempRawColnames.get(col).getValue() + 1);
-					if(rs.wasNull()) {
-						val = Double.NaN;
+					switch (tempRawColnames.get(col).type) {
+					case NUMERIC:
+						double dval = rs.getDouble(tempRawColnames.get(col).index + 1);
+						if(rs.wasNull()) {
+							dval = Double.NaN;
+						}
+						rawdataTable[col][row] = dval;
+						break;
+					case TEXT:
+						String sval = rs.getString(tempRawColnames.get(col).index + 1);
+						rawdataTable[col][row] = sval;
+						break;
 					}
-					rawdataTable[col][row] = val;
 				}
 			}
 		}
@@ -84,7 +100,7 @@ public class Crosstabs {
 		rawColnames = new String[tempRawColnames.size()];
 		
 		for(int col = 0; col < tempRawColnames.size(); col++) {
-			rawColnames[col] = tempRawColnames.get(col).getKey().toUpperCase();
+			rawColnames[col] = tempRawColnames.get(col).column.toUpperCase();
 		}
 		
 		rawTimePointIndex = Arrays.binarySearch(rawColnames, about.getTimeSeriesShortColumn().toUpperCase());
@@ -133,6 +149,7 @@ public class Crosstabs {
 		}
 	}
 	
+	@SuppressWarnings({ "unchecked", "rawtypes" })
 	private int[][] crosstabs2(MetaQuestion question, MetaQuestion perspective, MetaTimepointShort timepoint, int lowerlimit) throws SQLException {
 		if(question.getScale() == null && perspective.getScale() == null) { 
 			return null;
@@ -142,27 +159,29 @@ public class Crosstabs {
 		
 		int[] totals = new int[perspective.getScale().getOptionCount()];	
 		
-		if(hasLoadedRawdata) {
-			
-			int questionColIndex = Arrays.binarySearch(rawColnames, question.getId().toUpperCase());
-			int perspectiveColIndex = Arrays.binarySearch(rawColnames, perspective.getId().toUpperCase());
-			
-			MetaScale questionScale = question.getScale();
-			MetaScale perspectiveScale = perspective.getScale();
-			
-			for(int row = 0; row < rawdataTable[0].length; row++) {
-				if(rawdataTable[rawTimePointIndex][row] == timepoint.getValue()) {
-					int qindex = questionScale.getOptionIndex(rawdataTable[questionColIndex][row]);
-					int pindex = perspectiveScale.getOptionIndex(rawdataTable[perspectiveColIndex][row]);
-					if(qindex == -1 || pindex == -1) {
-						continue;
-					}
-					totals[pindex]++;
-					crosstabsdata[pindex][qindex]++;
-				}
-			}
+		if(!hasLoadedRawdata) {
+			loadRawToMem();
+		}
 
-		} else {
+		int questionColIndex = Arrays.binarySearch(rawColnames, question.getColumn().toUpperCase());
+		int perspectiveColIndex = Arrays.binarySearch(rawColnames, perspective.getColumn().toUpperCase());
+		
+		MetaScale questionScale = question.getScale();
+		MetaScale perspectiveScale = perspective.getScale();
+		
+		for(int row = 0; row < rawdataTable[0].length; row++) {
+			if(((Double)rawdataTable[rawTimePointIndex][row]) == timepoint.getValue()) { //TODO timepoint: support TEXT/REAL for value
+				int qindex = questionScale.getOptionIndex(rawdataTable[questionColIndex][row]);
+				int pindex = perspectiveScale.getOptionIndex(rawdataTable[perspectiveColIndex][row]);
+				if(qindex == -1 || pindex == -1) {
+					continue;
+				}
+				totals[pindex]++;
+				crosstabsdata[pindex][qindex]++;
+			}
+		}
+
+		/*} else { //TODO unused 2015-06-18
 			//TODO: handle case where scale only has ignore
 			
 			try (Statement stmt = connection.createStatement();
@@ -181,7 +200,7 @@ public class Crosstabs {
 					crosstabsdata[pindex][qindex]++;
 				}
 			}
-		}
+		}*/
 		
 		for(int ti = 0; ti < totals.length; ti++) {
 			if(totals[ti] < lowerlimit) {
@@ -193,27 +212,30 @@ public class Crosstabs {
 		
 	}
 	
+	@SuppressWarnings({ "unchecked", "rawtypes" })
 	private int[] frequencies(MetaQuestion question, MetaTimepointShort timepoint, int lowerlimit) throws SQLException {
 		int[] frequencies = new int[question.getScale().getOptionCount()];
 		int total = 0;
 
 		if(hasLoadedRawdata) {
-			MetaScale scale = question.getScale();
-			
-			int questionColIndex = Arrays.binarySearch(rawColnames, question.getId().toUpperCase());
-			
-			for(int row = 0; row < rawdataTable[0].length; row++) {
-				if(rawdataTable[rawTimePointIndex][row] == timepoint.getValue()) {
-					int index = scale.getOptionIndex(rawdataTable[questionColIndex][row]);
-					if(index != -1) {
-						frequencies[index]++;
-						total++;
-					}
+			loadRawToMem();
+		}
+		MetaScale scale = question.getScale();
+		
+		int questionColIndex = Arrays.binarySearch(rawColnames, question.getColumn().toUpperCase());
+		
+		for(int row = 0; row < rawdataTable[0].length; row++) {
+			if((Double)rawdataTable[rawTimePointIndex][row] == timepoint.getValue()) { //TODO timepoint: support TEXT/REAL for value
+				int index = scale.getOptionIndex(rawdataTable[questionColIndex][row]);
+				if(index != -1) {
+					frequencies[index]++;
+					total++;
 				}
 			}
+		}
 
 			
-		} else {
+		/*} else { //TODO unused 2015-06-18
 
 			try (Statement stmt = connection.createStatement();
 					ResultSet rs = stmt.executeQuery("SELECT " + question.getId() + " FROM rawdata WHERE " 
@@ -228,7 +250,7 @@ public class Crosstabs {
 					}
 				}
 			}
-		}
+		}*/
 		
 		if(total < lowerlimit) {
 			return new int[frequencies.length];

@@ -33,7 +33,7 @@ public class TimePointTableModel extends DefaultTableModel {
 	
 	public TimePointTableModel(MetaTimepointShortManager mtsm, RawData rawData, About about, MetaQuestion question) throws SQLException, DaxploreException {
 		this.mq = question;
-		LinkedList<Pair<Double, Integer>> timePointCount = rawData.getColumnValueCountWhere(about.getTimeSeriesShortColumn(), mq.getId());
+		LinkedList<Pair<Double, Integer>> timePointCount = rawData.getColumnValueCountWhere(about.getTimeSeriesShortColumn(), mq.getColumn());
 		for(MetaTimepointShort tp: mtsm.getAll()) {
 			Double tpVal = tp.getValue();
 			Integer tpCount = 0;

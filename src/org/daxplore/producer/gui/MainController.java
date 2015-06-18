@@ -282,12 +282,16 @@ public class MainController {
 	
 	@Subscribe
 	public void on(EditQuestionEvent e) {
-		VariableController vc = new VariableController(eventBus, texts, daxploreFile, e.getMetaQuestion());
-		JDialog dialog = vc.getDialog();
-		dialog.setSize(800, 800);
-		dialog.setLocationRelativeTo(mainWindow);
-		dialog.setVisible(true);
-		eventBus.post(new ReloadTextsEvent());
+		try {
+			VariableController vc = new VariableController(eventBus, texts, daxploreFile, e.getMetaQuestion());
+			JDialog dialog = vc.getDialog();
+			dialog.setSize(800, 800);
+			dialog.setLocationRelativeTo(mainWindow);
+			dialog.setVisible(true);
+			eventBus.post(new ReloadTextsEvent());
+		} catch (Exception ex) {
+			ex.printStackTrace();
+		}
 	}
 	
 	@Subscribe

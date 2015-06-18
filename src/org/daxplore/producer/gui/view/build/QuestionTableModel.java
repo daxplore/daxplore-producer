@@ -27,7 +27,7 @@ class QuestionTableModel extends DefaultTableModel {
 		Collections.sort(questionList, new Comparator<MetaQuestion>() {
 			@Override
 			public int compare(MetaQuestion o1, MetaQuestion o2) {
-				return o1.getId().compareTo(o2.getId());
+				return o1.getColumn().compareTo(o2.getColumn());
 			}
 		});
 	}

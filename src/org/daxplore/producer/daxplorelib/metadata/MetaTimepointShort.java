@@ -30,7 +30,7 @@ public class MetaTimepointShort implements Comparable<MetaTimepointShort> {
 	/**
 	 * name: the name of the timepoint, for example 1992 and 2010
 	 * timeindex: the order of the timepoints
-	 * value: the timepoint's value as it is stored in the column (see above) //TODO support TEXT/REAL/INTEGER for value
+	 * value: the timepoint's value as it is stored in the column (see above) //TODO timepoint: support TEXT/REAL/INTEGER for value
 	 */
 	private static final DaxploreTable pointTable = new DaxploreTable(
 			"CREATE TABLE timepoints (id INTEGER PRIMARY KEY, textref TEXT NOT NULL, timeindex INTEGER UNIQUE NOT NULL, value REAL NOT NULL)", "timepoints"); 

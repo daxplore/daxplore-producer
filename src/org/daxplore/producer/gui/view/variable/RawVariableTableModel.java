@@ -14,20 +14,22 @@ import java.util.Map;
 import javax.swing.table.DefaultTableModel;
 
 import org.daxplore.producer.daxplorelib.metadata.MetaScale;
+import org.daxplore.producer.daxplorelib.metadata.MetaScale.Option;
 import org.daxplore.producer.daxplorelib.raw.RawMeta.RawMetaQuestion;
 import org.daxplore.producer.daxplorelib.raw.VariableOptionInfo;
-import org.daxplore.producer.tools.NumberlineCoverage;
 
 @SuppressWarnings("serial")
 public class RawVariableTableModel extends DefaultTableModel {
 	
 	private RawMetaQuestion rmq;
 	private List<VariableOptionInfo> variableList;
-	private Map<Double, Integer> toNumberMap = new HashMap<>();
+	private Map<Object, Integer> toNumberMap = new HashMap<>();
+	@SuppressWarnings("rawtypes")
 	private MetaScale ms;
 	
 	List<Integer> availableToNumbers;
 
+	@SuppressWarnings("rawtypes")
 	public RawVariableTableModel(RawMetaQuestion rmq, List<VariableOptionInfo> variableList, MetaScale ms, List<Integer> availableToNumbers) {
 		this.rmq = rmq;
 		this.variableList = variableList;
@@ -37,13 +39,13 @@ public class RawVariableTableModel extends DefaultTableModel {
 		remapFromMetaScale();
 	}
 	
+	@SuppressWarnings("unchecked")
 	public void remapFromMetaScale() {
 		if(ms != null) {
 			toNumberMap.clear();
 			for(VariableOptionInfo info: variableList) {
 				if(info.getValue() != null) {
-					//TODO: drop cast when support for string values are implemented
-					int index = ms.getOptionIndex((Double)info.getValue());
+					int index = ms.getOptionIndex(info.getValue());
 					if(index != -1 && availableToNumbers.contains(index)) {
 						toNumberMap.put((Double)info.getValue(), index);
 					}
@@ -100,6 +102,7 @@ public class RawVariableTableModel extends DefaultTableModel {
 		return columnIndex == 3 && variableList.get(rowIndex).getValue() != null;
 	}
 	
+	@SuppressWarnings("unchecked")
 	@Override
 	public void setValueAt(Object aValue, int row, int column) {
 		if (column == 3) {
@@ -110,15 +113,33 @@ public class RawVariableTableModel extends DefaultTableModel {
 				return;
 			}
 			
-			Double rawValue = (Double)getValueAt(row, 0);
+			Object rawValue = getValueAt(row, 0);
 			
-			if(oldToOptionIndex != null) {
-				ms.getOptions().get(oldToOptionIndex).removeValue(rawValue);
+			switch (ms.getType()) {
+			case NUMERIC:
+				if(oldToOptionIndex != null) {
+					MetaScale.Option<Double> currentOption = (Option<Double>) ms.getOptions().get(oldToOptionIndex);
+					currentOption.removeValue((Double)rawValue);
+				}
+				
+				if (toOptionIndex != null) {
+					MetaScale.Option<Double> toOption = (Option<Double>) ms.getOptions().get(toOptionIndex);
+					toOption.addValue((Double)rawValue);
+				}
+				break;
+			case TEXT:
+				if(oldToOptionIndex != null) {
+					MetaScale.Option<String> currentOption = (Option<String>) ms.getOptions().get(oldToOptionIndex);
+					currentOption.removeValue((String)rawValue);
+				}
+				
+				if (toOptionIndex != null) {
+					MetaScale.Option<String> toOption = (Option<String>) ms.getOptions().get(toOptionIndex);
+					toOption.addValue((String)rawValue);
+				}
+				break;
 			}
-			
-			if (toOptionIndex != null) {
-				ms.getOptions().get(toOptionIndex).addValue(rawValue);
-			}
+
 			toNumberMap.put(rawValue, toOptionIndex);
 			
 			fireTableCellUpdated(row, column);
@@ -128,7 +149,7 @@ public class RawVariableTableModel extends DefaultTableModel {
 	public void setAvailableToNumbers(List<Integer> toNumbers) {
 		availableToNumbers = toNumbers;
 		boolean modified = false;
-		for(Map.Entry<Double, Integer> entry: toNumberMap.entrySet()) {
+		for(Map.Entry<Object, Integer> entry: toNumberMap.entrySet()) {
 			if(!availableToNumbers.contains(entry.getValue())) {
 				toNumberMap.put(entry.getKey(), null);
 				modified = true;
@@ -137,16 +158,6 @@ public class RawVariableTableModel extends DefaultTableModel {
 		if(modified) {
 			fireTableDataChanged();
 		}
-	}
-	
-	public NumberlineCoverage getNumberlineCoverageForOption(Integer option) {
-		NumberlineCoverage nc = new NumberlineCoverage();
-		for(Map.Entry<Double, Integer> entry: toNumberMap.entrySet()) {
-			if(entry.getValue().equals(option)) {
-				nc.addNumber(entry.getKey());
-			}
-		}
-		return nc;
 	}
 
 	@Override

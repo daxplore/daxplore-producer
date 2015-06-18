@@ -187,9 +187,9 @@ public class DaxploreFile implements Closeable {
 			Logger.getGlobal().log(Level.INFO, "Save initiated");
 			about.save();
 			textReferenceManager.saveAll();
-			metaScaleManager.saveAll();
 			metaQuestionManager.saveAll();
-			metaMeanManager.saveAll(); // run after metaQuestionmanager's saveAll (foreign key)
+			metaScaleManager.saveAll(); // run after metaQuestionmanager's saveAll (foreign key)
+			metaMeanManager.saveAll();  // run after metaQuestionmanager's saveAll (foreign key)
 			metaGroupManager.saveAll();
 			metaTimepointShortManager.saveAll();
 			
@@ -230,36 +230,38 @@ public class DaxploreFile implements Closeable {
 			if(!rawMeta.hasColumn(column)){
 				throw new DaxploreException("Tried to get data for non-existing column: " + column);
 			}
+			RawMetaQuestion rmq = rawMeta.getQuestion(column);
 			List<VariableOptionInfo> infoList = new LinkedList<>();
 			LinkedHashMap<Object, Integer> counts = rawData.getColumnValueCount(column);
 			for(Map.Entry<Object, Integer> count: counts.entrySet()) {
-				VariableOptionInfo optionInfo = new VariableOptionInfo(count.getKey(), count.getValue());
+				VariableOptionInfo optionInfo = new VariableOptionInfo(count.getKey(), count.getValue(), rmq.qtype);
 				infoList.add(optionInfo);
 			}
-			RawMetaQuestion rmq = rawMeta.getQuestion(column);
-			switch (rmq.qtype) {
-			case NUMERIC:
-				for(Map.Entry<Object, String> texts: rmq.valuelables.entrySet()) {
-					Double value = (Double)texts.getKey();
-					for(VariableOptionInfo info: infoList) {
-						if(value == info.getValue() || (value!=null && value.equals(info.getValue()))) {
-							info.setRawText(texts.getValue());
-							break;
+			if(rmq.valuelables != null) {
+				switch (rmq.qtype) {
+				case NUMERIC:
+					for(Map.Entry<Object, String> texts: rmq.valuelables.entrySet()) {
+						Double value = (Double)texts.getKey();
+						for(VariableOptionInfo info: infoList) {
+							if(value == info.getValue() || (value!=null && value.equals(info.getValue()))) {
+								info.setRawText(texts.getValue());
+								break;
+							}
 						}
 					}
-				}
-				break;
-			case TEXT:
-				for(Map.Entry<Object, String> texts: rmq.valuelables.entrySet()) {
-					String value = (String)texts.getKey();
-					for(VariableOptionInfo info: infoList) {
-						if(value == info.getValue() || (value!=null && value.equals(info.getValue()))) {
-							info.setRawText(texts.getValue());
-							break;
+					break;
+				case TEXT:
+					for(Map.Entry<Object, String> texts: rmq.valuelables.entrySet()) {
+						String value = (String)texts.getKey();
+						for(VariableOptionInfo info: infoList) {
+							if(value == info.getValue() || (value!=null && value.equals(info.getValue()))) {
+								info.setRawText(texts.getValue());
+								break;
+							}
 						}
 					}
+					break;
 				}
-				break;
 			}
 			return infoList;
 		} catch (SQLException e) {
@@ -356,7 +358,7 @@ public class DaxploreFile implements Closeable {
 		int tpAdded = 0, questionsModified = 0;
 		for(MetaQuestion question : metaQuestionManager.getAll()) {
 			List<MetaTimepointShort> questionTp = new LinkedList<>();
-			LinkedList<Pair<Double, Integer>> valueCounts = rawData.getColumnValueCountWhere(about.getTimeSeriesShortColumn(), question.getId());
+			LinkedList<Pair<Double, Integer>> valueCounts = rawData.getColumnValueCountWhere(about.getTimeSeriesShortColumn(), question.getColumn());
 			questionTp.clear();
 			for(Pair<Double, Integer> pair : valueCounts) {
 				for(MetaTimepointShort tp : timepoints) {

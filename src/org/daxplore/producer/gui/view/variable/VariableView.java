@@ -35,7 +35,7 @@ public class VariableView extends JPanel {
 	private JScrollPane rawScrollPane = new JScrollPane();
 	private JScrollPane timePointScrollPane = new JScrollPane();
 	
-	private JLabel questionID = new JLabel();
+	private JLabel column = new JLabel();
 	private JPanel fullTextRefHolder;
 	private JPanel shortTextRefHolder;
 	private TextWidget fullText;
@@ -51,7 +51,7 @@ public class VariableView extends JPanel {
 		fullText = new TextWidget(eventBus, texts);
 		shortText = new TextWidget(eventBus, texts);
 		
-		questionID.setText(metaQuestion.getId());
+		column.setText(metaQuestion.getColumn());
 		fullText.setContent(metaQuestion.getFullTextRef());
 		shortText.setContent(metaQuestion.getShortTextRef());
 		

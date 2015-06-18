@@ -26,16 +26,16 @@ import com.google.gson.Gson;
 public class MetaMean {
 
 	private static final DaxploreTable table = new DaxploreTable(
-			"CREATE TABLE metamean (questionid TEXT NOT NULL, includedvalues TEXT NOT NULL, FOREIGN KEY(questionid) REFERENCES metaquestion(id))",
+			"CREATE TABLE metamean (questionid INTEGER NOT NULL, includedvalues TEXT NOT NULL, FOREIGN KEY(questionid) REFERENCES metaquestion(id))",
 			"metamean");
 	
 	public static class MetaMeanManager {
 		
 		private Connection connection;
 		
-		private Map<String, MetaMean> metaMeanMap = new HashMap<>();
+		private Map<Integer, MetaMean> metaMeanMap = new HashMap<>();
 		private LinkedList<MetaMean> toBeAdded= new LinkedList<>();
-		private Map<String, MetaMean> toBeRemoved = new HashMap<>();
+		private Map<Integer, MetaMean> toBeRemoved = new HashMap<>();
 
 		public MetaMeanManager(Connection connection) throws SQLException {
 			this.connection = connection;
@@ -47,7 +47,7 @@ public class MetaMean {
 			}
 		}
 		
-		public MetaMean get(String id) throws DaxploreException, SQLException {
+		public MetaMean get(int id) throws DaxploreException, SQLException {
 			if(metaMeanMap.containsKey(id)) {
 				return metaMeanMap.get(id);
 			} else if(toBeRemoved.containsKey(id)) {
@@ -56,7 +56,7 @@ public class MetaMean {
 			
 			Set<Double> includedValues = new HashSet<Double>();
 			try (PreparedStatement stmt = connection.prepareStatement("SELECT * FROM metamean WHERE questionid = ?")) {
-				stmt.setString(1, id);
+				stmt.setInt(1, id);
 				
 				try(ResultSet rs = stmt.executeQuery()) {
 					if(!rs.next()) {
@@ -74,14 +74,14 @@ public class MetaMean {
 			return metaMean;
 		}
 		
-		public MetaMean create(String id, Set<Double> includedValues) {
+		public MetaMean create(int id, Set<Double> includedValues) {
 			MetaMean metaMean = new MetaMean(id, includedValues, true);
 			toBeAdded.add(metaMean);
 			metaMeanMap.put(id, metaMean);
 			return metaMean;
 		}
 		
-		public void remove(String id) {
+		public void remove(int id) {
 			MetaMean metaMean = metaMeanMap.remove(id);
 			toBeAdded.remove(metaMean);
 			toBeRemoved.put(id, metaMean);
@@ -108,7 +108,7 @@ public class MetaMean {
 				
 				for(MetaMean metaMean : toBeAdded) {
 					nNew++;
-					addMetaMeanStmt.setString(1, metaMean.questionid);
+					addMetaMeanStmt.setInt(1, metaMean.questionid);
 					String valuesJson = gson.toJson(metaMean.includedValues.toArray(), Double[].class);
 					addMetaMeanStmt.setString(2, valuesJson);
 					addMetaMeanStmt.addBatch();
@@ -120,14 +120,14 @@ public class MetaMean {
 					if(metaMean.modified){
 						String valuesJson = gson.toJson(metaMean.includedValues.toArray(), Double[].class);
 						updateMetaMeanStmt.setString(1, valuesJson);
-						updateMetaMeanStmt.setString(2, metaMean.questionid);
+						updateMetaMeanStmt.setInt(2, metaMean.questionid);
 						updateMetaMeanStmt.addBatch();
 					}
 				}
 				updateMetaMeanStmt.executeBatch();
 				
 				for(MetaMean metaMean : toBeRemoved.values()) {
-					deleteMetaMeanStmt.setString(1, metaMean.questionid);
+					deleteMetaMeanStmt.setInt(1, metaMean.questionid);
 					deleteMetaMeanStmt.addBatch();
 					// TODO Auto-generated method stub	}
 					deleteMetaMeanStmt.executeBatch();
@@ -154,17 +154,19 @@ public class MetaMean {
 		}
 	}
 	
-	private String questionid;
-	private Set<Double> includedValues;
+	private int questionid;
+	private TreeSet<Double> includedValues = new TreeSet<Double>(); //TreeSet gives natural ordering
 	private boolean modified;
 	
-	private MetaMean(String questionid, Set<Double> includedValues, boolean setNew) {
+	private MetaMean(int questionid, Set<Double> includedValues, boolean setNew) {
 		this.questionid = questionid;
-		this.includedValues = new TreeSet<>(includedValues); //TreeSet gives natural ordering
+		if(includedValues != null) {
+			this.includedValues.addAll(includedValues);
+		}
 		modified = setNew;
 	}
 		
-	public String getQuestionId() {
+	public int getQuestionId() {
 		return questionid;
 	}
 	

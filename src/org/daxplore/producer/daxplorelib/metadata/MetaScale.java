@@ -28,27 +28,33 @@ import org.daxplore.producer.daxplorelib.DaxploreTable;
 import org.daxplore.producer.daxplorelib.SQLTools;
 import org.daxplore.producer.daxplorelib.metadata.textreference.TextReference;
 import org.daxplore.producer.daxplorelib.metadata.textreference.TextReferenceManager;
+import org.daxplore.producer.daxplorelib.raw.VariableType;
 
 import com.beust.jcommander.internal.Lists;
 import com.google.gson.Gson;
 
-public class MetaScale {
+public class MetaScale<T> {
 	
 	/*private static final DaxploreTable maintable = new DaxploreTable(
 			"CREATE TABLE metascale (id INTEGER PRIMARY KEY, valmap STRING NOT NULL)"
 			, "metascale");*/
 	private static final DaxploreTable scaletable = new DaxploreTable(
-			"CREATE TABLE metascale (scaleid INTEGER NOT NULL, textref STRING NOT NULL, pos INTEGER NOT NULL, mappedvals TEXT NOT NULL, UNIQUE(scaleid, textref) ON CONFLICT REPLACE)"
+			"CREATE TABLE metascale ("
+			+ "questionid INTEGER NOT NULL, "
+			+ "textref STRING NOT NULL, "
+			+ "pos INTEGER NOT NULL, "
+			+ "mappedvals TEXT NOT NULL, "
+			+ "FOREIGN KEY(questionid) REFERENCES metaquestion(id), "
+			+ "UNIQUE(questionid, textref) ON CONFLICT REPLACE)"
 			, "metascale");
 	
 	public static class MetaScaleManager {
-		private Map<Integer, MetaScale> scaleMap = new HashMap<>();
+		private Map<Integer, MetaScale<?>> scaleMap = new HashMap<>();
 		private Connection connection;
 		private TextReferenceManager textsManager;
 		
-		private List<MetaScale> toBeAdded = new LinkedList<>();
-		private int addDelta = 0;
-		private Map<Integer, MetaScale> toBeRemoved = new HashMap<>();
+		private List<MetaScale<?>> toBeAdded = new LinkedList<>();
+		private Map<Integer, MetaScale<?>> toBeRemoved = new HashMap<>();
 //		private List<MetaScale> toBeRemoved = new LinkedList<MetaScale>();
 		
 		public MetaScaleManager(Connection connection, TextReferenceManager textsManager) throws SQLException {
@@ -62,45 +68,69 @@ public class MetaScale {
 			}
 		}
 		
-		public MetaScale get(int id) throws SQLException, DaxploreException {
-			if(scaleMap.containsKey(id)) {
-				return scaleMap.get(id);
-			} else if(toBeRemoved.containsKey(id)) {
+		public MetaScale<?> get(int questionid, VariableType type) throws SQLException, DaxploreException {
+			if(scaleMap.containsKey(questionid)) {
+				return scaleMap.get(questionid);
+			} else if(toBeRemoved.containsKey(questionid)) {
 				return null; // TODO: handle non-scales in a more structured way?
 			} else {
 				Gson gson = new Gson();
-				try(PreparedStatement stmt = connection.prepareStatement("SELECT * FROM metascale WHERE scaleid = ? ORDER BY pos")) {
-					stmt.setInt(1, id);
+				try(PreparedStatement stmt = connection.prepareStatement("SELECT * FROM metascale WHERE questionid = ? ORDER BY pos")) {
+					stmt.setInt(1, questionid);
 					try(ResultSet rs  = stmt.executeQuery()) {
-						List<Option> options = new LinkedList<>();
 						
-						while(rs.next()) {
-							Double[] dArray = gson.fromJson(rs.getString("mappedvals"), Double[].class);
-							options.add(
-									new Option(
-											textsManager.get(rs.getString("textref")), 
-											Arrays.asList(dArray),
-											false));
-						}
-						MetaScale ms = new MetaScale(id, options, false);
-						scaleMap.put(id, ms);
-						return ms;
+							switch (type) {
+							case NUMERIC:
+								List<Option<Double>> optionsDouble = new LinkedList<>();
+								
+								while(rs.next()) {
+									Double[] dArray = gson.fromJson(rs.getString("mappedvals"), Double[].class);
+									optionsDouble.add(
+											new Option<Double>(
+													textsManager.get(rs.getString("textref")), 
+													Arrays.asList(dArray),
+													false));
+								}
+								MetaScale<Double> msDouble = new MetaScale<Double>(questionid, optionsDouble, false, type);
+								scaleMap.put(questionid, msDouble);
+								return msDouble;
+							case TEXT:
+								List<Option<String>> optionsString = new LinkedList<>();
+								
+								while(rs.next()) {
+									String[] sArray = gson.fromJson(rs.getString("mappedvals"), String[].class);
+									optionsString.add(
+											new Option<String>(
+													textsManager.get(rs.getString("textref")), 
+													Arrays.asList(sArray),
+													false));
+								}
+								MetaScale<String> msString = new MetaScale<String>(questionid, optionsString, false, type);
+								scaleMap.put(questionid, msString);
+								return msString;
+							}
 					}
 				}
 			}
+			throw new DaxploreException("Could not get metascale with id " + questionid);
 		}
 		
-		public MetaScale create(List<Option> options) throws SQLException {
-			addDelta++;
-			int id = SQLTools.maxId(scaletable.name, "scaleid", connection) + addDelta;
-			MetaScale scale = new MetaScale(id, options, true);
-			toBeAdded.add(scale);
-			scaleMap.put(id, scale);
-			return scale;
+		public MetaScale<String> createString(int questionid, List<Option<String>> options) throws SQLException {
+			MetaScale<String> scaleString = new MetaScale<String>(questionid, options, true, VariableType.TEXT);
+			toBeAdded.add(scaleString);
+			scaleMap.put(questionid, scaleString);
+			return scaleString;
+		}
+		
+		public MetaScale<Double> createDouble(int questionid, List<Option<Double>> options) throws SQLException {
+			MetaScale<Double> scaleDouble = new MetaScale<Double>(questionid, options, true, VariableType.NUMERIC);
+			toBeAdded.add(scaleDouble);
+			scaleMap.put(questionid, scaleDouble);
+			return scaleDouble;
 		}
 		
 		public void remove(int id) {
-			MetaScale scale = scaleMap.remove(id);
+			MetaScale<?> scale = scaleMap.remove(id);
 			toBeAdded.remove(scale);
 			toBeRemoved.put(id, scale);
 		}
@@ -108,16 +138,16 @@ public class MetaScale {
 		public void saveAll() throws SQLException {
 			Gson gson = new Gson();
 			try (
-				PreparedStatement addOptionStmt = connection.prepareStatement("INSERT INTO metascale (scaleid, textref, pos, mappedvals) VALUES (?, ?, ?, ?)");
-				PreparedStatement deleteOptionStmt = connection.prepareStatement("DELETE FROM metascale WHERE scaleid = ?");
+				PreparedStatement addOptionStmt = connection.prepareStatement("INSERT INTO metascale (questionid, textref, pos, mappedvals) VALUES (?, ?, ?, ?)");
+				PreparedStatement deleteOptionStmt = connection.prepareStatement("DELETE FROM metascale WHERE questionid = ?");
 				//PreparedStatement updateOptionStmt = connection.prepareStatement("UPDATE metascaleoption SET textref = ?, value = ?, transform = ? WHERE scaleid = ? AND ord = ?");
 			) {
 				int nNew = 0, nModified = 0, nRemoved = 0;
 				
-				for(MetaScale ms: toBeAdded) {
+				for(MetaScale<?> ms: toBeAdded) {
 					nNew++;
 					int ord = 0;
-					for(Option opt: ms.options) {
+					for(Option<?> opt: ms.options) {
 						addOptionStmt.setInt(1, ms.id);
 						addOptionStmt.setString(2, opt.textRef.getRef());
 						addOptionStmt.setInt(3, ord);
@@ -129,9 +159,8 @@ public class MetaScale {
 				}
 				toBeAdded.clear();
 				addOptionStmt.executeBatch();
-				addDelta = 0;
 				
-				for(MetaScale ms: scaleMap.values()) {
+				for(MetaScale<?> ms: scaleMap.values()) {
 					if(ms.isModified()) {
 						nModified++;
 						
@@ -139,7 +168,7 @@ public class MetaScale {
 						deleteOptionStmt.addBatch();
 						
 						int ord = 0;
-						for(Option opt: ms.options) {
+						for(Option<?> opt: ms.options) {
 							addOptionStmt.setInt(1, ms.id);
 							addOptionStmt.setString(2, opt.textRef.getRef());
 							addOptionStmt.setInt(3, ord);
@@ -154,7 +183,7 @@ public class MetaScale {
 				deleteOptionStmt.executeBatch();
 				addOptionStmt.executeBatch();
 				
-				for(MetaScale ms: toBeRemoved.values()) {
+				for(MetaScale<?> ms: toBeRemoved.values()) {
 					nRemoved++;
 					deleteOptionStmt.setInt(1, ms.id);
 					deleteOptionStmt.addBatch();
@@ -171,7 +200,7 @@ public class MetaScale {
 		
 		public int getUnsavedChangesCount() {
 			int nModified = 0;
-			for(MetaScale ms: scaleMap.values()) {
+			for(MetaScale<?> ms: scaleMap.values()) {
 				if(ms.isModified()) {
 					nModified++;
 				}
@@ -179,10 +208,10 @@ public class MetaScale {
 			return toBeRemoved.size() + nModified;
 		}
 		
-		public List<MetaScale> getAll() throws SQLException, DaxploreException {
+		/*public List<MetaScale> getAll() throws SQLException, DaxploreException { //NO LONGER NEEDED?!? 2015-06-17
 			// make sure all scales are cached before returning the content of the map
 			try(Statement stmt = connection.createStatement();
-					ResultSet rs = stmt.executeQuery("SELECT id FROM metascale")) {
+					ResultSet rs = stmt.executeQuery("SELECT questionid FROM metascale")) {
 				while(rs.next()) {
 					int id = rs.getInt("id");
 					if(!scaleMap.containsKey(id) && !toBeRemoved.containsKey(id)) {
@@ -191,22 +220,21 @@ public class MetaScale {
 				}
 			}
 			return new LinkedList<>(scaleMap.values());
-		}
+		}*/
 		
 		public void discardChanges() {
 			scaleMap.clear();
 			toBeAdded.clear();
 			toBeRemoved.clear();
-			addDelta = 0;
 		}
 	}
 	
-	public static class Option {
+	public static class Option<T> {
 		private TextReference textRef;
-		private Set<Double> values = new HashSet<Double>();
+		private Set<T> values = new HashSet<T>();
 		private boolean modified = false;
 		
-		public Option(TextReference textRef, Collection<Double> values, boolean setNew) {
+		public Option(TextReference textRef, Collection<T> values, boolean setNew) {
 			this.textRef = textRef;
 			this.values.addAll(values);
 			this.modified = setNew;
@@ -223,38 +251,39 @@ public class MetaScale {
 			}
 		}
 
-		public Set<Double> getValues() {
+		public Set<T> getValues() {
 			return values;
 		}
 
-		public void addValue(Double value) {
+		public void addValue(T value) {
 			values.add(value);
 		}
 		
-		public void removeValue(Double value) {
+		public void removeValue(T value) {
 			values.remove(value);
 		}
 		
-		public boolean containsValue(Double value) {
+		public boolean containsValue(T value) {
 			return values.contains(value);
 		}
 		
-		public void setValues(Collection<Double> values) {
+		public void setValues(Collection<T> values) {
 			values.clear();
 			values.addAll(values);
 		}
 	}
 	
 	
-	/** Each Option's position is defined by the order of this list */ //TODO change to explicit ordering
-	private List<Option> options;
-
+	/** Each Option's position is defined by the order of this list */ //TODO change to explicit ordering?
 	private int id;
+	private List<Option<T>> options;
+	private VariableType type;
 	private boolean modified = false;
 	
-	private MetaScale(int id, List<Option> options, boolean newScale) {
+	private MetaScale(int id, List<Option<T>> options, boolean newScale, VariableType type) {
 		this.id = id;
 		this.options = options;
+		this.type = type;
 		this.modified = newScale;
 	}
 	
@@ -266,11 +295,15 @@ public class MetaScale {
 		return options.size();
 	}
 	
-	public List<Option> getOptions() {
+	public List<Option<T>> getOptions() {
 		return Lists.newLinkedList(options);
 	}
+	
+	public VariableType getType() {
+		return type;
+	}
 
-	public void setOptions(List<Option> options) {
+	public void setOptions(List<Option<T>> options) {
 		if(!options.equals(this.options)) {
 			this.options = options;
 			modified = true;
@@ -282,7 +315,7 @@ public class MetaScale {
 	 * @param value
 	 * @return index of value, -1 if not found
 	 */
-	public int getOptionIndex(Double value) {
+	public int getOptionIndex(T value) {
 		//TODO: optimize with better data structure
 		for(int i = 0; i < options.size(); i++ ) {
 			if(options.get(i).getValues().contains(value)) {
@@ -296,7 +329,7 @@ public class MetaScale {
 		if(modified) {
 			return true; 
 		}
-		for(Option opt: options) {
+		for(Option<T> opt: options) {
 			if(opt.modified) {
 				return true;
 			}
@@ -306,7 +339,7 @@ public class MetaScale {
 	
 	public void setSaved() {
 		modified = false;
-		for(Option opt: options) {
+		for(Option<T> opt: options) {
 			opt.modified = false;
 		}
 	}

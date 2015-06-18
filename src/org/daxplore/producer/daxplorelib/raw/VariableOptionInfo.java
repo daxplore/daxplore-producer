@@ -7,14 +7,21 @@
  ******************************************************************************/
 package org.daxplore.producer.daxplorelib.raw;
 
+import org.daxplore.producer.daxplorelib.DaxploreException;
+
 public class VariableOptionInfo {
 	private Object value;
 	private String rawText;
 	private int count;
+	private VariableType type;
 	
-	public VariableOptionInfo(Object value, int count) {
+	public VariableOptionInfo(Object value, int count, VariableType type) throws DaxploreException{
 		this.value = value;
 		this.count = count;
+		this.type = type;
+		if(value != null && (value.getClass() != type.javatype())) {
+			throw new DaxploreException("VariableOptionInfo only supports String or Double values, not " + value.getClass().getName());
+		}
 	}
 	
 	public Object getValue() {
@@ -31,5 +38,9 @@ public class VariableOptionInfo {
 	
 	public int getCount() {
 		return count;
+	}
+	
+	public Class<?> getVariableClass() {
+		return type.javatype();
 	}
 }

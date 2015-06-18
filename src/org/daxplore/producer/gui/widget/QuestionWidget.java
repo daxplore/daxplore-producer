@@ -79,7 +79,7 @@ public class QuestionWidget extends JPanel implements AbstractWidgetEditor<MetaQ
 	public void setContent(MetaQuestion value) {
 		this.metaQuestion = value;
 		
-		idLabel.setText(MessageFormat.format(idFormat, metaQuestion.getId()));
+		idLabel.setText(MessageFormat.format(idFormat, metaQuestion.getColumn()));
 		
 		String shortText = metaQuestion.getShortTextRef().get(locale);
 		if(Strings.isNullOrEmpty(shortText)) {

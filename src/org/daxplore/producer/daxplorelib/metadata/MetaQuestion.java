@@ -32,6 +32,7 @@ import org.daxplore.producer.daxplorelib.metadata.MetaScale.Option;
 import org.daxplore.producer.daxplorelib.metadata.MetaTimepointShort.MetaTimepointShortManager;
 import org.daxplore.producer.daxplorelib.metadata.textreference.TextReference;
 import org.daxplore.producer.daxplorelib.metadata.textreference.TextReferenceManager;
+import org.daxplore.producer.daxplorelib.raw.VariableType;
 
 import com.beust.jcommander.internal.Lists;
 import com.google.common.collect.Sets;
@@ -44,10 +45,22 @@ import com.google.gson.JsonPrimitive;
 public class MetaQuestion {
 	
 	private static final DaxploreTable table = new DaxploreTable(
-			"CREATE TABLE metaquestion (id TEXT PRIMARY KEY, scaleid INTEGER, displaytypes STRING NOT NULL, fulltextref TEXT NOT NULL, shorttextref TEXT NOT NULL, extratextref TEXT, FOREIGN KEY(scaleid) REFERENCES metascale(id))",
+			"CREATE TABLE metaquestion ("
+			+ "id INTEGER PRIMARY KEY, "
+			+ "col TEXT NOT NULL, "
+			+ "type STRING NOT NULL, "
+			+ "displaytypes STRING NOT NULL, "
+			+ "fulltextref TEXT NOT NULL, "
+			+ "shorttextref TEXT NOT NULL, "
+			+ "extratextref TEXT)",
 			"metaquestion");
+	
 	private static final DaxploreTable timePointTable = new DaxploreTable(
-			"CREATE TABLE questtimerel (qid TEXT NOT NULL, timeid INTEGER NOT NULL, FOREIGN KEY(qid) REFERENCES metaquestion(id), FOREIGN KEY(timeid) REFERENCES timepoints(id))", 
+			"CREATE TABLE questtimerel ("
+			+ "qid INTEGER NOT NULL, "
+			+ "timeid INTEGER NOT NULL, "
+			+ "FOREIGN KEY(qid) REFERENCES metaquestion(id), "
+			+ "FOREIGN KEY(timeid) REFERENCES timepoints(id))", 
 			"questtimerel");
 	
 	private enum DisplayTypes {
@@ -61,9 +74,10 @@ public class MetaQuestion {
 		private TextReferenceManager textsManager;
 		private MetaMeanManager metaMeanManager;
 		private MetaTimepointShortManager timePointManager;
-		private Map<String, MetaQuestion> questionMap = new HashMap<>();
+		private Map<Integer, MetaQuestion> questionMap = new HashMap<>();
 		private LinkedList<MetaQuestion> toBeAdded= new LinkedList<>();
-		private Map<String, MetaQuestion> toBeRemoved = new HashMap<>();
+		private Map<Integer, MetaQuestion> toBeRemoved = new HashMap<>();
+		private int addDelta = 0;
 		
 		public MetaQuestionManager(Connection connection, TextReferenceManager textsManager,
 				MetaScaleManager metaScaleManager, MetaMeanManager metaMeanManager, MetaTimepointShortManager timePointManager) throws SQLException {
@@ -85,22 +99,26 @@ public class MetaQuestion {
 			}
 		}
 		
-		public MetaQuestion get(String id) throws SQLException, DaxploreException {
+		public MetaQuestion get(int id) throws SQLException, DaxploreException {
 			if(questionMap.containsKey(id)) {
 				return questionMap.get(id);
 			} else if(toBeRemoved.containsKey(id)) {
 				throw new DaxploreException("No metaquestion with id '"+id+"'");
 			}
 			
+			String column;
+			VariableType type;
 			TextReference fullTextRef, shortTextRef, extraTextRef;
-			MetaScale scale = null;
+			MetaScale<?> scale = null;
 			boolean useFrequencies, useMean;
 			try (PreparedStatement stmt = connection.prepareStatement("SELECT * FROM metaquestion WHERE id = ?")) {
-				stmt.setString(1, id);
+				stmt.setInt(1, id);
 				try(ResultSet rs = stmt.executeQuery()) {
 					if(!rs.next()) {
 						throw new DaxploreException("MetaQuestion '" + id + "' does not exist?");
 					}
+					column = rs.getString("col");
+					type = VariableType.valueOf(rs.getString("type")); //TODO check exception
 					fullTextRef = textsManager.get(rs.getString("fulltextref"));
 					shortTextRef = textsManager.get(rs.getString("shorttextref"));
 					String extraTextRefId = rs.getString("extratextref");
@@ -116,17 +134,14 @@ public class MetaQuestion {
 					useFrequencies = displayTypes.contains(DisplayTypes.FREQUENCIES.name());
 					useMean = displayTypes.contains(DisplayTypes.MEAN.name());
 					
-					int scaleid = rs.getInt("scaleid");
-					if(!rs.wasNull()) {
-						scale = metascaleManager.get(scaleid);
-					}
+					scale = metascaleManager.get(id, type);
 				}
 			}
 			
 			MetaMean metaMean = metaMeanManager.get(id);
 			List<MetaTimepointShort> timepoints = new LinkedList<>();
 			try(PreparedStatement stmt2 = connection.prepareStatement("SELECT timeid FROM questtimerel WHERE qid = ?")) {
-				stmt2.setString(1, id);
+				stmt2.setInt(1, id);
 				try(ResultSet rs2 = stmt2.executeQuery()) {
 					while(rs2.next()) {
 						timepoints.add(timePointManager.get(rs2.getInt("timeid")));
@@ -134,20 +149,47 @@ public class MetaQuestion {
 					
 				}
 			}
-			MetaQuestion mq = new MetaQuestion(id, shortTextRef, fullTextRef, extraTextRef, scale, useFrequencies, metaMean, useMean, timepoints);
+			MetaQuestion mq = new MetaQuestion(id, column, type, shortTextRef, fullTextRef, extraTextRef, scale, useFrequencies, metaMean, useMean, timepoints);
 			questionMap.put(id, mq);
 			return mq;
 		}
 		
-		public MetaQuestion create(String id, TextReference shortTextRef, TextReference fullTextRef, TextReference extraTextRef, MetaScale scale, MetaMean metaMean, List<MetaTimepointShort> timepoints) {
-			boolean useMean = metaMean != null;
-			MetaQuestion mq = new MetaQuestion(id, shortTextRef, fullTextRef, extraTextRef, scale, true, metaMean, useMean, timepoints);
+		@SuppressWarnings("unchecked")
+		public MetaQuestion create(String column, VariableType type, TextReference shortTextRef, TextReference fullTextRef, TextReference extraTextRef,
+				List<MetaScale.Option<?>> scaleOptions, Set<Double> meanIncludedValues, List<MetaTimepointShort> timepoints) throws SQLException, DaxploreException {
+			boolean useMean = (meanIncludedValues != null);
+			
+			addDelta++;
+
+			int id = SQLTools.maxId(table.name, "id", connection) + addDelta;
+			
+			MetaScale<?> scale = null;
+			switch(type) {
+			case NUMERIC:
+				List<Option<Double>> scaleOptionsDouble = new LinkedList<MetaScale.Option<Double>>();
+				for(Option<?> o : scaleOptions) {
+					scaleOptionsDouble.add((Option<Double>)o);
+				}
+				scale = metascaleManager.createDouble(id, scaleOptionsDouble);
+				break;
+			case TEXT:
+				List<Option<String>> scaleOptionsString = new LinkedList<MetaScale.Option<String>>();
+				for(Option<?> o : scaleOptions) {
+					scaleOptionsString.add((Option<String>)o);
+				}
+				scale = metascaleManager.createString(id, scaleOptionsString);
+				break;
+			}
+			
+			MetaMean metaMean = metaMeanManager.create(id, meanIncludedValues);
+			
+			MetaQuestion mq = new MetaQuestion(id, column, type, shortTextRef, fullTextRef, extraTextRef, scale, true, metaMean, useMean, timepoints);
 			toBeAdded.add(mq);
 			questionMap.put(id, mq);
 			return mq;
 		}
 		
-		public void remove(String id) {
+		public void remove(int id) {
 			MetaQuestion mq = questionMap.remove(id);
 			toBeAdded.remove(mq);
 			toBeRemoved.put(id, mq);
@@ -156,8 +198,8 @@ public class MetaQuestion {
 		public void saveAll() throws SQLException {
 			int nNew = 0, nModified = 0, nRemoved = 0, nTimePoint = 0;
 			try (
-			PreparedStatement updateStmt = connection.prepareStatement("UPDATE metaquestion SET scaleid = ?, displaytypes = ?, fulltextref = ?, shorttextref = ?, extratextref = ? WHERE id = ?");
-			PreparedStatement insertStmt = connection.prepareStatement("INSERT INTO metaquestion (id, scaleid, displaytypes, fulltextref, shorttextref, extratextref) VALUES (?, ?, ?, ?, ?, ?)");
+			PreparedStatement updateStmt = connection.prepareStatement("UPDATE metaquestion SET col = ?, type = ?, displaytypes = ?, fulltextref = ?, shorttextref = ?, extratextref = ? WHERE id = ?");
+			PreparedStatement insertStmt = connection.prepareStatement("INSERT INTO metaquestion (id, col, type, displaytypes, fulltextref, shorttextref, extratextref) VALUES (?, ?, ?, ?, ?, ?, ?)");
 			PreparedStatement deleteStmt = connection.prepareStatement("DELETE FROM metaquestion WHERE id = ?");
 			PreparedStatement deleteRelStmt = connection.prepareStatement("DELETE FROM questtimerel WHERE qid = ?");
 			PreparedStatement insertRelStmt = connection.prepareStatement("INSERT INTO questtimerel (qid, timeid) VALUES (?, ?)");
@@ -165,34 +207,34 @@ public class MetaQuestion {
 				for(MetaQuestion mq: questionMap.values()) {
 					if(mq.modified) {
 						nModified++;
-						updateStmt.setInt(1, mq.scale.getId());
-						
+						updateStmt.setString(1, mq.column);
+						updateStmt.setString(2, mq.type.name());
 						String displayTypes = mq.displayTypesAsJSON().toString();
 						if (displayTypes != null) {
-							updateStmt.setString(2, displayTypes);
+							updateStmt.setString(3, displayTypes);
 						} else {
-							updateStmt.setString(2, "");
+							updateStmt.setString(3, "");
 						}
 						
-						updateStmt.setString(3, mq.fullTextRef.getRef());
-						updateStmt.setString(4, mq.shortTextRef.getRef());
+						updateStmt.setString(4, mq.fullTextRef.getRef());
+						updateStmt.setString(5, mq.shortTextRef.getRef());
 						if(mq.extraTextRef != null) {
-							updateStmt.setString(5, mq.extraTextRef.getRef());
+							updateStmt.setString(6, mq.extraTextRef.getRef());
 						} else {
 							updateStmt.setNull(6, Types.VARCHAR);
 						}
-						updateStmt.setString(7, mq.id);
+						updateStmt.setInt(7, mq.id);
 						updateStmt.executeUpdate();
 						mq.modified = false;
 					}
 					
 					if(mq.timemodified) {
-						deleteRelStmt.setString(1, mq.id);
+						deleteRelStmt.setInt(1, mq.id);
 						deleteRelStmt.executeUpdate();
 						
 						for(MetaTimepointShort timepoint: mq.timepoints) {
 							nTimePoint++;
-							insertRelStmt.setString(1, mq.id);
+							insertRelStmt.setInt(1, mq.id);
 							insertRelStmt.setInt(2, timepoint.getId());
 	//						insertRelStmt.addBatch();
 							insertRelStmt.executeUpdate();
@@ -205,32 +247,28 @@ public class MetaQuestion {
 				//TODO: add new ones before changing the modified ones and set modified flag to false??
 				for(MetaQuestion mq : toBeAdded) {
 					nNew++;
-					insertStmt.setString(1, mq.id);
-					
-					if(mq.scale != null) {
-						insertStmt.setInt(2, mq.scale.getId());
-					} else {
-						insertStmt.setNull(2, Types.INTEGER);
-					}
+					insertStmt.setInt(1, mq.id);
+					insertStmt.setString(2, mq.column);
+					insertStmt.setString(3, mq.type.name());
 					
 					String displayTypes = mq.displayTypesAsJSON().toString();
 					if (displayTypes != null) {
-						insertStmt.setString(3, displayTypes);
+						insertStmt.setString(4, displayTypes);
 					} else {
-						insertStmt.setString(3, "");
+						insertStmt.setString(4, "");
 					}
 					
-					insertStmt.setString(4, mq.fullTextRef.getRef());
-					insertStmt.setString(5, mq.shortTextRef.getRef());
+					insertStmt.setString(5, mq.fullTextRef.getRef());
+					insertStmt.setString(6, mq.shortTextRef.getRef());
 					if(mq.extraTextRef != null) {
-						insertStmt.setString(6, mq.extraTextRef.getRef());
+						insertStmt.setString(7, mq.extraTextRef.getRef());
 					} else {
-						insertStmt.setNull(6, Types.VARCHAR);
+						insertStmt.setNull(7, Types.VARCHAR);
 					}
 					insertStmt.addBatch();
 					
 					for(MetaTimepointShort timepoint: mq.timepoints) {
-						insertRelStmt.setString(1, mq.id);
+						insertRelStmt.setInt(1, mq.id);
 						insertRelStmt.setInt(2, timepoint.getId());
 						insertRelStmt.addBatch();
 					}
@@ -238,14 +276,14 @@ public class MetaQuestion {
 				}
 				insertStmt.executeBatch();
 				toBeAdded.clear();
-				
+				addDelta = 0;
 				
 				for(MetaQuestion mq: toBeRemoved.values()) {
 					nRemoved++;
-					deleteStmt.setString(1, mq.id);
+					deleteStmt.setInt(1, mq.id);
 					deleteStmt.addBatch();
 					
-					deleteRelStmt.setString(1, mq.id);
+					deleteRelStmt.setInt(1, mq.id);
 					deleteRelStmt.addBatch();
 				}
 				deleteRelStmt.executeBatch();
@@ -279,7 +317,7 @@ public class MetaQuestion {
 			try (Statement stmt = connection.createStatement();
 					ResultSet rs = stmt.executeQuery("SELECT id FROM metaquestion")) {
 				while(rs.next()) {
-					String id = rs.getString("id");
+					int id = rs.getInt("id");
 					if(!questionMap.containsKey(id) && !toBeRemoved.containsKey(id)) {
 						get(id);
 					}
@@ -294,35 +332,63 @@ public class MetaQuestion {
 			questionMap.clear();
 			toBeAdded.clear();
 			toBeRemoved.clear();
+			addDelta = 0;
 		}
 	}
 	
-	private String id;
+	private int id;
+	private String column;
+	private VariableType type;
 	private TextReference shortTextRef, fullTextRef, extraTextRef;
 	private boolean useFrequencies, useMean;
-	private MetaScale scale;
+	private MetaScale<?> scale;
 	private MetaMean metaMean;
 	private List<MetaTimepointShort> timepoints;
 	
 	private boolean modified = false;
 	private boolean timemodified = false;
 	
-	private MetaQuestion(String id, TextReference shortTextRef, TextReference fullTextRef,
-			TextReference extraTextRef,	MetaScale scale, boolean useFrequencies,
-			MetaMean metaMean, boolean useMean, List<MetaTimepointShort> timepoints) {
+	private MetaQuestion(int id, String column, VariableType type, TextReference shortTextRef, TextReference fullTextRef,
+			TextReference extraTextRef,	MetaScale<?> scale, boolean useFrequencies,
+			MetaMean metaMean, boolean useMean, List<MetaTimepointShort> timepoints) throws DaxploreException {
 		this.id = id;
+		this.column = column;
+		this.type = type;
 		this.shortTextRef = shortTextRef;
 		this.fullTextRef = fullTextRef;
 		this.extraTextRef = extraTextRef;
 		this.useFrequencies = useFrequencies;
-		this.scale = scale;
+		setScale(scale);
 		this.useMean = useMean;
 		this.metaMean = metaMean;
 		this.timepoints = timepoints;
 	}
 	
-	public String getId() {
+	public int getId() {
 		return id;
+	}
+	
+	public String getColumn() {
+		return column;
+	}
+	
+	public VariableType getType() {
+		return type;
+	}
+	
+	public MetaScale<?> getScale() {
+		return scale;
+	}
+	
+	public void setScale(MetaScale<?> scale) throws DaxploreException {
+		if(!scale.equals(this.scale)) {
+			if(scale.getType() == type) {
+				this.scale = scale;
+				modified = true;
+			} else {
+				throw new DaxploreException("Type mismatch: this MetaQuestion can't take a MetaScale of type " + scale.getType());
+			}
+		}
 	}
 	
 	public TextReference getShortTextRef() {
@@ -367,17 +433,6 @@ public class MetaQuestion {
 		modified = true;
 	}
 	
-	public MetaScale getScale() {
-		return scale;
-	}
-	
-	public void setScale(MetaScale scale) {
-		if(!scale.equals(this.scale)) {
-			this.scale = scale;
-			modified = true;
-		}
-	}
-	
 	public boolean useMean() {
 		return useMean;
 	}
@@ -405,6 +460,7 @@ public class MetaQuestion {
 		}
 	}
 	
+	@SuppressWarnings("rawtypes")
 	public JsonElement toJSONObject(Locale locale) {
 		
 		JsonObject json = new JsonObject();

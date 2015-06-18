@@ -52,7 +52,6 @@ import javax.xml.validation.SchemaFactory;
 
 import org.daxplore.producer.daxplorelib.calc.Crosstabs;
 import org.daxplore.producer.daxplorelib.metadata.MetaGroup;
-import org.daxplore.producer.daxplorelib.metadata.MetaMean;
 import org.daxplore.producer.daxplorelib.metadata.MetaQuestion;
 import org.daxplore.producer.daxplorelib.metadata.MetaScale;
 import org.daxplore.producer.daxplorelib.metadata.MetaTimepointShort;
@@ -110,7 +109,7 @@ public class ImportExportManager {
 		SortedSet<MetaQuestion> selectedQuestions = new TreeSet<>(new Comparator<MetaQuestion>() {
 			@Override
 			public int compare(MetaQuestion o1, MetaQuestion o2) {
-				return o1.getId().compareTo(o2.getId());
+				return Integer.compare(o1.getId(), o2.getId());
 			}
 		});
 		for(MetaQuestion perspective : perspectives.getQuestions()) {
@@ -263,41 +262,56 @@ public class ImportExportManager {
 		try {
 			
 			for(RawMetaQuestion rmq : daxploreFile.getRawMeta().getQuestions()) {
-				String id = rmq.column;
-				TextReference fulltext = daxploreFile.getTextReferenceManager().get(id + "_fulltext");
+				String column = rmq.column;
+				VariableType type = rmq.qtype;
+				TextReference fulltext = daxploreFile.getTextReferenceManager().get(column + "_fulltext");
 				fulltext.put(rmq.qtext, locale);
-				MetaScale scale = null;
+				List<MetaScale.Option<?>> scaleOptions = new LinkedList<MetaScale.Option<?>>();
 				if(rmq.valuelables != null) {
-					LinkedList<MetaScale.Option> scaleOptions = new LinkedList<>();
 					int i = 0; //TODO change to 1-indexed options
-					for(Map.Entry<Object, String> s: rmq.valuelables.entrySet()) {
-						TextReference ref = daxploreFile.getTextReferenceManager().get(rmq.column + "_option_" + i);
-						ref.put(s.getValue(), locale);
-						if(s.getKey() instanceof Double) {
-							Collection<Double> vals = new LinkedList<Double>();
-							vals.add((Double)s.getKey());
-							scaleOptions.add(new MetaScale.Option(ref, vals, true));
-						} else {
-							//TODO: Add support for string values
-							Logger.getGlobal().log(Level.WARNING, "Trying to add a non number as an option");
+					switch(type) {
+					case NUMERIC:
+//						LinkedList<MetaScale.Option<Double>> scaleOptionsDouble = new LinkedList<>();
+						for(Map.Entry<Object, String> s: rmq.valuelables.entrySet()) {
+							TextReference ref = daxploreFile.getTextReferenceManager().get(rmq.column + "_option_" + i);
+							ref.put(s.getValue(), locale);
+							if(s.getKey() instanceof Double) {
+								Collection<Double> vals = new LinkedList<Double>();
+								vals.add((Double)s.getKey());
+								scaleOptions.add(new MetaScale.Option<Double>(ref, vals, true));
+							} else {
+								throw new DaxploreException("Trying to add a non number or string as an option");
+							}
+							i++;
 						}
-						i++;
+						break;
+					case TEXT:
+						for(Map.Entry<Object, String> s: rmq.valuelables.entrySet()) {
+							TextReference ref = daxploreFile.getTextReferenceManager().get(rmq.column + "_option_" + i);
+							ref.put(s.getValue(), locale);
+							if(s.getKey() instanceof String) {
+								Collection<String> vals = new LinkedList<String>();
+								vals.add((String)s.getKey());
+								scaleOptions.add(new MetaScale.Option<String>(ref, vals, true));
+							} else {
+								throw new DaxploreException("Trying to add a non number or string as an option");
+							}
+							i++;
+						}
+						break;
 					}
-					scale = daxploreFile.getMetaScaleManager().create(scaleOptions);
 				}
 				
-				
-				TextReference shorttext = daxploreFile.getTextReferenceManager().get(id + "_shorttext");
-				MetaMean metaMean = null;
-				if (rmq.qtype == VariableType.NUMERIC) {
-					Set<Double> includedValues = new HashSet<Double>();
+				TextReference shorttext = daxploreFile.getTextReferenceManager().get(column + "_shorttext");
+				Set<Double> meanIncludedValues = null;
+				if(type == VariableType.NUMERIC) {
+					meanIncludedValues = new HashSet<>();
 					for(Object o : rmq.valuelables.keySet()) {
-						includedValues.add((Double)o);
+						meanIncludedValues.add((Double)o);
 					}
-					metaMean = daxploreFile.getMetaMeanManager().create(id, includedValues);
 				}
 				List<MetaTimepointShort> timepoints = new LinkedList<>();
-				daxploreFile.getMetaQuestionManager().create(id, shorttext, fulltext, null, scale, metaMean, timepoints);
+				daxploreFile.getMetaQuestionManager().create(column, type, shorttext, fulltext, null, scaleOptions, meanIncludedValues, timepoints);
 			}
 		} catch (SQLException e) {
 			throw new DaxploreException("Failed to transfer metadata from raw", e);

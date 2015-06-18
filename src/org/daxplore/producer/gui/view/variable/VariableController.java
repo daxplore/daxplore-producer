@@ -29,6 +29,7 @@ import org.daxplore.producer.daxplorelib.raw.RawMeta.RawMetaQuestion;
 import org.daxplore.producer.daxplorelib.raw.VariableOptionInfo;
 import org.daxplore.producer.gui.resources.GuiTexts;
 
+import com.google.common.collect.Lists;
 import com.google.common.eventbus.EventBus;
 
 public class VariableController implements TableModelListener, ActionListener {
@@ -36,10 +37,6 @@ public class VariableController implements TableModelListener, ActionListener {
 	enum QuestionCommand {
 		ADD, REMOVE, UP, DOWN, INVERT
 	}
-	
-	private EventBus eventBus;
-	private GuiTexts texts;
-	private DaxploreFile daxploreFile;
 	
 	private VariableView view;
 	private MetaQuestion mq;
@@ -49,17 +46,16 @@ public class VariableController implements TableModelListener, ActionListener {
 	private VariableTable variableTable;
 	private List<VariableOptionInfo> rawVariableList;
 	private RawMetaQuestion rawMetaQuestion;
+	private EventBus eventBus;
 	
 	public VariableController(EventBus eventBus, GuiTexts texts, DaxploreFile daxploreFile, MetaQuestion metaQuestion) {
-		this.eventBus = eventBus;
-		this.texts = texts;
 		this.mq = metaQuestion;
-		this.daxploreFile = daxploreFile;
+		this.eventBus = eventBus;
 		eventBus.register(this);
 		
 		try {
 			
-			rawMetaQuestion = daxploreFile.getRawMeta().getQuestion(metaQuestion.getId());
+			rawMetaQuestion = daxploreFile.getRawMeta().getQuestion(metaQuestion.getColumn());
 			rawVariableList = daxploreFile.getRawColumnInfo(rawMetaQuestion.column);
 
 			variableModel = new VariableTableModel(metaQuestion.getScale(), calculateAfter());
@@ -96,6 +92,7 @@ public class VariableController implements TableModelListener, ActionListener {
 		}
 	}
 	
+	@SuppressWarnings({ "rawtypes", "unchecked" })
 	LinkedList<Integer> calculateAfter() {
 		if(mq==null || mq.getScale()==null) {
 			return new LinkedList<>();
@@ -135,6 +132,7 @@ public class VariableController implements TableModelListener, ActionListener {
 	/**
 	 * {@inheritDoc}
 	 */
+	@SuppressWarnings("unchecked")
 	@Override
 	public void actionPerformed(ActionEvent e) {
 		switch(QuestionCommand.valueOf(e.getActionCommand())) {
@@ -177,14 +175,29 @@ public class VariableController implements TableModelListener, ActionListener {
 //			break;
 		case REMOVE:
 			int[] selectedRows = variableTable.getSelectedRows();
-			List<Option> options = mq.getScale().getOptions();
 			variableTable.clearSelection();
 			variableTable.removeEditor();
-			for(int i = selectedRows.length-1; i>=0; i--) {
-				options.remove(selectedRows[i]);
+
+			switch (mq.getType()) {
+			case NUMERIC:
+				MetaScale<Double> msDouble = (MetaScale<Double>) mq.getScale();
+				List<Option<Double>> optionsDouble = msDouble.getOptions();
+				for(int i = selectedRows.length-1; i>=0; i--) {
+					optionsDouble.remove(selectedRows[i]);
+				}
+				msDouble.setOptions(optionsDouble);
+				break;
+			case TEXT:
+				MetaScale<String> msString = (MetaScale<String>) mq.getScale();
+				List<Option<String>> optionsString = msString.getOptions();
+				for(int i = selectedRows.length-1; i>=0; i--) {
+					optionsString.remove(selectedRows[i]);
+				}
+				msString.setOptions(optionsString);
+				break;
 			}
+			
 			rawTable.setAvailableNumbers(variableModel.getAvailebleToNumbers());
-			mq.getScale().setOptions(options);
 			variableModel.fireTableRowsDeleted(selectedRows[0], selectedRows[0]);
 			variableTable.packAll();
 			rawModel.remapFromMetaScale();
@@ -221,13 +234,17 @@ public class VariableController implements TableModelListener, ActionListener {
 			rawTable.packAll();
 			break;
 		case INVERT:
-			options = mq.getScale().getOptions();
-			List<Option> invertedOptions = new LinkedList<>();
-			for(Option option : options) {
-				invertedOptions.add(0, option);
+			switch (mq.getType()) {
+			case NUMERIC:
+				MetaScale<Double> msDouble = (MetaScale<Double>) mq.getScale();
+				msDouble.setOptions(Lists.reverse(msDouble.getOptions()));
+				break;
+			case TEXT:
+				MetaScale<Double> msString = (MetaScale<Double>) mq.getScale();
+				msString.setOptions(Lists.reverse(msString.getOptions()));
+				break;
 			}
-
-			mq.getScale().setOptions(invertedOptions);
+			
 			variableModel.fireTableStructureChanged();
 			variableTable.packAll();
 			rawModel.remapFromMetaScale();
@@ -268,7 +285,7 @@ public class VariableController implements TableModelListener, ActionListener {
 	 */
 	public JDialog getDialog() {
 		JDialog dialog = new JDialog();
-		dialog.setTitle(mq.getId());
+		dialog.setTitle(mq.getColumn());
 		dialog.setContentPane(getView());
 		dialog.setModal(true);
 		dialog.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);

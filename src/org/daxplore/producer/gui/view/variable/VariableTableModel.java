@@ -96,13 +96,19 @@ public class VariableTableModel extends DefaultTableModel{
 		return;
 	}
 	
+	@SuppressWarnings("unchecked")
 	@Override
 	public Object getValueAt(int rowIndex, int columnIndex) {
 		switch(columnIndex) {
 		case 0:
 			return rowIndex;
 		case 1:
-			return ms.getOptions().get(rowIndex).getTextRef();
+			switch(ms.getType()) {
+			case NUMERIC:
+				return ((MetaScale<Double>)ms).getOptions().get(rowIndex).getTextRef();
+			case TEXT:
+				return ((MetaScale<String>)ms).getOptions().get(rowIndex).getTextRef();
+			}
 		case 2:
 			return values.get(rowIndex);
 		default: 
@@ -110,6 +116,7 @@ public class VariableTableModel extends DefaultTableModel{
 		}
 	}
 	
+	@SuppressWarnings({ "unchecked", "rawtypes" })
 	@Override
 	public void removeRow(int row) {
 		List<Option> options= ms.getOptions();
@@ -118,6 +125,7 @@ public class VariableTableModel extends DefaultTableModel{
 		fireTableRowsDeleted(row, row);
 	}
 	
+	@SuppressWarnings({ "unchecked", "rawtypes" })
 	@Override
 	public void insertRow(int row, Vector rowData) {
 		if(rowData.size() == 1 && rowData.get(0) instanceof MetaQuestion) {
@@ -128,6 +136,7 @@ public class VariableTableModel extends DefaultTableModel{
 		}
 	}
 	
+	@SuppressWarnings({ "unchecked", "rawtypes" })
 	@Override
 	public void moveRow(int start, int end, int to) {
 		List<Option> options= ms.getOptions();

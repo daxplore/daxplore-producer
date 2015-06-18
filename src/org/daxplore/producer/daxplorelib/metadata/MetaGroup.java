@@ -36,10 +36,19 @@ import com.google.gson.JsonPrimitive;
 
 public class MetaGroup implements Comparable<MetaGroup> {
 	private static final DaxploreTable groupTable = new DaxploreTable(
-			"CREATE TABLE metagroup (id INTEGER PRIMARY KEY, textref TEXT NOT NULL, ord INTEGER NOT NULL, type INTEGER NOT NULL)",
+			"CREATE TABLE metagroup ("
+			+ "id INTEGER PRIMARY KEY, "
+			+ "textref TEXT NOT NULL, "
+			+ "ord INTEGER NOT NULL, "
+			+ "type INTEGER NOT NULL)",
 			"metagroup");
 	private static final DaxploreTable groupRelTable = new DaxploreTable(
-			"CREATE TABLE metagrouprel (groupid INTEGER NOT NULL, questionid TEXT NOT NULL, ord INTEGER NOT NULL, FOREIGN KEY(questionid) REFERENCES metaquestion(id), FOREIGN KEY(groupid) REFERENCES metagroup(id))",
+			"CREATE TABLE metagrouprel ("
+			+ "questionid INTEGER NOT NULL, "
+			+ "groupid INTEGER NOT NULL, "
+			+ "ord INTEGER NOT NULL, "
+			+ "FOREIGN KEY(questionid) REFERENCES metaquestion(id), "
+			+ "FOREIGN KEY(groupid) REFERENCES metagroup(id))",
 			"metagrouprel");
 
 	public static class MetaGroupManager {
@@ -94,7 +103,7 @@ public class MetaGroup implements Comparable<MetaGroup> {
 				qstmt.setInt(1, id);
 				try (ResultSet rs = qstmt.executeQuery()) {
 					while (rs.next()) {
-						qList.add(questionManager.get(rs.getString("questionid")));
+						qList.add(questionManager.get(rs.getInt("questionid")));
 					}
 				}
 			}
@@ -155,7 +164,7 @@ public class MetaGroup implements Comparable<MetaGroup> {
 						for (int ord = 0; ord < mg.qList.size(); ord++) {
 							nQuestion++;
 							insertGroupRelStmt.setInt(1, mg.id);
-							insertGroupRelStmt.setString(2, mg.qList.get(ord)
+							insertGroupRelStmt.setInt(2, mg.qList.get(ord)
 									.getId());
 							insertGroupRelStmt.setInt(3, ord);
 							insertGroupRelStmt.addBatch();
@@ -192,7 +201,7 @@ public class MetaGroup implements Comparable<MetaGroup> {
 				for (MetaGroupRel mgr : toBeAddedGroupRel) {
 					nQuestion++;
 					insertGroupRelStmt.setInt(1, mgr.groupid);
-					insertGroupRelStmt.setString(2, mgr.questionid);
+					insertGroupRelStmt.setInt(2, mgr.questionid);
 					insertGroupRelStmt.setInt(3, mgr.ord);
 					insertGroupRelStmt.addBatch();
 				}
@@ -326,10 +335,9 @@ public class MetaGroup implements Comparable<MetaGroup> {
 	}
 
 	private static class MetaGroupRel {
-		int groupid, ord;
-		String questionid;
+		int groupid, ord, questionid;
 
-		public MetaGroupRel(int groupid, String questionid, int ord) {
+		public MetaGroupRel(int groupid, int questionid, int ord) {
 			this.groupid = groupid;
 			this.questionid = questionid;
 			this.ord = ord;
