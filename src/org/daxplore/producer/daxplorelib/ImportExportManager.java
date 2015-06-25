@@ -19,6 +19,7 @@ import java.nio.charset.Charset;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -74,6 +75,7 @@ import au.com.bytecode.opencsv.CSVReader;
 import au.com.bytecode.opencsv.CSVWriter;
 
 import com.google.common.base.Charsets;
+import com.google.common.base.Strings;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonArray;
@@ -84,6 +86,8 @@ public class ImportExportManager {
 	
 	private Connection connection;
 	private DaxploreFile daxploreFile;
+	
+	private List<TextReference> emptyTextrefs = new LinkedList<>();
 	
 	public enum Formats {
 		DATABASE, RESOURCE, JSON, RAW
@@ -101,6 +105,8 @@ public class ImportExportManager {
 	void writeUploadFile(OutputStream output) throws TransformerFactoryConfigurationError, TransformerException, SQLException, DaxploreException, SAXException, IOException, ParserConfigurationException {
 		long time = System.nanoTime();
 		Logger.getGlobal().log(Level.INFO, "Starting to generate json data");
+		
+		emptyTextrefs.clear();
 		
 		Crosstabs crosstabs = new Crosstabs(connection, daxploreFile.getAbout());
 		crosstabs.loadRawToMem();
@@ -155,6 +161,7 @@ public class ImportExportManager {
 				JsonArray questionJSON = new JsonArray();
 				for(MetaQuestion q : selectedQuestions) {
 					questionJSON.add(q.toJSONObject(locale));
+					emptyTextrefs.addAll(q.getEmptyTextRefs(locale));
 				}
 				
 				String propertiesJSONString = prettyGson.toJson(getPropertiesJson(locale));
@@ -163,6 +170,7 @@ public class ImportExportManager {
 				writeZipString(zout, "meta/questions_"+locale.toLanguageTag()+".json", prettyGson.toJson(questionJSON));
 			    
 			    String groupJSONString = prettyGson.toJson(daxploreFile.getMetaGroupManager().getQuestionGroupsJSON(locale));
+			    emptyTextrefs.addAll(daxploreFile.getMetaGroupManager().getEmptyTextRefs(locale));
 			    writeZipString(zout, "meta/groups_"+locale.toLanguageTag()+".json", groupJSONString);
 			    
 			    writeZipString(zout, "meta/perspectives_"+locale.toLanguageTag()+".json", prettyGson.toJson(perspectives.toJSONObject(locale)));
@@ -174,6 +182,10 @@ public class ImportExportManager {
 		crosstabs.dropRawFromMem();
 		
 		Logger.getGlobal().log(Level.INFO, "Created file in " + ((System.nanoTime() -time)/Math.pow(10,9)) + "s");
+		if(!emptyTextrefs.isEmpty()) {
+			Collections.sort(emptyTextrefs);
+			Logger.getGlobal().log(Level.WARNING, "Missing text for textref(s):\n\t " + MyTools.join(emptyTextrefs, "\n\t "));
+		}
 	}
 	
 	private static void writeZipString(ZipOutputStream zout, String filename, String dataString) throws IOException {
@@ -235,12 +247,23 @@ public class ImportExportManager {
 	private JsonElement getPropertiesJson(Locale locale) throws DaxploreException {
 		JsonObject json = new JsonObject();
 		for(String property: DaxploreProperties.properties) {
-			json.addProperty(property, daxploreFile.getTextReferenceManager().get(property).get(locale));
+			TextReference ref = daxploreFile.getTextReferenceManager().get(property);
+			json.addProperty(property, getTextRefForExport(ref, locale));
 		}
 		for(MetaTimepointShort mtp: daxploreFile.getMetaTimepointShortManager().getAll()) {
-			json.addProperty("timepoint_" + mtp.getTimeindex(), mtp.getTextRef().get(locale));
+			TextReference ref = mtp.getTextRef();
+			json.addProperty("timepoint_" + mtp.getTimeindex(), getTextRefForExport(ref, locale));
 		}
 		return json;
+	}
+	
+	private String getTextRefForExport(TextReference ref, Locale locale) {
+		if(!Strings.isNullOrEmpty(ref.get(locale))) { 
+			return ref.get(locale);
+		} else {
+			emptyTextrefs.add(ref);
+			return ref.getWithPlaceholder(locale);
+		}
 	}
 	
 	/* 

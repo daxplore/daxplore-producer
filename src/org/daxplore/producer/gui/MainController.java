@@ -433,6 +433,9 @@ public class MainController {
 	public void on(ExportUploadEvent e) {
 		try {
 			File exportTo = Dialogs.showExportDialog(mainWindow, preferences);
+			if(exportTo == null) {
+				return;
+			}
 			if(exportTo.exists()) {
 				if(Dialogs.confirmOverwrite(mainWindow, texts, exportTo.getName())) {
 					exportTo.delete();

@@ -13,6 +13,7 @@ import java.util.Locale;
 import java.util.Map;
 
 import com.beust.jcommander.internal.Lists;
+import com.google.common.base.Strings;
 
 public class TextReference extends TextReferenceReference {
 	//TODO using a static list inside a data structure (daxplore file) is highly problematic!
@@ -29,6 +30,17 @@ public class TextReference extends TextReferenceReference {
 	
 	public String get(Locale locale) {
 		return localeMap.get(locale);
+	}
+	
+	/**
+	 * Returns the user facing text for the TextReference. Returns the textref itself if the text is empty or null.
+	 */
+	public String getWithPlaceholder(Locale locale) {
+		String text = localeMap.get(locale);
+		if(Strings.isNullOrEmpty(text)) {
+			return "[" + reference + "]";
+		}
+		return text; 
 	}
 	
 	public void put(String text, Locale locale) {

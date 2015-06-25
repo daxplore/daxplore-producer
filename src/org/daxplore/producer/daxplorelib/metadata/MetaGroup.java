@@ -25,10 +25,12 @@ import org.daxplore.producer.daxplorelib.DaxploreException;
 import org.daxplore.producer.daxplorelib.DaxploreTable;
 import org.daxplore.producer.daxplorelib.SQLTools;
 import org.daxplore.producer.daxplorelib.metadata.MetaQuestion.MetaQuestionManager;
+import org.daxplore.producer.daxplorelib.metadata.MetaScale.Option;
 import org.daxplore.producer.daxplorelib.metadata.textreference.TextReference;
 import org.daxplore.producer.daxplorelib.metadata.textreference.TextReferenceManager;
 
 import com.beust.jcommander.internal.Lists;
+import com.google.common.base.Strings;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
@@ -300,6 +302,16 @@ public class MetaGroup implements Comparable<MetaGroup> {
 			return json;
 		}
 		
+		public List<TextReference> getEmptyTextRefs(Locale locale) throws DaxploreException {
+			List<TextReference> emptyRefs = new LinkedList<TextReference>();
+			for(MetaGroup group : getQuestionGroups()) {
+				if(group.type == GroupType.QUESTIONS && Strings.isNullOrEmpty(group.textref.get(locale))) {
+					emptyRefs.add(group.textref);
+				}
+			}
+			return emptyRefs;
+		}
+		
 		public void discardChanges() {
 			groupMap.clear();
 			toBeAddedGroup.clear();
@@ -489,7 +501,7 @@ public class MetaGroup implements Comparable<MetaGroup> {
 			return questions;
 		case QUESTIONS:
 			JsonObject json = new JsonObject();
-			json.add("name", new JsonPrimitive(textref.get(locale)));
+			json.add("name", new JsonPrimitive(textref.getWithPlaceholder(locale)));
 			json.add("questions", questions);
 			return json;
 		default:

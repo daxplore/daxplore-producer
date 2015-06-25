@@ -217,7 +217,7 @@ public class Crosstabs {
 		int[] frequencies = new int[question.getScale().getOptionCount()];
 		int total = 0;
 
-		if(hasLoadedRawdata) {
+		if(!hasLoadedRawdata) {
 			loadRawToMem();
 		}
 		MetaScale scale = question.getScale();

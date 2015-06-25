@@ -59,4 +59,9 @@ class TextReferenceReference implements Comparable<TextReferenceReference> {
 		}
 		return true;
 	}
+	
+	@Override
+	public String toString() {
+		return reference;
+	}
 }

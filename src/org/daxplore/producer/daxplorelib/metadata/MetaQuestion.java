@@ -35,6 +35,7 @@ import org.daxplore.producer.daxplorelib.metadata.textreference.TextReferenceMan
 import org.daxplore.producer.daxplorelib.raw.VariableType;
 
 import com.beust.jcommander.internal.Lists;
+import com.google.common.base.Strings;
 import com.google.common.collect.Sets;
 import com.google.gson.Gson;
 import com.google.gson.JsonArray;
@@ -462,15 +463,18 @@ public class MetaQuestion {
 	
 	@SuppressWarnings("rawtypes")
 	public JsonElement toJSONObject(Locale locale) {
-		
 		JsonObject json = new JsonObject();
 		json.addProperty("column", id);
-		json.addProperty("short", shortTextRef.get(locale));
-		json.addProperty("text", fullTextRef.get(locale));
-		
+		json.addProperty("short", shortTextRef.getWithPlaceholder(locale));
+		if(Strings.isNullOrEmpty(fullTextRef.get(locale))) {
+			json.addProperty("text", shortTextRef.getWithPlaceholder(locale));
+		} else {
+			json.addProperty("text", fullTextRef.get(locale));
+		}
+		//TODO extratextref
 		JsonArray options = new JsonArray();
 		for(Option option : scale.getOptions()) {
-			String text = option.getTextRef().get(locale);
+			String text = option.getTextRef().getWithPlaceholder(locale);
 			if(text!=null) {
 				options.add(new JsonPrimitive(text));
 			} else {
@@ -490,7 +494,6 @@ public class MetaQuestion {
 		return json;
 	}
 	
-	
 	private JsonElement displayTypesAsJSON() {
 		JsonArray displayTypesJson = new JsonArray();
 		if (useFrequencies) {
@@ -500,5 +503,19 @@ public class MetaQuestion {
 			displayTypesJson.add(new JsonPrimitive(DisplayTypes.MEAN.name()));
 		}
 		return displayTypesJson;
+	}
+	
+	public List<TextReference> getEmptyTextRefs(Locale locale) {
+		List<TextReference> emptyRefs = new LinkedList<TextReference>();
+		if(Strings.isNullOrEmpty(shortTextRef.get(locale))) {
+			emptyRefs.add(shortTextRef);
+		}
+		//TODO extratextref
+		for(Option option : scale.getOptions()) {
+			if(Strings.isNullOrEmpty(option.getTextRef().get(locale))) {
+				emptyRefs.add(option.getTextRef());
+			}
+		}
+		return emptyRefs;
 	}
 }
