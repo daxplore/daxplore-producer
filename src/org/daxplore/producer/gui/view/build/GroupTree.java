@@ -76,9 +76,13 @@ public class GroupTree extends JTree {
      */
     @Subscribe
     public void on(ChangeMainViewEvent e) {
-    	if(e.getView() == Views.GROUPSVIEW) {
-    		setCellRenderer(new GroupTreeCellRendererEditor(eventBus));
-    	}
+    	try {
+	    	if(e.getView() == Views.GROUPSVIEW) {
+	    		setCellRenderer(new GroupTreeCellRendererEditor(eventBus));
+	    	}
+	    } catch (Exception ex) {
+			Logger.getGlobal().log(Level.SEVERE, "Failed to handle event", ex);
+		}
     }
     
     /**
@@ -86,7 +90,11 @@ public class GroupTree extends JTree {
      */
     @Subscribe
     public void on(DisplayLocaleSelectEvent e) {
-		setCellRenderer(new GroupTreeCellRendererEditor(eventBus));
+    	try {
+			setCellRenderer(new GroupTreeCellRendererEditor(eventBus));
+	    } catch (Exception ex) {
+			Logger.getGlobal().log(Level.SEVERE, "Failed to handle event", ex);
+		}
     }
     
     /**
@@ -94,7 +102,11 @@ public class GroupTree extends JTree {
      */
     @Subscribe
     public void on(ReloadTextsEvent e) {
-		setCellRenderer(new GroupTreeCellRendererEditor(eventBus));
+    	try {
+			setCellRenderer(new GroupTreeCellRendererEditor(eventBus));
+	    } catch (Exception ex) {
+			Logger.getGlobal().log(Level.SEVERE, "Failed to handle event", ex);
+		}
     }
     
     @Override

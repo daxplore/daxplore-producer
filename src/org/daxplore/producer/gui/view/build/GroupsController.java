@@ -17,6 +17,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.Locale;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import javax.swing.JOptionPane;
 import javax.swing.event.ListSelectionEvent;
@@ -116,16 +118,19 @@ public class GroupsController implements ActionListener, MouseListener {
 			groupsView.setPerspectiveList(perspectivesTable);
 			
 			questionJTable.getSelectionModel().setSelectionInterval(0, 0);
-		} catch (DaxploreException ex) {
-			// TODO Auto-generated catch block
-			ex.printStackTrace();
+		} catch (Exception ex) {
+			Logger.getGlobal().log(Level.SEVERE, "Failed to handle event", ex);
 		}
 	}
 	
 	@Subscribe
 	public void on(DisplayLocaleSelectEvent e) {
-		selectedLocale = e.getLocale();
-		viewMetaQuestionInfo(selectedMetaQuestion);
+		try {
+			selectedLocale = e.getLocale();
+			viewMetaQuestionInfo(selectedMetaQuestion);
+		} catch (Exception ex) {
+			Logger.getGlobal().log(Level.SEVERE, "Failed to handle event", ex);
+		}
 	}
 	
 	@Override

@@ -12,6 +12,8 @@ import java.awt.Color;
 import java.awt.GridLayout;
 import java.text.MessageFormat;
 import java.util.Locale;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import javax.swing.JLabel;
 import javax.swing.JPanel;
@@ -104,6 +106,10 @@ public class QuestionWidget extends JPanel implements AbstractWidgetEditor<MetaQ
 	
 	@Subscribe
 	public void on(DisplayLocaleSelectEvent e) {
-		locale = e.getLocale();
+		try {
+			locale = e.getLocale();
+		} catch (Exception ex) {
+			Logger.getGlobal().log(Level.SEVERE, "Failed to handle event", ex);
+		}
 	}
 }

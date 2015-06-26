@@ -13,6 +13,8 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseMotionAdapter;
 import java.util.EventObject;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import javax.swing.AbstractCellEditor;
 import javax.swing.BorderFactory;
@@ -89,10 +91,14 @@ public class QuestionTable extends JTable {
 	
 	@Subscribe
 	public void on(ReloadTextsEvent e) {
-		int[] selected = getSelectedRows();
-		model.fireTableDataChanged();
-		for(int i=0; i<selected.length; i++) {
-			addRowSelectionInterval(selected[i], selected[i]);
+		try {
+			int[] selected = getSelectedRows();
+			model.fireTableDataChanged();
+			for(int i=0; i<selected.length; i++) {
+				addRowSelectionInterval(selected[i], selected[i]);
+			}
+		} catch (Exception ex) {
+			Logger.getGlobal().log(Level.SEVERE, "Failed to handle event", ex);
 		}
 	}
 	

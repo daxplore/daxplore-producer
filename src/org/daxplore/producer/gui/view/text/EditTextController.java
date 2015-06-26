@@ -8,15 +8,13 @@
 package org.daxplore.producer.gui.view.text;
 
 import java.awt.Component;
-import java.awt.Dimension;
-import java.awt.Rectangle;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.List;
 import java.util.Locale;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
-import javax.swing.JTable;
-import javax.swing.ListSelectionModel;
 import javax.swing.RowFilter;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
@@ -46,7 +44,6 @@ public class EditTextController implements ActionListener, DocumentListener {
 	private EditTextView editTextView;
 	private TextTree textsList;
 	private TextsTableModel model;
-	private JTable table;
 	
 	enum EditTextCommand {
 		UPDATE_COLUMN_1, UPDATE_COLUMN_2
@@ -61,18 +58,30 @@ public class EditTextController implements ActionListener, DocumentListener {
 	
 	@Subscribe
 	public void on(DaxploreFileUpdateEvent e) {
-		this.daxploreFile = e.getDaxploreFile();
-		loadData();
+		try {
+			this.daxploreFile = e.getDaxploreFile();
+			loadData();
+		} catch (Exception ex) {
+			Logger.getGlobal().log(Level.SEVERE, "Failed to handle event", ex);
+		}
 	}
 	
 	@Subscribe
 	public void on(LocaleAddedOrRemovedEvent e) {
-		loadData();
+		try {
+			loadData();
+		} catch (Exception ex) {
+			Logger.getGlobal().log(Level.SEVERE, "Failed to handle event", ex);
+		}
 	}
 	
 	@Subscribe
 	public void on(RawImportEvent e) {
-		loadData();
+		try {
+			loadData();
+		} catch (Exception ex) {
+			Logger.getGlobal().log(Level.SEVERE, "Failed to handle event", ex);
+		}
 	}
 	
 	/**
@@ -90,6 +99,9 @@ public class EditTextController implements ActionListener, DocumentListener {
 	void setCurrentLocale(Locale locale, int i) {
 		if(i < currentLocales.length) {
 			currentLocales[i] = locale;
+		}
+		if(model != null) {
+			model.setLocales(currentLocales[0], currentLocales[1]);
 		}
 	}
 	
@@ -117,15 +129,10 @@ public class EditTextController implements ActionListener, DocumentListener {
 	void loadTable() {
 		int scrollPosition = editTextView.getScrollbarPosition();
 		
-		model = new TextsTableModel(this, textsList);
+		model = new TextsTableModel(textsList, currentLocales[0], currentLocales[1]);
 		sorter = new TableRowSorter<>(model);
-		table = new JTable(model);
-		table.setRowSorter(sorter);
-		table.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-        table.setPreferredScrollableViewportSize(new Dimension(500, 70));
-        table.setFillsViewportHeight(true);
-		editTextView.setTextTable(table);
-		
+		editTextView.setTextTable(model);
+		editTextView.setTextTableSorter(sorter);
 		editTextView.setScrollbarPosition(scrollPosition);
 	}
 	
@@ -144,9 +151,7 @@ public class EditTextController implements ActionListener, DocumentListener {
 	public void jumpToTextReference(TextReference textref) {
 		editTextView.setSearchField("");
 		int line = model.find(textref);
-		Rectangle r = table.getCellRect(line, 0, true);
-		table.scrollRectToVisible(r);
-		table.setRowSelectionInterval(line, line);
+		editTextView.jumpToLine(line);
 	}
 
 	@Override

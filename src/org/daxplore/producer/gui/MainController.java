@@ -163,7 +163,11 @@ public class MainController {
 	
 	@Subscribe
 	public void on(DaxploreFileUpdateEvent e) {
-		this.daxploreFile = e.getDaxploreFile();
+		try {
+			this.daxploreFile = e.getDaxploreFile();
+		} catch (Exception ex) {
+			Logger.getGlobal().log(Level.SEVERE, "Failed to handle event", ex);
+		}
 	}
 	
 	@Subscribe
@@ -171,29 +175,36 @@ public class MainController {
 		try {
 			daxploreFile.discardChanges();
 			eventBus.post(new DaxploreFileUpdateEvent(daxploreFile));
-		} catch (DaxploreException e1) {
-			// TODO Auto-generated catch block
-			e1.printStackTrace();
+		} catch (Exception ex) {
+			Logger.getGlobal().log(Level.SEVERE, "Failed to handle event", ex);
 		}
 	}
 	
 	@Subscribe
 	public void on(ChangeMainViewEvent e) {
-		// Only adds history if it's a completely new view.
-		// Should maybe be changed to take the command into account?
-		if(currentHistoryItem != null && currentHistoryItem.view != e.getView()) {
-			history.push(currentHistoryItem);
+		try {
+			// Only adds history if it's a completely new view.
+			// Should maybe be changed to take the command into account?
+			if(currentHistoryItem != null && currentHistoryItem.view != e.getView()) {
+				history.push(currentHistoryItem);
+			}
+			currentHistoryItem = new HistoryItem(e.getView(), e.getCommand());
+			setView(e.getView(), e.getCommand());
+		} catch (Exception ex) {
+			Logger.getGlobal().log(Level.SEVERE, "Failed to handle event", ex);
 		}
-		currentHistoryItem = new HistoryItem(e.getView(), e.getCommand());
-		setView(e.getView(), e.getCommand());
 	}
 
 	@Subscribe
 	public void on(HistoryGoBackEvent e) {
-		if(!history.empty()) {
-			currentHistoryItem = history.pop();
-			eventBus.post(new HistoryAvailableEvent(!history.empty()));
-			setView(currentHistoryItem.view, currentHistoryItem.command);
+		try {
+			if(!history.empty()) {
+				currentHistoryItem = history.pop();
+				eventBus.post(new HistoryAvailableEvent(!history.empty()));
+				setView(currentHistoryItem.view, currentHistoryItem.command);
+			}
+		} catch (Exception ex) {
+			Logger.getGlobal().log(Level.SEVERE, "Failed to handle event", ex);
 		}
 	}
 	
@@ -237,10 +248,8 @@ public class MainController {
 				System.out.println("File is write protected");
 				return; //TODO communicate error properly
 			}
-
-		} catch (DaxploreException | IOException e1) {
-			// TODO Auto-generated catch block
-			e1.printStackTrace();
+		} catch (Exception ex) {
+			Logger.getGlobal().log(Level.SEVERE, "Failed to handle event", ex);
 		}
 	}
 	
@@ -279,9 +288,8 @@ public class MainController {
 					eventBus.post(new ErrorMessageEvent("Failed to import texts", e1));
 				}
 			}
-		} catch (Exception e2) {
-			// TODO: handle exception
-			e2.printStackTrace();
+		} catch (Exception ex) {
+			Logger.getGlobal().log(Level.SEVERE, "Failed to handle event", ex);
 		}
 	}
 	
@@ -294,9 +302,8 @@ public class MainController {
 			dialog.setLocationRelativeTo(mainWindow);
 			dialog.setVisible(true);
 			eventBus.post(new ReloadTextsEvent());
-		} catch (Exception e2) {
-			// TODO: handle exception
-			e2.printStackTrace();
+		} catch (Exception ex) {
+			Logger.getGlobal().log(Level.SEVERE, "Failed to handle event", ex);
 		}
 	}
 	
@@ -304,9 +311,8 @@ public class MainController {
 	public void on(DisplayLocaleSelectEvent e) {
 		try {
 			Settings.setCurrentDisplayLocale(e.getLocale());
-		} catch (Exception e2) {
-			// TODO: handle exception
-			e2.printStackTrace();
+		} catch (Exception ex) {
+			Logger.getGlobal().log(Level.SEVERE, "Failed to handle event", ex);
 		}
 	}
 	
@@ -344,9 +350,8 @@ public class MainController {
 							JOptionPane.PLAIN_MESSAGE);
 				}
 			}
-		} catch (Exception e2) {
-			// TODO: handle exception
-			e2.printStackTrace();
+		} catch (Exception ex) {
+			Logger.getGlobal().log(Level.SEVERE, "Failed to handle event", ex);
 		}
 	}
 	
@@ -354,9 +359,8 @@ public class MainController {
 	public void on(SaveFileEvent e) {
 		try {
 			daxploreFile.saveAll();
-		} catch (DaxploreException e1) {
-			// TODO Auto-generated catch block
-			e1.printStackTrace();
+		} catch (Exception ex) {
+			Logger.getGlobal().log(Level.SEVERE, "Failed to handle event", ex);
 		}
 	}
 	
@@ -413,9 +417,8 @@ public class MainController {
 					// do nothing
 				}
 			}
-		} catch (Exception e2) {
-			// TODO: handle exception
-			e2.printStackTrace();
+		} catch (Exception ex) {
+			Logger.getGlobal().log(Level.SEVERE, "Failed to handle event", ex);
 		}
 	}
 	
@@ -423,9 +426,8 @@ public class MainController {
 	public void on(RepaintWindowEvent e) {
 		try {
 			mainWindow.repaint();
-		} catch (Exception e2) {
-			// TODO: handle exception
-			e2.printStackTrace();
+		} catch (Exception ex) {
+			Logger.getGlobal().log(Level.SEVERE, "Failed to handle event", ex);
 		}
 	}
 	
@@ -448,9 +450,8 @@ public class MainController {
 			} catch (DaxploreException e1) {
 				eventBus.post(new ErrorMessageEvent("Error while generating export file", e1));
 			}
-		} catch (Exception e2) {
-			// TODO: handle exception
-			e2.printStackTrace();
+		} catch (Exception ex) {
+			Logger.getGlobal().log(Level.SEVERE, "Failed to handle event", ex);
 		}
 	}
 	

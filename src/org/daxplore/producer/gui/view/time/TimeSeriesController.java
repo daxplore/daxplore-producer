@@ -14,6 +14,8 @@ import java.sql.SQLException;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import javax.swing.JOptionPane;
 import javax.swing.JTable;
@@ -58,8 +60,12 @@ public class TimeSeriesController implements ActionListener, DocumentListener {
 	
 	@Subscribe
 	public void on(DaxploreFileUpdateEvent e) {
-		this.daxploreFile = e.getDaxploreFile();
-		loadData();
+		try {
+			this.daxploreFile = e.getDaxploreFile();
+			loadData();
+		} catch (Exception ex) {
+			Logger.getGlobal().log(Level.SEVERE, "Failed to handle event", ex);
+		}
 	}
 	
 	@Override

@@ -11,6 +11,8 @@ import java.awt.Component;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.Locale;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import org.daxplore.producer.daxplorelib.DaxploreFile;
 import org.daxplore.producer.gui.event.DaxploreFileUpdateEvent;
@@ -43,15 +45,23 @@ public class ToolbarController implements ActionListener {
 	
 	@Subscribe
 	public void on(DaxploreFileUpdateEvent e) {
-		daxploreFile = e.getDaxploreFile();
-		view.setLocales(daxploreFile.getAbout().getLocales());
-		updateSelectedLocale();
+		try {
+			daxploreFile = e.getDaxploreFile();
+			view.setLocales(daxploreFile.getAbout().getLocales());
+			updateSelectedLocale();
+		} catch (Exception ex) {
+			Logger.getGlobal().log(Level.SEVERE, "Failed to handle event", ex);
+		}
 	}
 
 	@Subscribe
 	public void on(LocaleAddedOrRemovedEvent e) {
-		view.setLocales(daxploreFile.getAbout().getLocales());
-		updateSelectedLocale();
+		try {
+			view.setLocales(daxploreFile.getAbout().getLocales());
+			updateSelectedLocale();
+		} catch (Exception ex) {
+			Logger.getGlobal().log(Level.SEVERE, "Failed to handle event", ex);
+		}
 	}
 
 	@Override

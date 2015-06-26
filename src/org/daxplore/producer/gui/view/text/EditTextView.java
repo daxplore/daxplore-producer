@@ -8,8 +8,10 @@
 package org.daxplore.producer.gui.view.text;
 
 import java.awt.BorderLayout;
+import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.GridLayout;
+import java.awt.Rectangle;
 import java.awt.event.ActionListener;
 import java.util.LinkedList;
 import java.util.List;
@@ -22,8 +24,10 @@ import javax.swing.JScrollPane;
 import javax.swing.JSplitPane;
 import javax.swing.JTable;
 import javax.swing.JTextField;
+import javax.swing.ListSelectionModel;
 import javax.swing.SwingConstants;
 import javax.swing.event.DocumentListener;
+import javax.swing.table.TableRowSorter;
 
 import org.daxplore.producer.gui.SectionHeader;
 import org.daxplore.producer.gui.menu.ActionManager;
@@ -46,6 +50,7 @@ public class EditTextView extends JPanel {
 	private JComboBox<DisplayLocale> localeCombo2;
 	
 	private JScrollPane textScrollPane;
+	private JTable table;
 	private JScrollPane localeScrollPane;
 	private JTable localeTable;
 	
@@ -132,8 +137,16 @@ public class EditTextView extends JPanel {
 		return sectionPanel;
 	}
 	
-	public void setTextTable(JTable table) {
+	public void setTextTable(TextsTableModel model) {
+		table = new JTable(model);
+		table.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+        table.setPreferredScrollableViewportSize(new Dimension(500, 70));
+        table.setFillsViewportHeight(true);
 		textScrollPane.setViewportView(table);
+	}
+	
+	public void setTextTableSorter(TableRowSorter<TextsTableModel> sorter) {
+		table.setRowSorter(sorter);
 	}
 	
 	void setLocaleTable(SelectedLocalesTableModel tableModel) {
@@ -211,5 +224,14 @@ public class EditTextView extends JPanel {
 	
 	public void setScrollbarPosition(int position) {
 		textScrollPane.getVerticalScrollBar().setValue(position);
+	}
+
+	public void jumpToLine(int line) {
+		if(table == null) {
+			return;
+		}
+		Rectangle r = table.getCellRect(line, 0, true);
+		table.scrollRectToVisible(r);
+		table.setRowSelectionInterval(line, line);
 	}
 }

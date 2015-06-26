@@ -12,6 +12,8 @@ import java.awt.event.ActionEvent;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import javax.swing.AbstractAction;
 import javax.swing.Action;
@@ -187,6 +189,10 @@ public class ActionManager {
 	
 	@Subscribe
 	public void on(DaxploreFileUpdateEvent e) {
-		this.daxploreFile = e.getDaxploreFile();
+		try {
+			this.daxploreFile = e.getDaxploreFile();
+		} catch (Exception ex) {
+			Logger.getGlobal().log(Level.SEVERE, "Failed to handle event", ex);
+		}
 	}
 }

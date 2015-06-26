@@ -11,6 +11,8 @@ import java.awt.BorderLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.Locale;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import javax.swing.JButton;
 import javax.swing.JLabel;
@@ -94,7 +96,11 @@ public class TextWidget extends JPanel implements AbstractWidgetEditor<TextRefer
 	
 	@Subscribe
 	public void on(DisplayLocaleSelectEvent e) {
-		locale = e.getLocale();
+		try {
+			locale = e.getLocale();
+		} catch (Exception ex) {
+			Logger.getGlobal().log(Level.SEVERE, "Failed to handle event", ex);
+		}
 	}
 	
 	@Override

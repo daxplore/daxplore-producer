@@ -13,6 +13,8 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
 import java.io.IOException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import javax.swing.JButton;
 import javax.swing.JFileChooser;
@@ -151,23 +153,27 @@ public class WelcomeDialog {
 	
 	@Subscribe
 	public void on(final DaxploreFileUpdateEvent event) {
-		eventBus.unregister(this);
-
-		EventQueue.invokeLater(new Runnable() {
-			@Override
-			public void run() {
-				try {
-					JFrame window = new JFrame();
-					MainController mainController = new MainController(window, eventBus, texts, preferences, event.getDaxploreFile());
-					mainController.setVisible(true);
-					
-					welcomeFrame.setVisible(false);
-					welcomeFrame.dispose();
-				} catch (Exception e1) {
-					//TODO communicate error to user
-					e1.printStackTrace();
+		try {
+			eventBus.unregister(this);
+	
+			EventQueue.invokeLater(new Runnable() {
+				@Override
+				public void run() {
+					try {
+						JFrame window = new JFrame();
+						MainController mainController = new MainController(window, eventBus, texts, preferences, event.getDaxploreFile());
+						mainController.setVisible(true);
+						
+						welcomeFrame.setVisible(false);
+						welcomeFrame.dispose();
+					} catch (Exception e1) {
+						//TODO communicate error to user
+						e1.printStackTrace();
+					}
 				}
-			}
-		});
+			});
+		} catch (Exception ex) {
+			Logger.getGlobal().log(Level.SEVERE, "Failed to handle event", ex);
+		}
 	}
 }

@@ -20,12 +20,13 @@ import org.daxplore.producer.gui.Settings;
 @SuppressWarnings("serial")
 class TextsTableModel extends DefaultTableModel implements TableModelListener {
 	
-	private final EditTextController controller;
 	TextTree textsList;
+	private Locale locale1, locale2;
 
-	TextsTableModel(EditTextController controller, TextTree textsList) {
+	TextsTableModel(TextTree textsList, Locale locale1, Locale locale2) {
 		this.textsList = textsList;
-		this.controller = controller;
+		this.locale1 = locale1;
+		this.locale2 = locale2;
 	}
 
 	@Override
@@ -34,10 +35,13 @@ class TextsTableModel extends DefaultTableModel implements TableModelListener {
 		case 0:
 			return "Reference";
 		case 1:
+			if(locale1 != null) {
+				return locale1.getDisplayLanguage(Settings.getProgramLocale());
+			}
+			return "";
 		case 2:
-			Locale locale = controller.getCurrentLocale(col-1);
-			if(locale != null) {
-				return locale.getDisplayLanguage(Settings.getProgramLocale());
+			if(locale2 != null) {
+				return locale2.getDisplayLanguage(Settings.getProgramLocale());
 			}
 			return "";
 		default:
@@ -62,9 +66,9 @@ class TextsTableModel extends DefaultTableModel implements TableModelListener {
 		case 0:
 			return textsList.get(row).getRef();
 		case 1:
-			return textsList.get(row).get(controller.getCurrentLocale(0));
+			return textsList.get(row).get(locale1);
 		case 2:
-			return textsList.get(row).get(controller.getCurrentLocale(1));
+			return textsList.get(row).get(locale2);
 		default:
 			throw new IndexOutOfBoundsException("Column out of bounds: " + col);
 		}
@@ -81,7 +85,21 @@ class TextsTableModel extends DefaultTableModel implements TableModelListener {
 
 	@Override
 	public void setValueAt(Object value, int row, int col) {
-		textsList.get(row).put(value.toString(), controller.getCurrentLocale(col-1));
+		switch(col) {
+		case 0: 
+			break;
+		case 1: 
+			textsList.get(row).put(value.toString(), locale1);
+			break;
+		case 2: 
+			textsList.get(row).put(value.toString(), locale2);
+			break;
+		}
+	}
+	
+	public void setLocales(Locale locale1, Locale locale2) {
+		this.locale1 = locale1;
+		this.locale2 = locale2;
 	}
 
 	@Override

@@ -21,6 +21,8 @@ import java.util.List;
 import java.util.Locale;
 import java.util.SortedSet;
 import java.util.TreeSet;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import org.daxplore.producer.daxplorelib.metadata.textreference.TextReference;
 
@@ -47,7 +49,7 @@ public class About {
 	private String filename;
 	private TimeSeriesType timeSeriesType;
 	
-	private boolean firstSave = false, modified = false;
+	private boolean firstSave = false;
 	
 	private SortedSet<Locale> locales;
 	private boolean localesModified = false;
@@ -81,7 +83,6 @@ public class About {
 			filename = null;
 			timeSeriesType = TimeSeriesType.SHORT;
 			timeSeriesShortColumn = null;
-			modified = true;
 			firstSave = true;
 		}else{
 			try (Statement stmt = connection.createStatement()) {
@@ -110,50 +111,48 @@ public class About {
 	}
 	
 	void save() throws SQLException {
-		if(modified) {
-			String stmtString;
-			if(firstSave) {
-				stmtString = 
-						"INSERT INTO about (filetypeversionmajor, filetypeversionminor, creation," +
-						"lastupdate, importdate, filename, timeseriestype, timeshortcolumn) " +
-						"VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
-				firstSave = false;
-			} else {
-				stmtString =
-						"UPDATE about SET filetypeversionmajor = ?, filetypeversionminor = ?, creation = ?," +
-						"lastupdate = ?, importdate = ?, filename = ?, timeseriestype = ?, timeshortcolumn = ?";
-			}
-			try(PreparedStatement updateStmt = connection.prepareStatement(stmtString)) {
-				Date now = new Date();
-				updateStmt.setInt(1, filetypeversionmajor);
-				updateStmt.setInt(2, filetypeversionminor);
-				updateStmt.setLong(3, creation.getTime());
-				updateStmt.setLong(4, now.getTime());
-				
-				if(importdate!=null) {
-					updateStmt.setLong(5, importdate.getTime());
-				} else {
-					updateStmt.setNull(5, Types.INTEGER);
-				}
-				
-				if(filename!=null) {
-					updateStmt.setString(6, filename);
-				} else {
-					updateStmt.setNull(6, Types.VARCHAR);
-				}
-				
-				updateStmt.setString(7, timeSeriesType.name());
-				
-				if(timeSeriesShortColumn!=null) {
-					updateStmt.setString(8, timeSeriesShortColumn);
-				} else {
-					updateStmt.setNull(8, Types.VARCHAR);
-				}
-				
-				updateStmt.executeUpdate();
-				modified = false;
-			}
+		String stmtString;
+		if(firstSave) {
+			stmtString = 
+					"INSERT INTO about (filetypeversionmajor, filetypeversionminor, creation," +
+					"lastupdate, importdate, filename, timeseriestype, timeshortcolumn) " +
+					"VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
+			firstSave = false;
+		} else {
+			stmtString =
+					"UPDATE about SET filetypeversionmajor = ?, filetypeversionminor = ?, creation = ?," +
+					"lastupdate = ?, importdate = ?, filename = ?, timeseriestype = ?, timeshortcolumn = ?";
 		}
+		try(PreparedStatement updateStmt = connection.prepareStatement(stmtString)) {
+			Date now = new Date();
+			updateStmt.setInt(1, filetypeversionmajor);
+			updateStmt.setInt(2, filetypeversionminor);
+			updateStmt.setLong(3, creation.getTime());
+			updateStmt.setLong(4, now.getTime());
+			
+			if(importdate!=null) {
+				updateStmt.setLong(5, importdate.getTime());
+			} else {
+				updateStmt.setNull(5, Types.INTEGER);
+			}
+			
+			if(filename!=null) {
+				updateStmt.setString(6, filename);
+			} else {
+				updateStmt.setNull(6, Types.VARCHAR);
+			}
+			
+			updateStmt.setString(7, timeSeriesType.name());
+			
+			if(timeSeriesShortColumn!=null) {
+				updateStmt.setString(8, timeSeriesShortColumn);
+			} else {
+				updateStmt.setNull(8, Types.VARCHAR);
+			}
+			
+			updateStmt.executeUpdate();
+		}
+		
 		if(localesModified) {
 			try(Statement stmt = connection.createStatement()) {
 				stmt.executeUpdate("DELETE FROM locales");
@@ -165,6 +164,10 @@ public class About {
 				}
 				insertLocaleStmt.executeBatch();
 			}
+			
+			String logString = String.format("About: Saved %d active locale(s)", locales.size());
+			Logger.getGlobal().log(Level.INFO, logString);
+			
 			localesModified = false;
 		}
 	}
@@ -188,11 +191,10 @@ public class About {
 				}
 			}
 		}
-		modified = false;
 	}
 	
 	public int getUnsavedChangesCount() {
-		return (modified ? 1 : 0) + (localesModified ? 1 : 0);
+		return (localesModified ? 1 : 0);
 	}
 	
 	public Date getCreationDate() {
@@ -211,7 +213,6 @@ public class About {
 		Date now = new Date();
 		this.filename = filename;
 		this.importdate = now;
-		modified = true;
 	}
 	
 	public String getImportFilename(){
@@ -221,7 +222,6 @@ public class About {
 	public void setTimeSeriesType(TimeSeriesType timeSeriesType) {
 		if(!timeSeriesType.equals(this.timeSeriesType)) {
 			this.timeSeriesType = timeSeriesType;
-			modified = true;
 		}
 	}
 	
@@ -232,7 +232,6 @@ public class About {
 	public void setTimeSeriesShortColumn(String column) {
 		if(!column.equals(timeSeriesShortColumn)) {
 			timeSeriesShortColumn = column;
-			modified = true;
 		}
 	}
 	
