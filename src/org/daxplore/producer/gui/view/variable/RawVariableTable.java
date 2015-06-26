@@ -12,6 +12,8 @@ import java.awt.Color;
 import java.awt.Component;
 import java.awt.Container;
 import java.awt.IllegalComponentStateException;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
 import java.awt.event.MouseAdapter;
@@ -27,6 +29,8 @@ import javax.swing.JPanel;
 import javax.swing.JTable;
 import javax.swing.ListSelectionModel;
 import javax.swing.SwingUtilities;
+import javax.swing.event.PopupMenuEvent;
+import javax.swing.event.PopupMenuListener;
 import javax.swing.table.TableCellEditor;
 import javax.swing.table.TableCellRenderer;
 
@@ -46,11 +50,17 @@ public class RawVariableTable extends JXTable {
 	private int mouseOverRow;
 	private RawVariableCellRenderer cellRenderer;
 	private RawVariableTableModel model;
+	private ChoiceEditor choiceEditor;
+	private ChoiceEditor choiceRenderer;
+	private JPanel cellTextWrapper = new JPanel();
+	private JLabel cellTextLabel = new JLabel();
+	private boolean enabled = true;
 	
 	public RawVariableTable(EventBus eventBus, GuiTexts texts, RawVariableTableModel model) {
 		super(model);
 		this.model = model;
 		
+		setSortable(false);
 		setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
         mouseOverRow = -1;
         
@@ -107,39 +117,47 @@ public class RawVariableTable extends JXTable {
 	    return c;
 	}
 	
-	class RawVariableCellRenderer extends AbstractCellEditor implements TableCellRenderer, TableCellEditor {
+	@Override
+	public void setEnabled(boolean enabled) {
+		super.setEnabled(enabled);
+		this.enabled = enabled;
+		choiceEditor.setEnabled(enabled);
+		choiceRenderer.setEnabled(enabled);
+		cellTextLabel.setEnabled(enabled);
+		cellTextWrapper.setEnabled(enabled);
+		getTableHeader().setForeground(enabled ? Color.BLACK : Color.GRAY);
+	}
+	
+	class RawVariableCellRenderer extends AbstractCellEditor implements TableCellRenderer, TableCellEditor, PopupMenuListener {
 		
 		private GuiTexts texts;
 		private AbstractWidgetEditor<?> editor;
-		private ChoiceEditor cEditor;
-		private ChoiceEditor cRenderer;
-		private JPanel cellTextWrapper = new JPanel();
-		private JLabel cellTextLabel = new JLabel();
 		
 		public RawVariableCellRenderer(GuiTexts texts, List<Integer> availableToNumbers) {
 			this.texts = texts;
-			cEditor = new ChoiceEditor(texts, availableToNumbers);
-			cRenderer = new ChoiceEditor(texts, availableToNumbers);
+			choiceEditor = new ChoiceEditor(texts, availableToNumbers);
+			choiceRenderer = new ChoiceEditor(texts, availableToNumbers);
 			cellTextWrapper.setLayout(new BorderLayout());
 			cellTextWrapper.add(cellTextLabel, BorderLayout.CENTER);
+			choiceEditor.addPopupMenuListener(this);
 		}
 		
 		public void setAvailableNumbers(List<Integer> list) {
-			cEditor.setAvailibleNumbers(list);
-			cRenderer.setAvailibleNumbers(list);
+			choiceEditor.setAvailibleNumbers(list);
+			choiceRenderer.setAvailibleNumbers(list);
 		}
 		
 	    @Override
 	    public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
 	    	Component comp;
-	    	if(column == 3 && model.getValueAt(row, 0) != null) {
-	    		comp = cRenderer;
+	    	if(column == 3)/* && model.getValueAt(row, 0) != null) */{
+	    		comp = choiceRenderer;
 	    		if(value!=null) {
-	    			cRenderer.setToolTipText(value.toString());
+	    			choiceRenderer.setToolTipText(value.toString());
 	    		} else {
-	    			cRenderer.setToolTipText(texts.get("table.tooltip.to_nothing"));
+	    			choiceRenderer.setToolTipText(texts.get("table.tooltip.to_nothing"));
 	    		}
-	    		cRenderer.setContent((Integer)value);
+	    		choiceRenderer.setContent((Integer)value);
 	    	} else if(value == null) {
 	    		cellTextLabel.setText(texts.get("table.text.null"));
 	    		cellTextWrapper.setToolTipText(texts.get("table.tooltip.null"));
@@ -150,7 +168,7 @@ public class RawVariableTable extends JXTable {
 	    		comp = cellTextWrapper;
 	    	}
 	    	
-	    	Color bgColor = Colors.getRowColor(isSelected, mouseOverRow==row, row%2==0);
+	    	Color bgColor = Colors.getRowColor(isSelected, mouseOverRow==row && enabled, row%2==0);
 
 	    	comp.setBackground(bgColor);
 		    if (value instanceof Container) {
@@ -167,21 +185,21 @@ public class RawVariableTable extends JXTable {
 		public Component getTableCellEditorComponent(JTable table, Object value, boolean isSelected, int row, int column) {
 			Component comp;
 			if(column == 3) {
-				cEditor.setContent((Integer)value);
+				choiceEditor.setContent((Integer)value);
 				
 				if(value!=null) {
-					cEditor.setToolTipText(value.toString());
+					choiceEditor.setToolTipText(value.toString());
 	    		} else {
-	    			cEditor.setToolTipText(texts.get("table.tooltip.to_nothing"));
+	    			choiceEditor.setToolTipText(texts.get("table.tooltip.to_nothing"));
 	    		}
 				
-				comp = cEditor;
-				editor = cEditor;
+				comp = choiceEditor;
+				editor = choiceEditor;
 	    	} else {
 	    		return null;
 	    	}
 			
-	    	Color bgColor = Colors.getRowColor(isSelected, mouseOverRow==row, row%2==0);
+	    	Color bgColor = Colors.getRowColor(isSelected, mouseOverRow==row && enabled, row%2==0);
 	    	
 	    	comp.setBackground(bgColor);
 		    if (value instanceof Container) {
@@ -198,7 +216,7 @@ public class RawVariableTable extends JXTable {
 		public Object getCellEditorValue() {
 			try {
 				return editor.getContent();
-			} catch (InvalidContentException|NullPointerException e) {
+			} catch (InvalidContentException e) {
 				return null;
 			}
 		}
@@ -212,6 +230,19 @@ public class RawVariableTable extends JXTable {
 	    public boolean shouldSelectCell(EventObject anEvent) {
 	        return true;
 	    }
+
+		@Override
+		public void popupMenuCanceled(PopupMenuEvent e) {}
+
+		@Override
+		public void popupMenuWillBecomeInvisible(PopupMenuEvent e) {
+			if(e.getSource() == choiceEditor) {
+				stopCellEditing();
+			}
+		}
+
+		@Override
+		public void popupMenuWillBecomeVisible(PopupMenuEvent e) {}
 	}
 	
 	class ChoiceEditor extends JComboBox<String> implements AbstractWidgetEditor<Integer>, ItemListener {

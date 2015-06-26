@@ -39,6 +39,11 @@ public class VariableTable extends JXTable {
 	
 	private int mouseOverRow;
 	private VariableCellRenderer cellRenderer;
+	private TextWidget textEditor;
+	private TextWidget textRenderer;
+	private JPanel cellTextWrapper = new JPanel();
+	private JLabel cellTextLabel = new JLabel();
+	private boolean enabled = true;
 	
 	public VariableTable(EventBus eventBus, GuiTexts texts, VariableTableModel model) {
 		super(model);
@@ -47,6 +52,9 @@ public class VariableTable extends JXTable {
 
 		setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
         mouseOverRow = -1;
+        
+        textEditor = new TextWidget(eventBus, texts);
+		textRenderer = new TextWidget(eventBus, texts);
         
         cellRenderer = new VariableCellRenderer(eventBus, texts);
         setDefaultRenderer(TextReference.class, cellRenderer);
@@ -82,17 +90,22 @@ public class VariableTable extends JXTable {
 	    return c;
 	}
 	
+	@Override
+	public void setEnabled(boolean enabled) {
+		super.setEnabled(enabled);
+		textEditor.setEnabled(enabled);
+		textRenderer.setEnabled(enabled);
+		cellTextLabel.setEnabled(enabled);
+		cellTextLabel.setEnabled(enabled);
+		getTableHeader().setForeground(enabled ? Color.BLACK : Color.GRAY);
+		this.enabled = enabled;
+	}
+	
 	class VariableCellRenderer extends AbstractCellEditor implements TableCellRenderer, TableCellEditor {
 		
 		private AbstractWidgetEditor<?> editor;
-		private TextWidget textEditor;
-		private TextWidget textRenderer;
-		private JPanel cellTextWrapper = new JPanel();
-		private JLabel cellTextLabel = new JLabel();
 		
 		public VariableCellRenderer(EventBus eventBus, GuiTexts texts) {
-			textEditor = new TextWidget(eventBus, texts);
-			textRenderer = new TextWidget(eventBus, texts);
 			cellTextWrapper.setLayout(new BorderLayout());
 			cellTextWrapper.add(cellTextLabel, BorderLayout.CENTER);
 		}
@@ -110,7 +123,7 @@ public class VariableTable extends JXTable {
 	    		comp = cellTextWrapper;
 	    	}
 	    	
-	    	Color bgColor = Colors.getRowColor(isSelected, !isSelected && mouseOverRow==row, row%2==0);
+	    	Color bgColor = Colors.getRowColor(isSelected, !isSelected && mouseOverRow==row && enabled, row%2==0);
 
 	    	comp.setBackground(bgColor);
 		    if (value instanceof Container) {
@@ -132,7 +145,7 @@ public class VariableTable extends JXTable {
 			textEditor.setContent((TextReference)value);
 			editor = textEditor;
 			
-	    	Color bgColor = Colors.getRowColor(isSelected, !isSelected && mouseOverRow==row, row%2==0);
+	    	Color bgColor = Colors.getRowColor(isSelected, !isSelected && mouseOverRow==row && enabled, row%2==0);
 	    	
 	    	textRenderer.setBackground(bgColor);
 	    	textEditor.setBackground(bgColor);
@@ -165,5 +178,4 @@ public class VariableTable extends JXTable {
 	        return true;
 	    }
 	}
-	
 }

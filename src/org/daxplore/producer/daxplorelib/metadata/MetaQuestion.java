@@ -359,10 +359,15 @@ public class MetaQuestion {
 		this.fullTextRef = fullTextRef;
 		this.extraTextRef = extraTextRef;
 		this.useFrequencies = useFrequencies;
-		setScale(scale);
 		this.useMean = useMean;
 		this.metaMean = metaMean;
 		this.timepoints = timepoints;
+
+		if(scale.getType() == type) {
+			this.scale = scale;
+		} else {
+			throw new DaxploreException("Type mismatch: this MetaQuestion can't take a MetaScale of type " + scale.getType());
+		}
 	}
 	
 	public int getId() {

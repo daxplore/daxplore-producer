@@ -44,11 +44,9 @@ public class RawVariableTableModel extends DefaultTableModel {
 		if(ms != null) {
 			toNumberMap.clear();
 			for(VariableOptionInfo info: variableList) {
-				if(info.getValue() != null) {
-					int index = ms.getOptionIndex(info.getValue());
-					if(index != -1 && availableToNumbers.contains(index)) {
-						toNumberMap.put(info.getValue(), index);
-					}
+				int index = ms.getOptionIndex(info.getValue());
+				if(index != -1 && availableToNumbers.contains(index)) {
+					toNumberMap.put(info.getValue(), index);
 				}
 			}
 		}
@@ -99,7 +97,7 @@ public class RawVariableTableModel extends DefaultTableModel {
 
 	@Override
 	public boolean isCellEditable(int rowIndex, int columnIndex) {
-		return columnIndex == 3 && variableList.get(rowIndex).getValue() != null;
+		return columnIndex == 3;// && variableList.get(rowIndex).getValue() != null;
 	}
 	
 	@SuppressWarnings("unchecked")

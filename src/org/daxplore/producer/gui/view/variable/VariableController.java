@@ -37,7 +37,8 @@ import com.google.common.eventbus.EventBus;
 public class VariableController implements TableModelListener, ActionListener {
 	
 	enum QuestionCommand {
-		ADD, REMOVE, UP, DOWN, INVERT
+		FREQ_ENABLE, FREQ_ADD, FREQ_REMOVE, FREQ_UP, FREQ_DOWN, FREQ_INVERT,
+		MEAN_ENABLE
 	}
 	
 	private VariableView view;
@@ -49,6 +50,11 @@ public class VariableController implements TableModelListener, ActionListener {
 	private List<VariableOptionInfo> rawVariableList;
 	private RawMetaQuestion rawMetaQuestion;
 	private DaxploreFile daxploreFile;
+	
+	private TabInfoPanel infoPanel;
+	private TabFrequenciesPanel freqPanel;
+	private TabMeanPanel meanPanel;
+	private TabTextPanel textPanel;
 	
 	public VariableController(EventBus eventBus, GuiTexts texts, DaxploreFile daxploreFile, MetaQuestion metaQuestion) {
 		this.mq = metaQuestion;
@@ -78,7 +84,12 @@ public class VariableController implements TableModelListener, ActionListener {
 			
 			TimePointTable timePointTable = new TimePointTable(eventBus, texts, timePointTableModel);
 			
-			view = new VariableView(eventBus, texts, this, metaQuestion, rawTable, variableTable, timePointTable);
+			infoPanel = new TabInfoPanel(eventBus, texts, metaQuestion, timePointTable);
+			freqPanel = new TabFrequenciesPanel(texts, this, metaQuestion, rawTable, variableTable);
+			meanPanel = new TabMeanPanel(texts, this, metaQuestion);
+			textPanel = new TabTextPanel();
+			
+			view = new VariableView(texts, infoPanel, freqPanel, meanPanel, textPanel);
 			
 		} catch (SQLException | DaxploreException e) {
 			// TODO Auto-generated catch block
@@ -105,7 +116,7 @@ public class VariableController implements TableModelListener, ActionListener {
 		for(MetaScale.Option option: mq.getScale().getOptions()) {
 			int total = 0;
 			for(VariableOptionInfo info: rawVariableList) {
-				if(info.getValue() != null && option.containsValue(info.getValue())) {
+				if(option.containsValue(info.getValue())) {
 					total += info.getCount();
 				}
 			}
@@ -138,7 +149,11 @@ public class VariableController implements TableModelListener, ActionListener {
 	@Override
 	public void actionPerformed(ActionEvent e) {
 		switch(QuestionCommand.valueOf(e.getActionCommand())) {
-		case ADD:
+		case FREQ_ENABLE:
+			mq.setUseFrequencies(freqPanel.isFreqActivated());
+			freqPanel.setEnabled(freqPanel.isFreqActivated());
+			break;
+		case FREQ_ADD:
 			int refIndex = mq.getScale().getLowestUnusedTextrefIndex();
 			try {
 				TextReference textRef = daxploreFile.getTextReferenceManager().get(mq.getColumn() + "_option_" + refIndex);
@@ -164,7 +179,7 @@ public class VariableController implements TableModelListener, ActionListener {
 				de.printStackTrace();
 			}
 			break;
-		case REMOVE:
+		case FREQ_REMOVE:
 			int[] selectedRows = variableTable.getSelectedRows();
 			variableTable.clearSelection();
 			variableTable.removeEditor();
@@ -195,7 +210,7 @@ public class VariableController implements TableModelListener, ActionListener {
 			rawModel.fireTableStructureChanged();
 			rawTable.packAll();
 			break;
-		case UP:
+		case FREQ_UP:
 			selectedRows = variableTable.getSelectedRows();
 			if(selectedRows.length < 1 || selectedRows[0] == 0) break;
 			variableTable.clearSelection();
@@ -209,7 +224,7 @@ public class VariableController implements TableModelListener, ActionListener {
 			rawModel.fireTableStructureChanged();
 			rawTable.packAll();
 			break;
-		case DOWN:
+		case FREQ_DOWN:
 			selectedRows = variableTable.getSelectedRows();
 			if(selectedRows.length < 1 || selectedRows[selectedRows.length-1] == variableModel.getRowCount() -1) break;
 			variableTable.clearSelection();
@@ -224,7 +239,7 @@ public class VariableController implements TableModelListener, ActionListener {
 			rawModel.fireTableStructureChanged();
 			rawTable.packAll();
 			break;
-		case INVERT:
+		case FREQ_INVERT:
 			switch (mq.getType()) {
 			case NUMERIC:
 				MetaScale<Double> msDouble = (MetaScale<Double>) mq.getScale();
@@ -241,6 +256,10 @@ public class VariableController implements TableModelListener, ActionListener {
 			rawModel.remapFromMetaScale();
 			rawModel.fireTableStructureChanged();
 			rawTable.packAll();
+			break;
+		case MEAN_ENABLE:
+			mq.setUseMean(meanPanel.isMeanActivated());
+			meanPanel.setEnabled(meanPanel.isMeanActivated());
 			break;
 		default:
 			throw new AssertionError("Undefined action command: " + e.getActionCommand());

@@ -25,7 +25,6 @@ import org.daxplore.producer.daxplorelib.DaxploreException;
 import org.daxplore.producer.daxplorelib.DaxploreTable;
 import org.daxplore.producer.daxplorelib.SQLTools;
 import org.daxplore.producer.daxplorelib.metadata.MetaQuestion.MetaQuestionManager;
-import org.daxplore.producer.daxplorelib.metadata.MetaScale.Option;
 import org.daxplore.producer.daxplorelib.metadata.textreference.TextReference;
 import org.daxplore.producer.daxplorelib.metadata.textreference.TextReferenceManager;
 

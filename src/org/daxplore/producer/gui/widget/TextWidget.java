@@ -34,6 +34,7 @@ public class TextWidget extends JPanel implements AbstractWidgetEditor<TextRefer
 	private TextReference textRef;
 	private JLabel label = new JLabel();
 	private JButton editButton;
+	private boolean enabled = true;
 	
 	private Locale locale; 
 	
@@ -75,7 +76,7 @@ public class TextWidget extends JPanel implements AbstractWidgetEditor<TextRefer
 	public void setContent(TextReference textRef) {
 		this.textRef = textRef;
 		label.setText(getLabelText());
-		editButton.setEnabled(true);
+		editButton.setEnabled(enabled);
 	}
 	
 	private String getLabelText() {
@@ -99,5 +100,12 @@ public class TextWidget extends JPanel implements AbstractWidgetEditor<TextRefer
 	@Override
 	public String getToolTipText() {
 		return label.getText();
+	}
+	
+	@Override
+	public void setEnabled(boolean enabled) {
+		this.enabled = enabled;
+		editButton.setEnabled(enabled);
+		label.setEnabled(enabled);
 	}
 }

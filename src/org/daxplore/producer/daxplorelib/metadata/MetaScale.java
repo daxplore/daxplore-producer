@@ -258,10 +258,12 @@ public class MetaScale<T> {
 
 		public void addValue(T value) {
 			values.add(value);
+			modified = true;
 		}
 		
 		public void removeValue(T value) {
 			values.remove(value);
+			modified = true;
 		}
 		
 		public boolean containsValue(T value) {
@@ -271,6 +273,7 @@ public class MetaScale<T> {
 		public void setValues(Collection<T> values) {
 			values.clear();
 			values.addAll(values);
+			modified = true;
 		}
 	}
 	
