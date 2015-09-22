@@ -22,6 +22,8 @@ import javax.swing.JTable;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 
+import org.daxplore.producer.daxplorelib.About;
+import org.daxplore.producer.daxplorelib.About.TimeSeriesType;
 import org.daxplore.producer.daxplorelib.DaxploreException;
 import org.daxplore.producer.daxplorelib.DaxploreFile;
 import org.daxplore.producer.daxplorelib.metadata.MetaTimepointShort;
@@ -40,9 +42,10 @@ import com.google.common.eventbus.Subscribe;
 public class TimeSeriesController implements ActionListener, DocumentListener {
 	
 	enum TimeSeriesCommand {
-		ADD, UP, DOWN, REMOVE, SET_COLUMN, REPLACE_TIMEPOINTS
+		TIME_ENABLE, ADD, UP, DOWN, REMOVE, SET_COLUMN, REPLACE_TIMEPOINTS
 	}
 	
+	private About about;
 	private EventBus eventBus;
 	private GuiTexts texts;
 	private DaxploreFile daxploreFile;
@@ -51,11 +54,12 @@ public class TimeSeriesController implements ActionListener, DocumentListener {
 	private TimeSeriesTable timeSeriesTable;
 	private TimeSeriesView timeSeriesView;
 	
-	public TimeSeriesController(EventBus eventBus, GuiTexts texts) {
+	public TimeSeriesController(About about, EventBus eventBus, GuiTexts texts) {
+		this.about = about;
 		this.eventBus = eventBus; 
 		this.texts = texts;
 		eventBus.register(this);
-		timeSeriesView = new TimeSeriesView(texts, this);
+		timeSeriesView = new TimeSeriesView(about, texts, this);
 	}
 	
 	@Subscribe
@@ -72,6 +76,13 @@ public class TimeSeriesController implements ActionListener, DocumentListener {
 	public void actionPerformed(ActionEvent event) {
 		int[] selectedRows;
 		switch(TimeSeriesCommand.valueOf(event.getActionCommand())) {
+		case TIME_ENABLE:
+			if (timeSeriesView.isTimeSeriesEnabled()) {
+				about.setTimeSeriesType(TimeSeriesType.SHORT);
+			} else {
+				about.setTimeSeriesType(TimeSeriesType.NONE);
+			}
+			break;
 		case ADD:
 			try {
 				MetaTimepointShortManager timeManager = daxploreFile.getMetaTimepointShortManager();

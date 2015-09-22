@@ -134,7 +134,7 @@ public class MainController {
 		toolbarController = new ToolbarController(eventBus, actionManager);
 		groupsController = new GroupsController(eventBus, texts);
 		editTextController = new EditTextController(eventBus, texts, actionManager);
-		timeSeriesController = new TimeSeriesController(eventBus, texts);
+		timeSeriesController = new TimeSeriesController(daxploreFile.getAbout(), eventBus, texts);
 
 		mainView = new MainView(mainWindow);
 		

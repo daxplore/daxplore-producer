@@ -38,7 +38,7 @@ public class About {
 	private static final DaxploreTable localeTable = new DaxploreTable("CREATE TABLE locales (locale TEXT PRIMARY KEY)", "locales");
 	
 	public enum TimeSeriesType {
-		NONE, SHORT, LONG
+		NONE, SHORT
 	}
 	
 	final int filetypeversionmajor;

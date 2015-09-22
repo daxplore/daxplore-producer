@@ -12,12 +12,15 @@ import java.awt.FlowLayout;
 import java.awt.event.ActionListener;
 
 import javax.swing.JButton;
+import javax.swing.JCheckBox;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTextField;
 import javax.swing.event.DocumentListener;
 
+import org.daxplore.producer.daxplorelib.About;
+import org.daxplore.producer.daxplorelib.About.TimeSeriesType;
 import org.daxplore.producer.gui.SectionHeader;
 import org.daxplore.producer.gui.resources.GuiTexts;
 import org.daxplore.producer.gui.view.time.TimeSeriesController.TimeSeriesCommand;
@@ -30,6 +33,7 @@ public class TimeSeriesView extends JPanel {
 	private JScrollPane columnValueCountPane;
 	private JScrollPane scrollPane;
 	private JTextField timeSeriesTextField;
+	private JCheckBox enableCheckBox = new JCheckBox();
 	
 	private DocumentListener documentListener;
 	private ActionListener actionListener;
@@ -37,14 +41,25 @@ public class TimeSeriesView extends JPanel {
 	/**
 	 * Create the panel.
 	 */
-	public <T extends DocumentListener & ActionListener> TimeSeriesView(GuiTexts texts, T listener) {
+	public <T extends DocumentListener & ActionListener> TimeSeriesView(About about, GuiTexts texts, T listener) {
 		this.texts = texts;
 		documentListener = listener;
 		actionListener = listener;
-
-		setLayout(new BorderLayout());
 		
-		add(new SectionHeader(texts, "timeseries"), BorderLayout.NORTH);
+		setLayout(new BorderLayout());
+
+		JPanel headerPanel = new JPanel();
+		headerPanel.setLayout(new BorderLayout());
+		
+		enableCheckBox.setText(texts.get("timeseries.enable"));
+		enableCheckBox.setActionCommand(TimeSeriesCommand.TIME_ENABLE.name());
+		enableCheckBox.setSelected(about.getTimeSeriesType() == TimeSeriesType.SHORT);
+		enableCheckBox.addActionListener(actionListener);
+		
+		headerPanel.add(new SectionHeader(texts, "timeseries"), BorderLayout.NORTH);
+		headerPanel.add(enableCheckBox, BorderLayout.WEST);
+		
+		add(headerPanel, BorderLayout.NORTH);
 		add(buildTimepointSelectionPanel(), BorderLayout.CENTER);
 		add(buildUtilityPanel(), BorderLayout.SOUTH);
 	}
@@ -121,6 +136,10 @@ public class TimeSeriesView extends JPanel {
 		utilityPanel.add(panel, BorderLayout.CENTER);
 		
 		return utilityPanel;
+	}
+	
+	boolean isTimeSeriesEnabled() {
+		return enableCheckBox.isSelected();
 	}
 	
 	/**
