@@ -290,6 +290,7 @@ public class ImportExportManager {
 				TextReference fulltext = daxploreFile.getTextReferenceManager().get(column + "_fulltext");
 				fulltext.put(rmq.qtext, locale);
 				List<MetaScale.Option<?>> scaleOptions = new LinkedList<MetaScale.Option<?>>();
+				Set<Double> meanIncludedValues = null;
 				if(rmq.valuelables != null) {
 					int i = 1;
 					switch(type) {
@@ -306,6 +307,10 @@ public class ImportExportManager {
 								throw new DaxploreException("Trying to add a non number or string as an option");
 							}
 							i++;
+						}
+						meanIncludedValues = new HashSet<>();
+						for(Object o : rmq.valuelables.keySet()) {
+							meanIncludedValues.add((Double)o);
 						}
 						break;
 					case TEXT:
@@ -326,13 +331,6 @@ public class ImportExportManager {
 				}
 				
 				TextReference shorttext = daxploreFile.getTextReferenceManager().get(column + "_shorttext");
-				Set<Double> meanIncludedValues = null;
-				if(type == VariableType.NUMERIC) {
-					meanIncludedValues = new HashSet<>();
-					for(Object o : rmq.valuelables.keySet()) {
-						meanIncludedValues.add((Double)o);
-					}
-				}
 				List<MetaTimepointShort> timepoints = new LinkedList<>();
 				daxploreFile.getMetaQuestionManager().create(column, type, shorttext, fulltext, null, scaleOptions, meanIncludedValues, timepoints);
 			}
