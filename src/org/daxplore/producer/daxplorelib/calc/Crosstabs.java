@@ -16,6 +16,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.daxplore.producer.daxplorelib.About;
+import org.daxplore.producer.daxplorelib.About.TimeSeriesType;
 import org.daxplore.producer.daxplorelib.DaxploreException;
 import org.daxplore.producer.daxplorelib.metadata.MetaQuestion;
 import org.daxplore.producer.daxplorelib.metadata.MetaScale;
@@ -35,7 +36,6 @@ public class Crosstabs {
 		public int compareTo(RawColumnInfo o) {
 			return column.compareTo(o.column);
 		}
-		
 	}
 	
 	private Connection connection;
@@ -102,8 +102,9 @@ public class Crosstabs {
 		for(int col = 0; col < tempRawColnames.size(); col++) {
 			rawColnames[col] = tempRawColnames.get(col).column.toUpperCase();
 		}
-		
-		rawTimePointIndex = Arrays.binarySearch(rawColnames, about.getTimeSeriesShortColumn().toUpperCase());
+		if(about.getTimeSeriesType() == TimeSeriesType.SHORT) {
+			rawTimePointIndex = Arrays.binarySearch(rawColnames, about.getTimeSeriesShortColumn().toUpperCase());
+		}
 		
 		Logger.getGlobal().log(Level.INFO, "Loaded rawdata to memory: " + ((System.nanoTime() -time)/Math.pow(10,9)) + "s");
 		hasLoadedRawdata = true;
@@ -122,27 +123,36 @@ public class Crosstabs {
 	 * @return
 	 * @throws DaxploreException
 	 */
-	public BarStats crosstabs2(MetaQuestion question, MetaQuestion perspective, int lowerLimit) throws DaxploreException {
+	public BarStats crosstabs2(About about, MetaQuestion question, MetaQuestion perspective, int lowerLimit) throws DaxploreException {
 		try {
-			List<MetaTimepointShort> questionTimes = question.getTimepoints();
-			List<MetaTimepointShort> perspectiveTimes = perspective.getTimepoints();
-			
-			LinkedList<MetaTimepointShort> commonTimes = new LinkedList<>();
-			
-			for(MetaTimepointShort qTime: questionTimes) {
-				if(perspectiveTimes.contains(qTime)) {
-					commonTimes.add(qTime);
-				}
-			}
-			
 			BarStats stats = new BarStats(question, perspective);
-			
-			for(MetaTimepointShort timepoint: commonTimes) {
-				int[][] crosstabs = crosstabs2(question, perspective, timepoint, lowerLimit);
-				int[] frequencies = frequencies(question, timepoint, lowerLimit);
-				stats.addTimePoint(timepoint, crosstabs, frequencies);
+			int[][] crosstabs;
+			int[] frequencies;
+			switch (about.getTimeSeriesType()) {
+			case NONE:
+				crosstabs = crosstabs2(question, perspective, null, lowerLimit);
+				frequencies = frequencies(question, null, lowerLimit);
+				stats.addTimePoint(0, crosstabs, frequencies);
+				break;
+			case SHORT:
+				List<MetaTimepointShort> questionTimes = question.getTimepoints();
+				List<MetaTimepointShort> perspectiveTimes = perspective.getTimepoints();
+				
+				LinkedList<MetaTimepointShort> commonTimes = new LinkedList<>();
+				
+				for(MetaTimepointShort qTime: questionTimes) {
+					if(perspectiveTimes.contains(qTime)) {
+						commonTimes.add(qTime);
+					}
+				}
+				
+				for(MetaTimepointShort timepoint: commonTimes) {
+					crosstabs = crosstabs2(question, perspective, timepoint, lowerLimit);
+					frequencies = frequencies(question, timepoint, lowerLimit);
+					stats.addTimePoint(timepoint.getTimeindex(), crosstabs, frequencies);
+				}
+				break;
 			}
-			
 			return stats;
 		} catch (SQLException | NullPointerException | ArrayIndexOutOfBoundsException e) {
 			throw new DaxploreException("Failed to generate crosstabs for question: " + question.getId() + ", perspective: " + perspective.getId(), e);
@@ -170,7 +180,7 @@ public class Crosstabs {
 		MetaScale perspectiveScale = perspective.getScale();
 		
 		for(int row = 0; row < rawdataTable[0].length; row++) {
-			if(((Double)rawdataTable[rawTimePointIndex][row]) == timepoint.getValue()) { //TODO timepoint: support TEXT/REAL for value
+			if(timepoint == null || ((Double)rawdataTable[rawTimePointIndex][row]) == timepoint.getValue()) { //TODO timepoint: support TEXT/REAL for value
 				int qindex = questionScale.getOptionIndex(rawdataTable[questionColIndex][row]);
 				int pindex = perspectiveScale.getOptionIndex(rawdataTable[perspectiveColIndex][row]);
 				if(qindex == -1 || pindex == -1) {
@@ -225,7 +235,7 @@ public class Crosstabs {
 		int questionColIndex = Arrays.binarySearch(rawColnames, question.getColumn().toUpperCase());
 		
 		for(int row = 0; row < rawdataTable[0].length; row++) {
-			if((Double)rawdataTable[rawTimePointIndex][row] == timepoint.getValue()) { //TODO timepoint: support TEXT/REAL for value
+			if(timepoint == null || (Double)rawdataTable[rawTimePointIndex][row] == timepoint.getValue()) { //TODO timepoint: support TEXT/REAL for value
 				int index = scale.getOptionIndex(rawdataTable[questionColIndex][row]);
 				if(index != -1) {
 					frequencies[index]++;

@@ -13,7 +13,6 @@ import java.util.List;
 import java.util.Map;
 
 import org.daxplore.producer.daxplorelib.metadata.MetaQuestion;
-import org.daxplore.producer.daxplorelib.metadata.MetaTimepointShort;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
@@ -22,7 +21,7 @@ import com.google.gson.JsonPrimitive;
 
 public class BarStats {
 	
-	private LinkedHashMap<MetaTimepointShort, BarGroups> data = new LinkedHashMap<>();
+	private LinkedHashMap<Integer, BarGroups> data = new LinkedHashMap<>();
 	private MetaQuestion question, perspective;
 	
 	private static class BarGroups {
@@ -62,8 +61,8 @@ public class BarStats {
 		this.perspective = perspective;
 	}
 	
-	void addTimePoint(MetaTimepointShort timepoint, int[][] crosstabs, int[] frequencies) {
-		data.put(timepoint, new BarGroups(crosstabs, frequencies));
+	void addTimePoint(int timeindex, int[][] crosstabs, int[] frequencies) {
+		data.put(timeindex, new BarGroups(crosstabs, frequencies));
 	}
 	
 	public JsonElement toJSONObject() {
@@ -72,8 +71,8 @@ public class BarStats {
 		json.add("p", new JsonPrimitive(perspective.getColumn()));
 		
 		JsonObject values = new JsonObject();
-		for(Map.Entry<MetaTimepointShort, BarGroups> entry: data.entrySet()) {
-			values.add(Integer.toString(entry.getKey().getTimeindex()), entry.getValue().toJSONObject());
+		for(Map.Entry<Integer, BarGroups> entry: data.entrySet()) {
+			values.add(Integer.toString(entry.getKey()), entry.getValue().toJSONObject());
 		}
 		json.add("values", values);
 		

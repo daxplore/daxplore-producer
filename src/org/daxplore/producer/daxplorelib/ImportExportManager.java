@@ -126,7 +126,7 @@ public class ImportExportManager {
 			for(MetaQuestion question : group.getQuestions()) {
 				selectedQuestions.add(question);
 				for(MetaQuestion perspective : perspectives.getQuestions()) {
-					dataJSON.add(crosstabs.crosstabs2(question, perspective, 10).toJSONObject());
+					dataJSON.add(crosstabs.crosstabs2(daxploreFile.getAbout(), question, perspective, 10).toJSONObject());
 				}
 			}
 		}

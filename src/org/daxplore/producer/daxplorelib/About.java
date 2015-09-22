@@ -81,7 +81,7 @@ public class About {
 			lastupdate = (Date) creation.clone();
 			importdate = null;
 			filename = null;
-			timeSeriesType = TimeSeriesType.SHORT;
+			timeSeriesType = TimeSeriesType.NONE;
 			timeSeriesShortColumn = null;
 			firstSave = true;
 		}else{
