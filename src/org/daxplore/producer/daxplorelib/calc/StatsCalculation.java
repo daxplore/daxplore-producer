@@ -18,10 +18,13 @@ import java.util.logging.Logger;
 import org.daxplore.producer.daxplorelib.About;
 import org.daxplore.producer.daxplorelib.About.TimeSeriesType;
 import org.daxplore.producer.daxplorelib.DaxploreException;
+import org.daxplore.producer.daxplorelib.DaxploreWarning;
 import org.daxplore.producer.daxplorelib.metadata.MetaQuestion;
 import org.daxplore.producer.daxplorelib.metadata.MetaScale;
 import org.daxplore.producer.daxplorelib.metadata.MetaTimepointShort;
 import org.daxplore.producer.daxplorelib.raw.VariableType;
+
+import com.google.common.base.Joiner;
 
 public class StatsCalculation {
 
@@ -116,29 +119,41 @@ public class StatsCalculation {
 		rawColnames = null;
 	}
 	/**
-	 * Generates crosstabs between question and perspective. Only returns results if total is over lowerlimit.
+	 * Calculate data for a question and perspective pair. Only returns results if total is over lowerlimit.
 	 * @param question
 	 * @param perspective
 	 * @param lowerLimit
 	 * @return
 	 * @throws DaxploreException
+	 * @throws DaxploreWarning 
 	 */
-	public BarStats crosstabs2(About about, MetaQuestion question, MetaQuestion perspective, int lowerLimit) throws DaxploreException {
+	public BarStats calculateData(About about, MetaQuestion question, MetaQuestion perspective, int lowerLimit) throws DaxploreException, DaxploreWarning {
 		try {
 			BarStats stats = new BarStats(question, perspective);
 			int[][] crosstabs;
 			int[] frequencies;
 			List<double[]> means; // <mean, allmean, count>
+			
+			List<String> warnings = new LinkedList<String>();
+			
 			switch (about.getTimeSeriesType()) {
 			case NONE:
 				if(question.useFrequencies()) {
-					crosstabs = crosstabs2(question, perspective, null, lowerLimit);
-					frequencies = frequencies(question, null, lowerLimit);
-					stats.addFrequencyData(0, crosstabs, frequencies);
+					try {
+						crosstabs = freqCalc(question, perspective, null, lowerLimit);
+						frequencies = frequencies(question, null, lowerLimit);
+						stats.addFrequencyData(0, crosstabs, frequencies);
+					} catch (DaxploreWarning e) {
+						warnings.add(e.getMessage());
+					}
 				}
 				if(question.useMean()) {
-					means = meanCalc(question, perspective, null, lowerLimit);
-					stats.addMeanData(0, means.get(0), means.get(1)[0], means.get(2));
+					try {
+						means = meanCalc(question, perspective, null, lowerLimit);
+						stats.addMeanData(0, means.get(0), means.get(1)[0], means.get(2));
+					} catch (DaxploreWarning e) {
+						warnings.add(e.getMessage());
+					}
 				}
 				break;
 			case SHORT:
@@ -155,25 +170,39 @@ public class StatsCalculation {
 				
 				for(MetaTimepointShort timepoint: commonTimes) {
 					if(question.useFrequencies()) {
-						crosstabs = crosstabs2(question, perspective, timepoint, lowerLimit);
-						frequencies = frequencies(question, timepoint, lowerLimit);
-						stats.addFrequencyData(timepoint.getTimeindex(), crosstabs, frequencies);
+						try {
+							crosstabs = freqCalc(question, perspective, timepoint, lowerLimit);
+							frequencies = frequencies(question, timepoint, lowerLimit);
+							stats.addFrequencyData(timepoint.getTimeindex(), crosstabs, frequencies);
+						} catch (DaxploreWarning e) {
+							warnings.add(e.getMessage());
+						}
 					}
 					if(question.useMean()) {
-						means = meanCalc(question, perspective, timepoint, lowerLimit);
-						stats.addMeanData(0, means.get(0), means.get(1)[0], means.get(2));
+						try {
+							means = meanCalc(question, perspective, timepoint, lowerLimit);
+							stats.addMeanData(0, means.get(0), means.get(1)[0], means.get(2));
+						} catch (DaxploreWarning e) {
+							warnings.add(e.getMessage());
+						}
 					}
 				}
 				break;
 			}
+			
+			if(!warnings.isEmpty()) {
+				Joiner joiner = Joiner.on("\n");
+				throw new DaxploreWarning(joiner.join(warnings));
+			}
+			
 			return stats;
 		} catch (SQLException | NullPointerException | ArrayIndexOutOfBoundsException | DaxploreException e) {
-			throw new DaxploreException("Failed to generate data for question: " + question.getId() + ", perspective: " + perspective.getId(), e);
+			throw new DaxploreException("Failed to generate data for question: " + question.getColumn() + ", perspective: " + perspective.getColumn(), e);
 		}
 	}
 	
 	@SuppressWarnings({ "unchecked", "rawtypes" })
-	private List<double[]> meanCalc(MetaQuestion question, MetaQuestion perspective, MetaTimepointShort timepoint, int lowerlimit) throws DaxploreException, SQLException {
+	private List<double[]> meanCalc(MetaQuestion question, MetaQuestion perspective, MetaTimepointShort timepoint, int lowerlimit) throws DaxploreException, SQLException, DaxploreWarning {
 		if(perspective.getScale() == null) { 
 			throw new DaxploreException("meanCalc: perspective is missing scale");
 		}
@@ -219,7 +248,7 @@ public class StatsCalculation {
 		if(countall >= lowerlimit) {
 			meanall[0] = meanall[0]/countall;
 		} else {
-			meanall[0] = Double.NaN;
+			throw new DaxploreWarning("Could not generate mean data for question: " + question.getColumn() + " and perspective: " + perspective.getColumn());
 		}
 		
 		ArrayList<double[]> list = new ArrayList<double[]>(4);
@@ -231,7 +260,7 @@ public class StatsCalculation {
 	}
 	
 	@SuppressWarnings({ "unchecked", "rawtypes" })
-	private int[][] crosstabs2(MetaQuestion question, MetaQuestion perspective, MetaTimepointShort timepoint, int lowerlimit) throws SQLException {
+	private int[][] freqCalc(MetaQuestion question, MetaQuestion perspective, MetaTimepointShort timepoint, int lowerlimit) throws SQLException, DaxploreWarning {
 		if(question.getScale() == null && perspective.getScale() == null) { 
 			return null;
 		}
@@ -283,10 +312,16 @@ public class StatsCalculation {
 			}
 		}*/
 		
+		int emptyCount = 0;
 		for(int ti = 0; ti < totals.length; ti++) {
 			if(totals[ti] < lowerlimit) {
 				crosstabsdata[ti] = new int[crosstabsdata[ti].length];
+				emptyCount++;
 			}
+		}
+		
+		if(emptyCount == totals.length) {
+			throw new DaxploreWarning("Could not generate frequency data for question: " + question.getColumn() + " and perspective: " + perspective.getColumn());
 		}
 		
 		return crosstabsdata;
@@ -294,7 +329,7 @@ public class StatsCalculation {
 	}
 	
 	@SuppressWarnings({ "unchecked", "rawtypes" })
-	private int[] frequencies(MetaQuestion question, MetaTimepointShort timepoint, int lowerlimit) throws SQLException {
+	private int[] frequencies(MetaQuestion question, MetaTimepointShort timepoint, int lowerlimit) throws SQLException, DaxploreWarning {
 		int[] frequencies = new int[question.getScale().getOptionCount()];
 		int total = 0;
 
@@ -334,7 +369,7 @@ public class StatsCalculation {
 		}*/
 		
 		if(total < lowerlimit) {
-			return new int[frequencies.length];
+			throw new DaxploreWarning("Could not generate total frequencies for question: " + question.getColumn());
 		}
 		
 		return frequencies;

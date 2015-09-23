@@ -325,7 +325,7 @@ public class MainController {
 				JOptionPane.showMessageDialog(mainWindow, message);
 			} else {
 				JLabelSelectable message = new JLabelSelectable(
-						texts.format("dialog.error.message", e.getUserMessage(), e.getCause().getLocalizedMessage()));
+						texts.format("dialog.error.message", e.getUserMessage(), e.getCause().getLocalizedMessage().replace("\n", "<br>")));
 				Logger.getGlobal().log(Level.SEVERE, e.getUserMessage());
 				e.getCause().printStackTrace();
 				int answer = JOptionPane.showOptionDialog(mainWindow,

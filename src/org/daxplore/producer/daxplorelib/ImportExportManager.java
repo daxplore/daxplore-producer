@@ -75,6 +75,7 @@ import au.com.bytecode.opencsv.CSVReader;
 import au.com.bytecode.opencsv.CSVWriter;
 
 import com.google.common.base.Charsets;
+import com.google.common.base.Joiner;
 import com.google.common.base.Strings;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -122,11 +123,16 @@ public class ImportExportManager {
 			selectedQuestions.add(perspective);
 		}
 		JsonArray dataJSON = new JsonArray();
+		List<String> warnings = new LinkedList<String>();
 		for(MetaGroup group : daxploreFile.getMetaGroupManager().getQuestionGroups()) {
 			for(MetaQuestion question : group.getQuestions()) {
 				selectedQuestions.add(question);
 				for(MetaQuestion perspective : perspectives.getQuestions()) {
-					dataJSON.add(crosstabs.crosstabs2(daxploreFile.getAbout(), question, perspective, 10).toJSONObject());
+					try {
+						dataJSON.add(crosstabs.calculateData(daxploreFile.getAbout(), question, perspective, 10).toJSONObject());
+					} catch (DaxploreWarning e) {
+						warnings.add(e.getMessage());
+					}
 				}
 			}
 		}
@@ -185,6 +191,11 @@ public class ImportExportManager {
 		if(!emptyTextrefs.isEmpty()) {
 			Collections.sort(emptyTextrefs);
 			Logger.getGlobal().log(Level.WARNING, "Missing text for textref(s):\n\t " + MyTools.join(emptyTextrefs, "\n\t "));
+		}
+		
+		if(!warnings.isEmpty()) {
+			Joiner joiner = Joiner.on("\n");
+			throw new DaxploreException(joiner.join(warnings));
 		}
 	}
 	
