@@ -193,7 +193,7 @@ public class RawData {
 		//Prepared statement doesn't work, but hasColumn is always called first so this should be relatively injection-safe
 		try (Statement stmt = connection.createStatement();
 				ResultSet rs = stmt.executeQuery(
-				"select " + column + " as val, count(*) as cnt from rawdata group by val order by val")) {
+				"select \"" + column + "\" as val, count(*) as cnt from rawdata group by val order by val")) {
 			while(rs.next()) {
 				Object val = rs.getObject("val");
 				Integer count = rs.getInt("cnt");
@@ -209,7 +209,7 @@ public class RawData {
 		//Prepared statement doesn't work, but hasColumn is always called first so this should be relatively injection-safe
 		try (Statement stmt = connection.createStatement();
 				ResultSet rs = stmt.executeQuery(
-				"SELECT "+ column + " AS val, count(*) AS cnt FROM rawdata WHERE " + column2 + " IS NOT NULL GROUP BY val ORDER BY val")) {
+				"SELECT \""+ column + "\" AS val, count(*) AS cnt FROM rawdata WHERE \"" + column2 + "\" IS NOT NULL GROUP BY val ORDER BY val")) {
 			while(rs.next()) {
 				double val = rs.getDouble("val");
 				boolean nullVal = rs.wasNull();
