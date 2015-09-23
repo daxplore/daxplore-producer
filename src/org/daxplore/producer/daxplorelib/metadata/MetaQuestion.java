@@ -157,8 +157,8 @@ public class MetaQuestion {
 		
 		@SuppressWarnings("unchecked")
 		public MetaQuestion create(String column, VariableType type, TextReference shortTextRef, TextReference fullTextRef, TextReference extraTextRef,
-				List<MetaScale.Option<?>> scaleOptions, Set<Double> meanIncludedValues, List<MetaTimepointShort> timepoints) throws SQLException, DaxploreException {
-			boolean useMean = (meanIncludedValues != null);
+				List<MetaScale.Option<?>> scaleOptions, Set<Double> meanExcludedValues, List<MetaTimepointShort> timepoints) throws SQLException, DaxploreException {
+			boolean useMean = (meanExcludedValues != null);
 			
 			addDelta++;
 
@@ -182,7 +182,7 @@ public class MetaQuestion {
 				break;
 			}
 			
-			MetaMean metaMean = metaMeanManager.create(id, meanIncludedValues);
+			MetaMean metaMean = metaMeanManager.create(id, meanExcludedValues);
 			
 			MetaQuestion mq = new MetaQuestion(id, column, type, shortTextRef, fullTextRef, extraTextRef, scale, true, metaMean, useMean, timepoints);
 			toBeAdded.add(mq);

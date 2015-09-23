@@ -51,7 +51,7 @@ import javax.xml.transform.stream.StreamSource;
 import javax.xml.validation.Schema;
 import javax.xml.validation.SchemaFactory;
 
-import org.daxplore.producer.daxplorelib.calc.Crosstabs;
+import org.daxplore.producer.daxplorelib.calc.StatsCalculation;
 import org.daxplore.producer.daxplorelib.metadata.MetaGroup;
 import org.daxplore.producer.daxplorelib.metadata.MetaQuestion;
 import org.daxplore.producer.daxplorelib.metadata.MetaScale;
@@ -108,7 +108,7 @@ public class ImportExportManager {
 		
 		emptyTextrefs.clear();
 		
-		Crosstabs crosstabs = new Crosstabs(connection, daxploreFile.getAbout());
+		StatsCalculation crosstabs = new StatsCalculation(connection, daxploreFile.getAbout());
 		crosstabs.loadRawToMem();
 
 		MetaGroup perspectives = daxploreFile.getMetaGroupManager().getPerspectiveGroup();
@@ -290,7 +290,7 @@ public class ImportExportManager {
 				TextReference fulltext = daxploreFile.getTextReferenceManager().get(column + "_fulltext");
 				fulltext.put(rmq.qtext, locale);
 				List<MetaScale.Option<?>> scaleOptions = new LinkedList<MetaScale.Option<?>>();
-				Set<Double> meanIncludedValues = null;
+				Set<Double> meanExcludedValues = null;
 				if(rmq.valuelables != null) {
 					int i = 1;
 					switch(type) {
@@ -308,10 +308,7 @@ public class ImportExportManager {
 							}
 							i++;
 						}
-						meanIncludedValues = new HashSet<>();
-						for(Object o : rmq.valuelables.keySet()) {
-							meanIncludedValues.add((Double)o);
-						}
+						meanExcludedValues = new HashSet<>();
 						break;
 					case TEXT:
 						for(Map.Entry<Object, String> s: rmq.valuelables.entrySet()) {
@@ -332,7 +329,7 @@ public class ImportExportManager {
 				
 				TextReference shorttext = daxploreFile.getTextReferenceManager().get(column + "_shorttext");
 				List<MetaTimepointShort> timepoints = new LinkedList<>();
-				daxploreFile.getMetaQuestionManager().create(column, type, shorttext, fulltext, null, scaleOptions, meanIncludedValues, timepoints);
+				daxploreFile.getMetaQuestionManager().create(column, type, shorttext, fulltext, null, scaleOptions, meanExcludedValues, timepoints);
 			}
 		} catch (SQLException e) {
 			throw new DaxploreException("Failed to transfer metadata from raw", e);

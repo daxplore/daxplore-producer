@@ -23,7 +23,7 @@ import org.daxplore.producer.daxplorelib.metadata.MetaScale;
 import org.daxplore.producer.daxplorelib.metadata.MetaTimepointShort;
 import org.daxplore.producer.daxplorelib.raw.VariableType;
 
-public class Crosstabs {
+public class StatsCalculation {
 
 	private class RawColumnInfo implements Comparable<RawColumnInfo>{
 		String column;
@@ -48,7 +48,7 @@ public class Crosstabs {
 	
 	private boolean hasLoadedRawdata = false;
 	
-	public Crosstabs(Connection connection, About about) {
+	public StatsCalculation(Connection connection, About about) {
 		this.connection = connection;
 		this.about = about;
 	}
@@ -116,7 +116,7 @@ public class Crosstabs {
 		rawColnames = null;
 	}
 	/**
-	 * Generates crosstabs between cquestion and perspective. No result only if total results is over lowerlimit.
+	 * Generates crosstabs between question and perspective. Only returns results if total is over lowerlimit.
 	 * @param question
 	 * @param perspective
 	 * @param lowerLimit
@@ -128,11 +128,18 @@ public class Crosstabs {
 			BarStats stats = new BarStats(question, perspective);
 			int[][] crosstabs;
 			int[] frequencies;
+			List<double[]> means; // <mean, allmean, count>
 			switch (about.getTimeSeriesType()) {
 			case NONE:
-				crosstabs = crosstabs2(question, perspective, null, lowerLimit);
-				frequencies = frequencies(question, null, lowerLimit);
-				stats.addTimePoint(0, crosstabs, frequencies);
+				if(question.useFrequencies()) {
+					crosstabs = crosstabs2(question, perspective, null, lowerLimit);
+					frequencies = frequencies(question, null, lowerLimit);
+					stats.addFrequencyData(0, crosstabs, frequencies);
+				}
+				if(question.useMean()) {
+					means = meanCalc(question, perspective, null, lowerLimit);
+					stats.addMeanData(0, means.get(0), means.get(1)[0], means.get(2));
+				}
 				break;
 			case SHORT:
 				List<MetaTimepointShort> questionTimes = question.getTimepoints();
@@ -147,16 +154,80 @@ public class Crosstabs {
 				}
 				
 				for(MetaTimepointShort timepoint: commonTimes) {
-					crosstabs = crosstabs2(question, perspective, timepoint, lowerLimit);
-					frequencies = frequencies(question, timepoint, lowerLimit);
-					stats.addTimePoint(timepoint.getTimeindex(), crosstabs, frequencies);
+					if(question.useFrequencies()) {
+						crosstabs = crosstabs2(question, perspective, timepoint, lowerLimit);
+						frequencies = frequencies(question, timepoint, lowerLimit);
+						stats.addFrequencyData(timepoint.getTimeindex(), crosstabs, frequencies);
+					}
+					if(question.useMean()) {
+						means = meanCalc(question, perspective, timepoint, lowerLimit);
+						stats.addMeanData(0, means.get(0), means.get(1)[0], means.get(2));
+					}
 				}
 				break;
 			}
 			return stats;
-		} catch (SQLException | NullPointerException | ArrayIndexOutOfBoundsException e) {
-			throw new DaxploreException("Failed to generate crosstabs for question: " + question.getId() + ", perspective: " + perspective.getId(), e);
+		} catch (SQLException | NullPointerException | ArrayIndexOutOfBoundsException | DaxploreException e) {
+			throw new DaxploreException("Failed to generate data for question: " + question.getId() + ", perspective: " + perspective.getId(), e);
 		}
+	}
+	
+	@SuppressWarnings({ "unchecked", "rawtypes" })
+	private List<double[]> meanCalc(MetaQuestion question, MetaQuestion perspective, MetaTimepointShort timepoint, int lowerlimit) throws DaxploreException, SQLException {
+		if(perspective.getScale() == null) { 
+			throw new DaxploreException("meanCalc: perspective is missing scale");
+		}
+		
+		// return values in order
+		double[] meandata = new double[perspective.getScale().getOptionCount()];
+		double[] meanall = new double[1];
+		double[] count = new double[perspective.getScale().getOptionCount()];
+		
+		double countall = 0;
+		
+		if(!hasLoadedRawdata) {
+			loadRawToMem();
+		}
+
+		int questionColIndex = Arrays.binarySearch(rawColnames, question.getColumn().toUpperCase());
+		int perspectiveColIndex = Arrays.binarySearch(rawColnames, perspective.getColumn().toUpperCase());
+		
+		MetaScale perspectiveScale = perspective.getScale();
+		
+		for(int row = 0; row < rawdataTable[0].length; row++) {
+			if(timepoint == null || ((Double)rawdataTable[rawTimePointIndex][row]) == timepoint.getValue()) {
+				int pindex = perspectiveScale.getOptionIndex(rawdataTable[perspectiveColIndex][row]);
+				if(pindex == -1 || question.getMetaMean().isExcluded(rawdataTable[questionColIndex][row])) {
+					continue;
+				}
+				meandata[pindex] += (Double)rawdataTable[questionColIndex][row];
+				count[pindex]++;
+			}
+		}
+		
+		for(int i = 0; i < meandata.length; i++) {
+			if(count[i] >= lowerlimit) {
+				meanall[0] += meandata[i];
+				countall += count[i];
+				meandata[i] = meandata[i] / count[i];
+			} else {
+				meandata[i] = Double.NaN;
+				count[i] = 0;
+			}
+		}
+
+		if(countall >= lowerlimit) {
+			meanall[0] = meanall[0]/countall;
+		} else {
+			meanall[0] = Double.NaN;
+		}
+		
+		ArrayList<double[]> list = new ArrayList<double[]>(4);
+		list.add(meandata);
+		list.add(meanall);
+		list.add(count);
+		
+		return list;
 	}
 	
 	@SuppressWarnings({ "unchecked", "rawtypes" })
@@ -268,6 +339,8 @@ public class Crosstabs {
 		
 		return frequencies;
 	}
+	
+	
 	
 }
 

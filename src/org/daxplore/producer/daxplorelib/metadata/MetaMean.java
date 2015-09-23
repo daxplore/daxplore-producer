@@ -26,7 +26,7 @@ import com.google.gson.Gson;
 public class MetaMean {
 
 	private static final DaxploreTable table = new DaxploreTable(
-			"CREATE TABLE metamean (questionid INTEGER NOT NULL, includedvalues TEXT NOT NULL, FOREIGN KEY(questionid) REFERENCES metaquestion(id))",
+			"CREATE TABLE metamean (questionid INTEGER NOT NULL, excludedvalues TEXT NOT NULL, FOREIGN KEY(questionid) REFERENCES metaquestion(id))",
 			"metamean");
 	
 	public static class MetaMeanManager {
@@ -54,7 +54,7 @@ public class MetaMean {
 				throw new DaxploreException("No metamean with id '"+id+"'");
 			}
 			
-			Set<Double> includedValues = new HashSet<Double>();
+			Set<Double> excludedValues = new HashSet<Double>();
 			try (PreparedStatement stmt = connection.prepareStatement("SELECT * FROM metamean WHERE questionid = ?")) {
 				stmt.setInt(1, id);
 				
@@ -63,19 +63,19 @@ public class MetaMean {
 						throw new IllegalArgumentException("QuestionID does not exist?");
 					}
 					
-					String includedValuesJson = rs.getString("includedvalues");
+					String excludedValuesJson = rs.getString("excludedvalues");
 					Gson gson = new Gson();
-					includedValues = Sets.newHashSet(gson.fromJson(includedValuesJson, Double[].class));
+					excludedValues = Sets.newHashSet(gson.fromJson(excludedValuesJson, Double[].class));
 				}
 			}
 			
-			MetaMean metaMean = new MetaMean(id, includedValues, false);
+			MetaMean metaMean = new MetaMean(id, excludedValues, false);
 			metaMeanMap.put(id, metaMean);
 			return metaMean;
 		}
 		
-		public MetaMean create(int id, Set<Double> includedValues) {
-			MetaMean metaMean = new MetaMean(id, includedValues, true);
+		public MetaMean create(int id, Set<Double> excludedValues) {
+			MetaMean metaMean = new MetaMean(id, excludedValues, true);
 			toBeAdded.add(metaMean);
 			metaMeanMap.put(id, metaMean);
 			return metaMean;
@@ -100,8 +100,8 @@ public class MetaMean {
 		public void saveAll() throws SQLException {
 			Gson gson = new Gson();
 			try (
-				PreparedStatement addMetaMeanStmt = connection.prepareStatement("INSERT INTO metamean (questionid, includedvalues) VALUES (?, ?)");
-				PreparedStatement updateMetaMeanStmt = connection.prepareStatement("UPDATE metamean SET includedvalues = ? WHERE questionid = ?");
+				PreparedStatement addMetaMeanStmt = connection.prepareStatement("INSERT INTO metamean (questionid, excludedvalues) VALUES (?, ?)");
+				PreparedStatement updateMetaMeanStmt = connection.prepareStatement("UPDATE metamean SET excludedvalues = ? WHERE questionid = ?");
 				PreparedStatement deleteMetaMeanStmt = connection.prepareStatement("DELETE FROM metamean WHERE questionid = ?");
 			) {
 				int nNew = 0, nModified = 0, nRemoved = 0;
@@ -109,7 +109,7 @@ public class MetaMean {
 				for(MetaMean metaMean : toBeAdded) {
 					nNew++;
 					addMetaMeanStmt.setInt(1, metaMean.questionid);
-					String valuesJson = gson.toJson(metaMean.includedValues.toArray(), Double[].class);
+					String valuesJson = gson.toJson(metaMean.excludedValues.toArray(), Double[].class);
 					addMetaMeanStmt.setString(2, valuesJson);
 					addMetaMeanStmt.addBatch();
 					metaMean.modified = false;
@@ -118,7 +118,7 @@ public class MetaMean {
 				
 				for(MetaMean metaMean : metaMeanMap.values()) {
 					if(metaMean.modified){
-						String valuesJson = gson.toJson(metaMean.includedValues.toArray(), Double[].class);
+						String valuesJson = gson.toJson(metaMean.excludedValues.toArray(), Double[].class);
 						updateMetaMeanStmt.setString(1, valuesJson);
 						updateMetaMeanStmt.setInt(2, metaMean.questionid);
 						updateMetaMeanStmt.addBatch();
@@ -155,13 +155,13 @@ public class MetaMean {
 	}
 	
 	private int questionid;
-	private TreeSet<Double> includedValues = new TreeSet<Double>(); //TreeSet gives natural ordering
+	private TreeSet<Double> excludedValues = new TreeSet<Double>(); //TreeSet gives natural ordering
 	private boolean modified;
 	
-	private MetaMean(int questionid, Set<Double> includedValues, boolean setNew) {
+	private MetaMean(int questionid, Set<Double> excludedValues, boolean setNew) {
 		this.questionid = questionid;
-		if(includedValues != null) {
-			this.includedValues.addAll(includedValues);
+		if(excludedValues != null) {
+			this.excludedValues.addAll(excludedValues);
 		}
 		modified = setNew;
 	}
@@ -170,20 +170,27 @@ public class MetaMean {
 		return questionid;
 	}
 	
-	public Set<Double> getIncludedValues() {
-		return ImmutableSet.copyOf(includedValues);
+	public boolean isExcluded(Object value) {
+		if(value != null && value instanceof Double && !Double.isNaN((Double)value)) {
+			return excludedValues.contains(value);
+		}
+		return true;
 	}
 	
-	public void setIncludedValues(Collection<Double> values) {
-		includedValues.clear();
-		includedValues.addAll(values);
+	public Set<Double> getExcludedValues() {
+		return ImmutableSet.copyOf(excludedValues);
 	}
 	
-	public void addIncludedValue(double value) {
-		includedValues.add(value);
+	public void setExcludedValues(Collection<Double> values) {
+		excludedValues.clear();
+		excludedValues.addAll(values);
 	}
 	
-	public void removeIncludedValue(double value) {
-		includedValues.remove(value);
+	public void addExcludedValue(double value) {
+		excludedValues.add(value);
+	}
+	
+	public void removeExcludedValue(double value) {
+		excludedValues.remove(value);
 	}
 }
