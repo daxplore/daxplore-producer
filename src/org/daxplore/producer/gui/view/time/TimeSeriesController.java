@@ -210,7 +210,9 @@ public class TimeSeriesController implements ActionListener, DocumentListener {
 			timeSeriesTableModel = new TimeSeriesTableModel(daxploreFile.getMetaTimepointShortManager());
 			timeSeriesTable = new TimeSeriesTable(eventBus, texts, timeSeriesTableModel);
 			timeSeriesView.getTimeSeriesScrollPane().setViewportView(timeSeriesTable);
-			timeSeriesView.setTimeSeriesColumn(daxploreFile.getAbout().getTimeSeriesShortColumn());
+			if(daxploreFile.getAbout().getTimeSeriesType() == TimeSeriesType.SHORT) {
+				timeSeriesView.setTimeSeriesColumn(daxploreFile.getAbout().getTimeSeriesShortColumn());
+			}
 		}
 	}
 

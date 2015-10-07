@@ -12,7 +12,6 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.sql.Types;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.Date;
@@ -31,45 +30,26 @@ import org.daxplore.producer.daxplorelib.metadata.textreference.TextReference;
  * It's a one row table with information about the entire save file.
  */
 public class About {
-	private static final DaxploreTable table = new DaxploreTable(
-			"CREATE TABLE about (filetypeversionmajor INTEGER, filetypeversionminor INTEGER, creation INTEGER," +
-			"lastupdate INTEGER, importdate INTEGER, filename TEXT, timeseriestype TEXT, timeshortcolumn TEXT)", "about");
-	
 	private static final DaxploreTable localeTable = new DaxploreTable("CREATE TABLE locales (locale TEXT PRIMARY KEY)", "locales");
-	
-	
 	
 	public enum TimeSeriesType {
 		NONE, SHORT
 	}
 	
-	final int filetypeversionmajor;
-	final int filetypeversionminor;
-	private Date creation;
-	private Date lastupdate;
-	private Date importdate;
-	private String filename;
-	private TimeSeriesType timeSeriesType;
-	
-	private boolean firstSave = false;
+	private Settings settings;
 	
 	private SortedSet<Locale> locales;
 	private boolean localesModified = false;
 	
-	/**
-	 * If the timeseries type is SHORT, this is the column that keeps track of time points.
-	 * For other timeseries types, this should be set to null.
-	 */
-	private String timeSeriesShortColumn;
-	
 	private Connection connection;
 	
-	public About(Connection sqliteDatabase) throws SQLException {
-		this(sqliteDatabase, false);
+	public About(Connection sqliteDatabase, Settings settings) throws SQLException {
+		this(sqliteDatabase, settings, false);
 	}
 	
-	About(Connection sqliteDatabase, boolean createnew) throws SQLException { 
+	About(Connection sqliteDatabase, Settings settings, boolean createnew) throws SQLException { 
 		this.connection = sqliteDatabase;
+		this.settings = settings;
 		locales = new TreeSet<>(new Comparator<Locale>() {
 			@Override
 			public int compare(Locale o1, Locale o2) {
@@ -77,84 +57,31 @@ public class About {
 			}
 		});
 		if(createnew){
-			filetypeversionmajor = DaxploreProperties.filetypeversionmajor;
-			filetypeversionminor = DaxploreProperties.filetypeversionminor;
-			creation = new Date();
-			lastupdate = (Date) creation.clone();
-			importdate = null;
-			filename = null;
-			timeSeriesType = TimeSeriesType.NONE;
-			timeSeriesShortColumn = null;
-			firstSave = true;
+			settings.putSetting("filetypeversionmajor", DaxploreProperties.filetypeversionmajor);
+			settings.putSetting("filetypeversionminor", DaxploreProperties.filetypeversionminor);
+			Date create = new Date();
+			settings.putSetting("creation", create);
+			settings.putSetting("lastupdate", create.clone());
+			settings.putSetting("importdate", null);
+			settings.putSetting("filename", null);
+			
+			settings.putSetting("timeSeriesType", TimeSeriesType.NONE.name());
+			
+			// If the timeseries type is SHORT, timeSeriesShortColumn is the column that keeps track of time points.
+			// For other timeseries types, this setting is ignored.
 		}else{
-			try (Statement stmt = connection.createStatement()) {
-				stmt.execute("SELECT * FROM about");
-				try(ResultSet rs = stmt.getResultSet()) {
-					rs.next();
-					filetypeversionmajor = rs.getInt("filetypeversionmajor");
-					filetypeversionminor = rs.getInt("filetypeversionminor");
-					creation = rs.getDate("creation");
-					lastupdate = rs.getDate("lastupdate");
-					importdate = rs.getDate("importdate");
-					filename = rs.getString("filename");
-					timeSeriesType = TimeSeriesType.valueOf(rs.getString("timeseriestype"));
-					timeSeriesShortColumn = rs.getString("timeshortcolumn");
-				}
-				try(ResultSet rs = stmt.executeQuery("SELECT locale FROM locales")) {
-					while(rs.next()) {
-						locales.add(new Locale(rs.getString("locale")));
-					}
+			try (Statement stmt = connection.createStatement();
+				 ResultSet rs = stmt.executeQuery("SELECT locale FROM locales")) {
+				while (rs.next()) {
+					locales.add(new Locale(rs.getString("locale")));
 				}
 			}
 		}
 		TextReference.setActiveLocales(new ArrayList<Locale>(locales));
-		SQLTools.createIfNotExists(table, connection);
 		SQLTools.createIfNotExists(localeTable, connection);
 	}
 	
 	void save() throws SQLException {
-		String stmtString;
-		if(firstSave) {
-			stmtString = 
-					"INSERT INTO about (filetypeversionmajor, filetypeversionminor, creation," +
-					"lastupdate, importdate, filename, timeseriestype, timeshortcolumn) " +
-					"VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
-			firstSave = false;
-		} else {
-			stmtString =
-					"UPDATE about SET filetypeversionmajor = ?, filetypeversionminor = ?, creation = ?," +
-					"lastupdate = ?, importdate = ?, filename = ?, timeseriestype = ?, timeshortcolumn = ?";
-		}
-		try(PreparedStatement updateStmt = connection.prepareStatement(stmtString)) {
-			Date now = new Date();
-			updateStmt.setInt(1, filetypeversionmajor);
-			updateStmt.setInt(2, filetypeversionminor);
-			updateStmt.setLong(3, creation.getTime());
-			updateStmt.setLong(4, now.getTime());
-			
-			if(importdate!=null) {
-				updateStmt.setLong(5, importdate.getTime());
-			} else {
-				updateStmt.setNull(5, Types.INTEGER);
-			}
-			
-			if(filename!=null) {
-				updateStmt.setString(6, filename);
-			} else {
-				updateStmt.setNull(6, Types.VARCHAR);
-			}
-			
-			updateStmt.setString(7, timeSeriesType.name());
-			
-			if(timeSeriesShortColumn!=null) {
-				updateStmt.setString(8, timeSeriesShortColumn);
-			} else {
-				updateStmt.setNull(8, Types.VARCHAR);
-			}
-			
-			updateStmt.executeUpdate();
-		}
-		
 		if(localesModified) {
 			try(Statement stmt = connection.createStatement()) {
 				stmt.executeUpdate("DELETE FROM locales");
@@ -176,21 +103,10 @@ public class About {
 	
 	public void discardChanges() throws SQLException {
 		locales.clear();
-		try (Statement stmt = connection.createStatement()) {
-			stmt.execute("SELECT * FROM about");
-			try(ResultSet rs = stmt.getResultSet()) {
-				rs.next();
-				creation = rs.getDate("creation");
-				lastupdate = rs.getDate("lastupdate");
-				importdate = rs.getDate("importdate");
-				filename = rs.getString("filename");
-				timeSeriesType = TimeSeriesType.valueOf(rs.getString("timeseriestype"));
-				timeSeriesShortColumn = rs.getString("timeshortcolumn");
-			}
-			try(ResultSet rs = stmt.executeQuery("SELECT locale FROM locales")) {
-				while(rs.next()) {
-					locales.add(new Locale(rs.getString("locale")));
-				}
+		try (Statement stmt = connection.createStatement();
+			 ResultSet rs = stmt.executeQuery("SELECT locale FROM locales")) {
+			while (rs.next()) {
+				locales.add(new Locale(rs.getString("locale")));
 			}
 		}
 	}
@@ -200,45 +116,41 @@ public class About {
 	}
 	
 	public Date getCreationDate() {
-		return creation;
+		return settings.getDate("creation");
 	}
 	
 	public Date getLastUpdate() {
-		return lastupdate;
+		return settings.getDate("lastupdate");
 	}
 	
 	public Date getImportDate() {
-		return importdate;
+		return settings.getDate("importdate");
 	}
 	
 	public void setImport(String filename) {
 		Date now = new Date();
-		this.filename = filename;
-		this.importdate = now;
+		settings.putSetting("filename", filename);
+		settings.putSetting("importdate", now);
 	}
 	
-	public String getImportFilename(){
-		return filename;
+	public String getImportFilename() {
+		return settings.getString("filename");
 	}
 	
 	public void setTimeSeriesType(TimeSeriesType timeSeriesType) {
-		if(!timeSeriesType.equals(this.timeSeriesType)) {
-			this.timeSeriesType = timeSeriesType;
-		}
+		settings.putSetting("timeSeriesType", timeSeriesType.name());
 	}
 	
 	public TimeSeriesType getTimeSeriesType() {
-		return timeSeriesType;
+		return TimeSeriesType.valueOf(settings.getString("timeSeriesType"));
 	}
 	
 	public void setTimeSeriesShortColumn(String column) {
-		if(!column.equals(timeSeriesShortColumn)) {
-			timeSeriesShortColumn = column;
-		}
+		settings.putSetting("timeSeriesShortColumn", column);
 	}
 	
 	public String getTimeSeriesShortColumn() {
-		return timeSeriesShortColumn;
+		return settings.getString("timeSeriesShortColumn");
 	}
 	
 	public void addLocale(Locale locale) {

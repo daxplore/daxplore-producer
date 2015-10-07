@@ -127,7 +127,7 @@ public class StatsCalculation {
 	 * @throws DaxploreException
 	 * @throws DaxploreWarning 
 	 */
-	public BarStats calculateData(About about, MetaQuestion question, MetaQuestion perspective, int lowerLimit) throws DaxploreException, DaxploreWarning {
+	public BarStats calculateData(About about, MetaQuestion question, MetaQuestion perspective, int lowerLimit) throws DaxploreWarning, DaxploreException {
 		try {
 			BarStats stats = new BarStats(question, perspective);
 			int[][] crosstabs;
@@ -260,7 +260,7 @@ public class StatsCalculation {
 	}
 	
 	@SuppressWarnings({ "unchecked", "rawtypes" })
-	private int[][] freqCalc(MetaQuestion question, MetaQuestion perspective, MetaTimepointShort timepoint, int lowerlimit) throws SQLException, DaxploreWarning {
+	private int[][] freqCalc(MetaQuestion question, MetaQuestion perspective, MetaTimepointShort timepoint, int lowerlimit) throws SQLException, DaxploreWarning, DaxploreException {
 		if(question.getScale() == null && perspective.getScale() == null) { 
 			return null;
 		}

@@ -51,6 +51,7 @@ import com.google.common.base.Strings;
 
 public class DaxploreFile implements Closeable {
 	private Connection connection;
+	private Settings settings;
 	private About about;
 	private File file = null;
 	private RawMeta rawMeta;
@@ -99,7 +100,8 @@ public class DaxploreFile implements Closeable {
 		this.connection = connection;
 		this.file = file;
 		try {
-			about = new About(connection, createNew);
+			settings = new Settings(connection);
+			about = new About(connection, settings, createNew);
 			about.save();
 			rawMeta = new RawMeta(connection);
 			rawData = new RawData(connection);
@@ -185,6 +187,7 @@ public class DaxploreFile implements Closeable {
 			connection.setTransactionIsolation(Connection.TRANSACTION_READ_UNCOMMITTED);
 			
 			Logger.getGlobal().log(Level.INFO, "Save initiated");
+			settings.saveAll();
 			about.save();
 			textReferenceManager.saveAll();
 			metaQuestionManager.saveAll();
@@ -380,6 +383,7 @@ public class DaxploreFile implements Closeable {
 	public void discardChanges() throws DaxploreException {
 		try {
 			about.discardChanges();
+			settings.discardChanges();
 			metaGroupManager.discardChanges();
 			metaQuestionManager.discardChanges();
 			metaScaleManager.discardChanges();
