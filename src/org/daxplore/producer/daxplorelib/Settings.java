@@ -8,7 +8,9 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedList;
+import java.util.Set;
 
 public class Settings {
 	
@@ -17,11 +19,11 @@ public class Settings {
 	}
 	
 	private HashMap<String, Object> settingsMap = new HashMap<>();
-	private LinkedList<String> toBeRemoved = new LinkedList<>();
-	private LinkedList<String> toBeAdded = new LinkedList<>();
-	private LinkedList<String> toBeUpdated = new LinkedList<>();
+	private Set<String> toBeRemoved = new HashSet<>();
+	private Set<String> toBeAdded = new HashSet<>();
+	private Set<String> toBeUpdated = new HashSet<>();
 
-	private static final DaxploreTable table = new DaxploreTable("CREATE TABLE settings (key TEXT, datatype TEXT, val TEXT)", "settings");
+	private static final DaxploreTable table = new DaxploreTable("CREATE TABLE settings (key TEXT PRIMARY KEY, datatype TEXT, val TEXT)", "settings");
 	
 	private Connection connection;
 	
@@ -161,7 +163,8 @@ public class Settings {
 	}
 	
 	public void putSetting(String key, Object value) {
-		if(settingsMap.containsKey(key)) {
+		boolean isindb = (settingsMap.containsKey(key) && !toBeAdded.contains(key)) || toBeRemoved.contains(key); 
+		if(isindb) {
 			toBeUpdated.add(key);
 		} else {
 			toBeAdded.add(key);
@@ -171,7 +174,8 @@ public class Settings {
 	}
 	
 	public void removeSetting(String key) {
-		if(settingsMap.containsKey(key)) {
+		boolean isindb = (settingsMap.containsKey(key) && !toBeAdded.contains(key));
+		if(isindb) {
 			toBeRemoved.add(key);
 			settingsMap.remove(key);
 			toBeAdded.remove(key);

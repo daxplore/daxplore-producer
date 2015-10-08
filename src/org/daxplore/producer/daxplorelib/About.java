@@ -62,8 +62,8 @@ public class About {
 			Date create = new Date();
 			settings.putSetting("creation", create);
 			settings.putSetting("lastupdate", create.clone());
-			settings.putSetting("importdate", null);
-			settings.putSetting("filename", null);
+			settings.putSetting("importdate", new Date(0));
+			settings.putSetting("filename", "hej.txt");
 			
 			settings.putSetting("timeSeriesType", TimeSeriesType.NONE.name());
 			
