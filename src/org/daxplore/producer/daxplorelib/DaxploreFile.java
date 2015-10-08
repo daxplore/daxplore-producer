@@ -106,6 +106,12 @@ public class DaxploreFile implements Closeable {
 			rawMeta = new RawMeta(connection);
 			rawData = new RawData(connection);
 			
+			for(String key : DaxploreProperties.clientBoolSettings) {
+				if(!settings.has(key)) {
+					settings.putSetting(key, DaxploreProperties.clientBoolSettingsDefaults.get(key));
+				}
+			}
+			
 			textReferenceManager = new TextReferenceManager(connection);
 			metaScaleManager = new MetaScaleManager(connection, textReferenceManager);
 			metaMeanManager = new MetaMeanManager(connection);
@@ -125,6 +131,10 @@ public class DaxploreFile implements Closeable {
 	
 	public About getAbout(){
 		return about;
+	}
+	
+	public Settings getSettings() {
+		return settings;
 	}
 	
 	public RawMeta getRawMeta() {

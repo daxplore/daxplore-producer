@@ -57,6 +57,7 @@ import org.daxplore.producer.gui.menu.ActionManager;
 import org.daxplore.producer.gui.menu.MenuBarController;
 import org.daxplore.producer.gui.menu.ToolbarController;
 import org.daxplore.producer.gui.resources.GuiTexts;
+import org.daxplore.producer.gui.settings.SettingsController;
 import org.daxplore.producer.gui.utility.JLabelSelectable;
 import org.daxplore.producer.gui.view.build.GroupsController;
 import org.daxplore.producer.gui.view.text.EditTextController;
@@ -90,6 +91,7 @@ public class MainController {
 	private GroupsController groupsController;
 	private EditTextController editTextController;
 	private TimeSeriesController timeSeriesController;
+	private SettingsController settingsController;
 	
 	private HistoryItem currentHistoryItem; 
 	private Stack<HistoryItem> history = new Stack<>();
@@ -98,6 +100,7 @@ public class MainController {
 		EDITTEXTVIEW,
 		GROUPSVIEW,
 		TIMESERIESVIEW,
+		SETTINGSVIEW
 	}
 	
 	private class HistoryItem {
@@ -135,6 +138,7 @@ public class MainController {
 		groupsController = new GroupsController(eventBus, texts);
 		editTextController = new EditTextController(eventBus, texts, actionManager);
 		timeSeriesController = new TimeSeriesController(daxploreFile.getAbout(), eventBus, texts);
+		settingsController = new SettingsController(eventBus, texts);
 
 		mainView = new MainView(mainWindow);
 		
@@ -143,6 +147,7 @@ public class MainController {
 		mainView.addTab(texts.get("view.groups.tab"), groupsController.getView(), Views.GROUPSVIEW);
 		mainView.addTab(texts.get("view.edit_text.tab"), editTextController.getView(), Views.EDITTEXTVIEW);
 		mainView.addTab(texts.get("view.time_series.tab"), timeSeriesController.getView(), Views.TIMESERIESVIEW);
+		mainView.addTab(texts.get("view.settings.tab"), settingsController.getView(), Views.SETTINGSVIEW);
 		
 		mainView.setToolbar(toolbarController.getView());
 		

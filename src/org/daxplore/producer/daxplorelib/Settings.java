@@ -14,7 +14,7 @@ import java.util.Set;
 public class Settings {
 	
 	public enum SettingsType {
-		INT, DOUBLE, STRING, DATE
+		INT, DOUBLE, STRING, DATE, BOOL
 	}
 	
 	private HashMap<String, Object> settingsMap = new HashMap<>();
@@ -96,6 +96,8 @@ public class Settings {
 			return SettingsType.INT;
 		} else if(object instanceof ZonedDateTime) {
 			return SettingsType.DATE;
+		} else if(object instanceof Boolean) {
+			return SettingsType.BOOL;
 		}
 		return null;
 	}
@@ -127,6 +129,10 @@ public class Settings {
 					ZonedDateTime date = ZonedDateTime.parse(rs.getString("val"));
 					settingsMap.put(key, date);
 					return date;
+				case BOOL:
+					boolean bool = Boolean.parseBoolean(rs.getString("val"));
+					settingsMap.put(key, bool);
+					return bool;
 				}
 			} catch (SQLException|DateTimeParseException e) {
 				// couldn't find a value or valid value, treat it as if it's an empty hashmap and return null
@@ -159,6 +165,14 @@ public class Settings {
 	
 	public ZonedDateTime getDate(String key) {
 		return (ZonedDateTime)getAndLoad(key);
+	}
+	
+	public boolean getBool(String key) {
+		return (Boolean)getAndLoad(key);
+	}
+	
+	public boolean has(String key) {
+		return getAndLoad(key) != null;
 	}
 	
 	public void putSetting(String key, Object value) {
