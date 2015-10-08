@@ -261,7 +261,7 @@ public class MainController {
 	@Subscribe
 	public void on(ImportTextsEvent e) {
 		try {
-			List<Locale> localeList = Settings.availableLocales();
+			List<Locale> localeList = GuiSettings.availableLocales();
 			FileLocalePair fileLocalePair = Dialogs.showImportDialog(preferences, texts, mainWindow, localeList);
 			
 			if(fileLocalePair == null) {
@@ -315,7 +315,7 @@ public class MainController {
 	@Subscribe
 	public void on(DisplayLocaleSelectEvent e) {
 		try {
-			Settings.setCurrentDisplayLocale(e.getLocale());
+			GuiSettings.setCurrentDisplayLocale(e.getLocale());
 		} catch (Exception ex) {
 			Logger.getGlobal().log(Level.SEVERE, "Failed to handle event", ex);
 		}

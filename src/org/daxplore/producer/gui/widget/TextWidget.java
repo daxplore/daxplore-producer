@@ -21,7 +21,7 @@ import javax.swing.SwingConstants;
 
 import org.daxplore.producer.daxplorelib.metadata.textreference.TextReference;
 import org.daxplore.producer.gui.Dialogs;
-import org.daxplore.producer.gui.Settings;
+import org.daxplore.producer.gui.GuiSettings;
 import org.daxplore.producer.gui.event.DisplayLocaleSelectEvent;
 import org.daxplore.producer.gui.resources.Colors;
 import org.daxplore.producer.gui.resources.GuiTexts;
@@ -42,9 +42,9 @@ public class TextWidget extends JPanel implements AbstractWidgetEditor<TextRefer
 	
 	public TextWidget(final EventBus eventBus, final GuiTexts texts) {
 		eventBus.register(this);
-		locale = Settings.getCurrentDisplayLocale();
+		locale = GuiSettings.getCurrentDisplayLocale();
 		setLayout(new BorderLayout(0, 0));
-		locale = Settings.getCurrentDisplayLocale();
+		locale = GuiSettings.getCurrentDisplayLocale();
 		add(label, BorderLayout.CENTER);
 		label.setHorizontalAlignment(SwingConstants.LEFT);
 		JPanel editPanel = new JPanel();

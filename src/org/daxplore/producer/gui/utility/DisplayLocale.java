@@ -9,7 +9,7 @@ package org.daxplore.producer.gui.utility;
 
 import java.util.Locale;
 
-import org.daxplore.producer.gui.Settings;
+import org.daxplore.producer.gui.GuiSettings;
 
 public class DisplayLocale {
 	
@@ -27,7 +27,7 @@ public class DisplayLocale {
 	@Override
 	public String toString() {
 		if(locale!=null) {
-			return locale.getDisplayLanguage(Settings.getProgramLocale());
+			return locale.getDisplayLanguage(GuiSettings.getProgramLocale());
 		}
 		return alternativeText;
 	}

@@ -28,7 +28,7 @@ import javax.swing.event.DocumentListener;
 
 import org.daxplore.producer.daxplorelib.DaxploreFile;
 import org.daxplore.producer.daxplorelib.metadata.textreference.TextReference;
-import org.daxplore.producer.gui.Settings;
+import org.daxplore.producer.gui.GuiSettings;
 import org.daxplore.producer.gui.resources.GuiTexts;
 
 @SuppressWarnings("serial")
@@ -92,7 +92,7 @@ public class EditTextRefPanel extends JPanel implements DocumentListener {
 		}
 		
 		for(Locale l : localesToEdit) {
-			Label label = new Label(MessageFormat.format(texts.get("edit.texts.forlang"), l.getDisplayLanguage(Settings.getProgramLocale()))); 
+			Label label = new Label(MessageFormat.format(texts.get("edit.texts.forlang"), l.getDisplayLanguage(GuiSettings.getProgramLocale()))); 
 			editPanel.add(label, i++);
 			
 			JTextField textField = new JTextField();
@@ -110,7 +110,7 @@ public class EditTextRefPanel extends JPanel implements DocumentListener {
 			updateValidTextRefWarning();
 		}
 		
-		JTextField defaultTextField = localeTextFields.get(Settings.getCurrentDisplayLocale());
+		JTextField defaultTextField = localeTextFields.get(GuiSettings.getCurrentDisplayLocale());
 		
 		defaultTextField.addAncestorListener(new AncestorListener() {
 			@Override

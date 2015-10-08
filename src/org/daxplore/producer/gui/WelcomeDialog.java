@@ -98,7 +98,7 @@ public class WelcomeDialog {
 		welcomeFrame = new JFrame();
 		eventBus = new EventBus();
 		eventBus.register(this);
-		texts = new GuiTexts(Settings.getProgramLocale());
+		texts = new GuiTexts(GuiSettings.getProgramLocale());
 		preferences = new DaxplorePreferences();
 		
 		welcomeFrame.setSize(500, 300);

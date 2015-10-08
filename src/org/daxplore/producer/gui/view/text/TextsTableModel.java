@@ -15,7 +15,7 @@ import javax.swing.table.DefaultTableModel;
 
 import org.daxplore.producer.daxplorelib.metadata.textreference.TextReference;
 import org.daxplore.producer.daxplorelib.metadata.textreference.TextTree;
-import org.daxplore.producer.gui.Settings;
+import org.daxplore.producer.gui.GuiSettings;
 
 @SuppressWarnings("serial")
 class TextsTableModel extends DefaultTableModel implements TableModelListener {
@@ -36,12 +36,12 @@ class TextsTableModel extends DefaultTableModel implements TableModelListener {
 			return "Reference";
 		case 1:
 			if(locale1 != null) {
-				return locale1.getDisplayLanguage(Settings.getProgramLocale());
+				return locale1.getDisplayLanguage(GuiSettings.getProgramLocale());
 			}
 			return "";
 		case 2:
 			if(locale2 != null) {
-				return locale2.getDisplayLanguage(Settings.getProgramLocale());
+				return locale2.getDisplayLanguage(GuiSettings.getProgramLocale());
 			}
 			return "";
 		default:

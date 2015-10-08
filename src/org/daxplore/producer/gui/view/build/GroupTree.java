@@ -32,7 +32,7 @@ import javax.swing.tree.TreePath;
 import org.daxplore.producer.daxplorelib.metadata.MetaGroup;
 import org.daxplore.producer.daxplorelib.metadata.MetaQuestion;
 import org.daxplore.producer.gui.MainController.Views;
-import org.daxplore.producer.gui.Settings;
+import org.daxplore.producer.gui.GuiSettings;
 import org.daxplore.producer.gui.event.ChangeMainViewEvent;
 import org.daxplore.producer.gui.event.DisplayLocaleSelectEvent;
 import org.daxplore.producer.gui.event.EmptyEvents.ReloadTextsEvent;
@@ -114,7 +114,7 @@ public class GroupTree extends JTree {
     	TreePath path = getPathForLocation(event.getX(), event.getY());
     	if(path != null && path.getLastPathComponent() instanceof MetaQuestion) {
     		MetaQuestion mq = (MetaQuestion)path.getLastPathComponent();
-    		return mq.getFullTextRef().get(Settings.getCurrentDisplayLocale());
+    		return mq.getFullTextRef().get(GuiSettings.getCurrentDisplayLocale());
     	}
 		return null;
     }

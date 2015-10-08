@@ -6,7 +6,7 @@ package org.daxplore.producer.gui.view.text;
 import javax.swing.table.DefaultTableModel;
 
 import org.daxplore.producer.daxplorelib.About;
-import org.daxplore.producer.gui.Settings;
+import org.daxplore.producer.gui.GuiSettings;
 import org.daxplore.producer.gui.event.EmptyEvents.LocaleAddedOrRemovedEvent;
 
 import com.google.common.eventbus.EventBus;
@@ -36,7 +36,7 @@ public class SelectedLocalesTableModel extends DefaultTableModel {
 
 	@Override
 	public int getRowCount() {
-		return Settings.availableLocales().size();
+		return GuiSettings.availableLocales().size();
 	}
 
 	@Override
@@ -48,9 +48,9 @@ public class SelectedLocalesTableModel extends DefaultTableModel {
 	public Object getValueAt(int row, int col) {
 		switch (col) {
 		case 0:
-			return Settings.availableLocales().get(row).getDisplayLanguage();
+			return GuiSettings.availableLocales().get(row).getDisplayLanguage();
 		case 1:
-			return about.getLocales().contains(Settings.availableLocales().get(row));
+			return about.getLocales().contains(GuiSettings.availableLocales().get(row));
 		default:
 			throw new IndexOutOfBoundsException("Column index out of bounds: '" + col + "'");
 		}
@@ -78,9 +78,9 @@ public class SelectedLocalesTableModel extends DefaultTableModel {
 		if(col == 1 && value instanceof Boolean) {
 			Boolean set = (Boolean)value;
 			if(set) {
-				about.addLocale(Settings.availableLocales().get(row));
+				about.addLocale(GuiSettings.availableLocales().get(row));
 			} else {
-				about.removeLocale(Settings.availableLocales().get(row));
+				about.removeLocale(GuiSettings.availableLocales().get(row));
 			}
 			eventBus.post(new LocaleAddedOrRemovedEvent());
 		}

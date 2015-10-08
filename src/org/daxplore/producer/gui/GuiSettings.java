@@ -11,7 +11,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
 
-public class Settings {
+public class GuiSettings {
 	
 	private static Locale programLocale = Locale.ENGLISH;
 	private final static Locale[] availableLocales = new Locale[]{new Locale("sv"), new Locale("en")};
@@ -27,7 +27,7 @@ public class Settings {
 	}
 
 	public static void setDefaultLocale(Locale defaultLocale) {
-		Settings.defaultLocale = defaultLocale;
+		GuiSettings.defaultLocale = defaultLocale;
 	}
 	
 	public static void setCurrentDisplayLocale(Locale locale) {

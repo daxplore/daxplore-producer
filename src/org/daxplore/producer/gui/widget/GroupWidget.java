@@ -20,7 +20,7 @@ import javax.swing.border.EmptyBorder;
 
 import org.daxplore.producer.daxplorelib.metadata.MetaGroup;
 import org.daxplore.producer.daxplorelib.metadata.textreference.TextReference;
-import org.daxplore.producer.gui.Settings;
+import org.daxplore.producer.gui.GuiSettings;
 import org.daxplore.producer.gui.event.DisplayLocaleSelectEvent;
 
 import com.google.common.base.Strings;
@@ -41,7 +41,7 @@ public class GroupWidget extends JPanel implements AbstractWidgetEditor<MetaGrou
 	public GroupWidget(EventBus eventBus) {
 		setLayout(new BorderLayout());
 		eventBus.register(this);
-		locale = Settings.getCurrentDisplayLocale();
+		locale = GuiSettings.getCurrentDisplayLocale();
 		textField = new JLabel();
 		textField.setBorder(new EmptyBorder(5, 5, 5, 15));
 		add(textField, BorderLayout.WEST);

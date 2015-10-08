@@ -9,7 +9,7 @@ package org.daxplore.producer.gui.utility;
 
 import java.nio.charset.Charset;
 
-import org.daxplore.producer.gui.Settings;
+import org.daxplore.producer.gui.GuiSettings;
 
 public class DisplayCharset {
 	public Charset charset;
@@ -26,7 +26,7 @@ public class DisplayCharset {
 	@Override
 	public String toString() {
 		if(charset!=null) {
-			return charset.displayName(Settings.getProgramLocale());
+			return charset.displayName(GuiSettings.getProgramLocale());
 		}
 		return alternativeText;
 	}

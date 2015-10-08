@@ -20,7 +20,7 @@ import javax.swing.JPanel;
 import javax.swing.border.EmptyBorder;
 
 import org.daxplore.producer.daxplorelib.metadata.MetaQuestion;
-import org.daxplore.producer.gui.Settings;
+import org.daxplore.producer.gui.GuiSettings;
 import org.daxplore.producer.gui.event.DisplayLocaleSelectEvent;
 import org.daxplore.producer.gui.resources.Colors;
 
@@ -52,7 +52,7 @@ public class QuestionWidget extends JPanel implements AbstractWidgetEditor<MetaQ
 	public QuestionWidget(final EventBus eventBus, boolean compact) {
 		this.compact = compact;
 		eventBus.register(this);
-		locale = Settings.getCurrentDisplayLocale();
+		locale = GuiSettings.getCurrentDisplayLocale();
 		
 		JPanel topRowPanel = new JPanel(new BorderLayout());
 		if(compact) {

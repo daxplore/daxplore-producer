@@ -31,7 +31,7 @@ import org.daxplore.producer.daxplorelib.metadata.MetaGroup.MetaGroupManager;
 import org.daxplore.producer.daxplorelib.metadata.MetaQuestion;
 import org.daxplore.producer.daxplorelib.metadata.textreference.TextReferenceManager;
 import org.daxplore.producer.gui.Dialogs;
-import org.daxplore.producer.gui.Settings;
+import org.daxplore.producer.gui.GuiSettings;
 import org.daxplore.producer.gui.event.DaxploreFileUpdateEvent;
 import org.daxplore.producer.gui.event.DisplayLocaleSelectEvent;
 import org.daxplore.producer.gui.event.EditQuestionEvent;
@@ -300,7 +300,7 @@ public class GroupsController implements ActionListener, MouseListener {
 				MetaGroup group = (MetaGroup)paths[0].getLastPathComponent();
 				 //TODO externalize 
 				int removeOption = JOptionPane.showConfirmDialog(groupsView,
-						MessageFormat.format("Are you sure you want to remove the group \"{0}\"?", group.getTextRef().get(Settings.getCurrentDisplayLocale())),
+						MessageFormat.format("Are you sure you want to remove the group \"{0}\"?", group.getTextRef().get(GuiSettings.getCurrentDisplayLocale())),
 								"Remove group?",
 								JOptionPane.YES_NO_OPTION);
 				if(removeOption==JOptionPane.YES_OPTION) {
