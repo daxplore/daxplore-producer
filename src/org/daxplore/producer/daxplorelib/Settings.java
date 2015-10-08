@@ -4,12 +4,11 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.Date;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.LinkedList;
 import java.util.Set;
 
 public class Settings {
@@ -27,8 +26,6 @@ public class Settings {
 	
 	private Connection connection;
 	
-	SimpleDateFormat sdf = new SimpleDateFormat();
-
 	public Settings(Connection connection) throws SQLException {
 		this.connection = connection;
 		SQLTools.createIfNotExists(table, connection);
@@ -53,7 +50,8 @@ public class Settings {
 				addStmt.setString(2, type.name());
 				switch(type) {
 				case DATE:
-					addStmt.setString(3, sdf.format(settingsMap.get(key)));
+					ZonedDateTime date = (ZonedDateTime)(settingsMap.get(key));
+					addStmt.setString(3, date.format(DateTimeFormatter.ISO_INSTANT));
 					break;
 				default:
 					addStmt.setString(3, settingsMap.get(key).toString()); //works for current types
@@ -68,7 +66,8 @@ public class Settings {
 				addStmt.setString(1, type.name());
 				switch(type) {
 				case DATE:
-					addStmt.setString(2, sdf.format(settingsMap.get(key)));
+					ZonedDateTime date = (ZonedDateTime)(settingsMap.get(key));
+					addStmt.setString(2, date.format(DateTimeFormatter.ISO_INSTANT));
 					break;
 				default:
 					addStmt.setString(2, settingsMap.get(key).toString()); //works for current types
@@ -95,7 +94,7 @@ public class Settings {
 			return SettingsType.STRING;
 		} else if(object instanceof Integer) {
 			return SettingsType.INT;
-		} else if(object instanceof Date) {
+		} else if(object instanceof ZonedDateTime) {
 			return SettingsType.DATE;
 		}
 		return null;
@@ -125,11 +124,11 @@ public class Settings {
 					settingsMap.put(key, s);
 					return s;
 				case DATE:
-					Date date = sdf.parse(rs.getString("val"));
+					ZonedDateTime date = ZonedDateTime.parse(rs.getString("val"));
 					settingsMap.put(key, date);
 					return date;
 				}
-			} catch (SQLException|ParseException e) {
+			} catch (SQLException|DateTimeParseException e) {
 				// couldn't find a value or valid value, treat it as if it's an empty hashmap and return null
 			}
 			return null;
@@ -158,8 +157,8 @@ public class Settings {
 		return (Integer)getAndLoad(key);
 	}
 	
-	public Date getDate(String key) {
-		return (Date)getAndLoad(key);
+	public ZonedDateTime getDate(String key) {
+		return (ZonedDateTime)getAndLoad(key);
 	}
 	
 	public void putSetting(String key, Object value) {

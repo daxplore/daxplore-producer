@@ -12,9 +12,9 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.Comparator;
-import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
@@ -59,11 +59,9 @@ public class About {
 		if(createnew){
 			settings.putSetting("filetypeversionmajor", DaxploreProperties.filetypeversionmajor);
 			settings.putSetting("filetypeversionminor", DaxploreProperties.filetypeversionminor);
-			Date create = new Date();
+			ZonedDateTime create = ZonedDateTime.now();
 			settings.putSetting("creation", create);
-			settings.putSetting("lastupdate", create.clone());
-			settings.putSetting("importdate", new Date(0));
-			settings.putSetting("filename", "hej.txt");
+			settings.putSetting("lastupdate", create);
 			
 			settings.putSetting("timeSeriesType", TimeSeriesType.NONE.name());
 			
@@ -115,20 +113,20 @@ public class About {
 		return (localesModified ? 1 : 0);
 	}
 	
-	public Date getCreationDate() {
+	public ZonedDateTime getCreationDate() {
 		return settings.getDate("creation");
 	}
 	
-	public Date getLastUpdate() {
+	public ZonedDateTime getLastUpdate() {
 		return settings.getDate("lastupdate");
 	}
 	
-	public Date getImportDate() {
+	public ZonedDateTime getImportDate() {
 		return settings.getDate("importdate");
 	}
 	
 	public void setImport(String filename) {
-		Date now = new Date();
+		ZonedDateTime now = ZonedDateTime.now();
 		settings.putSetting("filename", filename);
 		settings.putSetting("importdate", now);
 	}
