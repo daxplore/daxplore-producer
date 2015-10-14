@@ -82,6 +82,7 @@ import com.google.gson.GsonBuilder;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
+import com.google.gson.JsonPrimitive;
 
 public class ImportExportManager {
 	
@@ -162,6 +163,12 @@ public class ImportExportManager {
 			
 			// Generate a single json string and replace "}}},{" with "}}},\n{" to create rows in the file
 			writeZipString(zout, "data/data.json", plainGson.toJson(dataJSON).replaceAll("(}}},\\{)", "}}},\n{")); 
+			
+			JsonObject boolSettings = new JsonObject();
+			for(String setting : DaxploreProperties.clientBoolSettings) {
+				boolSettings.add(setting, new JsonPrimitive(daxploreFile.getSettings().getBool(setting)));
+			}
+			writeZipString(zout, "meta/settings.json", prettyGson.toJson(boolSettings));
 			
 			for(Locale locale : daxploreFile.getAbout().getLocales()) {
 				JsonArray questionJSON = new JsonArray();
