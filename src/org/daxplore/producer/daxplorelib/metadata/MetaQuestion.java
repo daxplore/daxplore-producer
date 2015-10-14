@@ -65,7 +65,7 @@ public class MetaQuestion {
 			"questtimerel");
 	
 	private enum DisplayTypes {
-		FREQUENCIES, MEAN
+		FREQ, MEAN
 	}
 	
 	public static class MetaQuestionManager {
@@ -132,7 +132,7 @@ public class MetaQuestion {
 					String displayTypesJson = rs.getString("displaytypes");
 					Gson gson = new Gson();
 					Set<String> displayTypes = Sets.newHashSet(gson.fromJson(displayTypesJson, String[].class));
-					useFrequencies = displayTypes.contains(DisplayTypes.FREQUENCIES.name());
+					useFrequencies = displayTypes.contains(DisplayTypes.FREQ.name());
 					useMean = displayTypes.contains(DisplayTypes.MEAN.name());
 					
 					scale = metascaleManager.get(id, type);
@@ -469,7 +469,7 @@ public class MetaQuestion {
 	@SuppressWarnings("rawtypes")
 	public JsonElement toJSONObject(Locale locale) {
 		JsonObject json = new JsonObject();
-		json.addProperty("column", id);
+		json.addProperty("column", column);
 		json.addProperty("short", shortTextRef.getWithPlaceholder(locale));
 		if(Strings.isNullOrEmpty(fullTextRef.get(locale))) {
 			json.addProperty("text", shortTextRef.getWithPlaceholder(locale));
@@ -489,8 +489,12 @@ public class MetaQuestion {
 		json.add("options", options);
 		
 		JsonArray tps = new JsonArray();
-		for(MetaTimepointShort tp : getTimepoints()) {
-			tps.add(new JsonPrimitive(tp.getTimeindex()));
+		if(!getTimepoints().isEmpty()) {
+			for(MetaTimepointShort tp : getTimepoints()) {
+				tps.add(new JsonPrimitive(tp.getTimeindex()));
+			}
+		} else {
+			tps.add(new JsonPrimitive(0));
 		}
 		json.add("timepoints", tps);
 		
@@ -502,7 +506,7 @@ public class MetaQuestion {
 	private JsonElement displayTypesAsJSON() {
 		JsonArray displayTypesJson = new JsonArray();
 		if (useFrequencies) {
-			displayTypesJson.add(new JsonPrimitive(DisplayTypes.FREQUENCIES.name()));
+			displayTypesJson.add(new JsonPrimitive(DisplayTypes.FREQ.name()));
 		}
 		if (useMean) {
 			displayTypesJson.add(new JsonPrimitive(DisplayTypes.MEAN.name()));

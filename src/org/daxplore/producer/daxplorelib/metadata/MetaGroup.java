@@ -493,7 +493,7 @@ public class MetaGroup implements Comparable<MetaGroup> {
 	public JsonElement toJSONObject(Locale locale) {
 		JsonArray questions = new JsonArray();
 		for(MetaQuestion q : qList) {
-			questions.add(new JsonPrimitive(q.getId()));
+			questions.add(new JsonPrimitive(q.getColumn()));
 		}
 		switch(type) {
 		case PERSPECTIVE:
