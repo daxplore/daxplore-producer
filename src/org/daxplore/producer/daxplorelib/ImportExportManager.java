@@ -60,6 +60,7 @@ import org.daxplore.producer.daxplorelib.metadata.textreference.TextReference;
 import org.daxplore.producer.daxplorelib.metadata.textreference.TextTree;
 import org.daxplore.producer.daxplorelib.raw.RawMeta.RawMetaQuestion;
 import org.daxplore.producer.daxplorelib.raw.VariableType;
+import org.daxplore.producer.daxplorelib.resources.DaxploreProperties;
 import org.daxplore.producer.tools.MyTools;
 import org.daxplore.producer.tools.SortedProperties;
 import org.opendatafoundation.data.FileFormatInfo;

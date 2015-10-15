@@ -25,9 +25,9 @@ import java.util.logging.Logger;
 
 import org.daxplore.producer.daxplorelib.DaxploreException;
 import org.daxplore.producer.daxplorelib.DaxploreFile;
-import org.daxplore.producer.daxplorelib.DaxploreProperties;
 import org.daxplore.producer.daxplorelib.DaxploreTable;
 import org.daxplore.producer.daxplorelib.SQLTools;
+import org.daxplore.producer.daxplorelib.resources.DaxploreProperties;
 import org.daxplore.producer.tools.SmallMap;
 
 public class TextReferenceManager {

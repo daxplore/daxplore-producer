@@ -44,6 +44,7 @@ import org.daxplore.producer.daxplorelib.raw.RawData;
 import org.daxplore.producer.daxplorelib.raw.RawMeta;
 import org.daxplore.producer.daxplorelib.raw.RawMeta.RawMetaQuestion;
 import org.daxplore.producer.daxplorelib.raw.VariableOptionInfo;
+import org.daxplore.producer.daxplorelib.resources.DaxploreProperties;
 import org.daxplore.producer.tools.Pair;
 import org.xml.sax.SAXException;
 

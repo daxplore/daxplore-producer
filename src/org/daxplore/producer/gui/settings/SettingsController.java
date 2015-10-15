@@ -8,8 +8,8 @@ import java.util.Map;
 
 import javax.swing.JCheckBox;
 
-import org.daxplore.producer.daxplorelib.DaxploreProperties;
 import org.daxplore.producer.daxplorelib.Settings;
+import org.daxplore.producer.daxplorelib.resources.DaxploreProperties;
 import org.daxplore.producer.gui.event.DaxploreFileUpdateEvent;
 import org.daxplore.producer.gui.resources.GuiTexts;
 

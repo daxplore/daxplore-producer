@@ -5,7 +5,7 @@
  * which accompanies this distribution, and is available at
  * http://www.gnu.org/licenses/old-licenses/gpl-2.0.html
  ******************************************************************************/
-package org.daxplore.producer.daxplorelib;
+package org.daxplore.producer.daxplorelib.resources;
 
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -16,12 +16,11 @@ import com.google.common.collect.ImmutableMap;
 
 public class DaxploreProperties {
 
-	static final int filetypeversionmajor = 0;
-	static final int filetypeversionminor = 3;
+	public static final int filetypeversionmajor = 0;
+	public static final int filetypeversionminor = 3;
 	
 	public static final String[] properties = {"page_title", "secondary_flag", "all_respondents"};
 	
-	//public static final String[] clientBoolSettings = {"freq", "mean", "extratext", "csv", "img", "embed", "timeseries"};
 	public static final List<String> clientBoolSettings;
 	public static final Map<String, Boolean> clientBoolSettingsDefaults;
 	static {

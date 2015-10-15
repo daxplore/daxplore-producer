@@ -24,6 +24,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.daxplore.producer.daxplorelib.metadata.textreference.TextReference;
+import org.daxplore.producer.daxplorelib.resources.DaxploreProperties;
 
 /**
  * This class mirrors the 'about' table in the project file
