@@ -300,7 +300,7 @@ public class GroupsController implements ActionListener, MouseListener {
 				MetaGroup group = (MetaGroup)paths[0].getLastPathComponent();
 				 //TODO externalize 
 				int removeOption = JOptionPane.showConfirmDialog(groupsView,
-						MessageFormat.format("Are you sure you want to remove the group \"{0}\"?", group.getTextRef().get(GuiSettings.getCurrentDisplayLocale())),
+						MessageFormat.format("Are you sure you want to remove the group \"{0}\"?", group.getTextRef().getText(GuiSettings.getCurrentDisplayLocale())),
 								"Remove group?",
 								JOptionPane.YES_NO_OPTION);
 				if(removeOption==JOptionPane.YES_OPTION) {
@@ -366,8 +366,8 @@ public class GroupsController implements ActionListener, MouseListener {
 		String column = question.getColumn();
 		if(selectedLocale != null) {
 			
-			String shorttext = question.getShortTextRef().get(selectedLocale);
-			String fulltext = question.getFullTextRef().get(selectedLocale);
+			String shorttext = question.getShortTextRef().getText(selectedLocale);
+			String fulltext = question.getFullTextRef().getText(selectedLocale);
 			groupsView.setVariableInfo(column, shorttext, fulltext);
 		} else {
 			groupsView.setVariableInfo(column, "", "");

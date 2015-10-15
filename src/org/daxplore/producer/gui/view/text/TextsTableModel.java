@@ -66,9 +66,9 @@ class TextsTableModel extends DefaultTableModel implements TableModelListener {
 		case 0:
 			return textsList.get(row).getRef();
 		case 1:
-			return textsList.get(row).get(locale1);
+			return textsList.get(row).getText(locale1);
 		case 2:
-			return textsList.get(row).get(locale2);
+			return textsList.get(row).getText(locale2);
 		default:
 			throw new IndexOutOfBoundsException("Column out of bounds: " + col);
 		}

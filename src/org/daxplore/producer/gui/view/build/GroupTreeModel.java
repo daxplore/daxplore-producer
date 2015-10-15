@@ -250,9 +250,9 @@ class GroupTreeModel implements TreeModel {
 	public String prettyPrint(Locale locale) {
 		StringBuilder sb = new StringBuilder();
 		for(MetaGroup mg: groups) {
-			sb.append(mg.getTextRef().get(locale) + "\n");
+			sb.append(mg.getTextRef().getText(locale) + "\n");
 			for(MetaQuestion mq: mg.getQuestions()) {
-				sb.append("\t " + mq.getFullTextRef().get(locale) + "\n");
+				sb.append("\t " + mq.getFullTextRef().getText(locale) + "\n");
 			}
 		}
 		return sb.toString();

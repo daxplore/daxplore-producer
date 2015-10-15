@@ -7,8 +7,10 @@
  ******************************************************************************/
 package org.daxplore.producer.daxplorelib.resources;
 
+import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 
 import com.google.common.collect.ImmutableList;
@@ -19,20 +21,29 @@ public class DaxploreProperties {
 	public static final int filetypeversionmajor = 0;
 	public static final int filetypeversionminor = 3;
 	
-	public static final String[] properties = {"page_title", "secondary_flag", "all_respondents"};
+	public static final List<Locale> predefinedLocales =
+			ImmutableList.copyOf(Arrays.asList(
+					new Locale("sv"),
+					new Locale("en")));
 	
 	public static final List<String> clientBoolSettings;
 	public static final Map<String, Boolean> clientBoolSettingsDefaults;
 	static {
-		LinkedHashMap<String, Boolean> map = new LinkedHashMap<String, Boolean>();
-		map.put("freq", true);
-		map.put("mean", false);
-		map.put("extratext", false);
-		map.put("csv", true);
-		map.put("img", false);
-		map.put("embed", true);
-		map.put("timeseries", false);
-		clientBoolSettings = ImmutableList.copyOf(map.keySet());
-		clientBoolSettingsDefaults = ImmutableMap.copyOf(map);
+		Map<String, Boolean> boolSettingsMap = new LinkedHashMap<String, Boolean>();
+		boolSettingsMap.put("freq", true);
+		boolSettingsMap.put("mean", false);
+		boolSettingsMap.put("extratext", false);
+		boolSettingsMap.put("csv", true);
+		boolSettingsMap.put("img", false);
+		boolSettingsMap.put("embed", true);
+		boolSettingsMap.put("timeseries", false);
+		clientBoolSettings = ImmutableList.copyOf(boolSettingsMap.keySet());
+		clientBoolSettingsDefaults = ImmutableMap.copyOf(boolSettingsMap);
 	}
+	
+	public static final List<String> properties =
+			ImmutableList.copyOf(Arrays.asList(
+				"page_title",
+				"secondary_flag",
+				"all_respondents"));
 }

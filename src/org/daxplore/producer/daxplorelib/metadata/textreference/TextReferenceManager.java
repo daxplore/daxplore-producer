@@ -28,6 +28,7 @@ import org.daxplore.producer.daxplorelib.DaxploreFile;
 import org.daxplore.producer.daxplorelib.DaxploreTable;
 import org.daxplore.producer.daxplorelib.SQLTools;
 import org.daxplore.producer.daxplorelib.resources.DaxploreProperties;
+import org.daxplore.producer.daxplorelib.resources.DefaultPresenterTexts;
 import org.daxplore.producer.tools.SmallMap;
 
 public class TextReferenceManager {
@@ -48,8 +49,16 @@ public class TextReferenceManager {
 		} catch (SQLException e) {
 			throw new DaxploreException("Failed to create the TextReferenceManager SQL table", e);
 		}
-		for(String property: DaxploreProperties.properties) {
-			get(property);
+		
+		// set default values
+		for (Locale locale : DaxploreProperties.predefinedLocales) {
+			DefaultPresenterTexts defaultTexts = new DefaultPresenterTexts(locale);
+			for (String property : DaxploreProperties.properties) {
+				TextReference ref = get(property);
+				if (!ref.hasText(locale)) {
+					ref.put(defaultTexts.get(property), locale);
+				}
+			}
 		}
 	}
 	
@@ -139,7 +148,7 @@ public class TextReferenceManager {
 							oldLocs.remove(l);
 							insertTextrefStmt.setString(1, tr.reference);
 							insertTextrefStmt.setString(2, l.toLanguageTag());
-							String trtext = tr.get(l);
+							String trtext = tr.getText(l);
 							if (trtext == null) {
 								trtext = "";
 							}

@@ -83,13 +83,13 @@ public class QuestionWidget extends JPanel implements AbstractWidgetEditor<MetaQ
 		
 		idLabel.setText(MessageFormat.format(idFormat, metaQuestion.getColumn()));
 		
-		String shortText = metaQuestion.getShortTextRef().get(locale);
+		String shortText = metaQuestion.getShortTextRef().getText(locale);
 		if(Strings.isNullOrEmpty(shortText)) {
 			shortText = "<i>missing short text</i>";
 		}
 		shortTextLabel.setText(MessageFormat.format(shortTextFormat, shortText));
 
-		String longText = metaQuestion.getFullTextRef().get(locale);
+		String longText = metaQuestion.getFullTextRef().getText(locale);
 		if(Strings.isNullOrEmpty(longText)) {
 			longText = "";
 		} else {

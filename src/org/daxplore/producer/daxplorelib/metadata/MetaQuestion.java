@@ -471,10 +471,10 @@ public class MetaQuestion {
 		JsonObject json = new JsonObject();
 		json.addProperty("column", column);
 		json.addProperty("short", shortTextRef.getWithPlaceholder(locale));
-		if(Strings.isNullOrEmpty(fullTextRef.get(locale))) {
+		if(Strings.isNullOrEmpty(fullTextRef.getText(locale))) {
 			json.addProperty("text", shortTextRef.getWithPlaceholder(locale));
 		} else {
-			json.addProperty("text", fullTextRef.get(locale));
+			json.addProperty("text", fullTextRef.getText(locale));
 		}
 		//TODO extratextref
 		JsonArray options = new JsonArray();
@@ -516,12 +516,12 @@ public class MetaQuestion {
 	
 	public List<TextReference> getEmptyTextRefs(Locale locale) {
 		List<TextReference> emptyRefs = new LinkedList<TextReference>();
-		if(Strings.isNullOrEmpty(shortTextRef.get(locale))) {
+		if(Strings.isNullOrEmpty(shortTextRef.getText(locale))) {
 			emptyRefs.add(shortTextRef);
 		}
 		//TODO extratextref
 		for(Option option : scale.getOptions()) {
-			if(Strings.isNullOrEmpty(option.getTextRef().get(locale))) {
+			if(Strings.isNullOrEmpty(option.getTextRef().getText(locale))) {
 				emptyRefs.add(option.getTextRef());
 			}
 		}

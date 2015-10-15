@@ -55,7 +55,7 @@ public class EditTextRefPanel extends JPanel implements DocumentListener {
 		buildUI(localesToEdit, true);
 		textRefIdField.setText(textRef.getRef());
 		for(Locale l : localesToEdit) {
-			localeTextFields.get(l).setText(textRef.get(l));
+			localeTextFields.get(l).setText(textRef.getText(l));
 		}
 	}
 
@@ -70,7 +70,7 @@ public class EditTextRefPanel extends JPanel implements DocumentListener {
 			textRefIdLabel.setText(textRef.getRef());
 		}
 		for(Locale l : localesToEdit) {
-			localeTextFields.get(l).setText(textRef.get(l));
+			localeTextFields.get(l).setText(textRef.getText(l));
 		}
 	}
 	

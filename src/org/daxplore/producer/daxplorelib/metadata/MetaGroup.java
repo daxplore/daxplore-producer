@@ -304,7 +304,7 @@ public class MetaGroup implements Comparable<MetaGroup> {
 		public List<TextReference> getEmptyTextRefs(Locale locale) throws DaxploreException {
 			List<TextReference> emptyRefs = new LinkedList<TextReference>();
 			for(MetaGroup group : getQuestionGroups()) {
-				if(group.type == GroupType.QUESTIONS && Strings.isNullOrEmpty(group.textref.get(locale))) {
+				if(group.type == GroupType.QUESTIONS && Strings.isNullOrEmpty(group.textref.getText(locale))) {
 					emptyRefs.add(group.textref);
 				}
 			}

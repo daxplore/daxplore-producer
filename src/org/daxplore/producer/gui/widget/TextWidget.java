@@ -86,7 +86,7 @@ public class TextWidget extends JPanel implements AbstractWidgetEditor<TextRefer
 			return textRef.getRef();
 		}
 	
-		String text = textRef.get(locale);
+		String text = textRef.getText(locale);
 		if(Strings.isNullOrEmpty(text)) {
 			return textRef.getRef();
 		}

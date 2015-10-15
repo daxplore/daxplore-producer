@@ -108,7 +108,7 @@ public class Dialogs {
 				try {
 					TextReference newTextRef = textManager.get(textRefId);
 					for(Locale l : textRef.getLocales()) {
-						newTextRef.put(textRef.get(l), l);
+						newTextRef.put(textRef.getText(l), l);
 					}
 					metaGroup.setTextRef(newTextRef);
 					textManager.remove(textRef);

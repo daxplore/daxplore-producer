@@ -28,12 +28,13 @@ public class TextReference extends TextReferenceReference {
 		this.localeMap = localeMap;
 	}
 	
-	public String get(Locale locale) {
+	public String getText(Locale locale) {
 		return localeMap.get(locale);
 	}
 	
 	/**
-	 * Returns the user facing text for the TextReference. Returns the textref itself if the text is empty or null.
+	 * Returns the user facing text for the TextReference.
+	 * Returns the textref itself if the text is empty or null.
 	 */
 	public String getWithPlaceholder(Locale locale) {
 		String text = localeMap.get(locale);
@@ -52,7 +53,11 @@ public class TextReference extends TextReferenceReference {
 		}
 	}
 	
-	public boolean has(Locale locale) {
+	public boolean hasText(Locale locale) {
+		return localeMap.get(locale) != null;
+	}
+	
+	public boolean hasLocale(Locale locale) {
 		return localeMap.containsKey(locale);
 	}
 	
@@ -66,10 +71,10 @@ public class TextReference extends TextReferenceReference {
 	}
 	
 	public boolean equalsLocale(TextReference other, Locale locale) {
-		if(!has(locale) || !other.has(locale)) {
+		if(!hasLocale(locale) || !other.hasLocale(locale)) {
 			return false;
 		}
-		return get(locale).equals(other.get(locale));
+		return getText(locale).equals(other.getText(locale));
 	}
 	
 	public static void setActiveLocales(List<Locale> localelist) {

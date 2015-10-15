@@ -1,33 +1,26 @@
-/*******************************************************************************
- * Copyright (c) 2013-2014 Daniel Dunér, Axel Winkler.
- * All rights reserved. This program is free software: it is made
- * available under the terms of the GNU Public License v2.0 (or later)
- * which accompanies this distribution, and is available at
- * http://www.gnu.org/licenses/old-licenses/gpl-2.0.html
- ******************************************************************************/
-package org.daxplore.producer.gui.resources;
+package org.daxplore.producer.daxplorelib.resources;
 
 import java.text.MessageFormat;
 import java.util.Locale;
 import java.util.ResourceBundle;
 
-import org.daxplore.producer.daxplorelib.resources.DefaultPresenterTexts;
+import org.daxplore.producer.gui.resources.GuiTexts;
 import org.daxplore.producer.tools.MyTools;
 
 /**
- * A small one-off ResourceBundle wrapper class that reads localized GuiTexts_?.properties files
- * from the resource package.
+ * A small one-off ResourceBundle wrapper class that reads localized
+ * DefautltPresenterTexts_?.properties files from the resource package.
  * 
  * <p>Hides unused methods, adds some convenience via Message format and allows for
  * a completely different implementation if we want to switch to a UTF-8 format later.</p>
  * 
- * <p>Same as {@link DefaultPresenterTexts}.</p>
+ * <p>Copy of {@link GuiTexts}</p>
  */
-public class GuiTexts {
+public class DefaultPresenterTexts {
 	private ResourceBundle textBundle;
 	
-	public GuiTexts(Locale locale) {
-		textBundle = ResourceBundle.getBundle("org.daxplore.producer.gui.resources.GuiTexts", locale, this.getClass().getClassLoader());
+	public DefaultPresenterTexts(Locale locale) {
+		textBundle = ResourceBundle.getBundle("org.daxplore.producer.daxplorelib.resources.DefaultPresenterTexts", locale, this.getClass().getClassLoader());
 	}
 	
 	/**

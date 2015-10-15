@@ -57,7 +57,7 @@ public class GroupWidget extends JPanel implements AbstractWidgetEditor<MetaGrou
 	@Override
 	public void setContent(MetaGroup value) {
 		this.metaGroup = value;
-		if(metaGroup.getTextRef().has(locale)) {
+		if(metaGroup.getTextRef().hasLocale(locale)) {
 			textField.setText(MessageFormat.format(htmlFormat, getLabelText()));
 		} else {
 			textField.setText(missingFormat);
@@ -74,7 +74,7 @@ public class GroupWidget extends JPanel implements AbstractWidgetEditor<MetaGrou
 			return textRef.getRef();
 		}
 	
-		String text = textRef.get(locale);
+		String text = textRef.getText(locale);
 		if(Strings.isNullOrEmpty(text)) {
 			return textRef.getRef();
 		}

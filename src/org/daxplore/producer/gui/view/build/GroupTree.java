@@ -114,7 +114,7 @@ public class GroupTree extends JTree {
     	TreePath path = getPathForLocation(event.getX(), event.getY());
     	if(path != null && path.getLastPathComponent() instanceof MetaQuestion) {
     		MetaQuestion mq = (MetaQuestion)path.getLastPathComponent();
-    		return mq.getFullTextRef().get(GuiSettings.getCurrentDisplayLocale());
+    		return mq.getFullTextRef().getText(GuiSettings.getCurrentDisplayLocale());
     	}
 		return null;
     }

@@ -277,8 +277,8 @@ public class ImportExportManager {
 	}
 	
 	private String getTextRefForExport(TextReference ref, Locale locale) {
-		if(!Strings.isNullOrEmpty(ref.get(locale))) { 
-			return ref.get(locale);
+		if(!Strings.isNullOrEmpty(ref.getText(locale))) { 
+			return ref.getText(locale);
 		} else {
 			emptyTextrefs.add(ref);
 			return ref.getWithPlaceholder(locale);
@@ -460,8 +460,8 @@ public class ImportExportManager {
 			TextTree allTexts = daxploreFile.getTextReferenceManager().getAll();
 			
 			for(TextReference tr: allTexts.iterable()) {
-				if(tr.has(locale)) {
-					properties.setProperty(tr.getRef(), tr.get(locale));
+				if(tr.hasLocale(locale)) {
+					properties.setProperty(tr.getRef(), tr.getText(locale));
 				} else {
 					properties.setProperty(tr.getRef(), "");
 				}
@@ -474,8 +474,8 @@ public class ImportExportManager {
 			try(CSVWriter csvWriter = new CSVWriter(writer)) {
 				allTexts = daxploreFile.getTextReferenceManager().getAll();
 				for(TextReference tr: allTexts.iterable()) {
-					if(tr.has(locale)) {
-						csvWriter.writeNext(new String[]{tr.getRef(), tr.get(locale)});
+					if(tr.hasLocale(locale)) {
+						csvWriter.writeNext(new String[]{tr.getRef(), tr.getText(locale)});
 					} else {
 						csvWriter.writeNext(new String[]{tr.getRef(), ""});
 					}
