@@ -163,13 +163,13 @@ public class ImportExportManager {
 			Gson prettyGson = new GsonBuilder().setPrettyPrinting().create();
 			
 			// Generate a single json string and replace "}}},{" with "}}},\n{" to create rows in the file
-			writeZipString(zout, "data/data.json", plainGson.toJson(dataJSON).replaceAll("(}}},\\{)", "}}},\n{")); 
+			writeZipString(zout, "data.json", plainGson.toJson(dataJSON).replaceAll("(}}},\\{)", "}}},\n{")); 
 			
 			JsonObject boolSettings = new JsonObject();
 			for(String setting : DaxploreProperties.clientBoolSettings) {
 				boolSettings.add(setting, new JsonPrimitive(daxploreFile.getSettings().getBool(setting)));
 			}
-			writeZipString(zout, "meta/settings.json", prettyGson.toJson(boolSettings));
+			writeZipString(zout, "boolsettings.json", prettyGson.toJson(boolSettings));
 			
 			for(Locale locale : daxploreFile.getAbout().getLocales()) {
 				JsonArray questionJSON = new JsonArray();
@@ -179,15 +179,15 @@ public class ImportExportManager {
 				}
 				
 				String propertiesJSONString = prettyGson.toJson(getPropertiesJson(locale));
-				writeZipString(zout, "properties/usertexts_"+locale.toLanguageTag()+".json", propertiesJSONString);
+				writeZipString(zout, "usertexts_"+locale.toLanguageTag()+".json", propertiesJSONString);
 				
-				writeZipString(zout, "meta/questions_"+locale.toLanguageTag()+".json", prettyGson.toJson(questionJSON));
+				writeZipString(zout, "questions_"+locale.toLanguageTag()+".json", prettyGson.toJson(questionJSON));
 			    
 			    String groupJSONString = prettyGson.toJson(daxploreFile.getMetaGroupManager().getQuestionGroupsJSON(locale));
 			    emptyTextrefs.addAll(daxploreFile.getMetaGroupManager().getEmptyTextRefs(locale));
-			    writeZipString(zout, "meta/groups_"+locale.toLanguageTag()+".json", groupJSONString);
+			    writeZipString(zout, "groups_"+locale.toLanguageTag()+".json", groupJSONString);
 			    
-			    writeZipString(zout, "meta/perspectives_"+locale.toLanguageTag()+".json", prettyGson.toJson(perspectives.toJSONObject(locale)));
+			    writeZipString(zout, "perspectives_"+locale.toLanguageTag()+".json", prettyGson.toJson(perspectives.toJSONObject(locale)));
 			}
 	
 			zout.flush();
