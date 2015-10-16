@@ -41,9 +41,37 @@ public class DaxploreProperties {
 		clientBoolSettingsDefaults = ImmutableMap.copyOf(boolSettingsMap);
 	}
 	
-	public static final List<String> properties =
+	public static final List<String> presenterUITexts =
 			ImmutableList.copyOf(Arrays.asList(
-				"page_title",
-				"secondary_flag",
-				"all_respondents"));
+					"all_respondents",
+					"compareWithAll",
+					"compareWithOld",
+					"compareWithOldTitleDisabled",
+					"compareWithOldTitleEnabled",
+					"csvButtonTitle",
+					"embedButtonNumbers",
+					"embedButtonTexts",
+					"embedButtonTitle",
+					"embedPopupDescription",
+					"embedPopupTitle",
+					"embedPopupTitleSize",
+					"embedSettingsHeader",
+					"embedShowLegend",
+					"embedTransparentBackground",
+					"hideWarningButton",
+					"onlyShowNewTitleDisabled",
+					"onlyShowNewTitleEnabled",
+					"onlyShowNew",
+					"page_title",
+					"pickAQuestionHeader",
+					"pickSelectionAlternativesHeader",
+					"pickSelectionGroupHeader",
+					"printButtonTitle",
+					"secondary_flag",
+					"showAverageTitleDisabled",
+					"showAverageTitleEnabled",
+					"showAverage",
+					"showFrequencyTitleDisabled",
+					"showFrequencyTitleEnabled",
+					"showFrequency"));
 }

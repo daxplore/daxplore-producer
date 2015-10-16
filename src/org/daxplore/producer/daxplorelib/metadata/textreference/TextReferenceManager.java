@@ -53,7 +53,7 @@ public class TextReferenceManager {
 		// set default values
 		for (Locale locale : DaxploreProperties.predefinedLocales) {
 			DefaultPresenterTexts defaultTexts = new DefaultPresenterTexts(locale);
-			for (String property : DaxploreProperties.properties) {
+			for (String property : DaxploreProperties.presenterUITexts) {
 				TextReference ref = get(property);
 				if (!ref.hasText(locale)) {
 					ref.put(defaultTexts.get(property), locale);
