@@ -178,7 +178,7 @@ public class ImportExportManager {
 					emptyTextrefs.addAll(q.getEmptyTextRefs(locale));
 				}
 				
-				String propertiesJSONString = prettyGson.toJson(getPropertiesJson(locale));
+				String propertiesJSONString = prettyGson.toJson(getUITextsJson(locale));
 				writeZipString(zout, "usertexts_"+locale.toLanguageTag()+".json", propertiesJSONString);
 				
 				writeZipString(zout, "questions_"+locale.toLanguageTag()+".json", prettyGson.toJson(questionJSON));
@@ -263,7 +263,7 @@ public class ImportExportManager {
 		}
 	}
 	
-	private JsonElement getPropertiesJson(Locale locale) throws DaxploreException {
+	private JsonElement getUITextsJson(Locale locale) throws DaxploreException {
 		JsonObject json = new JsonObject();
 		for(String property: DaxploreProperties.presenterUITexts) {
 			TextReference ref = daxploreFile.getTextReferenceManager().get(property);
@@ -271,7 +271,7 @@ public class ImportExportManager {
 		}
 		for(MetaTimepointShort mtp: daxploreFile.getMetaTimepointShortManager().getAll()) {
 			TextReference ref = mtp.getTextRef();
-			json.addProperty("timepoint_" + mtp.getTimeindex(), getTextRefForExport(ref, locale));
+			json.addProperty("timepoint" + mtp.getTimeindex(), getTextRefForExport(ref, locale));
 		}
 		return json;
 	}
@@ -281,7 +281,7 @@ public class ImportExportManager {
 			return ref.getText(locale);
 		} else {
 			emptyTextrefs.add(ref);
-			return ref.getWithPlaceholder(locale);
+			return "";
 		}
 	}
 	

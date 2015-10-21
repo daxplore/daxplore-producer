@@ -43,7 +43,7 @@ public class DaxploreProperties {
 	
 	public static final List<String> presenterUITexts =
 			ImmutableList.copyOf(Arrays.asList(
-					"all_respondents",
+					"allRespondents",
 					"compareWithAll",
 					"compareWithOld",
 					"compareWithOldTitleDisabled",
@@ -62,12 +62,12 @@ public class DaxploreProperties {
 					"onlyShowNewTitleDisabled",
 					"onlyShowNewTitleEnabled",
 					"onlyShowNew",
-					"page_title",
+					"pageTitle",
 					"pickAQuestionHeader",
 					"pickSelectionAlternativesHeader",
 					"pickSelectionGroupHeader",
 					"printButtonTitle",
-					"secondary_flag",
+					"secondaryFlag",
 					"showAverageTitleDisabled",
 					"showAverageTitleEnabled",
 					"showAverage",
