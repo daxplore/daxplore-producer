@@ -61,9 +61,9 @@ public class BarStats {
 	private static class Means {
 		private double[] mean;
 		private Double allmean;
-		private double[] counts;
+		private int[] counts;
 		
-		public Means(double[] mean, double allmean, double[] counts) {
+		public Means(double[] mean, double allmean, int[] counts) {
 			this.mean = mean;
 			this.allmean = allmean;
 			this.counts = counts;
@@ -79,7 +79,7 @@ public class BarStats {
 			json.add("all", new JsonPrimitive(allmean));
 			
 			array = new JsonArray();
-			for(Double d : counts) {
+			for(int d : counts) {
 				array.add(new JsonPrimitive(d));
 			}
 			json.add("count", array);
@@ -99,7 +99,7 @@ public class BarStats {
 		useFrequency = true;
 	}
 
-	void addMeanData(int timeindex, double[] means, double allmean, double[] counts) {
+	void addMeanData(int timeindex, double[] means, double allmean, int[] counts) {
 		meanData.put(timeindex, new Means(means, allmean, counts));
 		useMean = true;
 	}

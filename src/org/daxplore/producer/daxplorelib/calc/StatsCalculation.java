@@ -141,6 +141,9 @@ public class StatsCalculation {
 				if(question.useFrequencies()) {
 					try {
 						crosstabs = freqCalc(question, perspective, null, lowerLimit);
+						//TODO add option to choose how to calculate the "all" group
+						// A) As frequencies, as it currently is
+						// B) As a sum of the crosstab data
 						frequencies = frequencies(question, null, lowerLimit);
 						stats.addFrequencyData(0, crosstabs, frequencies);
 					} catch (DaxploreWarning e) {
@@ -150,7 +153,12 @@ public class StatsCalculation {
 				if(question.useMean()) {
 					try {
 						means = meanCalc(question, perspective, null, lowerLimit);
-						stats.addMeanData(0, means.get(0), means.get(1)[0], means.get(2));
+						double[] counts = means.get(2);
+						int[] intCounts = new int[counts.length];
+						for(int i=0; i<counts.length; i++){
+							intCounts[i] = (int)counts[i];
+						}
+						stats.addMeanData(0, means.get(0), means.get(1)[0], intCounts);
 					} catch (DaxploreWarning e) {
 						warnings.add(e.getMessage());
 					}
@@ -181,7 +189,12 @@ public class StatsCalculation {
 					if(question.useMean()) {
 						try {
 							means = meanCalc(question, perspective, timepoint, lowerLimit);
-							stats.addMeanData(0, means.get(0), means.get(1)[0], means.get(2));
+							double[] counts = means.get(2);
+							int[] intCounts = new int[counts.length];
+							for(int i=0; i<counts.length; i++){
+								intCounts[i] = (int)counts[i];
+							}
+							stats.addMeanData(0, means.get(0), means.get(1)[0], intCounts);
 						} catch (DaxploreWarning e) {
 							warnings.add(e.getMessage());
 						}
@@ -240,7 +253,7 @@ public class StatsCalculation {
 				countall += count[i];
 				meandata[i] = meandata[i] / count[i];
 			} else {
-				meandata[i] = Double.NaN;
+				meandata[i] = -1;
 				count[i] = 0;
 			}
 		}
@@ -315,7 +328,7 @@ public class StatsCalculation {
 		int emptyCount = 0;
 		for(int ti = 0; ti < totals.length; ti++) {
 			if(totals[ti] < lowerlimit) {
-				crosstabsdata[ti] = new int[crosstabsdata[ti].length];
+				crosstabsdata[ti] = new int[0];
 				emptyCount++;
 			}
 		}
