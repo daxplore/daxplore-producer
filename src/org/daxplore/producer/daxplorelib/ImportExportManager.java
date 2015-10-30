@@ -307,6 +307,7 @@ public class ImportExportManager {
 				String column = rmq.column;
 				VariableType type = rmq.qtype;
 				TextReference fulltext = daxploreFile.getTextReferenceManager().get(column + "_fulltext");
+				
 				fulltext.put(rmq.qtext, locale);
 				List<MetaScale.Option<?>> scaleOptions = new LinkedList<MetaScale.Option<?>>();
 				Set<Double> meanExcludedValues = null;
@@ -347,8 +348,9 @@ public class ImportExportManager {
 				}
 				
 				TextReference shorttext = daxploreFile.getTextReferenceManager().get(column + "_shorttext");
+				TextReference descriptiontext = daxploreFile.getTextReferenceManager().get(column + "_description");
 				List<MetaTimepointShort> timepoints = new LinkedList<>();
-				daxploreFile.getMetaQuestionManager().create(column, type, shorttext, fulltext, null, scaleOptions, meanExcludedValues, timepoints);
+				daxploreFile.getMetaQuestionManager().create(column, type, shorttext, fulltext, descriptiontext, scaleOptions, meanExcludedValues, timepoints);
 			}
 		} catch (SQLException e) {
 			throw new DaxploreException("Failed to transfer metadata from raw", e);

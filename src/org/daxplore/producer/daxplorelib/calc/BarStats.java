@@ -62,11 +62,13 @@ public class BarStats {
 		private double[] mean;
 		private Double allmean;
 		private int[] counts;
+		private int allcount;
 		
-		public Means(double[] mean, double allmean, int[] counts) {
+		public Means(double[] mean, double allmean, int[] counts, int allcount) {
 			this.mean = mean;
 			this.allmean = allmean;
 			this.counts = counts;
+			this.allcount = allcount;
 		}
 		
 		public JsonElement toJSONObject() {
@@ -83,6 +85,7 @@ public class BarStats {
 				array.add(new JsonPrimitive(d));
 			}
 			json.add("count", array);
+			json.add("allcount", new JsonPrimitive(allcount));
 			
 			return json;
 		}
@@ -99,8 +102,8 @@ public class BarStats {
 		useFrequency = true;
 	}
 
-	void addMeanData(int timeindex, double[] means, double allmean, int[] counts) {
-		meanData.put(timeindex, new Means(means, allmean, counts));
+	void addMeanData(int timeindex, double[] means, double allmean, int[] counts, int allcount) {
+		meanData.put(timeindex, new Means(means, allmean, counts, allcount));
 		useMean = true;
 	}
 	
@@ -150,6 +153,7 @@ public class BarStats {
 		"mean":[1.72,1.65,1.5555555555555556,1.1666666666666667,5.136],
 		"all":1.9609665427509293,
 		"count":[1111,380,250,93,90],
+		"allcount":2331
 		}
 	}
 }

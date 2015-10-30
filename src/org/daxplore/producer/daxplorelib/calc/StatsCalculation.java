@@ -158,7 +158,7 @@ public class StatsCalculation {
 						for(int i=0; i<counts.length; i++){
 							intCounts[i] = (int)counts[i];
 						}
-						stats.addMeanData(0, means.get(0), means.get(1)[0], intCounts);
+						stats.addMeanData(0, means.get(0), means.get(1)[0], intCounts, (int)means.get(3)[0]);
 					} catch (DaxploreWarning e) {
 						warnings.add(e.getMessage());
 					}
@@ -194,7 +194,7 @@ public class StatsCalculation {
 							for(int i=0; i<counts.length; i++){
 								intCounts[i] = (int)counts[i];
 							}
-							stats.addMeanData(0, means.get(0), means.get(1)[0], intCounts);
+							stats.addMeanData(0, means.get(0), means.get(1)[0], intCounts, (int)means.get(3)[0]);
 						} catch (DaxploreWarning e) {
 							warnings.add(e.getMessage());
 						}
@@ -224,8 +224,7 @@ public class StatsCalculation {
 		double[] meandata = new double[perspective.getScale().getOptionCount()];
 		double[] meanall = new double[1];
 		double[] count = new double[perspective.getScale().getOptionCount()];
-		
-		double countall = 0;
+		double[] countall = new double[1];
 		
 		if(!hasLoadedRawdata) {
 			loadRawToMem();
@@ -250,7 +249,7 @@ public class StatsCalculation {
 		for(int i = 0; i < meandata.length; i++) {
 			if(count[i] >= lowerlimit) {
 				meanall[0] += meandata[i];
-				countall += count[i];
+				countall[0] += count[i];
 				meandata[i] = meandata[i] / count[i];
 			} else {
 				meandata[i] = -1;
@@ -258,8 +257,8 @@ public class StatsCalculation {
 			}
 		}
 
-		if(countall >= lowerlimit) {
-			meanall[0] = meanall[0]/countall;
+		if(countall[0] >= lowerlimit) {
+			meanall[0] = meanall[0]/countall[0];
 		} else {
 			throw new DaxploreWarning("Could not generate mean data for question: " + question.getColumn() + " and perspective: " + perspective.getColumn());
 		}
@@ -268,6 +267,7 @@ public class StatsCalculation {
 		list.add(meandata);
 		list.add(meanall);
 		list.add(count);
+		list.add(countall);
 		
 		return list;
 	}

@@ -53,7 +53,7 @@ public class MetaQuestion {
 			+ "displaytypes STRING NOT NULL, "
 			+ "fulltextref TEXT NOT NULL, "
 			+ "shorttextref TEXT NOT NULL, "
-			+ "extratextref TEXT)",
+			+ "descriptiontextref TEXT)",
 			"metaquestion");
 	
 	private static final DaxploreTable timePointTable = new DaxploreTable(
@@ -109,7 +109,7 @@ public class MetaQuestion {
 			
 			String column;
 			VariableType type;
-			TextReference fullTextRef, shortTextRef, extraTextRef;
+			TextReference fullTextRef, shortTextRef, descriptionTextRef;
 			MetaScale<?> scale = null;
 			boolean useFrequencies, useMean;
 			try (PreparedStatement stmt = connection.prepareStatement("SELECT * FROM metaquestion WHERE id = ?")) {
@@ -122,11 +122,11 @@ public class MetaQuestion {
 					type = VariableType.valueOf(rs.getString("type")); //TODO check exception
 					fullTextRef = textsManager.get(rs.getString("fulltextref"));
 					shortTextRef = textsManager.get(rs.getString("shorttextref"));
-					String extraTextRefId = rs.getString("extratextref");
+					String descriptionTextRefId = rs.getString("descriptiontextref");
 					if(!rs.wasNull()) {
-						extraTextRef = textsManager.get(extraTextRefId);
+						descriptionTextRef = textsManager.get(descriptionTextRefId);
 					} else {
-						extraTextRef = null;
+						descriptionTextRef = null;
 					}
 					
 					String displayTypesJson = rs.getString("displaytypes");
@@ -150,13 +150,13 @@ public class MetaQuestion {
 					
 				}
 			}
-			MetaQuestion mq = new MetaQuestion(id, column, type, shortTextRef, fullTextRef, extraTextRef, scale, useFrequencies, metaMean, useMean, timepoints);
+			MetaQuestion mq = new MetaQuestion(id, column, type, shortTextRef, fullTextRef, descriptionTextRef, scale, useFrequencies, metaMean, useMean, timepoints);
 			questionMap.put(id, mq);
 			return mq;
 		}
 		
 		@SuppressWarnings("unchecked")
-		public MetaQuestion create(String column, VariableType type, TextReference shortTextRef, TextReference fullTextRef, TextReference extraTextRef,
+		public MetaQuestion create(String column, VariableType type, TextReference shortTextRef, TextReference fullTextRef, TextReference descriptionTextRef,
 				List<MetaScale.Option<?>> scaleOptions, Set<Double> meanExcludedValues, List<MetaTimepointShort> timepoints) throws SQLException, DaxploreException {
 			boolean useMean = (meanExcludedValues != null);
 			
@@ -184,7 +184,7 @@ public class MetaQuestion {
 			
 			MetaMean metaMean = metaMeanManager.create(id, meanExcludedValues);
 			
-			MetaQuestion mq = new MetaQuestion(id, column, type, shortTextRef, fullTextRef, extraTextRef, scale, true, metaMean, useMean, timepoints);
+			MetaQuestion mq = new MetaQuestion(id, column, type, shortTextRef, fullTextRef, descriptionTextRef, scale, true, metaMean, useMean, timepoints);
 			toBeAdded.add(mq);
 			questionMap.put(id, mq);
 			return mq;
@@ -199,8 +199,8 @@ public class MetaQuestion {
 		public void saveAll() throws SQLException {
 			int nNew = 0, nModified = 0, nRemoved = 0, nTimePoint = 0;
 			try (
-			PreparedStatement updateStmt = connection.prepareStatement("UPDATE metaquestion SET col = ?, type = ?, displaytypes = ?, fulltextref = ?, shorttextref = ?, extratextref = ? WHERE id = ?");
-			PreparedStatement insertStmt = connection.prepareStatement("INSERT INTO metaquestion (id, col, type, displaytypes, fulltextref, shorttextref, extratextref) VALUES (?, ?, ?, ?, ?, ?, ?)");
+			PreparedStatement updateStmt = connection.prepareStatement("UPDATE metaquestion SET col = ?, type = ?, displaytypes = ?, fulltextref = ?, shorttextref = ?, descriptiontextref = ? WHERE id = ?");
+			PreparedStatement insertStmt = connection.prepareStatement("INSERT INTO metaquestion (id, col, type, displaytypes, fulltextref, shorttextref, descriptiontextref) VALUES (?, ?, ?, ?, ?, ?, ?)");
 			PreparedStatement deleteStmt = connection.prepareStatement("DELETE FROM metaquestion WHERE id = ?");
 			PreparedStatement deleteRelStmt = connection.prepareStatement("DELETE FROM questtimerel WHERE qid = ?");
 			PreparedStatement insertRelStmt = connection.prepareStatement("INSERT INTO questtimerel (qid, timeid) VALUES (?, ?)");
@@ -219,8 +219,8 @@ public class MetaQuestion {
 						
 						updateStmt.setString(4, mq.fullTextRef.getRef());
 						updateStmt.setString(5, mq.shortTextRef.getRef());
-						if(mq.extraTextRef != null) {
-							updateStmt.setString(6, mq.extraTextRef.getRef());
+						if(mq.descriptionTextRef != null) {
+							updateStmt.setString(6, mq.descriptionTextRef.getRef());
 						} else {
 							updateStmt.setNull(6, Types.VARCHAR);
 						}
@@ -261,8 +261,8 @@ public class MetaQuestion {
 					
 					insertStmt.setString(5, mq.fullTextRef.getRef());
 					insertStmt.setString(6, mq.shortTextRef.getRef());
-					if(mq.extraTextRef != null) {
-						insertStmt.setString(7, mq.extraTextRef.getRef());
+					if(mq.descriptionTextRef != null) {
+						insertStmt.setString(7, mq.descriptionTextRef.getRef());
 					} else {
 						insertStmt.setNull(7, Types.VARCHAR);
 					}
@@ -340,7 +340,7 @@ public class MetaQuestion {
 	private int id;
 	private String column;
 	private VariableType type;
-	private TextReference shortTextRef, fullTextRef, extraTextRef;
+	private TextReference shortTextRef, fullTextRef, descriptionTextRef;
 	private boolean useFrequencies, useMean;
 	private MetaScale<?> scale;
 	private MetaMean metaMean;
@@ -350,14 +350,14 @@ public class MetaQuestion {
 	private boolean timemodified = false;
 	
 	private MetaQuestion(int id, String column, VariableType type, TextReference shortTextRef, TextReference fullTextRef,
-			TextReference extraTextRef,	MetaScale<?> scale, boolean useFrequencies,
+			TextReference descriptionTextRef,	MetaScale<?> scale, boolean useFrequencies,
 			MetaMean metaMean, boolean useMean, List<MetaTimepointShort> timepoints) throws DaxploreException {
 		this.id = id;
 		this.column = column;
 		this.type = type;
 		this.shortTextRef = shortTextRef;
 		this.fullTextRef = fullTextRef;
-		this.extraTextRef = extraTextRef;
+		this.descriptionTextRef = descriptionTextRef;
 		this.useFrequencies = useFrequencies;
 		this.useMean = useMean;
 		this.metaMean = metaMean;
@@ -419,13 +419,13 @@ public class MetaQuestion {
 		}
 	}
 	
-	public TextReference getExtraTextRef() {
-		return extraTextRef;
+	public TextReference getDescriptionTextRef() {
+		return descriptionTextRef;
 	}
 	
-	public void setExtraTextRef(TextReference extraTextRef) {
-		if(!extraTextRef.equals(this.extraTextRef)) {
-			this.extraTextRef = extraTextRef;
+	public void setExtraTextRef(TextReference descriptionTextRef) {
+		if(!descriptionTextRef.equals(this.descriptionTextRef)) {
+			this.descriptionTextRef = descriptionTextRef;
 			modified = true;
 		}
 	}
@@ -476,7 +476,10 @@ public class MetaQuestion {
 		} else {
 			json.addProperty("text", fullTextRef.getText(locale));
 		}
-		//TODO extratextref
+		
+		json.addProperty("description", descriptionTextRef.getText(locale));
+		
+		//TODO descriptiontextref
 		JsonArray options = new JsonArray();
 		for(Option option : scale.getOptions()) {
 			String text = option.getTextRef().getWithPlaceholder(locale);
@@ -519,7 +522,7 @@ public class MetaQuestion {
 		if(Strings.isNullOrEmpty(shortTextRef.getText(locale))) {
 			emptyRefs.add(shortTextRef);
 		}
-		//TODO extratextref
+		//TODO descriptiontextref
 		for(Option option : scale.getOptions()) {
 			if(Strings.isNullOrEmpty(option.getTextRef().getText(locale))) {
 				emptyRefs.add(option.getTextRef());
