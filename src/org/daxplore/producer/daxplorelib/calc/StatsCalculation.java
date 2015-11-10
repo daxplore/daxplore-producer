@@ -103,10 +103,10 @@ public class StatsCalculation {
 		rawColnames = new String[tempRawColnames.size()];
 		
 		for(int col = 0; col < tempRawColnames.size(); col++) {
-			rawColnames[col] = tempRawColnames.get(col).column.toUpperCase();
+			rawColnames[col] = tempRawColnames.get(col).column;
 		}
 		if(about.getTimeSeriesType() == TimeSeriesType.SHORT) {
-			rawTimePointIndex = Arrays.binarySearch(rawColnames, about.getTimeSeriesShortColumn().toUpperCase());
+			rawTimePointIndex = Arrays.binarySearch(rawColnames, about.getTimeSeriesShortColumn());
 		}
 		
 		Logger.getGlobal().log(Level.INFO, "Loaded rawdata to memory: " + ((System.nanoTime() -time)/Math.pow(10,9)) + "s");
@@ -230,8 +230,8 @@ public class StatsCalculation {
 			loadRawToMem();
 		}
 
-		int questionColIndex = Arrays.binarySearch(rawColnames, question.getColumn().toUpperCase());
-		int perspectiveColIndex = Arrays.binarySearch(rawColnames, perspective.getColumn().toUpperCase());
+		int questionColIndex = Arrays.binarySearch(rawColnames, question.getColumn());
+		int perspectiveColIndex = Arrays.binarySearch(rawColnames, perspective.getColumn());
 		
 		MetaScale perspectiveScale = perspective.getScale();
 		
@@ -286,8 +286,8 @@ public class StatsCalculation {
 			loadRawToMem();
 		}
 
-		int questionColIndex = Arrays.binarySearch(rawColnames, question.getColumn().toUpperCase());
-		int perspectiveColIndex = Arrays.binarySearch(rawColnames, perspective.getColumn().toUpperCase());
+		int questionColIndex = Arrays.binarySearch(rawColnames, question.getColumn());
+		int perspectiveColIndex = Arrays.binarySearch(rawColnames, perspective.getColumn());
 		
 		MetaScale questionScale = question.getScale();
 		MetaScale perspectiveScale = perspective.getScale();
@@ -351,7 +351,7 @@ public class StatsCalculation {
 		}
 		MetaScale scale = question.getScale();
 		
-		int questionColIndex = Arrays.binarySearch(rawColnames, question.getColumn().toUpperCase());
+		int questionColIndex = Arrays.binarySearch(rawColnames, question.getColumn());
 		
 		for(int row = 0; row < rawdataTable[0].length; row++) {
 			if(timepoint == null || (Double)rawdataTable[rawTimePointIndex][row] == timepoint.getValue()) { //TODO timepoint: support TEXT/REAL for value
