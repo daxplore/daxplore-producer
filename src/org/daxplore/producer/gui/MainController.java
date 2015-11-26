@@ -243,11 +243,11 @@ public class MainController {
 			if(file.exists() && file.canWrite()) {
 				try (BufferedWriter writer = Files.newBufferedWriter(file.toPath(), Charsets.UTF_8, StandardOpenOption.WRITE, StandardOpenOption.TRUNCATE_EXISTING)) {
 					//TODO use fileLocaleUsedTriplet.usedXXX
-					daxploreFile.exportL10n(writer, format, locale);
+					daxploreFile.exportL10n(writer, format, locale, fileLocaleUsedTriplet.onlyExportUsed);
 				}
 			} else if (!file.exists()) {
 				try (BufferedWriter writer = Files.newBufferedWriter(file.toPath(), Charsets.UTF_8, StandardOpenOption.CREATE_NEW, StandardOpenOption.WRITE)) {
-					daxploreFile.exportL10n(writer, format, locale);
+					daxploreFile.exportL10n(writer, format, locale, fileLocaleUsedTriplet.onlyExportUsed);
 				}
 			} else {
 				System.out.println("File is write protected");

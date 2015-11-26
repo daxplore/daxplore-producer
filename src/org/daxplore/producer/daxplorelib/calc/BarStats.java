@@ -7,6 +7,7 @@
  ******************************************************************************/
 package org.daxplore.producer.daxplorelib.calc;
 
+import java.math.BigDecimal;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -61,24 +62,31 @@ public class BarStats {
 	private static class Means {
 		private double[] mean;
 		private Double allmean;
+		private double globalMean;
 		private int[] counts;
 		private int allcount;
 		
-		public Means(double[] mean, double allmean, int[] counts, int allcount) {
+		public Means(double[] mean, double allmean, double globalMean, int[] counts, int allcount) {
 			this.mean = mean;
 			this.allmean = allmean;
+			this.globalMean = globalMean;
 			this.counts = counts;
 			this.allcount = allcount;
 		}
 		
 		public JsonElement toJSONObject() {
+			int decimalPlaces = 2;
 			JsonObject json = new JsonObject();
 			JsonArray array = new JsonArray();
 			for(Double d : mean) {
-				array.add(new JsonPrimitive(d));
+				array.add(new JsonPrimitive((new BigDecimal(d)).setScale(decimalPlaces, BigDecimal.ROUND_HALF_UP)));
 			}
 			json.add("mean", array);
-			json.add("all", new JsonPrimitive(allmean));
+			json.add("all", new JsonPrimitive((new BigDecimal(allmean)).setScale(decimalPlaces, BigDecimal.ROUND_HALF_UP)));
+			
+			if(!Double.isNaN(globalMean)) {
+				json.add("global", new JsonPrimitive((new BigDecimal(globalMean)).setScale(decimalPlaces, BigDecimal.ROUND_HALF_UP)));
+			}
 			
 			array = new JsonArray();
 			for(int d : counts) {
@@ -102,8 +110,8 @@ public class BarStats {
 		useFrequency = true;
 	}
 
-	void addMeanData(int timeindex, double[] means, double allmean, int[] counts, int allcount) {
-		meanData.put(timeindex, new Means(means, allmean, counts, allcount));
+	void addMeanData(int timeindex, double[] means, double allmean, double globalMean, int[] counts, int allcount) {
+		meanData.put(timeindex, new Means(means, allmean, globalMean, counts, allcount));
 		useMean = true;
 	}
 	

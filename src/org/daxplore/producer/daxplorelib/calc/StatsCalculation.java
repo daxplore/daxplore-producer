@@ -158,7 +158,8 @@ public class StatsCalculation {
 						for(int i=0; i<counts.length; i++){
 							intCounts[i] = (int)counts[i];
 						}
-						stats.addMeanData(0, means.get(0), means.get(1)[0], intCounts, (int)means.get(3)[0]);
+						double globalMean = question.getMetaMean().useGlobalMean() ? question.getMetaMean().getGlobalMean() : Double.NaN;
+						stats.addMeanData(0, means.get(0), means.get(1)[0], globalMean, intCounts, (int)means.get(3)[0]);
 					} catch (DaxploreWarning e) {
 						warnings.add(e.getMessage());
 					}
@@ -194,7 +195,8 @@ public class StatsCalculation {
 							for(int i=0; i<counts.length; i++){
 								intCounts[i] = (int)counts[i];
 							}
-							stats.addMeanData(0, means.get(0), means.get(1)[0], intCounts, (int)means.get(3)[0]);
+							double globalMean = question.getMetaMean().useGlobalMean() ? question.getMetaMean().getGlobalMean() : Double.NaN;
+							stats.addMeanData(0, means.get(0), means.get(1)[0], globalMean, intCounts, (int)means.get(3)[0]);
 						} catch (DaxploreWarning e) {
 							warnings.add(e.getMessage());
 						}

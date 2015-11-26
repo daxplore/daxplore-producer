@@ -63,14 +63,14 @@ public class Settings {
 			
 			for(String key : toBeUpdated) {
 				SettingsType type = getTypeOf(settingsMap.get(key));
-				addStmt.setString(1, type.name());
+				updateStmt.setString(1, type.name());
 				switch(type) {
 				case DATE:
 					ZonedDateTime date = (ZonedDateTime)(settingsMap.get(key));
-					addStmt.setString(2, date.format(DateTimeFormatter.ISO_INSTANT));
+					updateStmt.setString(2, date.format(DateTimeFormatter.ISO_INSTANT));
 					break;
 				default:
-					addStmt.setString(2, settingsMap.get(key).toString()); //works for current types
+					updateStmt.setString(2, settingsMap.get(key).toString()); //works for current types
 				}
 				updateStmt.setString(3, key);
 				updateStmt.addBatch();
@@ -136,6 +136,7 @@ public class Settings {
 				}
 			} catch (SQLException|DateTimeParseException e) {
 				// couldn't find a value or valid value, treat it as if it's an empty hashmap and return null
+				return null;
 			}
 			return null;
 		}

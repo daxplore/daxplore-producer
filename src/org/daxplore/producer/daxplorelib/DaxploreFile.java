@@ -187,8 +187,8 @@ public class DaxploreFile implements Closeable {
 		importExport.importL10n(reader, format, locale);
 	}
 	
-	public void exportL10n(Writer writer, L10nFormat format, Locale locale) throws IOException, DaxploreException {
-		importExport.exportL10n(writer, format, locale);
+	public void exportL10n(Writer writer, L10nFormat format, Locale locale, boolean onlyExportUsed) throws IOException, DaxploreException {
+		importExport.exportL10n(writer, format, locale, onlyExportUsed);
 	}
 	
 	public void saveAll() throws DaxploreException { //TODO: return boolean instead of throwing exception?

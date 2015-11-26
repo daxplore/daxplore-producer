@@ -119,7 +119,7 @@ public class ExportCommand {
 				OutputStreamWriter osw = new OutputStreamWriter(fos, Charsets.UTF_8);
 				Writer w = new BufferedWriter(osw);
 				DaxploreFile dax = DaxploreFile.createFromExistingFile(file)) {
-				dax.exportL10n(w, L10nFormat.PROPERTIES, locale);
+				dax.exportL10n(w, L10nFormat.PROPERTIES, locale, false);
 				w.flush();
 			} catch (DaxploreException | IOException e) {
 				//TODO handle exception

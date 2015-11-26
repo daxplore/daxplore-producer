@@ -18,11 +18,13 @@ import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
@@ -55,6 +57,7 @@ import org.daxplore.producer.daxplorelib.calc.StatsCalculation;
 import org.daxplore.producer.daxplorelib.metadata.MetaGroup;
 import org.daxplore.producer.daxplorelib.metadata.MetaQuestion;
 import org.daxplore.producer.daxplorelib.metadata.MetaScale;
+import org.daxplore.producer.daxplorelib.metadata.MetaScale.Option;
 import org.daxplore.producer.daxplorelib.metadata.MetaTimepointShort;
 import org.daxplore.producer.daxplorelib.metadata.textreference.TextReference;
 import org.daxplore.producer.daxplorelib.metadata.textreference.TextTree;
@@ -62,6 +65,7 @@ import org.daxplore.producer.daxplorelib.raw.RawMeta.RawMetaQuestion;
 import org.daxplore.producer.daxplorelib.raw.VariableType;
 import org.daxplore.producer.daxplorelib.resources.DaxploreProperties;
 import org.daxplore.producer.tools.MyTools;
+import org.daxplore.producer.tools.Pair;
 import org.daxplore.producer.tools.SortedProperties;
 import org.opendatafoundation.data.FileFormatInfo;
 import org.opendatafoundation.data.FileFormatInfo.ASCIIFormat;
@@ -350,7 +354,7 @@ public class ImportExportManager {
 				TextReference shorttext = daxploreFile.getTextReferenceManager().get(column + "_shorttext");
 				TextReference descriptiontext = daxploreFile.getTextReferenceManager().get(column + "_description");
 				List<MetaTimepointShort> timepoints = new LinkedList<>();
-				daxploreFile.getMetaQuestionManager().create(column, type, shorttext, fulltext, descriptiontext, scaleOptions, meanExcludedValues, timepoints);
+				daxploreFile.getMetaQuestionManager().create(column, type, shorttext, fulltext, descriptiontext, scaleOptions, meanExcludedValues, Double.NaN, timepoints);
 			}
 		} catch (SQLException e) {
 			throw new DaxploreException("Failed to transfer metadata from raw", e);
@@ -451,41 +455,89 @@ public class ImportExportManager {
 	 * @param writer A character based writer, compatible with {@link Properties#store(Writer, String)}
 	 * @param format
 	 * @param locale
+	 * @param onlyExportUsed 
 	 * @throws IOException
 	 * @throws DaxploreException 
 	 */
-	void exportL10n(Writer writer, L10nFormat format, Locale locale) throws IOException, DaxploreException {
+	void exportL10n(Writer writer, L10nFormat format, Locale locale, boolean onlyExportUsed) throws IOException, DaxploreException {
+		List<Pair<String, String>> output = new ArrayList<>();
+		Set<TextReference> writtenRefs = new HashSet<>();
+		
+		if (onlyExportUsed) {
+			for(String text : DaxploreProperties.presenterUITexts) {
+				TextReference tr = daxploreFile.getTextReferenceManager().get(text);
+				output.add(createOutputRow(tr, locale));
+			}
+			
+			for(MetaGroup group : daxploreFile.getMetaGroupManager().getAll()) {
+				output.add(new Pair<String, String>("", ""));
+				TextReference tr = group.getTextRef();
+				output.add(createOutputRow(tr, locale));
+				
+				for(MetaQuestion question : group.getQuestions()) {
+					output.add(new Pair<String, String>("", ""));
+					
+					tr = question.getShortTextRef();
+					if(writtenRefs.add(tr)) {
+						output.add(createOutputRow(tr, locale));
+					}
+					
+					tr = question.getFullTextRef();
+					if(writtenRefs.add(tr)) {
+						output.add(createOutputRow(tr, locale));
+					}
+					
+					tr = question.getDescriptionTextRef();
+					if(writtenRefs.add(tr)) {
+						output.add(createOutputRow(tr, locale));
+					}
+					
+					if(question.useFrequencies() || daxploreFile.getMetaGroupManager().getPerspectiveGroup().contains(question)) {
+						for(Option option : question.getScale().getOptions()) {
+							tr = option.getTextRef();
+							if(writtenRefs.add(tr)) {
+								output.add(createOutputRow(tr, locale));
+							}
+						}
+					}
+				}
+			}
+		} else {
+			TextTree allTexts = daxploreFile.getTextReferenceManager().getAll();
+			for (TextReference tr : allTexts.iterable()) {
+				if (tr.hasLocale(locale)) {
+					output.add(new Pair<String, String>(tr.getRef(), tr.getText(locale)));
+				} else {
+					output.add(new Pair<String, String>(tr.getRef(), ""));
+				}
+			}
+		}
+
 		switch(format) {
 		case PROPERTIES:
 			Properties properties = new SortedProperties();
-			
-			TextTree allTexts = daxploreFile.getTextReferenceManager().getAll();
-			
-			for(TextReference tr: allTexts.iterable()) {
-				if(tr.hasLocale(locale)) {
-					properties.setProperty(tr.getRef(), tr.getText(locale));
-				} else {
-					properties.setProperty(tr.getRef(), "");
-				}
+			for(Pair<String, String> pair : output) {
+				properties.setProperty(pair.getKey(), pair.getValue());
 			}
-			
-			properties.store(writer, null); //Comment can be null Some documentation comment placed on the first row of the file
-
+			properties.store(writer, null); // 2nd argument is documentation comment placed on the first row of the file, can be null
 			break;
 		case CSV:
 			try(CSVWriter csvWriter = new CSVWriter(writer)) {
-				allTexts = daxploreFile.getTextReferenceManager().getAll();
-				for(TextReference tr: allTexts.iterable()) {
-					if(tr.hasLocale(locale)) {
-						csvWriter.writeNext(new String[]{tr.getRef(), tr.getText(locale)});
-					} else {
-						csvWriter.writeNext(new String[]{tr.getRef(), ""});
-					}
+				for(Pair<String, String> pair : output) {
+					csvWriter.writeNext(new String[]{pair.getKey(), pair.getValue()});
 				}
 			}
 			break;
 		default:
 			throw new AssertionError("Unsupported format: " + format);	
+		}
+	}
+	
+	private static Pair<String, String> createOutputRow(TextReference tr, Locale locale) {
+		if (tr.hasLocale(locale)) {
+			return new Pair<String, String>(tr.getRef(), tr.getText(locale));
+		} else {
+			return new Pair<String, String>(tr.getRef(), "");
 		}
 	}
 }

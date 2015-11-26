@@ -5,6 +5,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.sql.Types;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -26,13 +27,16 @@ import com.google.gson.Gson;
 public class MetaMean {
 
 	private static final DaxploreTable table = new DaxploreTable(
-			"CREATE TABLE metamean (questionid INTEGER NOT NULL, excludedvalues TEXT NOT NULL, FOREIGN KEY(questionid) REFERENCES metaquestion(id))",
+			"CREATE TABLE metamean ("
+			+ "questionid INTEGER NOT NULL,"
+			+ "excludedvalues TEXT NOT NULL,"
+			+ "useglobalmean INTEGER,"
+			+ "globalmean REAL,"
+			+ "FOREIGN KEY(questionid) REFERENCES metaquestion(id))",
 			"metamean");
 	
 	public static class MetaMeanManager {
-		
 		private Connection connection;
-		
 		private Map<Integer, MetaMean> metaMeanMap = new HashMap<>();
 		private LinkedList<MetaMean> toBeAdded= new LinkedList<>();
 		private Map<Integer, MetaMean> toBeRemoved = new HashMap<>();
@@ -55,6 +59,8 @@ public class MetaMean {
 			}
 			
 			Set<Double> excludedValues = new HashSet<Double>();
+			boolean useGlobalMean;
+			double globalMean;
 			try (PreparedStatement stmt = connection.prepareStatement("SELECT * FROM metamean WHERE questionid = ?")) {
 				stmt.setInt(1, id);
 				
@@ -66,16 +72,29 @@ public class MetaMean {
 					String excludedValuesJson = rs.getString("excludedvalues");
 					Gson gson = new Gson();
 					excludedValues = Sets.newHashSet(gson.fromJson(excludedValuesJson, Double[].class));
+					
+					if(rs.getInt("useglobalmean") != 0) {
+						useGlobalMean = true;
+					} else {
+						useGlobalMean = false;
+					}
+					
+					
+					globalMean = rs.getDouble("globalMean");
+					if(rs.wasNull()) {
+						globalMean = Double.NaN;
+					}
+					
 				}
 			}
 			
-			MetaMean metaMean = new MetaMean(id, excludedValues, false);
+			MetaMean metaMean = new MetaMean(id, excludedValues, useGlobalMean, globalMean, false);
 			metaMeanMap.put(id, metaMean);
 			return metaMean;
 		}
 		
-		public MetaMean create(int id, Set<Double> excludedValues) {
-			MetaMean metaMean = new MetaMean(id, excludedValues, true);
+		public MetaMean create(int id, Set<Double> excludedValues, boolean useGlobalMean, double globalMean) {
+			MetaMean metaMean = new MetaMean(id, excludedValues, useGlobalMean, globalMean, true);
 			toBeAdded.add(metaMean);
 			metaMeanMap.put(id, metaMean);
 			return metaMean;
@@ -100,8 +119,8 @@ public class MetaMean {
 		public void saveAll() throws SQLException {
 			Gson gson = new Gson();
 			try (
-				PreparedStatement addMetaMeanStmt = connection.prepareStatement("INSERT INTO metamean (questionid, excludedvalues) VALUES (?, ?)");
-				PreparedStatement updateMetaMeanStmt = connection.prepareStatement("UPDATE metamean SET excludedvalues = ? WHERE questionid = ?");
+				PreparedStatement addMetaMeanStmt = connection.prepareStatement("INSERT INTO metamean (questionid, excludedvalues, useglobalmean, globalmean) VALUES (?, ?, ?, ?)");
+				PreparedStatement updateMetaMeanStmt = connection.prepareStatement("UPDATE metamean SET excludedvalues = ?, useglobalmean = ?, globalmean = ? WHERE questionid = ?");
 				PreparedStatement deleteMetaMeanStmt = connection.prepareStatement("DELETE FROM metamean WHERE questionid = ?");
 			) {
 				int nNew = 0, nModified = 0, nRemoved = 0;
@@ -111,8 +130,14 @@ public class MetaMean {
 					addMetaMeanStmt.setInt(1, metaMean.questionid);
 					String valuesJson = gson.toJson(metaMean.excludedValues.toArray(), Double[].class);
 					addMetaMeanStmt.setString(2, valuesJson);
+					addMetaMeanStmt.setInt(3, metaMean.useGlobalMean ? 1 : 0);
+					if(Double.isNaN(metaMean.globalMean)) {
+						addMetaMeanStmt.setNull(4, Types.DOUBLE);
+					} else {
+						addMetaMeanStmt.setDouble(4, metaMean.globalMean);
+					}
 					addMetaMeanStmt.addBatch();
-					metaMean.modified = false;
+					nNew++;
 				}
 				addMetaMeanStmt.executeBatch();
 				
@@ -120,8 +145,15 @@ public class MetaMean {
 					if(metaMean.modified){
 						String valuesJson = gson.toJson(metaMean.excludedValues.toArray(), Double[].class);
 						updateMetaMeanStmt.setString(1, valuesJson);
-						updateMetaMeanStmt.setInt(2, metaMean.questionid);
+						updateMetaMeanStmt.setInt(2, metaMean.useGlobalMean ? 1 : 0);
+						if(Double.isNaN(metaMean.globalMean)) {
+							updateMetaMeanStmt.setNull(3, Types.DOUBLE);
+						} else {
+							updateMetaMeanStmt.setDouble(3, metaMean.globalMean);
+						}
+						updateMetaMeanStmt.setInt(4, metaMean.questionid);
 						updateMetaMeanStmt.addBatch();
+						nModified++;
 					}
 				}
 				updateMetaMeanStmt.executeBatch();
@@ -131,6 +163,7 @@ public class MetaMean {
 					deleteMetaMeanStmt.addBatch();
 					// TODO Auto-generated method stub	}
 					deleteMetaMeanStmt.executeBatch();
+					nRemoved++;
 				}
 				
 				if(nModified != 0 || nNew != 0 || nRemoved != 0) {
@@ -157,19 +190,23 @@ public class MetaMean {
 	private int questionid;
 	private TreeSet<Double> excludedValues = new TreeSet<Double>(); //TreeSet gives natural ordering
 	private boolean modified;
+	private boolean useGlobalMean;
+	private double globalMean;
 	
-	private MetaMean(int questionid, Set<Double> excludedValues, boolean setNew) {
+	private MetaMean(int questionid, Set<Double> excludedValues, boolean useGlobalMean, double globalMean, boolean setNew) {
 		this.questionid = questionid;
 		if(excludedValues != null) {
 			this.excludedValues.addAll(excludedValues);
 		}
+		this.useGlobalMean = useGlobalMean;
+		this.globalMean = globalMean;
 		modified = setNew;
 	}
 		
 	public int getQuestionId() {
 		return questionid;
 	}
-	
+		
 	public boolean isExcluded(Object value) {
 		if(value != null && value instanceof Double && !Double.isNaN((Double)value)) {
 			return excludedValues.contains(value);
@@ -184,13 +221,32 @@ public class MetaMean {
 	public void setExcludedValues(Collection<Double> values) {
 		excludedValues.clear();
 		excludedValues.addAll(values);
+		modified = true;
 	}
 	
 	public void addExcludedValue(double value) {
-		excludedValues.add(value);
+		modified |= excludedValues.add(value);
 	}
 	
 	public void removeExcludedValue(double value) {
-		excludedValues.remove(value);
+		modified |= excludedValues.remove(value);
+	}
+	
+	public void setUseGlobalMean(boolean useGlobalMean) {
+		this.useGlobalMean = useGlobalMean;
+		modified = true;
+	}
+	
+	public boolean useGlobalMean() {
+		return useGlobalMean;
+	}
+	
+	public double getGlobalMean() {
+		return globalMean;
+	}
+
+	public void setGlobalMean(double globalMean) {
+		this.globalMean = globalMean;
+		modified = true;
 	}
 }

@@ -38,7 +38,7 @@ public class VariableController implements TableModelListener, ActionListener {
 	
 	enum QuestionCommand {
 		FREQ_ENABLE, FREQ_ADD, FREQ_REMOVE, FREQ_UP, FREQ_DOWN, FREQ_INVERT,
-		MEAN_ENABLE
+		MEAN_ENABLE, GLOBAL_MEAN_CHANGE, USE_GLOBAL_MEAN
 	}
 	
 	private VariableView view;
@@ -258,13 +258,24 @@ public class VariableController implements TableModelListener, ActionListener {
 			rawTable.packAll();
 			break;
 		case MEAN_ENABLE:
-			mq.setUseMean(meanPanel.isMeanActivated());
-			meanPanel.setEnabled(meanPanel.isMeanActivated());
+			boolean useMean = meanPanel.isMeanActivated();
+			mq.setUseMean(useMean);
+			meanPanel.setEnabled(useMean);
+			break;
+		case USE_GLOBAL_MEAN:
+			boolean useGlobalMean = meanPanel.isGlobalMeanUsed();
+			mq.getMetaMean().setUseGlobalMean(useGlobalMean);
+			meanPanel.setUseGlobalMean(useGlobalMean);
+			break;
+		case GLOBAL_MEAN_CHANGE:
+			double globalMean = meanPanel.getGlobalMean();
+			if(!Double.isNaN(globalMean)) {
+				mq.getMetaMean().setGlobalMean(globalMean);
+			}
 			break;
 		default:
 			throw new AssertionError("Undefined action command: " + e.getActionCommand());
 		}
-		
 	}
 	
 	/*private void addOption(double value) throws DaxploreException {
