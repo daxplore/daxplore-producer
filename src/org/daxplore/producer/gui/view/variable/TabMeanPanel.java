@@ -39,7 +39,7 @@ public class TabMeanPanel extends JPanel {
 		useGlobalMean.setText(texts.get("question_edit.mean.use_global_mean"));
 		useGlobalMean.setActionCommand(QuestionCommand.USE_GLOBAL_MEAN.name());
 		useGlobalMean.addActionListener(actionListener);
-		useGlobalMean.setSelected(metaQuestion.getMetaMean().useGlobalMean());
+		useGlobalMean.setSelected(metaQuestion.getMetaMean().useMeanReferenceValue());
 		add(topPanel, BorderLayout.NORTH);
 		
 		globalMean.setActionCommand(QuestionCommand.GLOBAL_MEAN_CHANGE.name());

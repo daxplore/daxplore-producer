@@ -437,8 +437,11 @@ public class ImportExportManager {
 						continue;
 					} else if(row.length==2) {
 						TextReference tr;
-						tr = daxploreFile.getTextReferenceManager().get(row[0]);
-						tr.put(row[1], locale);
+						String refText = row[0];
+						if(!Strings.isNullOrEmpty(refText)){
+							tr = daxploreFile.getTextReferenceManager().get(row[0]);
+							tr.put(row[1], locale);
+						}
 					} else {
 						throw new DaxploreException("Invalid csv row:" + MyTools.join(row, ", "));
 					}

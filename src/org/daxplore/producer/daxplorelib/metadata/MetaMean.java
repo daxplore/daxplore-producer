@@ -130,7 +130,7 @@ public class MetaMean {
 					addMetaMeanStmt.setInt(1, metaMean.questionid);
 					String valuesJson = gson.toJson(metaMean.excludedValues.toArray(), Double[].class);
 					addMetaMeanStmt.setString(2, valuesJson);
-					addMetaMeanStmt.setInt(3, metaMean.useGlobalMean ? 1 : 0);
+					addMetaMeanStmt.setInt(3, metaMean.useMeanReferenceValue ? 1 : 0);
 					if(Double.isNaN(metaMean.globalMean)) {
 						addMetaMeanStmt.setNull(4, Types.DOUBLE);
 					} else {
@@ -145,7 +145,7 @@ public class MetaMean {
 					if(metaMean.modified){
 						String valuesJson = gson.toJson(metaMean.excludedValues.toArray(), Double[].class);
 						updateMetaMeanStmt.setString(1, valuesJson);
-						updateMetaMeanStmt.setInt(2, metaMean.useGlobalMean ? 1 : 0);
+						updateMetaMeanStmt.setInt(2, metaMean.useMeanReferenceValue ? 1 : 0);
 						if(Double.isNaN(metaMean.globalMean)) {
 							updateMetaMeanStmt.setNull(3, Types.DOUBLE);
 						} else {
@@ -190,7 +190,7 @@ public class MetaMean {
 	private int questionid;
 	private TreeSet<Double> excludedValues = new TreeSet<Double>(); //TreeSet gives natural ordering
 	private boolean modified;
-	private boolean useGlobalMean;
+	private boolean useMeanReferenceValue;
 	private double globalMean;
 	
 	private MetaMean(int questionid, Set<Double> excludedValues, boolean useGlobalMean, double globalMean, boolean setNew) {
@@ -198,7 +198,7 @@ public class MetaMean {
 		if(excludedValues != null) {
 			this.excludedValues.addAll(excludedValues);
 		}
-		this.useGlobalMean = useGlobalMean;
+		this.useMeanReferenceValue = useGlobalMean;
 		this.globalMean = globalMean;
 		modified = setNew;
 	}
@@ -232,13 +232,13 @@ public class MetaMean {
 		modified |= excludedValues.remove(value);
 	}
 	
-	public void setUseGlobalMean(boolean useGlobalMean) {
-		this.useGlobalMean = useGlobalMean;
+	public void setMeanReferenceValue(boolean useGlobalMean) {
+		this.useMeanReferenceValue = useGlobalMean;
 		modified = true;
 	}
 	
-	public boolean useGlobalMean() {
-		return useGlobalMean;
+	public boolean useMeanReferenceValue() {
+		return useMeanReferenceValue;
 	}
 	
 	public double getGlobalMean() {

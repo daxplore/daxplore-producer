@@ -502,6 +502,8 @@ public class MetaQuestion {
 		json.add("timepoints", tps);
 		
 		json.add("displaytypes", displayTypesAsJSON());
+		
+		json.add("mean_reference", new JsonPrimitive(metaMean.useMeanReferenceValue()));
 
 		return json;
 	}

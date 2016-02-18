@@ -30,13 +30,12 @@ public class DaxploreProperties {
 	public static final Map<String, Boolean> clientBoolSettingsDefaults;
 	static {
 		Map<String, Boolean> boolSettingsMap = new LinkedHashMap<String, Boolean>();
-		boolSettingsMap.put("freq", true);
-		boolSettingsMap.put("mean", false);
-		boolSettingsMap.put("extratext", false);
-		boolSettingsMap.put("csv", true);
+		boolSettingsMap.put("csv", false);
 		boolSettingsMap.put("img", false);
 		boolSettingsMap.put("embed", true);
-		boolSettingsMap.put("timeseries", false);
+		boolSettingsMap.put("timebuttons", false);
+		boolSettingsMap.put("typebuttons", false);
+		boolSettingsMap.put("respondents", true);
 		clientBoolSettings = ImmutableList.copyOf(boolSettingsMap.keySet());
 		clientBoolSettingsDefaults = ImmutableMap.copyOf(boolSettingsMap);
 	}

@@ -264,7 +264,7 @@ public class VariableController implements TableModelListener, ActionListener {
 			break;
 		case USE_GLOBAL_MEAN:
 			boolean useGlobalMean = meanPanel.isGlobalMeanUsed();
-			mq.getMetaMean().setUseGlobalMean(useGlobalMean);
+			mq.getMetaMean().setMeanReferenceValue(useGlobalMean);
 			meanPanel.setUseGlobalMean(useGlobalMean);
 			break;
 		case GLOBAL_MEAN_CHANGE:
