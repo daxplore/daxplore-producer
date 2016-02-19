@@ -36,7 +36,7 @@ class GroupTreeModel implements TreeModel {
 		manager = metaGroupManager;
 		List<MetaGroup> allGroups = metaGroupManager.getAll();
 		for(MetaGroup mg: allGroups) {
-			if(mg.getType() == GroupType.QUESTIONS) {
+			if(mg.getType() == GroupType.QUESTIONS || mg.getType() == GroupType.HEADER) {
 				groups.add(mg);
 			}
 		}
@@ -195,8 +195,11 @@ class GroupTreeModel implements TreeModel {
 
 	@Override
 	public boolean isLeaf(Object node) {
-		if(node == root || node instanceof MetaGroup) {
+		if(node == root) { 
 			return false;
+		} else if(node instanceof MetaGroup) {
+			MetaGroup group = (MetaGroup)node;
+			return group.getType() == GroupType.HEADER;
 		} else if(node instanceof MetaQuestion) {
 			return true;
 		}

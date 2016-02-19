@@ -12,12 +12,15 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -117,6 +120,10 @@ public class MetaGroup implements Comparable<MetaGroup> {
 		public MetaGroup create(TextReference textref, int index,
 				GroupType type, List<MetaQuestion> qList) throws SQLException {
 			addDelta++;
+			
+			if(type == GroupType.HEADER) {
+				qList = new ArrayList<>(0);
+			}
 
 			int id = SQLTools.maxId(groupTable.name, "id", connection)
 					+ addDelta;
@@ -255,11 +262,10 @@ public class MetaGroup implements Comparable<MetaGroup> {
 		}
 		
 		public List<MetaGroup> getQuestionGroups() throws DaxploreException {
-			// make sure all groups are cached before returning the content of
-			// the map
-			List<MetaGroup> groupList = new LinkedList<>();
+			// make sure all groups are cached before returning the content of the map
+			List<MetaGroup> groupList = new LinkedList<>(toBeAddedGroup);
 			try (Statement stmt = connection.createStatement();
-			ResultSet rs = stmt.executeQuery("SELECT id FROM metagroup WHERE type = " + GroupType.QUESTIONS.type)) {
+			ResultSet rs = stmt.executeQuery("SELECT id FROM metagroup WHERE type IN (" + GroupType.QUESTIONS.type + ", " + GroupType.HEADER.type + ")")) {
 				while (rs.next()) {
 					int id = rs.getInt("id");
 					if (!toBeRemoved.containsKey(id)) {
@@ -293,6 +299,25 @@ public class MetaGroup implements Comparable<MetaGroup> {
 			return SQLTools.maxId(groupTable.name, "id", connection) + addDelta;
 		}
 		
+		public String getSuggestedRefName(GroupType type) {
+			int count = 1;
+			Set<String> occupied = new HashSet<>();
+			for(MetaGroup g: groupMap.values()) {
+				count += g.getType() == type ? 1 : 0;
+				occupied.add(g.getTextRef().getRef());
+			}
+			String prefix = type == GroupType.HEADER ? "header_" : "group_";
+			String name = "";
+			while(true) {
+				name = prefix + count;
+				if(!occupied.contains(name)) {
+					break;
+				}
+				count++;
+			}
+			return name;
+		}
+		
 		public JsonElement getQuestionGroupsJSON(Locale locale) throws DaxploreException {
 			JsonArray json = new JsonArray(); 
 			for(MetaGroup group : getQuestionGroups()) {
@@ -321,7 +346,7 @@ public class MetaGroup implements Comparable<MetaGroup> {
 	}
 
 	public enum GroupType {
-		QUESTIONS(0), PERSPECTIVE(1);
+		QUESTIONS(0), PERSPECTIVE(1), HEADER(2);
 
 		protected final int type;
 
@@ -339,6 +364,8 @@ public class MetaGroup implements Comparable<MetaGroup> {
 				return QUESTIONS;
 			case 1:
 				return PERSPECTIVE;
+			case 2:
+				return HEADER;
 			default:
 				throw new IllegalArgumentException("No group type with that type id: '" + i + "'");
 			}
@@ -380,6 +407,9 @@ public class MetaGroup implements Comparable<MetaGroup> {
 	}
 	
 	public void addQuestion(MetaQuestion mq, int atIndex) {
+		if(type == GroupType.HEADER) {
+			return;
+		}
 		if(qList.contains(mq)) {
 			throw new IllegalArgumentException("Question already added to Group");
 		}
@@ -388,6 +418,9 @@ public class MetaGroup implements Comparable<MetaGroup> {
 	}
 
 	public void addQuestion(MetaQuestion mq) {
+		if(type == GroupType.HEADER) {
+			return;
+		}
 		if(qList.contains(mq)) {
 			throw new IllegalArgumentException("Question already added to Group");
 		}
@@ -396,6 +429,9 @@ public class MetaGroup implements Comparable<MetaGroup> {
 	}
 
 	public void removeQuestion(MetaQuestion mq) {
+		if(type == GroupType.HEADER) {
+			return;
+		}
 		if(qList.remove(mq)) {
 			modified = true;
 		}
@@ -501,7 +537,13 @@ public class MetaGroup implements Comparable<MetaGroup> {
 		case QUESTIONS:
 			JsonObject json = new JsonObject();
 			json.add("name", new JsonPrimitive(textref.getWithPlaceholder(locale)));
+			json.add("type", new JsonPrimitive("GROUP"));
 			json.add("questions", questions);
+			return json;
+		case HEADER:
+			json = new JsonObject();
+			json.add("name", new JsonPrimitive(textref.getWithPlaceholder(locale)));
+			json.add("type", new JsonPrimitive("HEADER"));
 			return json;
 		default:
 			throw new AssertionError("Non-existant group type");	

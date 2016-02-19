@@ -38,7 +38,6 @@ import org.daxplore.producer.daxplorelib.metadata.textreference.TextReference;
 import org.daxplore.producer.daxplorelib.metadata.textreference.TextReferenceManager;
 import org.daxplore.producer.gui.resources.GuiTexts;
 import org.daxplore.producer.gui.utility.DisplayLocale;
-import org.daxplore.producer.gui.view.build.EditTextRefPanel;
 
 public class Dialogs {
 	
@@ -60,7 +59,7 @@ public class Dialogs {
 			List<Locale> locales, TextReference textRef) {
 		JButton[] buttons = getOkCancelOptions(texts);
 		
-		EditTextRefPanel editor = new EditTextRefPanel(texts, buttons[0], locales, textRef, false);
+		DialogsPanels editor = DialogsPanels.textRefEditPanel(texts, buttons[0], locales, textRef, false);
 		int answer = JOptionPane.showOptionDialog(parent,
 				editor,
 				"Edit texts",
@@ -86,7 +85,7 @@ public class Dialogs {
 		TextReference textRef = metaGroup.getTextRef();
 		JButton[] buttons = getOkCancelOptions(texts);
 		
-		EditTextRefPanel editor = new EditTextRefPanel(texts, buttons[0], locales, textRef);
+		DialogsPanels editor = DialogsPanels.editGroupPanel(texts, buttons[0], locales, textRef);
 		int answer = JOptionPane.showOptionDialog(parent,
 				editor,
 				"Edit group",
@@ -123,18 +122,10 @@ public class Dialogs {
 	}
 	
 	public static MetaGroup createGroupDialog(Component parent, TextReferenceManager textManager, MetaGroupManager metaGroupManager, GuiTexts texts, List<Locale> locales) {
-		int nextid;
-		try {
-			nextid = metaGroupManager.getHighestId();
-		} catch (SQLException e1) {
-			// TODO Auto-generated catch block
-			e1.printStackTrace();
-			return null;
-		}
 		
 		JButton[] buttons = getOkCancelOptions(texts);
 
-		EditTextRefPanel editor = new EditTextRefPanel(texts, buttons[0], locales, "group_" + nextid);
+		DialogsPanels editor = DialogsPanels.createGroupPanel(metaGroupManager, texts, buttons[0], locales);
 		
 		int answer = JOptionPane.showOptionDialog(parent,
 				editor,
@@ -153,7 +144,8 @@ public class Dialogs {
 				for(Locale l : newTexts.keySet()) {
 					textRef.put(newTexts.get(l), l);
 				}
-				MetaGroup metaGroup = metaGroupManager.create(textRef, Integer.MAX_VALUE, GroupType.QUESTIONS, new LinkedList<MetaQuestion>());
+				GroupType type = editor.isHeaderGroup() ? GroupType.HEADER : GroupType.QUESTIONS;
+				MetaGroup metaGroup = metaGroupManager.create(textRef, Integer.MAX_VALUE, type, new LinkedList<MetaQuestion>());
 				
 				return metaGroup;
 			} catch (DaxploreException | SQLException e) {

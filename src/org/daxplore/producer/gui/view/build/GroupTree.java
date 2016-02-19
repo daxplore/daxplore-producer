@@ -30,6 +30,7 @@ import javax.swing.tree.TreeCellRenderer;
 import javax.swing.tree.TreePath;
 
 import org.daxplore.producer.daxplorelib.metadata.MetaGroup;
+import org.daxplore.producer.daxplorelib.metadata.MetaGroup.GroupType;
 import org.daxplore.producer.daxplorelib.metadata.MetaQuestion;
 import org.daxplore.producer.gui.GuiSettings;
 import org.daxplore.producer.gui.MainController.Views;
@@ -40,6 +41,7 @@ import org.daxplore.producer.gui.resources.Colors;
 import org.daxplore.producer.gui.widget.AbstractWidgetEditor;
 import org.daxplore.producer.gui.widget.AbstractWidgetEditor.InvalidContentException;
 import org.daxplore.producer.gui.widget.GroupWidget;
+import org.daxplore.producer.gui.widget.HeaderWidget;
 import org.daxplore.producer.gui.widget.QuestionWidget;
 
 import com.google.common.eventbus.EventBus;
@@ -124,26 +126,36 @@ public class GroupTree extends JTree {
 		private QuestionWidget questionWidget;
 		private GroupWidget groupWidget;
 		private GroupWidget groupEditor;
+		private HeaderWidget headerWidget;
 		private AbstractWidgetEditor<?> editor;
 		
 		public GroupTreeCellRendererEditor(EventBus eventBus) {
 			groupWidget = new GroupWidget(eventBus);
 			groupEditor = new GroupWidget(eventBus);
+			headerWidget = new HeaderWidget(eventBus);
 			questionWidget = new QuestionWidget(eventBus, true);
 		}
 		
 		@Override
 		public Component getTreeCellRendererComponent(JTree tree, Object value, boolean selected,
 				boolean expanded, boolean leaf, int row, boolean hasFocus) {
-			Container container;
+			Container container = null;
 			if(value instanceof MetaQuestion) {
 				MetaQuestion mq = (MetaQuestion)value;
 				questionWidget.setContent(mq);
 				container = questionWidget;
 			} else if(value instanceof MetaGroup) {
 				MetaGroup mg = (MetaGroup)value;
-				groupWidget.setContent(mg);
-				container = groupWidget;
+				switch(mg.getType()) {
+				case QUESTIONS:
+					groupWidget.setContent(mg);
+					container = groupWidget;
+					break;
+				case HEADER:
+					headerWidget.setContent(mg);
+					container = headerWidget;
+					break;
+				}
 			} else if(value instanceof JPanel){
 				return (JPanel)value; //TODO why is it trying to display the root?
 			} else {
@@ -172,9 +184,16 @@ public class GroupTree extends JTree {
 				editor = questionWidget;
 				comp = questionWidget;
 			} else if(value instanceof MetaGroup) {
-				groupEditor.setContent((MetaGroup)value);
-				editor = groupEditor;
-				comp = groupEditor;
+				MetaGroup mg = (MetaGroup)value;
+				if(mg.getType() == GroupType.QUESTIONS) {
+					groupEditor.setContent(mg);
+					editor = groupEditor;
+					comp = groupEditor;
+				} else {
+					headerWidget.setContent(mg);
+					editor = headerWidget;
+					comp = headerWidget;
+				}
 			} else {
 				throw new AssertionError(); 
 			}
@@ -230,17 +249,24 @@ public class GroupTree extends JTree {
 			gg.setColor(bgColor);
 			gg.fillRect(0, bounds.y, tree.getWidth(), bounds.height);
 			gg.dispose();
+			
+			//System.out.println("rectangle: " + bounds.x + " " + bounds.width);
 
 			if(path.getLastPathComponent() instanceof MetaGroup) {
-				int arrowX = bounds.x - getRightChildIndent() + 1;
-				int arrowY = bounds.y + (bounds.height / 2);
-				Icon expandIcon;
-				if (isExpanded) {
-					expandIcon = getExpandedIcon();
+				MetaGroup mg = (MetaGroup)path.getLastPathComponent();
+				if(mg.getType() == GroupType.QUESTIONS) {
+					int arrowX = bounds.x - getRightChildIndent() + 1;
+					int arrowY = bounds.y + (bounds.height / 2);
+					Icon expandIcon;
+					if (isExpanded) {
+						expandIcon = getExpandedIcon();
+					} else {
+						expandIcon = getCollapsedIcon();
+					}
+					drawCentered(tree, g, expandIcon, arrowX, arrowY);
 				} else {
-					expandIcon = getCollapsedIcon();
+					bounds.translate(-bounds.x, 0);
 				}
-				drawCentered(tree, g, expandIcon, arrowX, arrowY);
 			}			
 			super.paintRow(g, clipBounds, insets, bounds, path, row, isExpanded, hasBeenExpanded, isLeaf);
 		}

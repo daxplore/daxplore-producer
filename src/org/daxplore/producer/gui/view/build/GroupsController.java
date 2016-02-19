@@ -27,6 +27,7 @@ import javax.swing.tree.TreePath;
 
 import org.daxplore.producer.daxplorelib.DaxploreFile;
 import org.daxplore.producer.daxplorelib.metadata.MetaGroup;
+import org.daxplore.producer.daxplorelib.metadata.MetaGroup.GroupType;
 import org.daxplore.producer.daxplorelib.metadata.MetaGroup.MetaGroupManager;
 import org.daxplore.producer.daxplorelib.metadata.MetaQuestion;
 import org.daxplore.producer.daxplorelib.metadata.textreference.TextReferenceManager;
@@ -187,7 +188,19 @@ public class GroupsController implements ActionListener, MouseListener {
 							} else {
 								int groupIndex = groupTreeModel.getIndexOfChild(p.getPathComponent(0), p.getPathComponent(1));
 								if(groupIndex > 0) {
-									Object newGroup = groupTreeModel.getChild(p.getPathComponent(0), groupIndex-1);
+									Object newGroup = null;
+									while(--groupIndex >= 0) {
+										newGroup = groupTreeModel.getChild(p.getPathComponent(0), groupIndex);
+										if(newGroup instanceof MetaGroup) {
+											MetaGroup newmg = (MetaGroup)newGroup;
+											if(newmg.getType() == GroupType.QUESTIONS) {
+												break;
+											}
+										}
+									}
+									if(groupIndex < 0) {
+										break;
+									}
 									groupTreeModel.moveChild(p.getPathComponent(2), newGroup, groupTreeModel.getChildCount(newGroup));
 									paths[i] = new TreePath(new Object[]{p.getPathComponent(0), newGroup, p.getPathComponent(2)});
 								} else {
@@ -236,7 +249,19 @@ public class GroupsController implements ActionListener, MouseListener {
 								int groupIndex = groupTreeModel.getIndexOfChild(p.getPathComponent(0), p.getPathComponent(1));
 								int groupSiblingCount = groupTreeModel.getChildCount(p.getPathComponent(0));
 								if(groupIndex < groupSiblingCount-1) {
-									Object newGroup = groupTreeModel.getChild(p.getPathComponent(0), groupIndex+1);
+									Object newGroup = null;
+									while(++groupIndex < groupSiblingCount) {
+										newGroup = groupTreeModel.getChild(p.getPathComponent(0), groupIndex);
+										if(newGroup instanceof MetaGroup) {
+											MetaGroup newmg = (MetaGroup)newGroup;
+											if(newmg.getType() == GroupType.QUESTIONS) {
+												break;
+											}
+										}
+									}
+									if(groupIndex >= groupSiblingCount) {
+										break;
+									}
 									groupTreeModel.moveChild(p.getPathComponent(2), newGroup, 0);
 									paths[i] = new TreePath(new Object[]{p.getPathComponent(0), newGroup, p.getPathComponent(2)});
 								} else {
