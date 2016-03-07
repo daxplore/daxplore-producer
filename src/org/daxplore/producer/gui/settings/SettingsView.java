@@ -1,10 +1,13 @@
 package org.daxplore.producer.gui.settings;
 
 import java.awt.BorderLayout;
+import java.awt.Component;
+import java.awt.FlowLayout;
 import java.awt.event.ActionListener;
 import java.util.Map;
 
 import javax.swing.BoxLayout;
+import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JPanel;
 
@@ -23,19 +26,49 @@ public class SettingsView extends JPanel {
 		setLayout(new BorderLayout());
 		
 		add(new SectionHeader(texts, "settings"), BorderLayout.NORTH);
-		
 	}
 	
 	void build(Map<String, Boolean> boolSettings) {
+		JPanel contentPanel = new JPanel();
+		contentPanel.setLayout(new BoxLayout(contentPanel, BoxLayout.Y_AXIS));
+		
 		JPanel boolPanel = new JPanel();
 		boolPanel.setLayout(new BoxLayout(boolPanel, BoxLayout.Y_AXIS));
+		boolPanel.setAlignmentX(0);
 		for(String key: boolSettings.keySet()) {
 			Boolean checked = boolSettings.get(key);
 			JCheckBox box = new JCheckBox(texts.get("setting." + key + ".checkbox"), checked);
 			box.setActionCommand(key);
 			box.addActionListener(listener);
-			boolPanel.add(box);
+			boolPanel.add(box, Component.LEFT_ALIGNMENT);
 		}
-		add(boolPanel, BorderLayout.CENTER);
+		contentPanel.add(boolPanel, Component.LEFT_ALIGNMENT);
+		
+		JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
+		buttonPanel.setAlignmentX(0);
+
+		JButton checkFreq = new JButton(texts.get("setting.button.checkfreq"));
+		checkFreq.setActionCommand("checkFreq");
+		checkFreq.addActionListener(listener);
+		buttonPanel.add(checkFreq);
+		
+		JButton uncheckFreq = new JButton(texts.get("setting.button.uncheckfreq"));
+		uncheckFreq.setActionCommand("uncheckFreq");
+		uncheckFreq.addActionListener(listener);
+		buttonPanel.add(uncheckFreq);
+		
+		JButton checkMean = new JButton(texts.get("setting.button.checkmean"));
+		checkMean.setActionCommand("checkMean");
+		checkMean.addActionListener(listener);
+		buttonPanel.add(checkMean);
+		
+		JButton uncheckMean = new JButton(texts.get("setting.button.uncheckmean"));
+		uncheckMean.setActionCommand("uncheckMean");
+		uncheckMean.addActionListener(listener);
+		buttonPanel.add(uncheckMean);
+		
+		contentPanel.add(buttonPanel, Component.LEFT_ALIGNMENT);
+		
+		add(contentPanel, BorderLayout.WEST);
 	}
 }

@@ -138,7 +138,7 @@ public class MainController {
 		groupsController = new GroupsController(eventBus, texts);
 		editTextController = new EditTextController(eventBus, texts, actionManager);
 		timeSeriesController = new TimeSeriesController(daxploreFile.getAbout(), eventBus, texts);
-		settingsController = new SettingsController(eventBus, texts);
+		settingsController = new SettingsController(daxploreFile.getMetaQuestionManager(), eventBus, texts);
 
 		mainView = new MainView(mainWindow);
 		
