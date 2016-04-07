@@ -152,6 +152,10 @@ public class Settings {
 		return getTypeOf(settingsMap.get(key));
 	}
 	
+	public Object getObject(String key) {
+		return getAndLoad(key);
+	}
+ 	
 	public Double getDouble(String key) {
 		return (Double)getAndLoad(key);
 	}

@@ -94,11 +94,18 @@ public class SettingsController implements ActionListener{
 	
 	@Subscribe
 	public void on(DaxploreFileUpdateEvent e) {
-		settings = e.getDaxploreFile().getSettings();
-		Map<String, Boolean> boolSettings = new LinkedHashMap<>();
-		for(String key: DaxploreProperties.clientBoolSettings) {
-			boolSettings.put(key, settings.getBool(key));
+		try {
+			settings = e.getDaxploreFile().getSettings();
+			
+			SettingsTableModel model = new SettingsTableModel(settings, texts);
+			
+			Map<String, Boolean> boolSettings = new LinkedHashMap<>();
+			for(String key: DaxploreProperties.clientSettings) {
+			//	boolSettings.put(key, settings.getBool(key));
+			}
+			settingsView.build(boolSettings, model);
+		} catch (Exception ex) {
+			ex.printStackTrace();
 		}
-		settingsView.build(boolSettings);
 	}
 }

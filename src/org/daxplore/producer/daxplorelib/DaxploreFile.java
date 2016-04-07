@@ -107,9 +107,9 @@ public class DaxploreFile implements Closeable {
 			rawMeta = new RawMeta(connection);
 			rawData = new RawData(connection);
 			
-			for(String key : DaxploreProperties.clientBoolSettings) {
+			for(String key : DaxploreProperties.clientSettings) {
 				if(!settings.has(key)) {
-					settings.putSetting(key, DaxploreProperties.clientBoolSettingsDefaults.get(key));
+					settings.putSetting(key, DaxploreProperties.clientSettingsDefaults.get(key));
 				}
 			}
 			

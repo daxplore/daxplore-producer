@@ -18,6 +18,7 @@ import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -168,11 +169,31 @@ public class ImportExportManager {
 			// Generate a single json string and replace "}}},{" with "}}},\n{" to create rows in the file
 			writeZipString(zout, "data.json", plainGson.toJson(dataJSON).replaceAll("(}}},\\{)", "}}},\n{")); 
 			
-			JsonObject boolSettings = new JsonObject();
-			for(String setting : DaxploreProperties.clientBoolSettings) {
-				boolSettings.add(setting, new JsonPrimitive(daxploreFile.getSettings().getBool(setting)));
+			JsonObject settings = new JsonObject();
+			for(String setting : DaxploreProperties.clientSettings) {
+				switch(daxploreFile.getSettings().getType(setting)) {
+				case BOOL:
+					settings.add(setting, new JsonPrimitive(daxploreFile.getSettings().getBool(setting)));
+					break;
+				case DATE:
+					String isoDate = DateTimeFormatter.ISO_DATE_TIME.format(daxploreFile.getSettings().getDate(setting));
+					settings.add(setting, new JsonPrimitive(isoDate));
+					break;
+				case DOUBLE:
+					settings.add(setting, new JsonPrimitive(daxploreFile.getSettings().getDouble(setting)));
+					break;
+				case INT:
+					settings.add(setting, new JsonPrimitive(daxploreFile.getSettings().getInteger(setting)));
+					break;
+				case STRING:
+					settings.add(setting, new JsonPrimitive(daxploreFile.getSettings().getString(setting)));
+					break;
+				default:
+					break;
+				
+				}
 			}
-			writeZipString(zout, "boolsettings.json", prettyGson.toJson(boolSettings));
+			writeZipString(zout, "settings.json", prettyGson.toJson(settings));
 			
 			for(Locale locale : daxploreFile.getAbout().getLocales()) {
 				JsonArray questionJSON = new JsonArray();

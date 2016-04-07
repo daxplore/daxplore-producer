@@ -26,18 +26,21 @@ public class DaxploreProperties {
 					new Locale("sv"),
 					new Locale("en")));
 	
-	public static final List<String> clientBoolSettings;
-	public static final Map<String, Boolean> clientBoolSettingsDefaults;
+	public static final List<String> clientSettings;
+	public static final Map<String, Object> clientSettingsDefaults;
 	static {
-		Map<String, Boolean> boolSettingsMap = new LinkedHashMap<String, Boolean>();
-		boolSettingsMap.put("csv", false);
-		boolSettingsMap.put("img", false);
-		boolSettingsMap.put("embed", true);
-		boolSettingsMap.put("timebuttons", false);
-		boolSettingsMap.put("typebuttons", false);
-		boolSettingsMap.put("respondents", true);
-		clientBoolSettings = ImmutableList.copyOf(boolSettingsMap.keySet());
-		clientBoolSettingsDefaults = ImmutableMap.copyOf(boolSettingsMap);
+		Map<String, Object> settingsMap = new LinkedHashMap<String, Object>(); 
+		//TODO: rename things to more descriptive names
+		settingsMap.put("csv", new Boolean(false));
+		settingsMap.put("img", new Boolean(false));
+		settingsMap.put("embed", new Boolean(true));
+		settingsMap.put("timebuttons", new Boolean(false));
+		settingsMap.put("typebuttons", new Boolean(false));
+		settingsMap.put("respondents", new Boolean(true));
+		settingsMap.put("defaultSelectedPerspectiveOptions", new Integer(4));
+		settingsMap.put("defaultSelectTotal", new Boolean(true));
+		clientSettingsDefaults = ImmutableMap.copyOf(settingsMap);
+		clientSettings = ImmutableList.copyOf(clientSettingsDefaults.keySet());
 	}
 	
 	public static final List<String> presenterUITexts =

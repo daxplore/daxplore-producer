@@ -10,6 +10,8 @@ import javax.swing.BoxLayout;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JPanel;
+import javax.swing.JScrollPane;
+import javax.swing.ScrollPaneLayout;
 
 import org.daxplore.producer.gui.SectionHeader;
 import org.daxplore.producer.gui.resources.GuiTexts;
@@ -28,7 +30,7 @@ public class SettingsView extends JPanel {
 		add(new SectionHeader(texts, "settings"), BorderLayout.NORTH);
 	}
 	
-	void build(Map<String, Boolean> boolSettings) {
+	void build(Map<String, Boolean> boolSettings, SettingsTableModel model) {
 		JPanel contentPanel = new JPanel();
 		contentPanel.setLayout(new BoxLayout(contentPanel, BoxLayout.Y_AXIS));
 		
@@ -68,6 +70,11 @@ public class SettingsView extends JPanel {
 		buttonPanel.add(uncheckMean);
 		
 		contentPanel.add(buttonPanel, Component.LEFT_ALIGNMENT);
+		
+		JScrollPane tableScroller = new JScrollPane();
+		SettingsTable table = new SettingsTable(model);
+		tableScroller.setViewportView(table);
+		contentPanel.add(tableScroller, Component.LEFT_ALIGNMENT);
 		
 		add(contentPanel, BorderLayout.WEST);
 	}
