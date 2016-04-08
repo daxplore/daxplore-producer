@@ -176,7 +176,7 @@ public class ImportExportManager {
 					settings.add(setting, new JsonPrimitive(daxploreFile.getSettings().getBool(setting)));
 					break;
 				case DATE:
-					String isoDate = DateTimeFormatter.ISO_DATE_TIME.format(daxploreFile.getSettings().getDate(setting));
+					String isoDate = DateTimeFormatter.ISO_INSTANT.format(daxploreFile.getSettings().getDate(setting));
 					settings.add(setting, new JsonPrimitive(isoDate));
 					break;
 				case DOUBLE:

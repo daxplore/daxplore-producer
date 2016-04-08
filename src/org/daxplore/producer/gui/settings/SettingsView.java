@@ -11,7 +11,6 @@ import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
-import javax.swing.ScrollPaneLayout;
 
 import org.daxplore.producer.gui.SectionHeader;
 import org.daxplore.producer.gui.resources.GuiTexts;
