@@ -40,6 +40,8 @@ public class DaxploreProperties {
 		settingsMap.put("defaultSelectedPerspectiveOptions", new Integer(4));
 		settingsMap.put("defaultSelectTotal", new Boolean(true));
 		settingsMap.put("perspectiveCheckboxesPerColumn", new Integer(8));
+		settingsMap.put("questionDescriptionPosition", new String("BOTTOM")); //TODO enums
+		settingsMap.put("perspectiveDescriptionPosition", new String("BOTTOM"));
 		clientSettingsDefaults = ImmutableMap.copyOf(settingsMap);
 		clientSettings = ImmutableList.copyOf(clientSettingsDefaults.keySet());
 	}
