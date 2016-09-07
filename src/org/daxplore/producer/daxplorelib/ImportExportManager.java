@@ -212,6 +212,10 @@ public class ImportExportManager {
 			    writeZipString(zout, "groups_"+locale.toLanguageTag()+".json", groupJSONString);
 			    
 			    writeZipString(zout, "perspectives.json", prettyGson.toJson(perspectives.toJSONObject()));
+			    
+			    String listViewJSONString = prettyGson.toJson(
+			    		daxploreFile.getMetaGroupManager().getListViewVariablesJSON());
+			    writeZipString(zout, "listview.json", listViewJSONString);
 			}
 	
 			zout.flush();
