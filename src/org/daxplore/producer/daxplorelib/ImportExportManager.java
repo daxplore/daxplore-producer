@@ -211,7 +211,7 @@ public class ImportExportManager {
 			    emptyTextrefs.addAll(daxploreFile.getMetaGroupManager().getEmptyTextRefs(locale));
 			    writeZipString(zout, "groups_"+locale.toLanguageTag()+".json", groupJSONString);
 			    
-			    writeZipString(zout, "perspectives_"+locale.toLanguageTag()+".json", prettyGson.toJson(perspectives.toJSONObject(locale)));
+			    writeZipString(zout, "perspectives.json", prettyGson.toJson(perspectives.toJSONObject()));
 			}
 	
 			zout.flush();

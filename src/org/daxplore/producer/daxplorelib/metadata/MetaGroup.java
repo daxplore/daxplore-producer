@@ -548,6 +548,18 @@ public class MetaGroup implements Comparable<MetaGroup> {
 		default:
 			throw new AssertionError("Non-existant group type");	
 		}
-			
+	}
+	
+	/**
+	 * Get as json for group types that don't depend on locale (i.e. {@link GroupType#PERSPECTIVE})
+	 * @throws DaxploreException 
+	 */
+	public JsonElement toJSONObject() throws DaxploreException {
+		switch(type) {
+		case PERSPECTIVE:
+			return toJSONObject(null);
+		default:
+			throw new DaxploreException("Can't generate json for type '" + type.toString() + "' without a specified locale");
+		}
 	}
 }
