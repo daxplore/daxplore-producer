@@ -38,6 +38,7 @@ public class DaxploreProperties {
 		settingsMap.put("typebuttons", new Boolean(false));
 		settingsMap.put("respondents", new Boolean(true));
 		settingsMap.put("defaultSelectedPerspectiveOptions", new Integer(4));
+		settingsMap.put("showSelectTotal", new Boolean(true));
 		settingsMap.put("defaultSelectTotal", new Boolean(true));
 		settingsMap.put("perspectiveCheckboxesPerColumn", new Integer(8));
 		settingsMap.put("questionDescriptionPosition", new String("BOTTOM")); //TODO enums
