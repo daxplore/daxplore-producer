@@ -508,7 +508,7 @@ public class MetaQuestion {
 		
 		Direction goodDirection = metaMean.getGoodDirection();
 		if(goodDirection != Direction.UNDEFINED) {
-			json.add("gooddirection", new JsonPrimitive(goodDirection.name().toLowerCase()));
+			json.add("gooddirection", new JsonPrimitive(goodDirection.name()));
 		}
 		
 		return json;
