@@ -26,6 +26,7 @@ import java.util.logging.Logger;
 import org.daxplore.producer.daxplorelib.DaxploreException;
 import org.daxplore.producer.daxplorelib.DaxploreTable;
 import org.daxplore.producer.daxplorelib.SQLTools;
+import org.daxplore.producer.daxplorelib.metadata.MetaMean.Direction;
 import org.daxplore.producer.daxplorelib.metadata.MetaMean.MetaMeanManager;
 import org.daxplore.producer.daxplorelib.metadata.MetaScale.MetaScaleManager;
 import org.daxplore.producer.daxplorelib.metadata.MetaScale.Option;
@@ -182,7 +183,7 @@ public class MetaQuestion {
 				break;
 			}
 			
-			MetaMean metaMean = metaMeanManager.create(id, meanExcludedValues, false, globalMean);
+			MetaMean metaMean = metaMeanManager.create(id, meanExcludedValues, false, globalMean, Direction.UNDEFINED);
 			
 			MetaQuestion mq = new MetaQuestion(id, column, type, shortTextRef, fullTextRef, descriptionTextRef, scale, true, metaMean, useMean, timepoints);
 			toBeAdded.add(mq);
@@ -504,7 +505,12 @@ public class MetaQuestion {
 		json.add("displaytypes", displayTypesAsJSON());
 		
 		json.add("mean_reference", new JsonPrimitive(metaMean.useMeanReferenceValue()));
-
+		
+		Direction goodDirection = metaMean.getGoodDirection();
+		if(goodDirection != Direction.UNDEFINED) {
+			json.add("gooddirection", new JsonPrimitive(goodDirection.name().toLowerCase()));
+		}
+		
 		return json;
 	}
 	

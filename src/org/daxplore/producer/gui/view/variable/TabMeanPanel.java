@@ -7,10 +7,12 @@ import java.awt.event.ActionListener;
 import java.text.NumberFormat;
 
 import javax.swing.JCheckBox;
+import javax.swing.JComboBox;
 import javax.swing.JFormattedTextField;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 
+import org.daxplore.producer.daxplorelib.metadata.MetaMean.Direction;
 import org.daxplore.producer.daxplorelib.metadata.MetaQuestion;
 import org.daxplore.producer.gui.resources.GuiTexts;
 import org.daxplore.producer.gui.view.variable.VariableController.QuestionCommand;
@@ -18,6 +20,8 @@ import org.daxplore.producer.gui.view.variable.VariableController.QuestionComman
 public class TabMeanPanel extends JPanel {
 	
 	private JCheckBox enableCheckBox = new JCheckBox();
+	private JLabel goodDirectionText = new JLabel();
+	private JComboBox<Direction> goodDirection = new JComboBox<>(Direction.values());
 	private JCheckBox useGlobalMean = new JCheckBox();
 	private JLabel globalMeanText = new JLabel();
 	private JFormattedTextField globalMean = new JFormattedTextField(NumberFormat.getNumberInstance());
@@ -27,19 +31,26 @@ public class TabMeanPanel extends JPanel {
 		
 		JPanel topPanel = new JPanel(new GridLayout(0, 1));
 		
-		
 		enableCheckBox.setText(texts.get("question_edit.mean.enable"));
 		enableCheckBox.setActionCommand(QuestionCommand.MEAN_ENABLE.name());
 		enableCheckBox.addActionListener(actionListener);
 		enableCheckBox.setSelected(metaQuestion.useMean());
 		topPanel.add(enableCheckBox);
 		
-		topPanel.add(useGlobalMean);
+		goodDirectionText.setText(texts.get("question_edit.mean.good_direction"));
+		topPanel.add(goodDirectionText);
+		
+		goodDirection.setSelectedItem(metaQuestion.getMetaMean().getGoodDirection());
+		goodDirection.setActionCommand(QuestionCommand.MEAN_DIRECTION.name());
+		goodDirection.addActionListener(actionListener);
+		topPanel.add(goodDirection);
 
 		useGlobalMean.setText(texts.get("question_edit.mean.use_global_mean"));
 		useGlobalMean.setActionCommand(QuestionCommand.USE_GLOBAL_MEAN.name());
 		useGlobalMean.addActionListener(actionListener);
 		useGlobalMean.setSelected(metaQuestion.getMetaMean().useMeanReferenceValue());
+		topPanel.add(useGlobalMean);
+		
 		add(topPanel, BorderLayout.NORTH);
 		
 		globalMean.setActionCommand(QuestionCommand.GLOBAL_MEAN_CHANGE.name());
@@ -73,6 +84,8 @@ public class TabMeanPanel extends JPanel {
 	}
 	
 	public void setEnabled(boolean enabled) {
+		goodDirectionText.setEnabled(enabled);
+		goodDirection.setEnabled(enabled);
 		useGlobalMean.setEnabled(enabled);
 		globalMeanText.setEnabled(enabled && isGlobalMeanUsed());
 		globalMean.setEnabled(enabled && isGlobalMeanUsed());
@@ -103,6 +116,10 @@ public class TabMeanPanel extends JPanel {
 			}
 		}
 		return (Double)value;
+	}
+
+	public Direction getGoodDirection() {
+		return (Direction)goodDirection.getSelectedItem();
 	}
 }
 

@@ -23,6 +23,7 @@ import javax.swing.event.TableModelListener;
 
 import org.daxplore.producer.daxplorelib.DaxploreException;
 import org.daxplore.producer.daxplorelib.DaxploreFile;
+import org.daxplore.producer.daxplorelib.metadata.MetaMean.Direction;
 import org.daxplore.producer.daxplorelib.metadata.MetaQuestion;
 import org.daxplore.producer.daxplorelib.metadata.MetaScale;
 import org.daxplore.producer.daxplorelib.metadata.MetaScale.Option;
@@ -38,7 +39,7 @@ public class VariableController implements TableModelListener, ActionListener {
 	
 	enum QuestionCommand {
 		FREQ_ENABLE, FREQ_ADD, FREQ_REMOVE, FREQ_UP, FREQ_DOWN, FREQ_INVERT,
-		MEAN_ENABLE, GLOBAL_MEAN_CHANGE, USE_GLOBAL_MEAN
+		MEAN_ENABLE, MEAN_DIRECTION, GLOBAL_MEAN_CHANGE, USE_GLOBAL_MEAN
 	}
 	
 	private VariableView view;
@@ -261,6 +262,10 @@ public class VariableController implements TableModelListener, ActionListener {
 			boolean useMean = meanPanel.isMeanActivated();
 			mq.setUseMean(useMean);
 			meanPanel.setEnabled(useMean);
+			break;
+		case MEAN_DIRECTION:
+			Direction direction = meanPanel.getGoodDirection();
+			mq.getMetaMean().setGoodDirection(direction);
 			break;
 		case USE_GLOBAL_MEAN:
 			boolean useGlobalMean = meanPanel.isGlobalMeanUsed();

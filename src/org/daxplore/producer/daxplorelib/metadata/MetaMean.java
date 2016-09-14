@@ -32,8 +32,13 @@ public class MetaMean {
 			+ "excludedvalues TEXT NOT NULL,"
 			+ "useglobalmean INTEGER,"
 			+ "globalmean REAL,"
+			+ "gooddirection TEXT NOT NULL"
 			+ "FOREIGN KEY(questionid) REFERENCES metaquestion(id))",
 			"metamean");
+	
+	public enum Direction {
+		HIGH, LOW, UNDEFINED
+	}
 	
 	public static class MetaMeanManager {
 		private Connection connection;
@@ -61,6 +66,8 @@ public class MetaMean {
 			Set<Double> excludedValues = new HashSet<Double>();
 			boolean useGlobalMean;
 			double globalMean;
+			Direction goodDirection;
+			
 			try (PreparedStatement stmt = connection.prepareStatement("SELECT * FROM metamean WHERE questionid = ?")) {
 				stmt.setInt(1, id);
 				
@@ -79,22 +86,24 @@ public class MetaMean {
 						useGlobalMean = false;
 					}
 					
-					
 					globalMean = rs.getDouble("globalMean");
 					if(rs.wasNull()) {
 						globalMean = Double.NaN;
 					}
 					
+					String direction = rs.getString("gooddirection");
+					goodDirection = Direction.valueOf(direction);
 				}
 			}
 			
-			MetaMean metaMean = new MetaMean(id, excludedValues, useGlobalMean, globalMean, false);
+			MetaMean metaMean = new MetaMean(id, excludedValues, useGlobalMean, globalMean, goodDirection, false);
 			metaMeanMap.put(id, metaMean);
 			return metaMean;
 		}
 		
-		public MetaMean create(int id, Set<Double> excludedValues, boolean useGlobalMean, double globalMean) {
-			MetaMean metaMean = new MetaMean(id, excludedValues, useGlobalMean, globalMean, true);
+		public MetaMean create(int id, Set<Double> excludedValues, boolean useGlobalMean,
+				double globalMean, Direction goodDirection) {
+			MetaMean metaMean = new MetaMean(id, excludedValues, useGlobalMean, globalMean, goodDirection, true);
 			toBeAdded.add(metaMean);
 			metaMeanMap.put(id, metaMean);
 			return metaMean;
@@ -119,8 +128,8 @@ public class MetaMean {
 		public void saveAll() throws SQLException {
 			Gson gson = new Gson();
 			try (
-				PreparedStatement addMetaMeanStmt = connection.prepareStatement("INSERT INTO metamean (questionid, excludedvalues, useglobalmean, globalmean) VALUES (?, ?, ?, ?)");
-				PreparedStatement updateMetaMeanStmt = connection.prepareStatement("UPDATE metamean SET excludedvalues = ?, useglobalmean = ?, globalmean = ? WHERE questionid = ?");
+				PreparedStatement addMetaMeanStmt = connection.prepareStatement("INSERT INTO metamean (questionid, excludedvalues, useglobalmean, globalmean, gooddirection) VALUES (?, ?, ?, ?, ?)");
+				PreparedStatement updateMetaMeanStmt = connection.prepareStatement("UPDATE metamean SET excludedvalues = ?, useglobalmean = ?, globalmean = ?, gooddirection = ? WHERE questionid = ?");
 				PreparedStatement deleteMetaMeanStmt = connection.prepareStatement("DELETE FROM metamean WHERE questionid = ?");
 			) {
 				int nNew = 0, nModified = 0, nRemoved = 0;
@@ -136,6 +145,7 @@ public class MetaMean {
 					} else {
 						addMetaMeanStmt.setDouble(4, metaMean.globalMean);
 					}
+					addMetaMeanStmt.setString(5, metaMean.goodDirection.name());
 					addMetaMeanStmt.addBatch();
 					nNew++;
 				}
@@ -151,7 +161,8 @@ public class MetaMean {
 						} else {
 							updateMetaMeanStmt.setDouble(3, metaMean.globalMean);
 						}
-						updateMetaMeanStmt.setInt(4, metaMean.questionid);
+						updateMetaMeanStmt.setString(4, metaMean.goodDirection.name());
+						updateMetaMeanStmt.setInt(5, metaMean.questionid);
 						updateMetaMeanStmt.addBatch();
 						nModified++;
 					}
@@ -192,14 +203,17 @@ public class MetaMean {
 	private boolean modified;
 	private boolean useMeanReferenceValue;
 	private double globalMean;
+	private Direction goodDirection;
 	
-	private MetaMean(int questionid, Set<Double> excludedValues, boolean useGlobalMean, double globalMean, boolean setNew) {
+	private MetaMean(int questionid, Set<Double> excludedValues, boolean useGlobalMean,
+			double globalMean, Direction goodDirection, boolean setNew) {
 		this.questionid = questionid;
 		if(excludedValues != null) {
 			this.excludedValues.addAll(excludedValues);
 		}
 		this.useMeanReferenceValue = useGlobalMean;
 		this.globalMean = globalMean;
+		this.goodDirection = goodDirection;
 		modified = setNew;
 	}
 		
@@ -249,4 +263,14 @@ public class MetaMean {
 		this.globalMean = globalMean;
 		modified = true;
 	}
+	
+	public Direction getGoodDirection() {
+		return goodDirection;
+	}
+
+	public void setGoodDirection(Direction goodDrection) {
+		this.goodDirection = goodDrection;
+		modified = true;
+	}
+	
 }
