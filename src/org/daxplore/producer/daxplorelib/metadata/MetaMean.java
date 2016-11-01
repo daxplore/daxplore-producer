@@ -32,7 +32,7 @@ public class MetaMean {
 			+ "excludedvalues TEXT NOT NULL,"
 			+ "useglobalmean INTEGER,"
 			+ "globalmean REAL,"
-			+ "gooddirection TEXT NOT NULL"
+			+ "gooddirection TEXT NOT NULL,"
 			+ "FOREIGN KEY(questionid) REFERENCES metaquestion(id))",
 			"metamean");
 	
@@ -43,7 +43,7 @@ public class MetaMean {
 	public static class MetaMeanManager {
 		private Connection connection;
 		private Map<Integer, MetaMean> metaMeanMap = new HashMap<>();
-		private LinkedList<MetaMean> toBeAdded= new LinkedList<>();
+		private LinkedList<MetaMean> toBeAdded = new LinkedList<>();
 		private Map<Integer, MetaMean> toBeRemoved = new HashMap<>();
 
 		public MetaMeanManager(Connection connection) throws SQLException {
