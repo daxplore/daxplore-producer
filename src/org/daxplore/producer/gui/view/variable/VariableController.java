@@ -28,7 +28,7 @@ import org.daxplore.producer.daxplorelib.metadata.MetaQuestion;
 import org.daxplore.producer.daxplorelib.metadata.MetaScale;
 import org.daxplore.producer.daxplorelib.metadata.MetaScale.Option;
 import org.daxplore.producer.daxplorelib.metadata.textreference.TextReference;
-import org.daxplore.producer.daxplorelib.raw.RawMeta.RawMetaQuestion;
+import org.daxplore.producer.daxplorelib.raw.RawMetaQuestion;
 import org.daxplore.producer.daxplorelib.raw.VariableOptionInfo;
 import org.daxplore.producer.gui.resources.GuiTexts;
 
@@ -65,8 +65,8 @@ public class VariableController implements TableModelListener, ActionListener {
 		
 		try {
 			
-			rawMetaQuestion = daxploreFile.getRawMeta().getQuestion(metaQuestion.getColumn());
-			rawVariableList = daxploreFile.getRawColumnInfo(rawMetaQuestion.column);
+			rawMetaQuestion = daxploreFile.getRawMetaManager().getQuestion(metaQuestion.getColumn());
+			rawVariableList = daxploreFile.getRawColumnInfo(rawMetaQuestion.getColumn());
 
 			variableModel = new VariableTableModel(metaQuestion.getScale(), calculateAfter());
 			variableTable = new VariableTable(eventBus, texts, variableModel);
@@ -79,7 +79,7 @@ public class VariableController implements TableModelListener, ActionListener {
 			
 			TimePointTableModel timePointTableModel = new TimePointTableModel(
 					daxploreFile.getMetaTimepointShortManager(),
-					daxploreFile.getRawData(),
+					daxploreFile.getRawDataManager(),
 					daxploreFile.getAbout(),
 					metaQuestion);
 			

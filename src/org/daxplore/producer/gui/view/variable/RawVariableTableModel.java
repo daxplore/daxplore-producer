@@ -15,7 +15,7 @@ import javax.swing.table.DefaultTableModel;
 
 import org.daxplore.producer.daxplorelib.metadata.MetaScale;
 import org.daxplore.producer.daxplorelib.metadata.MetaScale.Option;
-import org.daxplore.producer.daxplorelib.raw.RawMeta.RawMetaQuestion;
+import org.daxplore.producer.daxplorelib.raw.RawMetaQuestion;
 import org.daxplore.producer.daxplorelib.raw.VariableOptionInfo;
 
 @SuppressWarnings("serial")
@@ -83,7 +83,7 @@ public class RawVariableTableModel extends DefaultTableModel {
 	public Class<?> getColumnClass(int columnIndex) {
 		switch(columnIndex) {
 		case 0:
-			return rmq.qtype.javatype();
+			return rmq.getQtype().javatype();
 		case 1:
 			return String.class;
 		case 2:

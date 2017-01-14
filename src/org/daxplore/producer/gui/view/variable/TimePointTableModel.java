@@ -11,6 +11,7 @@ import java.sql.SQLException;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.SortedMap;
 
 import javax.swing.table.DefaultTableModel;
 
@@ -20,26 +21,24 @@ import org.daxplore.producer.daxplorelib.metadata.MetaQuestion;
 import org.daxplore.producer.daxplorelib.metadata.MetaTimepointShort;
 import org.daxplore.producer.daxplorelib.metadata.MetaTimepointShort.MetaTimepointShortManager;
 import org.daxplore.producer.daxplorelib.metadata.textreference.TextReference;
-import org.daxplore.producer.daxplorelib.raw.RawData;
-import org.daxplore.producer.tools.Pair;
+import org.daxplore.producer.daxplorelib.raw.RawData.RawDataManager;
 
 @SuppressWarnings("serial")
 public class TimePointTableModel extends DefaultTableModel {
-	
 	
 	LinkedHashMap<MetaTimepointShort, Integer> timePoints = new LinkedHashMap<>();
 	List<Double> counts = new LinkedList<>();
 	MetaQuestion mq;
 	
-	public TimePointTableModel(MetaTimepointShortManager mtsm, RawData rawData, About about, MetaQuestion question) throws SQLException, DaxploreException {
+	public TimePointTableModel(MetaTimepointShortManager mtsm, RawDataManager rawDataManager, About about, MetaQuestion question) throws SQLException, DaxploreException {
 		this.mq = question;
-		LinkedList<Pair<Double, Integer>> timePointCount = rawData.getColumnValueCountWhere(about.getTimeSeriesShortColumn(), mq.getColumn());
+		SortedMap<Double, Integer> timePointCount = rawDataManager.getColumnValueCountWhere(about.getTimeSeriesShortColumn(), mq.getColumn());
 		for(MetaTimepointShort tp: mtsm.getAll()) {
 			Double tpVal = tp.getValue();
 			Integer tpCount = 0;
-			for(Pair<Double, Integer> pair: timePointCount) {
-				if(tpVal.equals(pair.getKey())) {
-					tpCount = pair.getValue();
+			for(Double key : timePointCount.keySet()) {
+				if(tpVal.equals(key)) {
+					tpCount = timePointCount.get(key);
 					break;
 				}
 			}

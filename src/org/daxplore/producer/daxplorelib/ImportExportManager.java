@@ -61,7 +61,7 @@ import org.daxplore.producer.daxplorelib.metadata.MetaScale.Option;
 import org.daxplore.producer.daxplorelib.metadata.MetaTimepointShort;
 import org.daxplore.producer.daxplorelib.metadata.textreference.TextReference;
 import org.daxplore.producer.daxplorelib.metadata.textreference.TextTree;
-import org.daxplore.producer.daxplorelib.raw.RawMeta.RawMetaQuestion;
+import org.daxplore.producer.daxplorelib.raw.RawMetaQuestion;
 import org.daxplore.producer.daxplorelib.raw.VariableType;
 import org.daxplore.producer.daxplorelib.resources.DaxploreProperties;
 import org.daxplore.producer.tools.MyTools;
@@ -331,21 +331,21 @@ public class ImportExportManager {
 		
 		try {
 			
-			for(RawMetaQuestion rmq : daxploreFile.getRawMeta().getQuestions()) {
-				String column = rmq.column;
-				VariableType type = rmq.qtype;
+			for(RawMetaQuestion rmq : daxploreFile.getRawMetaManager().getQuestions()) {
+				String column = rmq.getColumn();
+				VariableType type = rmq.getQtype();
 				TextReference fulltext = daxploreFile.getTextReferenceManager().get(column + "_fulltext");
 				
-				fulltext.put(rmq.qtext, locale);
+				fulltext.put(rmq.getQtext(), locale);
 				List<MetaScale.Option<?>> scaleOptions = new LinkedList<MetaScale.Option<?>>();
 				Set<Double> meanExcludedValues = null;
-				if(rmq.valuelables != null) {
+				if(rmq.getValuelabels() != null) {
 					int i = 1;
 					switch(type) {
 					case NUMERIC:
 //						LinkedList<MetaScale.Option<Double>> scaleOptionsDouble = new LinkedList<>();
-						for(Map.Entry<Object, String> s: rmq.valuelables.entrySet()) {
-							TextReference ref = daxploreFile.getTextReferenceManager().get(rmq.column + "_option_" + i);
+						for(Map.Entry<Object, String> s: rmq.getValuelabels().entrySet()) {
+							TextReference ref = daxploreFile.getTextReferenceManager().get(rmq.getColumn() + "_option_" + i);
 							ref.put(s.getValue(), locale);
 							if(s.getKey() instanceof Double) {
 								Collection<Double> vals = new LinkedList<Double>();
@@ -359,8 +359,8 @@ public class ImportExportManager {
 						meanExcludedValues = new HashSet<>();
 						break;
 					case TEXT:
-						for(Map.Entry<Object, String> s: rmq.valuelables.entrySet()) {
-							TextReference ref = daxploreFile.getTextReferenceManager().get(rmq.column + "_option_" + i);
+						for(Map.Entry<Object, String> s: rmq.getValuelabels().entrySet()) {
+							TextReference ref = daxploreFile.getTextReferenceManager().get(rmq.getColumn() + "_option_" + i);
 							ref.put(s.getValue(), locale);
 							if(s.getKey() instanceof String) {
 								Collection<String> vals = new LinkedList<String>();
@@ -410,8 +410,8 @@ public class ImportExportManager {
 				int isolation = connection.getTransactionIsolation();
 				connection.setTransactionIsolation(Connection.TRANSACTION_READ_UNCOMMITTED);
 				
-				daxploreFile.getRawMeta().importSPSS(importSPSSFile); //Order important, meta before data
-				daxploreFile.getRawData().importSPSS(importSPSSFile);
+				daxploreFile.getRawMetaManager().loadFromSPSS(importSPSSFile); //Order important, meta before data
+				daxploreFile.getRawDataManager().loadFromSPSS(importSPSSFile);
 					
 				daxploreFile.getAbout().setImport(importSPSSFile.file.getName());
 				

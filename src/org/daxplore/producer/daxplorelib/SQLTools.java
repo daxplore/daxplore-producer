@@ -36,12 +36,14 @@ public class SQLTools {
 		return false;
 	}
 	
-	public static void createIfNotExists(DaxploreTable table, Connection connection) throws SQLException {
+	public static boolean createIfNotExists(DaxploreTable table, Connection connection) throws SQLException {
 		if(!tableExists(table.name, connection)) {
 			try (Statement stmt = connection.createStatement()) {
 				stmt.executeUpdate(table.sql);
+				return true;
 			}
 		}
+		return false;
 	}
 	
 	//TODO unused as of 2013-09-24, remove?

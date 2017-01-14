@@ -19,11 +19,11 @@ import java.nio.charset.Charset;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
-import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.SortedMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -40,12 +40,11 @@ import org.daxplore.producer.daxplorelib.metadata.MetaScale.MetaScaleManager;
 import org.daxplore.producer.daxplorelib.metadata.MetaTimepointShort;
 import org.daxplore.producer.daxplorelib.metadata.MetaTimepointShort.MetaTimepointShortManager;
 import org.daxplore.producer.daxplorelib.metadata.textreference.TextReferenceManager;
-import org.daxplore.producer.daxplorelib.raw.RawData;
-import org.daxplore.producer.daxplorelib.raw.RawMeta;
-import org.daxplore.producer.daxplorelib.raw.RawMeta.RawMetaQuestion;
+import org.daxplore.producer.daxplorelib.raw.RawData.RawDataManager;
+import org.daxplore.producer.daxplorelib.raw.RawMetaQuestion;
+import org.daxplore.producer.daxplorelib.raw.RawMetaQuestion.RawMetaManager;
 import org.daxplore.producer.daxplorelib.raw.VariableOptionInfo;
 import org.daxplore.producer.daxplorelib.resources.DaxploreProperties;
-import org.daxplore.producer.tools.Pair;
 import org.xml.sax.SAXException;
 
 import com.google.common.base.Strings;
@@ -55,10 +54,10 @@ public class DaxploreFile implements Closeable {
 	private Settings settings;
 	private About about;
 	private File file = null;
-	private RawMeta rawMeta;
-	private RawData rawData;
 	private ImportExportManager importExport;
 	
+	private RawMetaManager rawMetaManager;
+	private RawDataManager rawDataManager;
 	private TextReferenceManager textReferenceManager;
 	private MetaScaleManager metaScaleManager;
 	private MetaMeanManager metaMeanManager;
@@ -104,8 +103,8 @@ public class DaxploreFile implements Closeable {
 			settings = new Settings(connection);
 			about = new About(connection, settings, createNew);
 			about.save();
-			rawMeta = new RawMeta(connection);
-			rawData = new RawData(connection);
+			rawMetaManager = new RawMetaManager(connection);
+			rawDataManager = new RawDataManager(connection, about, rawMetaManager);
 			
 			for(String key : DaxploreProperties.clientSettings) {
 				if(!settings.has(key)) {
@@ -138,12 +137,12 @@ public class DaxploreFile implements Closeable {
 		return settings;
 	}
 	
-	public RawMeta getRawMeta() {
-		return rawMeta;
+	public RawMetaManager getRawMetaManager() {
+		return rawMetaManager;
 	}
 	
-	public RawData getRawData() {
-		return rawData;
+	public RawDataManager getRawDataManager() {
+		return rawDataManager;
 	}
 	
 	public MetaGroupManager getMetaGroupManager() {
@@ -182,7 +181,7 @@ public class DaxploreFile implements Closeable {
 	public void importSPSS(File spssFile, Charset charset) throws FileNotFoundException, IOException, DaxploreException {
 		importExport.importSPSS(spssFile, charset);
 	}
-	
+
 	public void importL10n(Reader reader, L10nFormat format, Locale locale) throws IOException, DaxploreException {
 		importExport.importL10n(reader, format, locale);
 	}
@@ -200,6 +199,8 @@ public class DaxploreFile implements Closeable {
 			Logger.getGlobal().log(Level.INFO, "Save initiated");
 			settings.saveAll();
 			about.save();
+			rawMetaManager.saveAll();
+			rawDataManager.saveAll();
 			textReferenceManager.saveAll();
 			metaQuestionManager.saveAll();
 			metaScaleManager.saveAll(); // run after metaQuestionmanager's saveAll (foreign key)
@@ -240,47 +241,43 @@ public class DaxploreFile implements Closeable {
 	}
 	
 	public List<VariableOptionInfo> getRawColumnInfo(String column) throws DaxploreException {
-		try {
-			if(!rawMeta.hasColumn(column)){
-				throw new DaxploreException("Tried to get data for non-existing column: " + column);
-			}
-			RawMetaQuestion rmq = rawMeta.getQuestion(column);
-			List<VariableOptionInfo> infoList = new LinkedList<>();
-			LinkedHashMap<Object, Integer> counts = rawData.getColumnValueCount(column);
-			for(Map.Entry<Object, Integer> count: counts.entrySet()) {
-				VariableOptionInfo optionInfo = new VariableOptionInfo(count.getKey(), count.getValue(), rmq.qtype);
-				infoList.add(optionInfo);
-			}
-			if(rmq.valuelables != null) {
-				switch (rmq.qtype) {
-				case NUMERIC:
-					for(Map.Entry<Object, String> texts: rmq.valuelables.entrySet()) {
-						Double value = (Double)texts.getKey();
-						for(VariableOptionInfo info: infoList) {
-							if(value == info.getValue() || (value!=null && value.equals(info.getValue()))) {
-								info.setRawText(texts.getValue());
-								break;
-							}
-						}
-					}
-					break;
-				case TEXT:
-					for(Map.Entry<Object, String> texts: rmq.valuelables.entrySet()) {
-						String value = (String)texts.getKey();
-						for(VariableOptionInfo info: infoList) {
-							if(value == info.getValue() || (value!=null && value.equals(info.getValue()))) {
-								info.setRawText(texts.getValue());
-								break;
-							}
-						}
-					}
-					break;
-				}
-			}
-			return infoList;
-		} catch (SQLException e) {
-			throw new DaxploreException("Failure to get raw data things", e);
+		if(!rawMetaManager.hasColumn(column)){
+			throw new DaxploreException("Tried to get data for non-existing column: " + column);
 		}
+		RawMetaQuestion rmq = rawMetaManager.getQuestion(column);
+		List<VariableOptionInfo> infoList = new LinkedList<>();
+		SortedMap<Object, Integer> counts = rawDataManager.getColumnValueCount(column);
+		for(Map.Entry<Object, Integer> count: counts.entrySet()) {
+			VariableOptionInfo optionInfo = new VariableOptionInfo(count.getKey(), count.getValue(), rmq.getQtype());
+			infoList.add(optionInfo);
+		}
+		if(rmq.getValuelabels() != null) {
+			switch (rmq.getQtype()) {
+			case NUMERIC:
+				for(Map.Entry<Object, String> texts: rmq.getValuelabels().entrySet()) {
+					Double value = (Double)texts.getKey();
+					for(VariableOptionInfo info: infoList) {
+						if(value == info.getValue() || (value!=null && value.equals(info.getValue()))) {
+							info.setRawText(texts.getValue());
+							break;
+						}
+					}
+				}
+				break;
+			case TEXT:
+				for(Map.Entry<Object, String> texts: rmq.getValuelabels().entrySet()) {
+					String value = (String)texts.getKey();
+					for(VariableOptionInfo info: infoList) {
+						if(value == info.getValue() || (value!=null && value.equals(info.getValue()))) {
+							info.setRawText(texts.getValue());
+							break;
+						}
+					}
+				}
+				break;
+			}
+		}
+		return infoList;
 	}
 	
 	/*
@@ -372,11 +369,11 @@ public class DaxploreFile implements Closeable {
 		int tpAdded = 0, questionsModified = 0;
 		for(MetaQuestion question : metaQuestionManager.getAll()) {
 			List<MetaTimepointShort> questionTp = new LinkedList<>();
-			LinkedList<Pair<Double, Integer>> valueCounts = rawData.getColumnValueCountWhere(about.getTimeSeriesShortColumn(), question.getColumn());
+			SortedMap<Double, Integer> valueCounts = rawDataManager.getColumnValueCountWhere(about.getTimeSeriesShortColumn(), question.getColumn());
 			questionTp.clear();
-			for(Pair<Double, Integer> pair : valueCounts) {
+			for(Double key : valueCounts.keySet()) {
 				for(MetaTimepointShort tp : timepoints) {
-					if(pair.getKey()!=null && tp.getValue() == pair.getKey() && pair.getValue()>0) {
+					if(key != null && tp.getValue() == key && valueCounts.get(key) > 0) {
 						questionTp.add(tp);
 					}
 				}

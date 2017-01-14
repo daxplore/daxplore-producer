@@ -3,19 +3,19 @@
  */
 package org.daxplore.producer.gui.widget;
 
-import java.util.LinkedHashMap;
+import java.util.SortedMap;
 
 import javax.swing.table.DefaultTableModel;
 
 @SuppressWarnings("serial")
 public class ColumnTableModel extends DefaultTableModel {
-	LinkedHashMap<Object, Integer> columnValueList;
+	SortedMap<Object, Integer> columnValueList;
 	
-	public ColumnTableModel(LinkedHashMap<Object, Integer> columnValueList) {
+	public ColumnTableModel(SortedMap<Object, Integer> columnValueList) {
 		this.columnValueList = columnValueList;
 	}
 	
-	public void setValues(LinkedHashMap<Object, Integer> columnValueList) {
+	public void setValues(SortedMap<Object, Integer> columnValueList) {
 		this.columnValueList = columnValueList;
 		fireTableDataChanged();
 	}

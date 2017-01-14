@@ -11,9 +11,9 @@ import java.awt.Component;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.sql.SQLException;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.SortedMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -30,8 +30,7 @@ import org.daxplore.producer.daxplorelib.metadata.MetaTimepointShort;
 import org.daxplore.producer.daxplorelib.metadata.MetaTimepointShort.MetaTimepointShortManager;
 import org.daxplore.producer.daxplorelib.metadata.textreference.TextReference;
 import org.daxplore.producer.daxplorelib.metadata.textreference.TextReferenceManager;
-import org.daxplore.producer.daxplorelib.raw.RawData;
-import org.daxplore.producer.daxplorelib.raw.RawMeta;
+import org.daxplore.producer.daxplorelib.raw.RawData.RawDataManager;
 import org.daxplore.producer.gui.event.DaxploreFileUpdateEvent;
 import org.daxplore.producer.gui.resources.GuiTexts;
 import org.daxplore.producer.gui.widget.ColumnTableModel;
@@ -97,9 +96,9 @@ public class TimeSeriesController implements ActionListener, DocumentListener {
 				}
 				
 				Double value = 0.0;
-				RawData rawData = daxploreFile.getRawData();
+				RawDataManager rawDataManager = daxploreFile.getRawDataManager();
 				String column = daxploreFile.getAbout().getTimeSeriesShortColumn();
-				LinkedHashMap<Object, Integer> columnValueCounts= rawData.getColumnValueCount(column);
+				SortedMap<Object, Integer> columnValueCounts= rawDataManager.getColumnValueCount(column);
 				L: for(Map.Entry<Object, Integer> valuePair: columnValueCounts.entrySet()) {
 					if(valuePair.getKey() == null) {
 						continue L;
@@ -154,14 +153,9 @@ public class TimeSeriesController implements ActionListener, DocumentListener {
 			break;
 		case SET_COLUMN:
 			String column = timeSeriesView.getTimeSeriesColumn();
-			try {
-				boolean hasColumn = daxploreFile.getRawMeta().hasColumn(column);
-				if(hasColumn) {
-					daxploreFile.getAbout().setTimeSeriesShortColumn(column);
-				}
-			} catch (SQLException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
+			boolean hasColumn = daxploreFile.getRawMetaManager().hasColumn(column);
+			if(hasColumn) {
+				daxploreFile.getAbout().setTimeSeriesShortColumn(column);
 			}
 			break;
 		case REPLACE_TIMEPOINTS:
@@ -218,15 +212,14 @@ public class TimeSeriesController implements ActionListener, DocumentListener {
 
 	public void filter(String text) { //TODO rename method
 		try {
-			RawData rawData = daxploreFile.getRawData();
-			RawMeta rawMeta = daxploreFile.getRawMeta();
-			if(rawMeta.hasColumn(text)) {
-				LinkedHashMap<Object, Integer> columnValueList = rawData.getColumnValueCount(text);
+			RawDataManager rawDataManager = daxploreFile.getRawDataManager();
+			if(daxploreFile.getRawMetaManager().hasColumn(text)) {
+				SortedMap<Object, Integer> columnValueList = rawDataManager.getColumnValueCount(text);
 				ColumnTableModel model = new ColumnTableModel(columnValueList);
 				JTable columnValueTable = new JTable(model);
 				timeSeriesView.getColumnValueCountPane().setViewportView(columnValueTable);
 			}
-		} catch (SQLException e) {
+		} catch (DaxploreException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
