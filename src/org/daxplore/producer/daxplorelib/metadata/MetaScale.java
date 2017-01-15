@@ -116,14 +116,14 @@ public class MetaScale<T> {
 			throw new DaxploreException("Could not get metascale with id " + questionid);
 		}
 		
-		public MetaScale<String> createString(int questionid, List<Option<String>> options) throws SQLException {
+		public MetaScale<String> createString(int questionid, List<Option<String>> options) {
 			MetaScale<String> scaleString = new MetaScale<String>(questionid, options, true, VariableType.TEXT);
 			toBeAdded.add(scaleString);
 			scaleMap.put(questionid, scaleString);
 			return scaleString;
 		}
 		
-		public MetaScale<Double> createDouble(int questionid, List<Option<Double>> options) throws SQLException {
+		public MetaScale<Double> createDouble(int questionid, List<Option<Double>> options) {
 			MetaScale<Double> scaleDouble = new MetaScale<Double>(questionid, options, true, VariableType.NUMERIC);
 			toBeAdded.add(scaleDouble);
 			scaleMap.put(questionid, scaleDouble);

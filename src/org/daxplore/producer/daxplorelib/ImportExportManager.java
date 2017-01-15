@@ -16,7 +16,6 @@ import java.io.Reader;
 import java.io.Writer;
 import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
-import java.sql.Connection;
 import java.sql.SQLException;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
@@ -90,8 +89,6 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonPrimitive;
 
 public class ImportExportManager {
-	
-	private Connection connection;
 	private DaxploreFile daxploreFile;
 	
 	private List<TextReference> emptyTextrefs = new LinkedList<>();
@@ -104,8 +101,7 @@ public class ImportExportManager {
 		PROPERTIES, CSV
 	}
 	
-	ImportExportManager(Connection connection, DaxploreFile daxploreFile) {
-		this.connection = connection;
+	ImportExportManager(DaxploreFile daxploreFile) {
 		this.daxploreFile = daxploreFile;
 	}
 	
@@ -312,80 +308,56 @@ public class ImportExportManager {
 	
 	/* 
 	 * Import/export methods that are used to change metadata in batch.
-	 * The preferred way too use the library.
+	 * The preferred way to use the library.
 	 */
 	void importFromRaw(Locale locale) throws DaxploreException {
-		boolean autocommit = true;
-		try {
-			//save = sqliteDatabase.setSavepoint();
-			autocommit = connection.getAutoCommit();
-			connection.setAutoCommit(false);
-			connection.setTransactionIsolation(Connection.TRANSACTION_READ_UNCOMMITTED);
-		} catch (SQLException e) {
-			MyTools.printSQLExeption(e);
-			throw new DaxploreException("Failed to disable autocommit", e);
-		}
-		
-		try {
+		for(RawMetaQuestion rmq : daxploreFile.getRawMetaManager().getQuestions()) {
+			String column = rmq.getColumn();
+			VariableType type = rmq.getQtype();
+			TextReference fulltext = daxploreFile.getTextReferenceManager().get(column + "_fulltext");
 			
-			for(RawMetaQuestion rmq : daxploreFile.getRawMetaManager().getQuestions()) {
-				String column = rmq.getColumn();
-				VariableType type = rmq.getQtype();
-				TextReference fulltext = daxploreFile.getTextReferenceManager().get(column + "_fulltext");
-				
-				fulltext.put(rmq.getQtext(), locale);
-				List<MetaScale.Option<?>> scaleOptions = new LinkedList<MetaScale.Option<?>>();
-				Set<Double> meanExcludedValues = null;
-				if(rmq.getValuelabels() != null) {
-					int i = 1;
-					switch(type) {
-					case NUMERIC:
-//						LinkedList<MetaScale.Option<Double>> scaleOptionsDouble = new LinkedList<>();
-						for(Map.Entry<Object, String> s: rmq.getValuelabels().entrySet()) {
-							TextReference ref = daxploreFile.getTextReferenceManager().get(rmq.getColumn() + "_option_" + i);
-							ref.put(s.getValue(), locale);
-							if(s.getKey() instanceof Double) {
-								Collection<Double> vals = new LinkedList<Double>();
-								vals.add((Double)s.getKey());
-								scaleOptions.add(new MetaScale.Option<Double>(ref, vals, true));
-							} else {
-								throw new DaxploreException("Trying to add a non number or string as an option");
-							}
-							i++;
+			fulltext.put(rmq.getQtext(), locale);
+			List<MetaScale.Option<?>> scaleOptions = new LinkedList<MetaScale.Option<?>>();
+			Set<Double> meanExcludedValues = null;
+			if(rmq.getValuelabels() != null) {
+				int i = 1;
+				switch(type) {
+				case NUMERIC:
+					for(Map.Entry<Object, String> s: rmq.getValuelabels().entrySet()) {
+						TextReference ref = daxploreFile.getTextReferenceManager().get(rmq.getColumn() + "_option_" + i);
+						ref.put(s.getValue(), locale);
+						if(s.getKey() instanceof Double) {
+							Collection<Double> vals = new LinkedList<Double>();
+							vals.add((Double)s.getKey());
+							scaleOptions.add(new MetaScale.Option<Double>(ref, vals, true));
+						} else {
+							throw new DaxploreException("Trying to add a non number or string as an option");
 						}
-						meanExcludedValues = new HashSet<>();
-						break;
-					case TEXT:
-						for(Map.Entry<Object, String> s: rmq.getValuelabels().entrySet()) {
-							TextReference ref = daxploreFile.getTextReferenceManager().get(rmq.getColumn() + "_option_" + i);
-							ref.put(s.getValue(), locale);
-							if(s.getKey() instanceof String) {
-								Collection<String> vals = new LinkedList<String>();
-								vals.add((String)s.getKey());
-								scaleOptions.add(new MetaScale.Option<String>(ref, vals, true));
-							} else {
-								throw new DaxploreException("Trying to add a non number or string as an option");
-							}
-							i++;
-						}
-						break;
+						i++;
 					}
+					meanExcludedValues = new HashSet<>();
+					break;
+				case TEXT:
+					for(Map.Entry<Object, String> s: rmq.getValuelabels().entrySet()) {
+						TextReference ref = daxploreFile.getTextReferenceManager().get(rmq.getColumn() + "_option_" + i);
+						ref.put(s.getValue(), locale);
+						if(s.getKey() instanceof String) {
+							Collection<String> vals = new LinkedList<String>();
+							vals.add((String)s.getKey());
+							scaleOptions.add(new MetaScale.Option<String>(ref, vals, true));
+						} else {
+							throw new DaxploreException("Trying to add a non number or string as an option");
+						}
+						i++;
+					}
+					break;
 				}
-				
-				TextReference shorttext = daxploreFile.getTextReferenceManager().get(column + "_shorttext");
-				TextReference descriptiontext = daxploreFile.getTextReferenceManager().get(column + "_description");
-				List<MetaTimepointShort> timepoints = new LinkedList<>();
-				daxploreFile.getMetaQuestionManager().create(column, type, shorttext, fulltext, descriptiontext, scaleOptions, meanExcludedValues, Double.NaN, timepoints);
 			}
-		} catch (SQLException e) {
-			throw new DaxploreException("Failed to transfer metadata from raw", e);
-		}
-		
-		try {
-			connection.setAutoCommit(autocommit);
-		} catch (SQLException e) {
-			MyTools.printSQLExeption(e);
-			throw new DaxploreException("Failed to reenable autocommit", e);
+			
+			TextReference shorttext = daxploreFile.getTextReferenceManager().get(column + "_shorttext");
+			TextReference descriptiontext = daxploreFile.getTextReferenceManager().get(column + "_description");
+			List<MetaTimepointShort> timepoints = new LinkedList<>();
+			daxploreFile.getMetaQuestionManager().create(column, type, shorttext, fulltext, descriptiontext, scaleOptions, meanExcludedValues, Double.NaN, timepoints);
 		}
 	}
 	
@@ -400,31 +372,10 @@ public class ImportExportManager {
 			importSPSSFile.logFlag = false;
 			importSPSSFile.loadMetadata();
 		
-			boolean autocommit = false;
-			try {
-				autocommit = connection.getAutoCommit();
-				connection.setAutoCommit(false);
-				int isolation = connection.getTransactionIsolation();
-				connection.setTransactionIsolation(Connection.TRANSACTION_READ_UNCOMMITTED);
+			daxploreFile.getRawMetaManager().loadFromSPSS(importSPSSFile); //Order important, meta before data
+			daxploreFile.getRawDataManager().loadFromSPSS(importSPSSFile);
 				
-				daxploreFile.getRawMetaManager().loadFromSPSS(importSPSSFile); //Order important, meta before data
-				daxploreFile.getRawDataManager().loadFromSPSS(importSPSSFile);
-					
-				daxploreFile.getAbout().setImport(importSPSSFile.file.getName());
-				
-				connection.commit();
-				connection.setTransactionIsolation(isolation);
-				connection.setAutoCommit(autocommit);
-			} catch (SQLException e) {
-				MyTools.printSQLExeption(e);
-				try {
-					connection.rollback();
-					connection.setAutoCommit(autocommit);
-				} catch (SQLException e1) {
-					throw new DaxploreException("Import error. Could not rollback.", e);
-				}
-				throw new DaxploreException("Import error.", e);
-			}
+			daxploreFile.getAbout().setImport(importSPSSFile.file.getName());
 		} catch (SPSSFileException e2) {
 			throw new DaxploreException("SPSSFileException", e2);
 		}

@@ -119,7 +119,7 @@ public class DaxploreFile implements Closeable {
 			metaQuestionManager = new MetaQuestionManager(connection, textReferenceManager, metaScaleManager, metaMeanManager, metaTimepointShortManager);
 			metaGroupManager = new MetaGroupManager(connection, textReferenceManager, metaQuestionManager);
 			
-			importExport = new ImportExportManager(connection, this);
+			importExport = new ImportExportManager(this);
 		} catch (SQLException e) {
 			throw new DaxploreException("Failed to construct DaxploreFile", e);
 		}

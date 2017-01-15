@@ -158,12 +158,17 @@ public class MetaQuestion {
 		
 		@SuppressWarnings("unchecked")
 		public MetaQuestion create(String column, VariableType type, TextReference shortTextRef, TextReference fullTextRef, TextReference descriptionTextRef,
-				List<MetaScale.Option<?>> scaleOptions, Set<Double> meanExcludedValues, double globalMean, List<MetaTimepointShort> timepoints) throws SQLException, DaxploreException {
+				List<MetaScale.Option<?>> scaleOptions, Set<Double> meanExcludedValues, double globalMean, List<MetaTimepointShort> timepoints) throws DaxploreException {
 			boolean useMean = (meanExcludedValues != null);
 			
 			addDelta++;
 
-			int id = SQLTools.maxId(table.name, "id", connection) + addDelta;
+			int id;
+			try {
+				id = SQLTools.maxId(table.name, "id", connection) + addDelta;
+			} catch (SQLException e) {
+				throw new DaxploreException("Failed to get max id from metaquestion");
+			}
 			
 			MetaScale<?> scale = null;
 			switch(type) {
