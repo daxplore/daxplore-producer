@@ -9,7 +9,6 @@ package org.daxplore.producer.gui.view.variable;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.sql.SQLException;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
@@ -57,45 +56,38 @@ public class VariableController implements TableModelListener, ActionListener {
 	private TabMeanPanel meanPanel;
 	private TabTextPanel textPanel;
 	
-	public VariableController(EventBus eventBus, GuiTexts texts, DaxploreFile daxploreFile, MetaQuestion metaQuestion) {
+	public VariableController(EventBus eventBus, GuiTexts texts, DaxploreFile daxploreFile, MetaQuestion metaQuestion) throws DaxploreException {
 		this.mq = metaQuestion;
 		this.daxploreFile = daxploreFile;
 		
 		eventBus.register(this);
 		
-		try {
-			rawMetaQuestion = daxploreFile.getRawMetaManager().getQuestion(metaQuestion.getColumn());
-			rawVariableList = daxploreFile.getRawColumnInfo(rawMetaQuestion.getColumn());
+		rawMetaQuestion = daxploreFile.getRawMetaManager().getQuestion(metaQuestion.getColumn());
+		rawVariableList = daxploreFile.getRawColumnInfo(rawMetaQuestion.getColumn());
 
-			variableModel = new VariableTableModel(metaQuestion.getScale(), calculateAfter());
-			variableTable = new VariableTable(eventBus, texts, variableModel);
-			variableModel.addTableModelListener(this);
-			List<Integer> availebleToNumbers = variableModel.getAvailebleToNumbers();
-			
-			rawModel = new RawVariableTableModel(rawMetaQuestion, rawVariableList, metaQuestion.getScale(), availebleToNumbers);
-			rawTable = new RawVariableTable(eventBus, texts, rawModel);
-			rawModel.addTableModelListener(this);
-			
-			TimePointTableModel timePointTableModel = new TimePointTableModel(
-					daxploreFile.getMetaTimepointShortManager(),
-					daxploreFile.getRawDataManager(),
-					daxploreFile.getAbout(),
-					metaQuestion);
-			
-			TimePointTable timePointTable = new TimePointTable(eventBus, texts, timePointTableModel);
-			
-			infoPanel = new TabInfoPanel(eventBus, texts, metaQuestion, timePointTable);
-			freqPanel = new TabFrequenciesPanel(texts, this, metaQuestion, rawTable, variableTable);
-			meanPanel = new TabMeanPanel(texts, this, metaQuestion);
-			textPanel = new TabTextPanel();
-			
-			view = new VariableView(texts, infoPanel, freqPanel, meanPanel, textPanel);
-			
-		} catch (SQLException | DaxploreException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+		variableModel = new VariableTableModel(metaQuestion.getScale(), calculateAfter());
+		variableTable = new VariableTable(eventBus, texts, variableModel);
+		variableModel.addTableModelListener(this);
+		List<Integer> availebleToNumbers = variableModel.getAvailebleToNumbers();
 		
+		rawModel = new RawVariableTableModel(rawMetaQuestion, rawVariableList, metaQuestion.getScale(), availebleToNumbers);
+		rawTable = new RawVariableTable(eventBus, texts, rawModel);
+		rawModel.addTableModelListener(this);
+		
+		TimePointTableModel timePointTableModel = new TimePointTableModel(
+				daxploreFile.getMetaTimepointShortManager(),
+				daxploreFile.getRawDataManager(),
+				daxploreFile.getAbout(),
+				metaQuestion);
+		
+		TimePointTable timePointTable = new TimePointTable(eventBus, texts, timePointTableModel);
+		
+		infoPanel = new TabInfoPanel(eventBus, texts, metaQuestion, timePointTable);
+		freqPanel = new TabFrequenciesPanel(texts, this, metaQuestion, rawTable, variableTable);
+		meanPanel = new TabMeanPanel(texts, this, metaQuestion);
+		textPanel = new TabTextPanel();
+		
+		view = new VariableView(texts, infoPanel, freqPanel, meanPanel, textPanel);
 	}
 	
 	

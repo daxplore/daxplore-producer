@@ -247,6 +247,7 @@ public class RawMetaQuestion {
 				// TODO handle different diff scenarios
 				toBeAdded.add(rmq);
 				columnMap.put(column, rmq);
+				columnIndexMap.put(column, i);
 			}
 		}
 
@@ -262,11 +263,11 @@ public class RawMetaQuestion {
 			return new ArrayList<RawMetaQuestion>(columnMap.values());
 		}
 		
-		public int getIndexOfColumn(String column) {
+		public int getIndexOfColumn(String column) throws DaxploreException {
 			if (columnIndexMap.containsKey(column)) {
 				return columnIndexMap.get(column);
 			}
-			return -1;
+			throw new DaxploreException("Column '" + column + "' doesn't exist");
 		}
 		
 		public List<String> getColumnNames() {

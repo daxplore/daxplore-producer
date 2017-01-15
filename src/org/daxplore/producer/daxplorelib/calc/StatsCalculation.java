@@ -231,7 +231,7 @@ public class StatsCalculation {
 	}
 	
 	@SuppressWarnings({ "unchecked", "rawtypes" })
-	private int[] frequencies(MetaQuestion question, MetaTimepointShort timepoint, int lowerlimit) throws DaxploreWarning {
+	private int[] frequencies(MetaQuestion question, MetaTimepointShort timepoint, int lowerlimit) throws DaxploreWarning, DaxploreException {
 		int[] frequencies = new int[question.getScale().getOptionCount()];
 		int total = 0;
 

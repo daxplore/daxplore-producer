@@ -7,7 +7,6 @@
  ******************************************************************************/
 package org.daxplore.producer.gui.view.variable;
 
-import java.sql.SQLException;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -30,7 +29,7 @@ public class TimePointTableModel extends DefaultTableModel {
 	List<Double> counts = new LinkedList<>();
 	MetaQuestion mq;
 	
-	public TimePointTableModel(MetaTimepointShortManager mtsm, RawDataManager rawDataManager, About about, MetaQuestion question) throws SQLException, DaxploreException {
+	public TimePointTableModel(MetaTimepointShortManager mtsm, RawDataManager rawDataManager, About about, MetaQuestion question) throws DaxploreException {
 		this.mq = question;
 		SortedMap<Double, Integer> timePointCount = rawDataManager.getColumnValueCountWhere(about.getTimeSeriesShortColumn(), mq.getColumn());
 		for(MetaTimepointShort tp: mtsm.getAll()) {
