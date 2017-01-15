@@ -115,8 +115,7 @@ public class ImportExportManager {
 		
 		emptyTextrefs.clear();
 		
-		StatsCalculation crosstabs = new StatsCalculation(connection, daxploreFile.getAbout());
-		crosstabs.loadRawToMem();
+		StatsCalculation crosstabs = new StatsCalculation(daxploreFile.getAbout(), daxploreFile.getRawMetaManager(), daxploreFile.getRawDataManager());
 
 		MetaGroup perspectives = daxploreFile.getMetaGroupManager().getPerspectiveGroup();
 		SortedSet<MetaQuestion> selectedQuestions = new TreeSet<>(new Comparator<MetaQuestion>() {
@@ -135,7 +134,7 @@ public class ImportExportManager {
 				selectedQuestions.add(question);
 				for(MetaQuestion perspective : perspectives.getQuestions()) {
 					try {
-						dataJSON.add(crosstabs.calculateData(daxploreFile.getAbout(), question, perspective, 10).toJSONObject());
+						dataJSON.add(crosstabs.calculateData(question, perspective, 10).toJSONObject());
 					} catch (DaxploreWarning e) {
 						warnings.add(e.getMessage());
 					}
@@ -220,8 +219,6 @@ public class ImportExportManager {
 	
 			zout.flush();
 		}
-		
-		crosstabs.dropRawFromMem();
 		
 		Logger.getGlobal().log(Level.INFO, "Created file in " + ((System.nanoTime() -time)/Math.pow(10,9)) + "s");
 		if(!emptyTextrefs.isEmpty()) {

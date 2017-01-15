@@ -7,7 +7,6 @@
  ******************************************************************************/
 package org.daxplore.producer.daxplorelib.metadata.textreference;
 
-import java.sql.SQLException;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -64,7 +63,6 @@ public class TextReference extends TextReferenceReference {
 	/**
 	 * Get a list of locales set for this TextReference
 	 * @return list of locales
-	 * @throws SQLException 
 	 */
 	public List<Locale> getLocales() {
 		return Lists.newLinkedList(localeMap.keySet());

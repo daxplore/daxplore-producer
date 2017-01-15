@@ -54,6 +54,7 @@ public class RawMetaQuestion {
 		
 		private Connection connection;
 		private LinkedHashMap<String, RawMetaQuestion> columnMap = new LinkedHashMap<>();
+		private HashMap<String, Integer> columnIndexMap = new HashMap<>();
 		private List<RawMetaQuestion> toBeAdded = new ArrayList<>();
 		private Map<String, RawMetaQuestion> toBeRemoved = new HashMap<>();
 		
@@ -77,10 +78,12 @@ public class RawMetaQuestion {
 				HashSet<String> rawMetaColumns = new HashSet<String>();
 				
 				// insert columns in map so that columnMap's order matches the column order of rawdata
+				int index = 0;
 				while (rawDataColumnResultSet.next()) {
 					String column = rawDataColumnResultSet.getString("name");
 					rawDataColumns.add(column);
 					columnMap.put(column, null);
+					columnIndexMap.put(column, index++);
 				}
 				
 				while (rs.next()) {
@@ -253,15 +256,11 @@ public class RawMetaQuestion {
 			return new ArrayList<RawMetaQuestion>(columnMap.values());
 		}
 		
-		public int getIndexOfColumn(String column) throws DaxploreException {
-			int index = 0;
-			for (RawMetaQuestion rmq : columnMap.values()) {
-				if (rmq.getColumn().equals(column)) {
-					return index;
-				}
-				index++;
+		public int getIndexOfColumn(String column) {
+			if (columnIndexMap.containsKey(column)) {
+				return columnIndexMap.get(column);
 			}
-			throw new DaxploreException("Column does not exist: " + column);
+			return -1;
 		}
 		
 		public List<String> getColumnNames() {

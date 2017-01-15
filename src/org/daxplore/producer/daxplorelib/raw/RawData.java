@@ -47,7 +47,7 @@ public class RawData {
 		/**
 		 * Indexed as data[column][row]
 		 */
-		private Object[][] data = new Object[0][0];
+		private Object[][] dataTable = new Object[0][0];
 		
 		public RawDataManager(Connection connection, About about, RawMetaManager rawMetaManager) throws SQLException {
 			this.connection = connection;
@@ -73,7 +73,7 @@ public class RawData {
 			List<RawMetaQuestion> columns = rawMetaManager.getQuestions();
 			
 			if (!SQLTools.tableExists(tablename, connection)) {
-				data = new Object[0][columns.size()];
+				dataTable = new Object[0][columns.size()];
 			}
 
 			int colCount = columns.size();
@@ -82,7 +82,7 @@ public class RawData {
 					ResultSet rs = stmt.executeQuery("SELECT count(*) as cnt from rawdata")) {
 				rs.next();
 				int rowCount = rs.getInt("cnt");
-				data = new Object[colCount][rowCount];
+				dataTable = new Object[colCount][rowCount];
 			}
 			
 			try(Statement stmt = connection.createStatement();
@@ -91,13 +91,13 @@ public class RawData {
 					for(int col = 0; col < columns.size(); col++) {
 						switch (columns.get(col).getQtype()) {
 						case NUMERIC:
-							data[col][row] = rs.getDouble(col + 1);
+							dataTable[col][row] = rs.getDouble(col + 1);
 							if(rs.wasNull()) {
-								data[col][row] = null;
+								dataTable[col][row] = null;
 							}
 							break;
 						case TEXT:
-							data[col][row] = rs.getString(col + 1);
+							dataTable[col][row] = rs.getString(col + 1);
 							break;
 						}
 					}
@@ -123,7 +123,7 @@ public class RawData {
 				stmt.execute(createString);
 			}
 			
-			int rows = data.length > 0 ? data[0].length : 0;
+			int rows = dataTable.length > 0 ? dataTable[0].length : 0;
 			
 			try (PreparedStatement addRowStatement = addRowStatement(rawMetaQuestions, connection)) {
 				for (int row = 0; row < rows; row++) {
@@ -131,7 +131,7 @@ public class RawData {
 					for(RawMetaQuestion rmq : rawMetaQuestions) {
 						switch (rmq.getQtype()) {
 						case NUMERIC:
-							Double ddatapoint = (Double)data[col][row];
+							Double ddatapoint = (Double)dataTable[col][row];
 							if(ddatapoint == null || ddatapoint.isNaN() || ddatapoint.isInfinite()){
 								addRowStatement.setNull(col+1, java.sql.Types.REAL);
 							} else {
@@ -139,7 +139,7 @@ public class RawData {
 							}
 							break;
 						case TEXT:
-							String sdatapoint = (String)data[col][row];
+							String sdatapoint = (String)dataTable[col][row];
 							if(Strings.isNullOrEmpty(sdatapoint)) {
 								addRowStatement.setNull(col+1, java.sql.Types.VARCHAR);
 							} else {
@@ -175,7 +175,7 @@ public class RawData {
 					}
 					rowIndex++;
 				}
-				data = loadedData;
+				dataTable = loadedData;
 				modified = true;
 			} catch (IOException | SPSSFileException e) {
 				throw new DaxploreException("Failed to read SPSS file", e);
@@ -185,9 +185,9 @@ public class RawData {
 		public SortedMap<Object, Integer> getColumnValueCount(String column) throws DaxploreException {
 			SortedMap<Object, Integer> counts = new TreeMap<>(naturalOrderNullLowComparator);
 			int colIndex = rawMetaManager.getIndexOfColumn(column);
-			if (data.length > 0) {
-				for (int row = 0; row < data[0].length; row++) {
-					Object val = data[colIndex][row];
+			if (dataTable.length > 0) {
+				for (int row = 0; row < dataTable[0].length; row++) {
+					Object val = dataTable[colIndex][row];
 					if (counts.containsKey(val)) {
 						int previous = counts.get(val);
 						counts.put(val, previous+1);
@@ -205,10 +205,10 @@ public class RawData {
 			if (column1 != null) {
 				int col1 = rawMetaManager.getIndexOfColumn(column1);
 				int col2 = rawMetaManager.getIndexOfColumn(column2);
-				if (data.length > 0) {
-					for (int row = 0; row < data[0].length; row++) {
-						Double val1 = asDouble(data[col1][row]);
-						if (data[col2][row] != null) {
+				if (dataTable.length > 0) {
+					for (int row = 0; row < dataTable[0].length; row++) {
+						Double val1 = asDouble(dataTable[col1][row]);
+						if (dataTable[col2][row] != null) {
 							if (counts.containsKey(val1)) {
 								int previous = counts.get(val1);
 								counts.put(val1, previous+1);
@@ -220,6 +220,10 @@ public class RawData {
 				}
 			}
 			return counts;
+		}
+
+		public Object[][] getDataTable() {
+			return dataTable;
 		}
 	}
 	

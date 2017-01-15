@@ -75,7 +75,7 @@
 		<xsd:attribute name="id" type="xsd:ID" use="required" />
 	</xsd:complexType>
 	
-	<!-- Column in sclae?!?!?!? -->
+	<!-- Column in scale?!?!?!? -->
 	
 	<!-- Column types (part of variables) --> 
 	
