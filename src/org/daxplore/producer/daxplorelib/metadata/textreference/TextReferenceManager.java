@@ -35,9 +35,9 @@ public class TextReferenceManager {
 	private static final DaxploreTable table = new DaxploreTable("CREATE TABLE texts (ref TEXT NOT NULL, locale TEXT, text TEXT NOT NULL, UNIQUE ( ref, locale) )", "texts");
 
 	private Connection connection;
-	private Map<String, TextReference> toBeRemoved = new HashMap<>();
 	
 	private TextTree textTree = new TextTree();
+	private Map<String, TextReference> toBeRemoved = new HashMap<>();
 	
 	private int nNew = 0;
 	

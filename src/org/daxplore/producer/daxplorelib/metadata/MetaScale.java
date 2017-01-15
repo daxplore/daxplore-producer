@@ -50,13 +50,12 @@ public class MetaScale<T> {
 			, "metascale");
 	
 	public static class MetaScaleManager {
-		private Map<Integer, MetaScale<?>> scaleMap = new HashMap<>();
 		private Connection connection;
 		private TextReferenceManager textsManager;
 		
+		private Map<Integer, MetaScale<?>> scaleMap = new HashMap<>();
 		private List<MetaScale<?>> toBeAdded = new LinkedList<>();
 		private Map<Integer, MetaScale<?>> toBeRemoved = new HashMap<>();
-//		private List<MetaScale> toBeRemoved = new LinkedList<MetaScale>();
 		
 		public MetaScaleManager(Connection connection, TextReferenceManager textsManager) throws SQLException {
 			this.connection = connection;

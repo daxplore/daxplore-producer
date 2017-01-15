@@ -66,13 +66,19 @@ public class RawMetaQuestion {
 			}
 		}
 		
-		// completely replaces in-memory version
+		/**
+		 * Load all database data into memory. Replaces all in-memory data. 
+		 * @throws SQLException
+		 */
 		private void loadAllToMemory() throws DaxploreException, SQLException {
 			try(ResultSet rawDataColumnResultSet = connection.createStatement().executeQuery("PRAGMA table_info('rawdata')");
 				PreparedStatement stmt = connection.prepareStatement("SELECT * FROM rawmeta ORDER BY column ASC");
 				ResultSet rs = stmt.executeQuery()) {
 				
-				columnMap = new LinkedHashMap<String, RawMetaQuestion>();
+				columnMap.clear();
+				columnIndexMap.clear();
+				toBeAdded.clear();
+				toBeRemoved.clear();
 				
 				HashSet<String> rawDataColumns = new HashSet<String>();
 				HashSet<String> rawMetaColumns = new HashSet<String>();
@@ -273,6 +279,10 @@ public class RawMetaQuestion {
 
 		public int getQuestionCount() {
 			return columnMap.size();
+		}
+
+		public void discardChanges() throws DaxploreException, SQLException {
+			loadAllToMemory();
 		}
 	}
 	

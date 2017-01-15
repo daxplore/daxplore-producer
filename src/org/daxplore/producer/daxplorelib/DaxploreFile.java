@@ -102,9 +102,8 @@ public class DaxploreFile implements Closeable {
 		try {
 			settings = new Settings(connection);
 			about = new About(connection, settings, createNew);
-			about.save();
 			rawMetaManager = new RawMetaManager(connection);
-			rawDataManager = new RawDataManager(connection, about, rawMetaManager);
+			rawDataManager = new RawDataManager(connection, rawMetaManager);
 			
 			for(String key : DaxploreProperties.clientSettings) {
 				if(!settings.has(key)) {
@@ -392,10 +391,12 @@ public class DaxploreFile implements Closeable {
 		try {
 			about.discardChanges();
 			settings.discardChanges();
+			rawMetaManager.discardChanges();
+			rawDataManager.discardChanges();
 			metaGroupManager.discardChanges();
+			metaMeanManager.discardChanges();
 			metaQuestionManager.discardChanges();
 			metaScaleManager.discardChanges();
-			metaMeanManager.discardChanges();
 			metaTimepointShortManager.discardChanges();
 			textReferenceManager.discardChanges();
 		} catch (SQLException e) {

@@ -306,6 +306,12 @@ public class ImportExportManager {
 		}
 	}
 	
+	
+	/////////////
+	// TODO do importRaw for new questions
+	// TODO remove removed metaquestions and everything that links to them (including textrefs? including scales? including metameans? ...)
+	//////////
+	
 	/* 
 	 * Import/export methods that are used to change metadata in batch.
 	 * The preferred way to use the library.

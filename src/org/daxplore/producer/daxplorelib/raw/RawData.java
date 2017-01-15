@@ -21,7 +21,6 @@ import java.util.List;
 import java.util.SortedMap;
 import java.util.TreeMap;
 
-import org.daxplore.producer.daxplorelib.About;
 import org.daxplore.producer.daxplorelib.DaxploreException;
 import org.daxplore.producer.daxplorelib.DaxploreTable;
 import org.daxplore.producer.daxplorelib.SQLTools;
@@ -39,7 +38,6 @@ public class RawData {
 		private final DaxploreTable table;
 		
 		private Connection connection;
-		private About about;
 		private RawMetaManager rawMetaManager;
 		
 		private boolean modified = false;
@@ -49,9 +47,8 @@ public class RawData {
 		 */
 		private Object[][] dataTable = new Object[0][0];
 		
-		public RawDataManager(Connection connection, About about, RawMetaManager rawMetaManager) throws SQLException {
+		public RawDataManager(Connection connection, RawMetaManager rawMetaManager) throws SQLException {
 			this.connection = connection;
-			this.about = about;
 			this.rawMetaManager = rawMetaManager;
 			
 			String sql = null;
@@ -69,6 +66,10 @@ public class RawData {
 			table = new DaxploreTable(sql, tablename);
 		}
 		
+		/**
+		 * Load all database data into memory. Replaces all in-memory data. 
+		 * @throws SQLException
+		 */
 		private void loadAllToMemory() throws SQLException {
 			List<RawMetaQuestion> columns = rawMetaManager.getQuestions();
 			
@@ -103,6 +104,8 @@ public class RawData {
 					}
 				}
 			}
+			
+			modified = false;
 		}
 		
 		public void saveAll() throws SQLException {
@@ -224,6 +227,10 @@ public class RawData {
 
 		public Object[][] getDataTable() {
 			return dataTable;
+		}
+
+		public void discardChanges() throws SQLException {
+			loadAllToMemory();
 		}
 	}
 	

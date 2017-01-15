@@ -76,6 +76,7 @@ public class MetaQuestion {
 		private TextReferenceManager textsManager;
 		private MetaMeanManager metaMeanManager;
 		private MetaTimepointShortManager timePointManager;
+		
 		private Map<Integer, MetaQuestion> questionMap = new HashMap<>();
 		private LinkedList<MetaQuestion> toBeAdded= new LinkedList<>();
 		private Map<Integer, MetaQuestion> toBeRemoved = new HashMap<>();

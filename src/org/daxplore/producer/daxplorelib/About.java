@@ -48,8 +48,8 @@ public class About {
 		this(sqliteDatabase, settings, false);
 	}
 	
-	About(Connection sqliteDatabase, Settings settings, boolean createnew) throws SQLException { 
-		this.connection = sqliteDatabase;
+	About(Connection connection, Settings settings, boolean createnew) throws SQLException { 
+		this.connection = connection;
 		this.settings = settings;
 		locales = new TreeSet<>(new Comparator<Locale>() {
 			@Override
@@ -108,6 +108,7 @@ public class About {
 				locales.add(new Locale(rs.getString("locale")));
 			}
 		}
+		localesModified = false;
 	}
 	
 	public int getUnsavedChangesCount() {

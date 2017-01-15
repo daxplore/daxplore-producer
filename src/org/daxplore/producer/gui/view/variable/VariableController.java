@@ -64,7 +64,6 @@ public class VariableController implements TableModelListener, ActionListener {
 		eventBus.register(this);
 		
 		try {
-			
 			rawMetaQuestion = daxploreFile.getRawMetaManager().getQuestion(metaQuestion.getColumn());
 			rawVariableList = daxploreFile.getRawColumnInfo(rawMetaQuestion.getColumn());
 
