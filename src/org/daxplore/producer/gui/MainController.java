@@ -36,8 +36,8 @@ import org.daxplore.producer.daxplorelib.DaxploreException;
 import org.daxplore.producer.daxplorelib.DaxploreFile;
 import org.daxplore.producer.daxplorelib.ImportExportManager.L10nFormat;
 import org.daxplore.producer.daxplorelib.metadata.textreference.TextReference;
-import org.daxplore.producer.gui.Dialogs.FileLocalePair;
-import org.daxplore.producer.gui.Dialogs.FileLocaleUsedTriplet;
+import org.daxplore.producer.gui.Dialogs.ExportDialogResult;
+import org.daxplore.producer.gui.Dialogs.ImportTextsDialogResult;
 import org.daxplore.producer.gui.event.ChangeMainViewEvent;
 import org.daxplore.producer.gui.event.DaxploreFileUpdateEvent;
 import org.daxplore.producer.gui.event.DisplayLocaleSelectEvent;
@@ -46,6 +46,7 @@ import org.daxplore.producer.gui.event.EmptyEvents.DiscardChangesEvent;
 import org.daxplore.producer.gui.event.EmptyEvents.ExportTextsEvent;
 import org.daxplore.producer.gui.event.EmptyEvents.ExportUploadEvent;
 import org.daxplore.producer.gui.event.EmptyEvents.HistoryGoBackEvent;
+import org.daxplore.producer.gui.event.EmptyEvents.ImportSpssEvent;
 import org.daxplore.producer.gui.event.EmptyEvents.ImportTextsEvent;
 import org.daxplore.producer.gui.event.EmptyEvents.QuitProgramEvent;
 import org.daxplore.producer.gui.event.EmptyEvents.ReloadTextsEvent;
@@ -217,7 +218,7 @@ public class MainController {
 	public void on(ExportTextsEvent e) {
 		try {
 			List<Locale> localeList = daxploreFile.getTextReferenceManager().getAllLocales();
-			FileLocaleUsedTriplet fileLocaleUsedTriplet = Dialogs.showExportDialog(preferences, texts, mainWindow, localeList);
+			ExportDialogResult fileLocaleUsedTriplet = Dialogs.showExportDialog(preferences, texts, mainWindow, localeList);
 			if(fileLocaleUsedTriplet == null) {
 				return;
 			}
@@ -259,10 +260,17 @@ public class MainController {
 	}
 	
 	@Subscribe
+	public void on(ImportSpssEvent e) {
+		DaxploreWizard wizard = DaxploreWizard.importSpssWizard(mainWindow, eventBus, texts, preferences, daxploreFile);
+		wizard.show();
+		eventBus.post(new DaxploreFileUpdateEvent(daxploreFile));
+	}
+	
+	@Subscribe
 	public void on(ImportTextsEvent e) {
 		try {
 			List<Locale> localeList = GuiSettings.availableLocales();
-			FileLocalePair fileLocalePair = Dialogs.showImportDialog(preferences, texts, mainWindow, localeList);
+			ImportTextsDialogResult fileLocalePair = Dialogs.showImportTextsDialog(preferences, texts, mainWindow, localeList);
 			
 			if(fileLocalePair == null) {
 				return;

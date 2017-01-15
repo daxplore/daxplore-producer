@@ -24,6 +24,7 @@ import org.daxplore.producer.gui.event.EmptyEvents.DiscardChangesEvent;
 import org.daxplore.producer.gui.event.EmptyEvents.ExportTextsEvent;
 import org.daxplore.producer.gui.event.EmptyEvents.ExportUploadEvent;
 import org.daxplore.producer.gui.event.EmptyEvents.HistoryGoBackEvent;
+import org.daxplore.producer.gui.event.EmptyEvents.ImportSpssEvent;
 import org.daxplore.producer.gui.event.EmptyEvents.ImportTextsEvent;
 import org.daxplore.producer.gui.event.EmptyEvents.QuitProgramEvent;
 import org.daxplore.producer.gui.event.EmptyEvents.SaveFileEvent;
@@ -125,7 +126,7 @@ public class ActionManager {
 		IMPORT_SPSS = new ResourcedAction(texts, "import_spss") {
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				
+				eventBus.post(new ImportSpssEvent());
 			}
 		};
 		

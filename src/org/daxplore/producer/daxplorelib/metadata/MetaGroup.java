@@ -125,25 +125,29 @@ public class MetaGroup implements Comparable<MetaGroup> {
 				qList = new ArrayList<>(0);
 			}
 
-			int id = SQLTools.maxId(groupTable.name, "id", connection)
-					+ addDelta;
+			int id = SQLTools.maxId(groupTable.name, "id", connection) + addDelta;
 			MetaGroup mg = new MetaGroup(id, textref, index, type, qList);
 			toBeAddedGroup.add(mg);
 			groupMap.put(id, mg);
 
 			for (int ord = 0; ord < qList.size(); ord++) {
-				MetaGroupRel groupRel = new MetaGroupRel(id, qList.get(ord)
-						.getId(), ord);
+				MetaGroupRel groupRel = new MetaGroupRel(id, qList.get(ord).getId(), ord);
 				toBeAddedGroupRel.add(groupRel);
 			}
 
 			return mg;
 		}
 
-		public void remove(int id) {
-			MetaGroup tbr = groupMap.remove(id);
+		public void removeGroup(int groupId) {
+			MetaGroup tbr = groupMap.remove(groupId);
 			toBeAddedGroup.remove(tbr);
-			toBeRemoved.put(id, tbr);
+			toBeRemoved.put(groupId, tbr);
+		}
+		
+		public void removeQuestion(MetaQuestion mq) {
+			for (MetaGroup group : groupMap.values()) {
+				group.removeQuestion(mq);
+			}
 		}
 
 		public void saveAll() throws SQLException {

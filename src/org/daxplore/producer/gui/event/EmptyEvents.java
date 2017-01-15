@@ -20,6 +20,8 @@ public class EmptyEvents {
 	
 	public static class HistoryGoBackEvent {}
 
+	public static class ImportSpssEvent {}
+
 	public static class ImportTextsEvent {}
 	
 	public static class LocaleAddedOrRemovedEvent {}

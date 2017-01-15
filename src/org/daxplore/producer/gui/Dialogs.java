@@ -215,7 +215,7 @@ public class Dialogs {
 		}
 	}
 	
-	public static FileLocalePair showImportDialog(DaxplorePreferences preferences, GuiTexts texts, Component parent, List<Locale> localeList) {
+	public static ImportTextsDialogResult showImportTextsDialog(DaxplorePreferences preferences, GuiTexts texts, Component parent, List<Locale> localeList) {
 		TextImportPanel importPanel = new TextImportPanel(localeList);
 		JButton[] buttons = getOkCancelOptions(texts);
 		int returnVal = JOptionPane.showOptionDialog(parent,
@@ -238,13 +238,13 @@ public class Dialogs {
 		switch(returnVal) {
 		case JFileChooser.APPROVE_OPTION:
 			preferences.setWorkingDirectory(fc.getCurrentDirectory());
-			return new FileLocalePair(fc.getSelectedFile(), importPanel.getImportLocale());
+			return new ImportTextsDialogResult(fc.getSelectedFile(), importPanel.getImportLocale());
 		default:
 			return null;
 		}
 	}
 	
-	public static FileLocaleUsedTriplet showExportDialog(DaxplorePreferences preferences, GuiTexts texts, Component parent, List<Locale> localeList) {
+	public static ExportDialogResult showExportDialog(DaxplorePreferences preferences, GuiTexts texts, Component parent, List<Locale> localeList) {
 		TextExportPanel exportPanel = new TextExportPanel(localeList);
 		JButton[] buttons = getOkCancelOptions(texts);
 		int returnVal = JOptionPane.showOptionDialog(parent,
@@ -264,26 +264,26 @@ public class Dialogs {
 		switch(returnVal) {
 		case JFileChooser.APPROVE_OPTION:
 			preferences.setWorkingDirectory(fc.getCurrentDirectory());
-			return new FileLocaleUsedTriplet(fc.getSelectedFile(), exportPanel.getExportLocale(), exportPanel.isOnlyExportUsed());
+			return new ExportDialogResult(fc.getSelectedFile(), exportPanel.getExportLocale(), exportPanel.isOnlyExportUsed());
 		default:
 			return null;
 		}
 	}
-	
-	public static class FileLocalePair {
+
+	public static class ImportTextsDialogResult {
 		public final File file;
 		public final Locale locale;
-		public FileLocalePair(File file, Locale locale) {
+		public ImportTextsDialogResult(File file, Locale locale) {
 			this.file = file;
 			this.locale = locale;
 		}
 	}
 	
-	public static class FileLocaleUsedTriplet {
+	public static class ExportDialogResult {
 		public final File file;
 		public final Locale locale;
 		public final boolean onlyExportUsed;
-		public FileLocaleUsedTriplet(File file, Locale locale, boolean onlyExportUsed) {
+		public ExportDialogResult(File file, Locale locale, boolean onlyExportUsed) {
 			this.file = file;
 			this.locale = locale;
 			this.onlyExportUsed = onlyExportUsed;

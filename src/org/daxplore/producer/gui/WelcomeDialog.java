@@ -112,7 +112,7 @@ public class WelcomeDialog {
 		newProjectButton.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				CreateFileWizard wizard = new CreateFileWizard(welcomeFrame, eventBus, texts, preferences);
+				DaxploreWizard wizard = DaxploreWizard.createNewFileWizard(welcomeFrame, eventBus, texts, preferences);
 				wizard.show();
 			}
 		});

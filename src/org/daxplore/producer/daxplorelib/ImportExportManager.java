@@ -61,6 +61,7 @@ import org.daxplore.producer.daxplorelib.metadata.MetaTimepointShort;
 import org.daxplore.producer.daxplorelib.metadata.textreference.TextReference;
 import org.daxplore.producer.daxplorelib.metadata.textreference.TextTree;
 import org.daxplore.producer.daxplorelib.raw.RawMetaQuestion;
+import org.daxplore.producer.daxplorelib.raw.RawMetaQuestion.RawMetaManager.RawMetaImportResult;
 import org.daxplore.producer.daxplorelib.raw.VariableType;
 import org.daxplore.producer.daxplorelib.resources.DaxploreProperties;
 import org.daxplore.producer.tools.MyTools;
@@ -305,70 +306,8 @@ public class ImportExportManager {
 			return "";
 		}
 	}
-	
-	
-	/////////////
-	// TODO do importRaw for new questions
-	// TODO remove removed metaquestions and everything that links to them (including textrefs? including scales? including metameans? ...)
-	//////////
-	
-	/* 
-	 * Import/export methods that are used to change metadata in batch.
-	 * The preferred way to use the library.
-	 */
-	void importFromRaw(Locale locale) throws DaxploreException {
-		for(RawMetaQuestion rmq : daxploreFile.getRawMetaManager().getQuestions()) {
-			String column = rmq.getColumn();
-			VariableType type = rmq.getQtype();
-			TextReference fulltext = daxploreFile.getTextReferenceManager().get(column + "_fulltext");
-			
-			fulltext.put(rmq.getQtext(), locale);
-			List<MetaScale.Option<?>> scaleOptions = new LinkedList<MetaScale.Option<?>>();
-			Set<Double> meanExcludedValues = null;
-			if(rmq.getValuelabels() != null) {
-				int i = 1;
-				switch(type) {
-				case NUMERIC:
-					for(Map.Entry<Object, String> s: rmq.getValuelabels().entrySet()) {
-						TextReference ref = daxploreFile.getTextReferenceManager().get(rmq.getColumn() + "_option_" + i);
-						ref.put(s.getValue(), locale);
-						if(s.getKey() instanceof Double) {
-							Collection<Double> vals = new LinkedList<Double>();
-							vals.add((Double)s.getKey());
-							scaleOptions.add(new MetaScale.Option<Double>(ref, vals, true));
-						} else {
-							throw new DaxploreException("Trying to add a non number or string as an option");
-						}
-						i++;
-					}
-					meanExcludedValues = new HashSet<>();
-					break;
-				case TEXT:
-					for(Map.Entry<Object, String> s: rmq.getValuelabels().entrySet()) {
-						TextReference ref = daxploreFile.getTextReferenceManager().get(rmq.getColumn() + "_option_" + i);
-						ref.put(s.getValue(), locale);
-						if(s.getKey() instanceof String) {
-							Collection<String> vals = new LinkedList<String>();
-							vals.add((String)s.getKey());
-							scaleOptions.add(new MetaScale.Option<String>(ref, vals, true));
-						} else {
-							throw new DaxploreException("Trying to add a non number or string as an option");
-						}
-						i++;
-					}
-					break;
-				}
-			}
-			
-			TextReference shorttext = daxploreFile.getTextReferenceManager().get(column + "_shorttext");
-			TextReference descriptiontext = daxploreFile.getTextReferenceManager().get(column + "_description");
-			List<MetaTimepointShort> timepoints = new LinkedList<>();
-			daxploreFile.getMetaQuestionManager().create(column, type, shorttext, fulltext, descriptiontext, scaleOptions, meanExcludedValues, Double.NaN, timepoints);
-		}
-	}
-	
-	void importSPSS(File spssFile, Charset charset)
-			throws FileNotFoundException, IOException, DaxploreException {
+
+	void importSPSS(File spssFile, Charset charset, Locale locale) throws FileNotFoundException, IOException, DaxploreException {
 		FileFormatInfo ffi = new FileFormatInfo();
 		ffi.namesOnFirstLine = false;
 		ffi.asciiFormat = ASCIIFormat.CSV;
@@ -377,13 +316,82 @@ public class ImportExportManager {
 		try (SPSSFile importSPSSFile = new SPSSFile(spssFile, charset)) {
 			importSPSSFile.logFlag = false;
 			importSPSSFile.loadMetadata();
-		
-			daxploreFile.getRawMetaManager().loadFromSPSS(importSPSSFile); //Order important, meta before data
-			daxploreFile.getRawDataManager().loadFromSPSS(importSPSSFile);
-				
 			daxploreFile.getAbout().setImport(importSPSSFile.file.getName());
+			
+			RawMetaImportResult metaImportResult = daxploreFile.getRawMetaManager().loadFromSPSS(importSPSSFile); //Order important, meta before data
+			daxploreFile.getRawDataManager().loadFromSPSS(importSPSSFile);
+			
+			System.out.println("### SPSS import ###");
+			for (String column : metaImportResult.removedColumns) {
+				for (MetaQuestion mq : daxploreFile.getMetaQuestionManager().getAll()) {
+					if (mq.getColumn().equals(column)) {
+						daxploreFile.getMetaGroupManager().removeQuestion(mq);
+						daxploreFile.getMetaQuestionManager().remove(mq.getId());
+						daxploreFile.getMetaMeanManager().remove(mq.getId());
+						daxploreFile.getMetaScaleManager().remove(mq.getId());
+					}
+				}
+				// TODO Communicate to GUI, but not on first import
+				System.out.println("Removed column: " + column);
+			}
+			
+			for (String column : metaImportResult.maintainedColumns) {
+				System.out.println("Identical column: " + column);
+			}
+			
+			for (String column : metaImportResult.addedColumns) {
+				RawMetaQuestion rmq = daxploreFile.getRawMetaManager().getQuestion(column);
+				VariableType type = rmq.getQtype();
+				TextReference fulltext = daxploreFile.getTextReferenceManager().get(column + "_fulltext");
+				
+				fulltext.put(rmq.getQtext(), locale);
+				List<MetaScale.Option<?>> scaleOptions = new LinkedList<MetaScale.Option<?>>();
+				Set<Double> meanExcludedValues = null;
+				if(rmq.getValuelabels() != null) {
+					int i = 1;
+					switch(type) {
+					case NUMERIC:
+						for(Map.Entry<Object, String> s: rmq.getValuelabels().entrySet()) {
+							TextReference ref = daxploreFile.getTextReferenceManager().get(rmq.getColumn() + "_option_" + i);
+							ref.put(s.getValue(), locale);
+							if(s.getKey() instanceof Double) {
+								Collection<Double> vals = new LinkedList<Double>();
+								vals.add((Double)s.getKey());
+								scaleOptions.add(new MetaScale.Option<Double>(ref, vals, true));
+							} else {
+								throw new DaxploreException("Trying to add a non number or string as an option");
+							}
+							i++;
+						}
+						meanExcludedValues = new HashSet<>();
+						break;
+					case TEXT:
+						for(Map.Entry<Object, String> s: rmq.getValuelabels().entrySet()) {
+							TextReference ref = daxploreFile.getTextReferenceManager().get(rmq.getColumn() + "_option_" + i);
+							ref.put(s.getValue(), locale);
+							if(s.getKey() instanceof String) {
+								Collection<String> vals = new LinkedList<String>();
+								vals.add((String)s.getKey());
+								scaleOptions.add(new MetaScale.Option<String>(ref, vals, true));
+							} else {
+								throw new DaxploreException("Trying to add a non number or string as an option");
+							}
+							i++;
+						}
+						break;
+					}
+					// TODO Communicate to GUI, but not on first import
+					System.out.println("Added column: " + column);
+				}
+				
+				TextReference shorttext = daxploreFile.getTextReferenceManager().get(column + "_shorttext");
+				TextReference descriptiontext = daxploreFile.getTextReferenceManager().get(column + "_description");
+				List<MetaTimepointShort> timepoints = new LinkedList<>();
+				daxploreFile.getMetaQuestionManager().create(column, type, shorttext, fulltext, descriptiontext, scaleOptions, meanExcludedValues, Double.NaN, timepoints);
+			}
+			System.out.println("");
 		} catch (SPSSFileException e2) {
-			throw new DaxploreException("SPSSFileException", e2);
+			throw new DaxploreException("Failed to load data from SPSS file", e2);
 		}
 	}
 	

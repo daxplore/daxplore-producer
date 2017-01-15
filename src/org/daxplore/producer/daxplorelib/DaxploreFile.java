@@ -124,10 +124,6 @@ public class DaxploreFile implements Closeable {
 		}
 	}
 	
-	public void importFromRaw(Locale locale) throws DaxploreException {
-		importExport.importFromRaw(locale);
-	}
-	
 	public About getAbout(){
 		return about;
 	}
@@ -177,8 +173,8 @@ public class DaxploreFile implements Closeable {
 		}
 	}
 	
-	public void importSPSS(File spssFile, Charset charset) throws FileNotFoundException, IOException, DaxploreException {
-		importExport.importSPSS(spssFile, charset);
+	public void importSPSS(File spssFile, Charset charset, Locale locale) throws FileNotFoundException, IOException, DaxploreException {
+		importExport.importSPSS(spssFile, charset, locale);
 	}
 
 	public void importL10n(Reader reader, L10nFormat format, Locale locale) throws IOException, DaxploreException {
@@ -195,7 +191,6 @@ public class DaxploreFile implements Closeable {
 			connection.setAutoCommit(false);
 			connection.setTransactionIsolation(Connection.TRANSACTION_READ_UNCOMMITTED);
 			
-			Logger.getGlobal().log(Level.INFO, "Save initiated");
 			settings.saveAll();
 			about.save();
 			rawMetaManager.saveAll();

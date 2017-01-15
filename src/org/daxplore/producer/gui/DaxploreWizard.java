@@ -58,8 +58,11 @@ import org.qdwizard.Wizard;
 import com.google.common.base.Charsets;
 import com.google.common.eventbus.EventBus;
 
+/**
+ * Wizard for creating a completely new file or importing new data from SPSS files
+ */
 @SuppressWarnings("serial")
-public class CreateFileWizard extends Wizard {
+public class DaxploreWizard extends Wizard {
 	
 	public static class CreateFilePanel extends Screen implements ActionListener {
 		
@@ -89,7 +92,7 @@ public class CreateFileWizard extends Wizard {
 
 		@Override
 		public void actionPerformed(ActionEvent e) {
-			JFileChooser jfc = new JFileChooser(CreateFileWizard.preferences.getWorkingDirectory());
+			JFileChooser jfc = new JFileChooser(DaxploreWizard.preferences.getWorkingDirectory());
 			
 			FileFilter filter = new FileNameExtensionFilter(
 					texts.get("general.filetype.daxplorefile"), "daxplore");
@@ -127,7 +130,7 @@ public class CreateFileWizard extends Wizard {
 					return;
 				}
 				
-				if(!fileToCreate.exists() && !canCreate(fileToCreate)) {
+				if(!fileToCreate.exists() && !canCreateFile(fileToCreate)) {
 					setProblem(texts.get("wizard.createfile.cantcreate "));
 					return;
 				}
@@ -234,6 +237,8 @@ public class CreateFileWizard extends Wizard {
 			
 			actionPerformed(new ActionEvent(encodingComboBox, ActionEvent.ACTION_PERFORMED, TextCommand.ENCODING.toString()));
 			updateWizardProblem();
+			boolean createNew = (Boolean)data.get("createNew"); 
+			setCanFinish(!createNew);
 		}
 
 		@Override
@@ -340,7 +345,7 @@ public class CreateFileWizard extends Wizard {
 		@Override
 		public void actionPerformed(ActionEvent e) {
 			
-			JFileChooser jfc = new JFileChooser(CreateFileWizard.preferences.getWorkingDirectory());
+			JFileChooser jfc = new JFileChooser(DaxploreWizard.preferences.getWorkingDirectory());
 			
 			FileFilter filter = new FileNameExtensionFilter(texts.get("wizard.opendata.spssfilter"), "sav");
 			jfc.addChoosableFileFilter(filter);
@@ -418,17 +423,31 @@ public class CreateFileWizard extends Wizard {
 
 	private EventBus eventBus;
 	private JFrame window;
+	private DaxploreFile daxploreFile;
+	private boolean createNewWizard;
+	
 	// static variable access for use by the screen subclasses 
 	static GuiTexts texts;
 	static DaxplorePreferences preferences;
 	
-	public CreateFileWizard(JFrame window, EventBus eventBus, GuiTexts texts, DaxplorePreferences preferences) {
+	private DaxploreWizard(JFrame window, EventBus eventBus, GuiTexts texts, DaxplorePreferences preferences, DaxploreFile daxploreFile) {
 		super(new Wizard.Builder(texts.get("wizard.general.title"), OpenSPSSPanel.class, window));
 		this.eventBus = eventBus;
 		this.window = window;
-		CreateFileWizard.texts = texts;
-		CreateFileWizard.preferences = preferences;
+		this.daxploreFile = daxploreFile;
+		createNewWizard = (daxploreFile == null);
+		data.put("createNew", createNewWizard);
+		DaxploreWizard.texts = texts;
+		DaxploreWizard.preferences = preferences;
 		data.put("preferences", preferences);
+	}
+	
+	public static DaxploreWizard createNewFileWizard(JFrame window, EventBus eventBus, GuiTexts texts, DaxplorePreferences preferences) {
+		return new DaxploreWizard(window, eventBus, texts, preferences, null);
+	}
+	
+	public static DaxploreWizard importSpssWizard(JFrame window, EventBus eventBus, GuiTexts texts, DaxplorePreferences preferences, DaxploreFile daxploreFile) {
+		return new DaxploreWizard(window, eventBus, texts, preferences, daxploreFile);
 	}
 	
 	@Override
@@ -437,7 +456,7 @@ public class CreateFileWizard extends Wizard {
 			return null;
 		} else if(ChooseEncodingPanel.class.equals(screen)){
 			return OpenSPSSPanel.class;
-		} else if(CreateFilePanel.class.equals(screen)) {
+		} else if(createNewWizard && CreateFilePanel.class.equals(screen)) {	
 			return ChooseEncodingPanel.class;
 		}
 		return null;
@@ -447,9 +466,9 @@ public class CreateFileWizard extends Wizard {
 	public Class<? extends Screen> getNextScreen(Class<? extends Screen> screen) {
 		if(OpenSPSSPanel.class.equals(screen)) {
 			return ChooseEncodingPanel.class;
-		} else if(ChooseEncodingPanel.class.equals(screen)){
+		} else if(createNewWizard && ChooseEncodingPanel.class.equals(screen)){
 			return CreateFilePanel.class;
-		} else if(CreateFilePanel.class.equals(screen)) {
+		} else if(createNewWizard && CreateFilePanel.class.equals(screen)) {
 			return null;
 		}
 		return null;
@@ -458,13 +477,16 @@ public class CreateFileWizard extends Wizard {
 	@Override
 	public void finish() {
 		try {
-			DaxploreFile daxploreFile = DaxploreFile.createWithNewFile((File)data.get("daxploreFile"));
-			daxploreFile.importSPSS((File)data.get("spssFile"), (Charset)data.get("charset"));
-			daxploreFile.importFromRaw((Locale)data.get("locale"));
-			daxploreFile.getAbout().addLocale((Locale)data.get("locale"));
-			daxploreFile.saveAll();
-			
-			eventBus.post(new DaxploreFileUpdateEvent(daxploreFile));
+			if (createNewWizard) {
+				DaxploreFile daxploreFile = DaxploreFile.createWithNewFile((File)data.get("daxploreFile"));
+				daxploreFile.importSPSS((File)data.get("spssFile"), (Charset)data.get("charset"), (Locale)data.get("locale"));
+				daxploreFile.getAbout().addLocale((Locale)data.get("locale"));
+				daxploreFile.saveAll();
+				eventBus.post(new DaxploreFileUpdateEvent(daxploreFile));
+			} else {
+				daxploreFile.importSPSS((File)data.get("spssFile"), (Charset)data.get("charset"), (Locale)data.get("locale"));
+				daxploreFile.getAbout().addLocale((Locale)data.get("locale"));
+			}
 		} catch (DaxploreException | IOException e) {
 			Logger.getGlobal().log(Level.SEVERE, e.getMessage(), e);
 			JOptionPane.showMessageDialog(window, e.getMessage());
@@ -472,7 +494,7 @@ public class CreateFileWizard extends Wizard {
 		
 	}
 	
-	public static boolean canCreate(File file) {
+	private static boolean canCreateFile(File file) {
 		if(!file.exists()) {
 			try {
 				file.createNewFile();

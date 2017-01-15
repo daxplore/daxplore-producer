@@ -144,7 +144,7 @@ class GroupTreeModel implements TreeModel {
 	public boolean removeChild(Object child) {
 		if(child instanceof MetaGroup && groups.contains(child)) {
 			MetaGroup mg = (MetaGroup)child;
-			manager.remove(mg.getId());
+			manager.removeGroup(mg.getId());
 			groups.remove(child);
 			fireTreeStructureChanged(new TreeModelEvent(this, new Object[]{root}));
 			//fireTreeNodesRemoved(new TreeModelEvent(this, new Object[]{root})); //TODO: get tree update function working properly

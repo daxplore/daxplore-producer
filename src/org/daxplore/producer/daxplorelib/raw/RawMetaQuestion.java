@@ -20,6 +20,8 @@ import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.TreeSet;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -56,7 +58,7 @@ public class RawMetaQuestion {
 		private LinkedHashMap<String, RawMetaQuestion> columnMap = new LinkedHashMap<>();
 		private HashMap<String, Integer> columnIndexMap = new HashMap<>();
 		private List<RawMetaQuestion> toBeAdded = new ArrayList<>();
-		private Map<String, RawMetaQuestion> toBeRemoved = new HashMap<>();
+		private Set<String> toBeRemoved = new HashSet<>();
 		
 		public RawMetaManager(Connection connection) throws SQLException, DaxploreException {
 			this.connection = connection;
@@ -129,13 +131,6 @@ public class RawMetaQuestion {
 				}
 			}
 		}
-		
-		public RawMetaQuestion get(String column) throws DaxploreException {
-			if (columnMap.containsKey(column)) {
-				return columnMap.get(column);
-			}
-			throw new DaxploreException("No raw meta question with column name '" + column + "'");
-		}
 
 		public void saveAll() throws SQLException, DaxploreException {
 			int nNew = 0, nModified = 0, nRemoved = 0;
@@ -165,9 +160,9 @@ public class RawMetaQuestion {
 					}
 				}
 
-				for (RawMetaQuestion rmq : toBeRemoved.values()) {
+				for (String column : toBeRemoved) {
 					nRemoved++;
-					deleteStmt.setString(1, rmq.column);
+					deleteStmt.setString(1, column);
 					deleteStmt.addBatch();
 				}
 				deleteStmt.executeBatch();
@@ -203,12 +198,37 @@ public class RawMetaQuestion {
 			}
 		}
 		
-		public void loadFromSPSS(SPSSFile spssFile) throws DaxploreException {
+		public class RawMetaImportResult {
+			public Set<String> addedColumns;
+			public Set<String> maintainedColumns;
+			public Set<String> removedColumns;
+			public RawMetaImportResult(Set<String> addedColumns, Set<String> maintainedColumns, Set<String> removedColumns) {
+				this.addedColumns = addedColumns;
+				this.maintainedColumns = maintainedColumns;
+				this.removedColumns = removedColumns;
+			}
+		}
+		
+		/**
+		 * /**
+		 * Load new data from a SPSS file, completely replacing the current in-memory data
+		 * @throws DaxploreException
+		 */
+		public RawMetaImportResult loadFromSPSS(SPSSFile spssFile) throws DaxploreException {
+			Set<String> oldQuestions = new TreeSet<>(columnMap.keySet());
+			Set<String> addedQuestions = new TreeSet<>();
+			Set<String> maintainedQuestions = new TreeSet<>();
+			
+			LinkedHashMap<String, RawMetaQuestion> newColumnMap = new LinkedHashMap<>();
+			columnIndexMap.clear();
+			toBeAdded.clear();
+			toBeRemoved.clear();
+
 			for(int i = 0; i < spssFile.getVariableCount(); i++){
 				SPSSVariable var = spssFile.getVariable(i);
 				String column = var.getName();
 				if(!DaxploreFile.isValidColumnName(column)) {
-					throw new DaxploreException("'" + column + "' is not a valid variable name");
+					throw new DaxploreException("Failed to load SPSS file due to an invalid variable name: '" + column + "'");
 				}
 				
 				LinkedHashMap<Object, String> valuelabels = new LinkedHashMap<>();
@@ -235,28 +255,51 @@ public class RawMetaQuestion {
 					}
 				}
 				
-				RawMetaQuestion rmq = new RawMetaQuestion(
-					column,
-					column,
-					var.getLabel(),
-					qtype,
-					spsstype,
-					valuelabels,
-					var.getMeasureLabel());
+				RawMetaQuestion rmq;
+				if (columnMap.containsKey(column)) {
+					rmq = columnMap.get(column);
+					rmq.setLongname(column);
+					rmq.setQtext(var.getLabel());
+					rmq.setQtype(qtype);
+					rmq.setSpsstype(spsstype);
+					rmq.setValuelabels(valuelabels);
+					rmq.setMeasure(var.getMeasureLabel());
+					
+					maintainedQuestions.add(column);
+				} else {
+					rmq = new RawMetaQuestion(
+						column,
+						column,
+						var.getLabel(),
+						qtype,
+						spsstype,
+						valuelabels,
+						var.getMeasureLabel());
+					
+					addedQuestions.add(column);
+					toBeAdded.add(rmq);
+				}
 				
-				// TODO handle different diff scenarios
-				toBeAdded.add(rmq);
-				columnMap.put(column, rmq);
+				newColumnMap.put(column, rmq);
 				columnIndexMap.put(column, i);
 			}
+			
+			Set<String> removedQuestions = Sets.difference(oldQuestions, maintainedQuestions);
+			toBeRemoved.addAll(removedQuestions);
+			columnMap = newColumnMap;
+			
+			return new RawMetaImportResult(addedQuestions, maintainedQuestions, removedQuestions);
 		}
 
 		public boolean hasColumn(String column) {
 			return columnMap.containsKey(column);
 		}
 
-		public RawMetaQuestion getQuestion(String column) {
-			return columnMap.get(column);
+		public RawMetaQuestion getQuestion(String column) throws DaxploreException {
+			if (columnMap.containsKey(column)) {
+				return columnMap.get(column);
+			}
+			throw new DaxploreException("No raw meta question with column name '" + column + "'");
 		}
 
 		public List<RawMetaQuestion> getQuestions() {
@@ -339,66 +382,137 @@ public class RawMetaQuestion {
 	public boolean isModified() {
 		return modified;
 	}
+	
+	public void setLongname(String longname) {
+		if (this.longname == null && longname == null) {
+			return;
+		}
+		if (longname == null || !longname.equals(this.longname)) {
+			this.longname = longname;
+			modified = true;
+		}
+	}
+
+	public void setQtext(String qtext) {
+		if (this.qtext == null && qtext == null) {
+			return;
+		}
+		if (qtext == null || !qtext.equals(this.qtext)) {
+			this.qtext = qtext;
+			modified = true;
+		}
+	}
+
+	public void setSpsstype(String spsstype) {
+		if (this.spsstype == null && spsstype == null) {
+			return;
+		}
+		if (spsstype == null || !spsstype.equals(this.spsstype)) {
+			this.spsstype = spsstype;
+			modified = true;
+		}
+	}
+
+	public void setMeasure(String measure) {
+		if (this.measure == null && measure == null) {
+			return;
+		}
+		if (measure == null || !measure.equals(this.measure)) {
+			this.measure = measure;
+			modified = true;
+		}
+	}
+
+	public void setQtype(VariableType qtype) {
+		if (this.qtype != qtype) {
+			//TODO send warning to GUI
+			System.out.println("Warning: Variable type changed for '" + column + "'. From " + this.qtype + " to " + qtype);
+
+			this.qtype = qtype;
+			modified = true;
+		}
+	}
+
+	public void setValuelabels(LinkedHashMap<Object, String> valuelabels) {
+		if (this.valuelabels == null && valuelabels == null) {
+			return;
+		}
+		if (valuelabels == null || !this.valuelabels.equals(valuelabels)) {
+			//TODO send warning to GUI
+			if (this.valuelabels != null) {
+				System.out.println("Warning: valuelables changed for '" + column + "'");
+				System.out.println("  Previous mapping:");
+				for (Object key : this.valuelabels.keySet()) {
+					System.out.println("    " + key + " = " + this.valuelabels.get(key));
+				}
+				System.out.println("  New mapping:");
+				for (Object key : valuelabels.keySet()) {
+					System.out.println("    " + key + " = " + valuelabels.get(key));
+				}
+				System.out.println("");
+			}
+			this.valuelabels = valuelabels;
+			modified = true;
+		}
+	}
 
 	
 	// Help functions
 	
-	@SuppressWarnings("rawtypes")
 	private static LinkedHashMap<Object, String> JSONtoCategoriesDoubles(String jsonstring) throws DaxploreException {
 		LinkedHashMap<Object, String> list = new LinkedHashMap<>();
 		
 		JSONParser parser = new JSONParser();
 		ContainerFactory containerFactory = new ContainerFactory(){
 			@Override
-			public List creatArrayContainer() {
-				return new LinkedList();
+			public List<?> creatArrayContainer() {
+				return new LinkedList<Object>();
 			}
 			@Override
-			public Map createObjectContainer() {
-				return new LinkedHashMap();
+			public Map<?, ?> createObjectContainer() {
+				return new LinkedHashMap<Object, Object>();
 			}
 		};
-		Map json;
+		Map<?, ?> json;
 		try {
-			json = (Map)parser.parse(jsonstring, containerFactory);
+			json = (Map<?, ?>)parser.parse(jsonstring, containerFactory);
 		} catch (ParseException e) {
 			throw new DaxploreException("Failed to parse json", e);
 		}
-		Iterator iter = json.entrySet().iterator();
+		Iterator<?> iter = json.entrySet().iterator();
 		
 		while(iter.hasNext()) {
-			Map.Entry entry = (Map.Entry)iter.next();
+			Map.Entry<?, ?> entry = (Map.Entry<?, ?>)iter.next();
 			list.put(Double.parseDouble((String)entry.getKey()), (String) entry.getValue());
 		}
 		
 		return list;
 	}
 	
-	@SuppressWarnings("rawtypes")
 	private static LinkedHashMap<Object, String> JSONtoCategoriesStrings(String jsonstring) throws DaxploreException {
 		LinkedHashMap<Object, String> list = new LinkedHashMap<>();
 		
 		JSONParser parser = new JSONParser();
 		ContainerFactory containerFactory = new ContainerFactory(){
 			@Override
-			public List creatArrayContainer() {
-				return new LinkedList();
+			public List<?> creatArrayContainer() {
+				return new LinkedList<Object>();
 			}
 			@Override
-			public Map createObjectContainer() {
-				return new LinkedHashMap();
+			public Map<?, ?> createObjectContainer() {
+				return new LinkedHashMap<Object, Object>();
 			}
 		};
-		Map json;
+		Map<?, ?> json;
 		try {
-			json = (Map)parser.parse(jsonstring, containerFactory);
+			json = (Map<?, ?>)parser.parse(jsonstring, containerFactory);
 		} catch (ParseException e) {
 			throw new DaxploreException("Failed to parse json", e); 
 		}
-		Iterator iter = json.entrySet().iterator();
+		Iterator<?> iter = json.entrySet().iterator();
 		
 		while(iter.hasNext()) {
-			Map.Entry entry = (Map.Entry)iter.next();
+			Map.Entry<?, ?> entry = (Map.Entry<?, ?>)iter.next();
 			list.put((String)entry.getKey(), (String) entry.getValue());
 		}
 		
