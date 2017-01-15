@@ -31,7 +31,7 @@ import org.daxplore.producer.daxplorelib.metadata.textreference.TextReference;
 import org.daxplore.producer.daxplorelib.metadata.textreference.TextReferenceManager;
 import org.daxplore.producer.daxplorelib.raw.VariableType;
 
-import com.beust.jcommander.internal.Lists;
+import com.google.common.collect.Lists;
 import com.google.gson.Gson;
 
 public class MetaScale<T> {

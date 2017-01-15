@@ -11,8 +11,8 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
-import com.beust.jcommander.internal.Lists;
 import com.google.common.base.Strings;
+import com.google.common.collect.Lists;
 
 public class TextReference extends TextReferenceReference {
 	//TODO using a static list inside a data structure (daxplore file) is highly problematic!

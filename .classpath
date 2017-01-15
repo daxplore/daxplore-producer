@@ -9,11 +9,6 @@
 	<classpathentry kind="lib" path="lib/appengine-remote-api.jar"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/spssreader"/>
 	<classpathentry kind="lib" path="lib/org.opendatafoundation.data-20111116.jar" sourcepath="/org.opendatafoundation.data"/>
-	<classpathentry kind="lib" path="lib/jcommander-1.28-SNAPSHOT.jar" sourcepath="lib/jcommander-1.28-SNAPSHOT-sources.jar">
-		<attributes>
-			<attribute name="javadoc_location" value="jar:file:/home/axwi4586/devspace/Daxel-Producer/Presentation-Generator/lib/jcommander-1.28-SNAPSHOT-javadoc.jar!/"/>
-		</attributes>
-	</classpathentry>
 	<classpathentry kind="con" path="org.eclipse.jdt.junit.JUNIT_CONTAINER/4"/>
 	<classpathentry kind="lib" path="miglayout15-swing.jar" sourcepath="miglayout-src.zip"/>
 	<classpathentry kind="lib" path="lib/opencsv-2.3.jar"/>

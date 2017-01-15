@@ -31,8 +31,8 @@ import org.daxplore.producer.daxplorelib.metadata.MetaQuestion.MetaQuestionManag
 import org.daxplore.producer.daxplorelib.metadata.textreference.TextReference;
 import org.daxplore.producer.daxplorelib.metadata.textreference.TextReferenceManager;
 
-import com.beust.jcommander.internal.Lists;
 import com.google.common.base.Strings;
+import com.google.common.collect.Lists;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
