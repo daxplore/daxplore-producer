@@ -36,9 +36,6 @@ import com.google.gson.Gson;
 
 public class MetaScale<T> {
 	
-	/*private static final DaxploreTable maintable = new DaxploreTable(
-			"CREATE TABLE metascale (id INTEGER PRIMARY KEY, valmap STRING NOT NULL)"
-			, "metascale");*/
 	private static final DaxploreTable scaletable = new DaxploreTable(
 			"CREATE TABLE metascale ("
 			+ "questionid INTEGER NOT NULL, "
@@ -207,21 +204,7 @@ public class MetaScale<T> {
 			}			
 			return toBeRemoved.size() + nModified;
 		}
-		
-		/*public List<MetaScale> getAll() throws SQLException, DaxploreException { //NO LONGER NEEDED?!? 2015-06-17
-			// make sure all scales are cached before returning the content of the map
-			try(Statement stmt = connection.createStatement();
-					ResultSet rs = stmt.executeQuery("SELECT questionid FROM metascale")) {
-				while(rs.next()) {
-					int id = rs.getInt("id");
-					if(!scaleMap.containsKey(id) && !toBeRemoved.containsKey(id)) {
-						get(rs.getInt("id"));
-					}
-				}
-			}
-			return new LinkedList<>(scaleMap.values());
-		}*/
-		
+
 		public void discardChanges() {
 			scaleMap.clear();
 			toBeAdded.clear();
@@ -363,13 +346,4 @@ public class MetaScale<T> {
 			}
 		}
 	}
-	
-	/*public boolean equalsLocale(MetaScale other, Locale byLocale) {
-		if(options.size() != other.options.size()) { return false; }
-		for(int i = 0; i < options.size(); i++) {
-			if(!options.get(i).textRef.get(byLocale).trim().equals(other.options.get(i).textRef.get(byLocale).trim())) { return false; }
-			if(options.get(i).value != other.options.get(i).value) { return false; }
-		}
-		return true;
-	}*/
 }

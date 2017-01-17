@@ -427,7 +427,6 @@ public class RawMetaQuestion {
 		if (this.qtype != qtype) {
 			//TODO send warning to GUI
 			System.out.println("Warning: Variable type changed for '" + column + "'. From " + this.qtype + " to " + qtype);
-
 			this.qtype = qtype;
 			modified = true;
 		}
