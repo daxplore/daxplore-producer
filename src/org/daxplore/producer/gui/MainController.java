@@ -54,6 +54,7 @@ import org.daxplore.producer.gui.event.EmptyEvents.RepaintWindowEvent;
 import org.daxplore.producer.gui.event.EmptyEvents.SaveFileEvent;
 import org.daxplore.producer.gui.event.ErrorMessageEvent;
 import org.daxplore.producer.gui.event.HistoryAvailableEvent;
+import org.daxplore.producer.gui.event.InfoMessageEvent;
 import org.daxplore.producer.gui.menu.ActionManager;
 import org.daxplore.producer.gui.menu.MenuBarController;
 import org.daxplore.producer.gui.menu.ToolbarController;
@@ -173,6 +174,7 @@ public class MainController {
 			this.daxploreFile = e.getDaxploreFile();
 		} catch (Exception ex) {
 			Logger.getGlobal().log(Level.SEVERE, "Failed to handle event", ex);
+			eventBus.post(new ErrorMessageEvent("Failed to handle event", ex));
 		}
 	}
 	
@@ -183,6 +185,7 @@ public class MainController {
 			eventBus.post(new DaxploreFileUpdateEvent(daxploreFile));
 		} catch (Exception ex) {
 			Logger.getGlobal().log(Level.SEVERE, "Failed to handle event", ex);
+			eventBus.post(new ErrorMessageEvent("Failed to handle event", ex));
 		}
 	}
 	
@@ -198,6 +201,7 @@ public class MainController {
 			setView(e.getView(), e.getCommand());
 		} catch (Exception ex) {
 			Logger.getGlobal().log(Level.SEVERE, "Failed to handle event", ex);
+			eventBus.post(new ErrorMessageEvent("Failed to handle event", ex));
 		}
 	}
 
@@ -211,6 +215,7 @@ public class MainController {
 			}
 		} catch (Exception ex) {
 			Logger.getGlobal().log(Level.SEVERE, "Failed to handle event", ex);
+			eventBus.post(new ErrorMessageEvent("Failed to handle event", ex));
 		}
 	}
 	
@@ -256,6 +261,7 @@ public class MainController {
 			}
 		} catch (Exception ex) {
 			Logger.getGlobal().log(Level.SEVERE, "Failed to handle event", ex);
+			eventBus.post(new ErrorMessageEvent("Failed to handle event", ex));
 		}
 	}
 	
@@ -288,7 +294,7 @@ public class MainController {
 				} else if(filename.endsWith(".properties")) {
 					format = L10nFormat.PROPERTIES;
 				} else {
-					System.out.println("Unsupported file suffix: " + filename); //TODO communicate error properly
+					eventBus.post("Unsupported file suffix: " + filename);
 					return;
 				}
 				
@@ -303,6 +309,7 @@ public class MainController {
 			}
 		} catch (Exception ex) {
 			Logger.getGlobal().log(Level.SEVERE, "Failed to handle event", ex);
+			eventBus.post(new ErrorMessageEvent("Failed to handle event", ex));
 		}
 	}
 	
@@ -317,6 +324,7 @@ public class MainController {
 			eventBus.post(new ReloadTextsEvent());
 		} catch (Exception ex) {
 			Logger.getGlobal().log(Level.SEVERE, "Failed to handle event", ex);
+			eventBus.post(new ErrorMessageEvent("Failed to handle event", ex));
 		}
 	}
 	
@@ -326,17 +334,18 @@ public class MainController {
 			GuiSettings.setCurrentDisplayLocale(e.getLocale());
 		} catch (Exception ex) {
 			Logger.getGlobal().log(Level.SEVERE, "Failed to handle event", ex);
+			eventBus.post(new ErrorMessageEvent("Failed to handle event", ex));
 		}
 	}
 	
 	@Subscribe
 	public void on(ErrorMessageEvent e) {
 		try {
-			Object[] options = {texts.get("dialog.error.continue"), texts.get("dialog.error.show_debug")};
 			if(e.getCause() == null) {
 				JLabelSelectable message = new JLabelSelectable(e.getUserMessage());
 				JOptionPane.showMessageDialog(mainWindow, message);
 			} else {
+				Object[] options = {texts.get("dialog.error.continue"), texts.get("dialog.error.show_debug")};
 				JLabelSelectable message = new JLabelSelectable(
 						texts.format("dialog.error.message", e.getUserMessage(), e.getCause().getLocalizedMessage().replace("\n", "<br>")));
 				Logger.getGlobal().log(Level.SEVERE, e.getUserMessage());
@@ -365,6 +374,32 @@ public class MainController {
 			}
 		} catch (Exception ex) {
 			Logger.getGlobal().log(Level.SEVERE, "Failed to handle event", ex);
+			eventBus.post(new ErrorMessageEvent("Failed to handle event", ex));
+		}
+	}
+	
+	@Subscribe
+	public void on(InfoMessageEvent e) {
+		try {
+			JLabelSelectable message = new JLabelSelectable(e.getUserMessage());
+			if (!e.hasLogMessage()) {
+				JOptionPane.showMessageDialog(mainWindow, message);
+			} else {
+				JPanel debugMessage = new JPanel(new BorderLayout(0, 10));
+				debugMessage.add(message, BorderLayout.NORTH);
+				JTextArea stacktraceText = new JTextArea(e.getLogMessage());
+				stacktraceText.setEditable(false);
+				JScrollPane stacktraceScrollPane = new JScrollPane(stacktraceText);
+				stacktraceScrollPane.setPreferredSize(new Dimension((int)stacktraceScrollPane.getPreferredSize().getWidth()+30, 300));
+				debugMessage.add(stacktraceScrollPane, BorderLayout.CENTER);
+				JOptionPane.showMessageDialog(mainWindow, 
+						debugMessage, 
+						texts.get("dialog.info.info_title"),
+						JOptionPane.PLAIN_MESSAGE);
+			}
+		} catch (Exception ex) {
+			Logger.getGlobal().log(Level.SEVERE, "Failed to handle event", ex);
+			eventBus.post(new ErrorMessageEvent("Failed to handle event", ex));
 		}
 	}
 	
@@ -374,6 +409,7 @@ public class MainController {
 			daxploreFile.saveAll();
 		} catch (Exception ex) {
 			Logger.getGlobal().log(Level.SEVERE, "Failed to handle event", ex);
+			eventBus.post(new ErrorMessageEvent("Failed to handle event", ex));
 		}
 	}
 	
@@ -384,8 +420,7 @@ public class MainController {
 				try {
 					daxploreFile.close();
 				} catch (IOException e1) {
-					// TODO Auto-generated catch block
-					e1.printStackTrace();
+					eventBus.post(new ErrorMessageEvent("Failed to properly close daxplore file", e1));
 				}
 				mainWindow.dispose();
 			} else {
@@ -405,14 +440,12 @@ public class MainController {
 					try {
 						daxploreFile.saveAll();
 					} catch (DaxploreException e1) {
-						// TODO Auto-generated catch block
-						e1.printStackTrace();
+						eventBus.post(new ErrorMessageEvent("Failed to save file", e1));
 					}
 					try {
 						daxploreFile.close();
 					} catch (IOException e2) {
-						// TODO Auto-generated catch block
-						e2.printStackTrace();
+						eventBus.post(new ErrorMessageEvent("Failed to properly close daxplore file", e2));
 					}
 					mainWindow.dispose();
 					break;
@@ -420,8 +453,7 @@ public class MainController {
 					try {
 						daxploreFile.close();
 					} catch (IOException e1) {
-						// TODO Auto-generated catch block
-						e1.printStackTrace();
+						eventBus.post(new ErrorMessageEvent("Failed to properly close daxplore file", e1));
 					}
 					mainWindow.dispose();
 					break;
@@ -432,6 +464,7 @@ public class MainController {
 			}
 		} catch (Exception ex) {
 			Logger.getGlobal().log(Level.SEVERE, "Failed to handle event", ex);
+			eventBus.post(new ErrorMessageEvent("Failed to handle event", ex));
 		}
 	}
 	
@@ -441,6 +474,7 @@ public class MainController {
 			mainWindow.repaint();
 		} catch (Exception ex) {
 			Logger.getGlobal().log(Level.SEVERE, "Failed to handle event", ex);
+			eventBus.post(new ErrorMessageEvent("Failed to handle event", ex));
 		}
 	}
 	
@@ -465,6 +499,7 @@ public class MainController {
 			}
 		} catch (Exception ex) {
 			Logger.getGlobal().log(Level.SEVERE, "Failed to handle event", ex);
+			eventBus.post(new ErrorMessageEvent("Failed to handle event", ex));
 		}
 	}
 	

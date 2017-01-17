@@ -133,7 +133,7 @@ public class WelcomeDialog {
 					System.out.println("Opening: " + file.getName() + ".");
 					
 					try {
-						DaxploreFile daxploreFile = DaxploreFile.createFromExistingFile(file);
+						DaxploreFile daxploreFile = DaxploreFile.createFromExistingFile(file, texts);
 						eventBus.post(new DaxploreFileUpdateEvent(daxploreFile));
 					} catch (DaxploreException e2) {
 						// TODO Auto-generated catch block

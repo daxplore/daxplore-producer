@@ -29,6 +29,7 @@ import org.daxplore.producer.daxplorelib.DaxploreException;
 import org.daxplore.producer.daxplorelib.DaxploreFile;
 import org.daxplore.producer.daxplorelib.DaxploreTable;
 import org.daxplore.producer.daxplorelib.SQLTools;
+import org.daxplore.producer.gui.resources.GuiTexts;
 import org.json.simple.JSONValue;
 import org.json.simple.parser.ContainerFactory;
 import org.json.simple.parser.JSONParser;
@@ -55,13 +56,16 @@ public class RawMetaQuestion {
 	public static class RawMetaManager {
 		
 		private Connection connection;
+		private static GuiTexts texts; // TODO if static, make it static globally instead
+		
 		private LinkedHashMap<String, RawMetaQuestion> columnMap = new LinkedHashMap<>();
 		private HashMap<String, Integer> columnIndexMap = new HashMap<>();
 		private List<RawMetaQuestion> toBeAdded = new ArrayList<>();
 		private Set<String> toBeRemoved = new HashSet<>();
 		
-		public RawMetaManager(Connection connection) throws SQLException, DaxploreException {
+		public RawMetaManager(Connection connection, GuiTexts texts) throws SQLException, DaxploreException {
 			this.connection = connection;
+			RawMetaManager.texts = texts;
 			boolean created = SQLTools.createIfNotExists(table, connection);
 			if (!created) {
 				loadAllToMemory();
@@ -202,10 +206,13 @@ public class RawMetaQuestion {
 			public Set<String> addedColumns;
 			public Set<String> maintainedColumns;
 			public Set<String> removedColumns;
-			public RawMetaImportResult(Set<String> addedColumns, Set<String> maintainedColumns, Set<String> removedColumns) {
+			public List<String> warnings;
+			public RawMetaImportResult(Set<String> addedColumns, Set<String> maintainedColumns,
+					Set<String> removedColumns, List<String> warnings) {
 				this.addedColumns = addedColumns;
 				this.maintainedColumns = maintainedColumns;
 				this.removedColumns = removedColumns;
+				this.warnings = warnings;
 			}
 		}
 		
@@ -218,6 +225,7 @@ public class RawMetaQuestion {
 			Set<String> oldQuestions = new TreeSet<>(columnMap.keySet());
 			Set<String> addedQuestions = new TreeSet<>();
 			Set<String> maintainedQuestions = new TreeSet<>();
+			List<String> warnings = new ArrayList<>();
 			
 			LinkedHashMap<String, RawMetaQuestion> newColumnMap = new LinkedHashMap<>();
 			columnIndexMap.clear();
@@ -259,10 +267,19 @@ public class RawMetaQuestion {
 				if (columnMap.containsKey(column)) {
 					rmq = columnMap.get(column);
 					rmq.setLongname(column);
+					
 					rmq.setQtext(var.getLabel());
-					rmq.setQtype(qtype);
+					String qTypeMessage = rmq.setQtype(qtype);
+					if (qTypeMessage != null) {
+						warnings.add(qTypeMessage);
+					}
+					
 					rmq.setSpsstype(spsstype);
-					rmq.setValuelabels(valuelabels);
+					String valueLabelMessage = rmq.setValuelabels(valuelabels);
+					if (valueLabelMessage != null) {
+						warnings.add(valueLabelMessage);
+					}
+					
 					rmq.setMeasure(var.getMeasureLabel());
 					
 					maintainedQuestions.add(column);
@@ -288,7 +305,7 @@ public class RawMetaQuestion {
 			toBeRemoved.addAll(removedQuestions);
 			columnMap = newColumnMap;
 			
-			return new RawMetaImportResult(addedQuestions, maintainedQuestions, removedQuestions);
+			return new RawMetaImportResult(addedQuestions, maintainedQuestions, removedQuestions, warnings);
 		}
 
 		public boolean hasColumn(String column) {
@@ -383,7 +400,7 @@ public class RawMetaQuestion {
 		return modified;
 	}
 	
-	public void setLongname(String longname) {
+	private void setLongname(String longname) {
 		if (this.longname == null && longname == null) {
 			return;
 		}
@@ -393,7 +410,7 @@ public class RawMetaQuestion {
 		}
 	}
 
-	public void setQtext(String qtext) {
+	private void setQtext(String qtext) {
 		if (this.qtext == null && qtext == null) {
 			return;
 		}
@@ -413,7 +430,7 @@ public class RawMetaQuestion {
 		}
 	}
 
-	public void setMeasure(String measure) {
+	private void setMeasure(String measure) {
 		if (this.measure == null && measure == null) {
 			return;
 		}
@@ -423,36 +440,50 @@ public class RawMetaQuestion {
 		}
 	}
 
-	public void setQtype(VariableType qtype) {
+	private String setQtype(VariableType qtype) {
+		String message = null;
 		if (this.qtype != qtype) {
-			//TODO send warning to GUI
-			System.out.println("Warning: Variable type changed for '" + column + "'. From " + this.qtype + " to " + qtype);
+			message = RawMetaManager.texts.format("library.import.changed_variable_type", column, this.qtype, qtype);
 			this.qtype = qtype;
 			modified = true;
 		}
+		return message;
 	}
 
-	public void setValuelabels(LinkedHashMap<Object, String> valuelabels) {
+	private String setValuelabels(LinkedHashMap<Object, String> valuelabels) {
+		String message = null;
 		if (this.valuelabels == null && valuelabels == null) {
-			return;
+			return message;
 		}
-		if (valuelabels == null || !this.valuelabels.equals(valuelabels)) {
-			//TODO send warning to GUI
-			if (this.valuelabels != null) {
-				System.out.println("Warning: valuelables changed for '" + column + "'");
-				System.out.println("  Previous mapping:");
+		if (this.valuelabels != null && valuelabels != null && this.valuelabels.isEmpty() && valuelabels.isEmpty()) {
+			return message;
+		}
+		if (valuelabels == null || !valuelabels.equals(this.valuelabels)) {
+			StringBuilder sb = new StringBuilder();
+			sb.append(RawMetaManager.texts.format("library.import.changed_valuelables_warning", column) + "\n");
+			sb.append(RawMetaManager.texts.format("library.import.changed_valuelables_old") + "\n");
+			if (this.valuelabels == null || this.valuelabels.isEmpty()) {
+				sb.append("    [no mapping]\n");
+			} else {
 				for (Object key : this.valuelabels.keySet()) {
-					System.out.println("    " + key + " = " + this.valuelabels.get(key));
+					sb.append("    " + key + " = " + this.valuelabels.get(key) + "\n");
 				}
-				System.out.println("  New mapping:");
-				for (Object key : valuelabels.keySet()) {
-					System.out.println("    " + key + " = " + valuelabels.get(key));
-				}
-				System.out.println("");
 			}
+			sb.append(RawMetaManager.texts.format("library.import.changed_valuelables_new") + "\n");
+			if (valuelabels == null || valuelabels.isEmpty()) {
+				sb.append("    [no mapping]\n");
+			} else {
+				for (Object key : valuelabels.keySet()) {
+					sb.append("    " + key + " = " + valuelabels.get(key) + "\n");
+				}
+			}
+			sb.append("\n");
+			
 			this.valuelabels = valuelabels;
 			modified = true;
+			message = sb.toString();
 		}
+		return message;
 	}
 
 	

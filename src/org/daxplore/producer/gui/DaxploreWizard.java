@@ -43,6 +43,7 @@ import javax.swing.table.TableModel;
 import org.daxplore.producer.daxplorelib.DaxploreException;
 import org.daxplore.producer.daxplorelib.DaxploreFile;
 import org.daxplore.producer.gui.event.DaxploreFileUpdateEvent;
+import org.daxplore.producer.gui.event.InfoMessageEvent;
 import org.daxplore.producer.gui.resources.GuiTexts;
 import org.daxplore.producer.gui.utility.DisplayCharset;
 import org.daxplore.producer.gui.utility.DisplayLocale;
@@ -478,13 +479,14 @@ public class DaxploreWizard extends Wizard {
 	public void finish() {
 		try {
 			if (createNewWizard) {
-				DaxploreFile daxploreFile = DaxploreFile.createWithNewFile((File)data.get("daxploreFile"));
+				DaxploreFile daxploreFile = DaxploreFile.createWithNewFile((File)data.get("daxploreFile"), texts);
 				daxploreFile.importSPSS((File)data.get("spssFile"), (Charset)data.get("charset"), (Locale)data.get("locale"));
 				daxploreFile.getAbout().addLocale((Locale)data.get("locale"));
 				daxploreFile.saveAll();
 				eventBus.post(new DaxploreFileUpdateEvent(daxploreFile));
 			} else {
-				daxploreFile.importSPSS((File)data.get("spssFile"), (Charset)data.get("charset"), (Locale)data.get("locale"));
+				String importResultMessage = daxploreFile.importSPSS((File)data.get("spssFile"), (Charset)data.get("charset"), (Locale)data.get("locale"));
+				eventBus.post(new InfoMessageEvent("SPSS import result", importResultMessage));
 				daxploreFile.getAbout().addLocale((Locale)data.get("locale"));
 			}
 		} catch (DaxploreException | IOException e) {

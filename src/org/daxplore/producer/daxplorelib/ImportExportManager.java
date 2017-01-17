@@ -64,6 +64,7 @@ import org.daxplore.producer.daxplorelib.raw.RawMetaQuestion;
 import org.daxplore.producer.daxplorelib.raw.RawMetaQuestion.RawMetaManager.RawMetaImportResult;
 import org.daxplore.producer.daxplorelib.raw.VariableType;
 import org.daxplore.producer.daxplorelib.resources.DaxploreProperties;
+import org.daxplore.producer.gui.resources.GuiTexts;
 import org.daxplore.producer.tools.MyTools;
 import org.daxplore.producer.tools.Pair;
 import org.daxplore.producer.tools.SortedProperties;
@@ -91,6 +92,7 @@ import com.google.gson.JsonPrimitive;
 
 public class ImportExportManager {
 	private DaxploreFile daxploreFile;
+	private GuiTexts texts;
 	
 	private List<TextReference> emptyTextrefs = new LinkedList<>();
 	
@@ -102,8 +104,9 @@ public class ImportExportManager {
 		PROPERTIES, CSV
 	}
 	
-	ImportExportManager(DaxploreFile daxploreFile) {
+	ImportExportManager(DaxploreFile daxploreFile, GuiTexts texts) {
 		this.daxploreFile = daxploreFile;
+		this.texts = texts;
 	}
 	
 	void writeUploadFile(OutputStream output) throws TransformerFactoryConfigurationError, TransformerException, SQLException, DaxploreException, SAXException, IOException, ParserConfigurationException {
@@ -307,7 +310,7 @@ public class ImportExportManager {
 		}
 	}
 
-	void importSPSS(File spssFile, Charset charset, Locale locale) throws FileNotFoundException, IOException, DaxploreException {
+	String importSPSS(File spssFile, Charset charset, Locale locale) throws FileNotFoundException, IOException, DaxploreException {
 		FileFormatInfo ffi = new FileFormatInfo();
 		ffi.namesOnFirstLine = false;
 		ffi.asciiFormat = ASCIIFormat.CSV;
@@ -321,7 +324,7 @@ public class ImportExportManager {
 			RawMetaImportResult metaImportResult = daxploreFile.getRawMetaManager().loadFromSPSS(importSPSSFile); //Order important, meta before data
 			daxploreFile.getRawDataManager().loadFromSPSS(importSPSSFile);
 			
-			System.out.println("### SPSS import ###");
+			List<String> guiMessages = new ArrayList<>();
 			for (String column : metaImportResult.removedColumns) {
 				for (MetaQuestion mq : daxploreFile.getMetaQuestionManager().getAll()) {
 					if (mq.getColumn().equals(column)) {
@@ -332,11 +335,11 @@ public class ImportExportManager {
 					}
 				}
 				// TODO Communicate to GUI, but not on first import
-				System.out.println("Removed column: " + column);
+				guiMessages.add(texts.get("library.import.removed_variable") + column);
 			}
 			
 			for (String column : metaImportResult.maintainedColumns) {
-				System.out.println("Identical column: " + column);
+				guiMessages.add(texts.get("library.import.matched_variable") + column);
 			}
 			
 			for (String column : metaImportResult.addedColumns) {
@@ -381,7 +384,7 @@ public class ImportExportManager {
 						break;
 					}
 					// TODO Communicate to GUI, but not on first import
-					System.out.println("Added column: " + column);
+					guiMessages.add(texts.get("library.import.added_variable") + column);
 				}
 				
 				TextReference shorttext = daxploreFile.getTextReferenceManager().get(column + "_shorttext");
@@ -389,7 +392,9 @@ public class ImportExportManager {
 				List<MetaTimepointShort> timepoints = new LinkedList<>();
 				daxploreFile.getMetaQuestionManager().create(column, type, shorttext, fulltext, descriptiontext, scaleOptions, meanExcludedValues, Double.NaN, timepoints);
 			}
-			System.out.println("");
+			guiMessages.add("");
+			
+			return MyTools.join(guiMessages, "\n") + "\n" + MyTools.join(metaImportResult.warnings, "\n"); 
 		} catch (SPSSFileException e2) {
 			throw new DaxploreException("Failed to load data from SPSS file", e2);
 		}
