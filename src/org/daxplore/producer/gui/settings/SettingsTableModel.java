@@ -4,15 +4,13 @@ import javax.swing.table.DefaultTableModel;
 
 import org.daxplore.producer.daxplorelib.Settings;
 import org.daxplore.producer.daxplorelib.resources.DaxploreProperties;
-import org.daxplore.producer.gui.resources.GuiTexts;
+import org.daxplore.producer.gui.resources.UITexts;
 
 public class SettingsTableModel extends DefaultTableModel{
 	Settings settings;
-	GuiTexts texts;
 	
-	public SettingsTableModel(Settings settings, GuiTexts texts) {
+	public SettingsTableModel(Settings settings) {
 		this.settings = settings;
-		this.texts = texts;
 	}
 	
 	@Override
@@ -56,7 +54,7 @@ public class SettingsTableModel extends DefaultTableModel{
 	public Object getValueAt(int rowIndex, int columnIndex) {
 		String key = DaxploreProperties.clientSettings.get(rowIndex);
 		if(columnIndex == 0) {
-			return texts.get("setting." + key);
+			return UITexts.get("setting." + key);
 		} else {
 			return settings.getObject(key);
 		}

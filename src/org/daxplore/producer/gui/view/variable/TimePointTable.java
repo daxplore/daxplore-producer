@@ -22,7 +22,6 @@ import javax.swing.table.TableCellEditor;
 import javax.swing.table.TableCellRenderer;
 
 import org.daxplore.producer.daxplorelib.metadata.textreference.TextReference;
-import org.daxplore.producer.gui.resources.GuiTexts;
 import org.daxplore.producer.gui.widget.AbstractWidget;
 import org.daxplore.producer.gui.widget.AbstractWidgetEditor;
 import org.daxplore.producer.gui.widget.AbstractWidgetEditor.InvalidContentException;
@@ -43,13 +42,13 @@ public class TimePointTable extends JTable {
 	private int mouseOverRow;
 	private int mouseOverColumn;
 
-	public TimePointTable(EventBus eventBus, GuiTexts texts, TimePointTableModel model) {
+	public TimePointTable(EventBus eventBus, TimePointTableModel model) {
 		super(model);
 		setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
         mouseOverRow = -1;
         mouseOverColumn = -1;
         
-        TimePointCellRenderer cellRenderer = new TimePointCellRenderer(eventBus, texts);
+        TimePointCellRenderer cellRenderer = new TimePointCellRenderer(eventBus);
         setDefaultRenderer(TextReference.class, cellRenderer);
         setDefaultEditor(TextReference.class, cellRenderer);
         //TODO should we have to create a QuestionWidget here?
@@ -85,9 +84,9 @@ public class TimePointTable extends JTable {
 		private NumberLineRenderer numberRenderer = new NumberLineRenderer();
 		private NumberLineEditor numberEditor = new NumberLineEditor();
 		
-		public TimePointCellRenderer(EventBus eventBus, GuiTexts texts) {
-			textRenderer = new TextWidget(eventBus, texts);
-			textEditor = new TextWidget(eventBus, texts);
+		public TimePointCellRenderer(EventBus eventBus) {
+			textRenderer = new TextWidget(eventBus);
+			textEditor = new TextWidget(eventBus);
 		}
 		
 	    @Override

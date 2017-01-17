@@ -35,12 +35,11 @@ import org.daxplore.producer.daxplorelib.DaxploreFile;
 import org.daxplore.producer.daxplorelib.metadata.MetaGroup.GroupType;
 import org.daxplore.producer.daxplorelib.metadata.MetaGroup.MetaGroupManager;
 import org.daxplore.producer.daxplorelib.metadata.textreference.TextReference;
-import org.daxplore.producer.gui.resources.GuiTexts;
+import org.daxplore.producer.gui.resources.UITexts;
 
 @SuppressWarnings("serial")
 public class DialogsPanels extends JPanel implements DocumentListener {
 	
-	private GuiTexts texts;
 	private JButton okButton;
 	private JTextField textRefIdField;
 	private JLabel textRefIdLabel;
@@ -48,8 +47,8 @@ public class DialogsPanels extends JPanel implements DocumentListener {
 	private JLabel badTextRefIdLabel;
 	private JCheckBox headerCheckbox;
 	
-	public static DialogsPanels createGroupPanel(MetaGroupManager mgm, GuiTexts texts, JButton okButton, List<Locale> localesToEdit) {
-		DialogsPanels panel = new DialogsPanels(texts, okButton, localesToEdit, true, true);
+	public static DialogsPanels createGroupPanel(MetaGroupManager mgm, JButton okButton, List<Locale> localesToEdit) {
+		DialogsPanels panel = new DialogsPanels(okButton, localesToEdit, true, true);
 		String suggestedId = mgm.getSuggestedRefName(GroupType.QUESTIONS);
 		panel.textRefIdField.setText(suggestedId);
 		panel.headerCheckbox.addChangeListener(new ChangeListener() {
@@ -65,8 +64,8 @@ public class DialogsPanels extends JPanel implements DocumentListener {
 		return panel;
 	}
 	
-	public static DialogsPanels editGroupPanel(GuiTexts texts, JButton okButton, List<Locale> localesToEdit, TextReference textRef) {
-		DialogsPanels panel = new DialogsPanels(texts, okButton, localesToEdit, true, false);
+	public static DialogsPanels editGroupPanel(JButton okButton, List<Locale> localesToEdit, TextReference textRef) {
+		DialogsPanels panel = new DialogsPanels(okButton, localesToEdit, true, false);
 		panel.textRefIdField.setText(textRef.getRef());
 		for(Locale l : localesToEdit) {
 			panel.localeTextFields.get(l).setText(textRef.getText(l));
@@ -74,10 +73,10 @@ public class DialogsPanels extends JPanel implements DocumentListener {
 		return panel;
 	}
 	
-	public static DialogsPanels textRefEditPanel(GuiTexts texts, JButton okButton, List<Locale> localesToEdit,
+	public static DialogsPanels textRefEditPanel( JButton okButton, List<Locale> localesToEdit,
 			TextReference textRef, boolean allowRefstringEdit) {
 		
-		DialogsPanels panel = new DialogsPanels(texts, okButton, localesToEdit, allowRefstringEdit, false);
+		DialogsPanels panel = new DialogsPanels(okButton, localesToEdit, allowRefstringEdit, false);
 		if(allowRefstringEdit) {
 			panel.textRefIdField.setText(textRef.getRef());
 		} else {
@@ -89,12 +88,11 @@ public class DialogsPanels extends JPanel implements DocumentListener {
 		return panel;
 	}
 		
-	private DialogsPanels(GuiTexts texts, JButton okButton, List<Locale> localesToEdit, boolean allowRefstringEdit, boolean createHeaderCheckbox) {
-		this.texts = texts;
+	private DialogsPanels(JButton okButton, List<Locale> localesToEdit, boolean allowRefstringEdit, boolean createHeaderCheckbox) {
 		this.okButton = okButton;
 		
 		setLayout(new BorderLayout(0, 10));
-		add(new JLabel(texts.get("edit.texts.header")), BorderLayout.NORTH);
+		add(new JLabel(UITexts.get("edit.texts.header")), BorderLayout.NORTH);
 		
 		JPanel editPanel = new JPanel(new GridBagLayout());
 		
@@ -106,7 +104,7 @@ public class DialogsPanels extends JPanel implements DocumentListener {
 		Insets insetNone = new Insets(0, 0, 0, 0);
 
 		c.insets = insetTop;
-		Label label = new Label(texts.get("edit.texts.textrefid"));
+		Label label = new Label(UITexts.get("edit.texts.textrefid"));
 		editPanel.add(label, c);
 		
 		c.weightx = 1;
@@ -125,7 +123,7 @@ public class DialogsPanels extends JPanel implements DocumentListener {
 		
 		for(Locale l : localesToEdit) {
 			c.insets = insetTop;
-			label = new Label(MessageFormat.format(texts.get("edit.texts.forlang"), l.getDisplayLanguage(GuiSettings.getProgramLocale()))); 
+			label = new Label(MessageFormat.format(UITexts.get("edit.texts.forlang"), l.getDisplayLanguage(GuiSettings.getProgramLocale()))); 
 			editPanel.add(label, c);
 			c.insets = insetNone;
 
@@ -139,7 +137,7 @@ public class DialogsPanels extends JPanel implements DocumentListener {
 		if(createHeaderCheckbox) {
 			c.insets = new Insets(20, 0, 0, 0);
 			c.gridwidth = GridBagConstraints.REMAINDER;
-			headerCheckbox = new JCheckBox(texts.get("edit.texts.asheader"));
+			headerCheckbox = new JCheckBox(UITexts.get("edit.texts.asheader"));
 			editPanel.add(headerCheckbox, c);
 		}
 
@@ -203,7 +201,7 @@ public class DialogsPanels extends JPanel implements DocumentListener {
 			badTextRefIdLabel.setText(" ");
 			okButton.setEnabled(true);
 		} else {
-			badTextRefIdLabel.setText(texts.get("edit.texts.badtextref"));
+			badTextRefIdLabel.setText(UITexts.get("edit.texts.badtextref"));
 			okButton.setEnabled(false);
 		}
 	}

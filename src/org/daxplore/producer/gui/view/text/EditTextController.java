@@ -29,7 +29,6 @@ import org.daxplore.producer.gui.event.DaxploreFileUpdateEvent;
 import org.daxplore.producer.gui.event.EmptyEvents.LocaleAddedOrRemovedEvent;
 import org.daxplore.producer.gui.event.EmptyEvents.RawImportEvent;
 import org.daxplore.producer.gui.menu.ActionManager;
-import org.daxplore.producer.gui.resources.GuiTexts;
 
 import com.google.common.eventbus.EventBus;
 import com.google.common.eventbus.Subscribe;
@@ -49,11 +48,11 @@ public class EditTextController implements ActionListener, DocumentListener {
 		UPDATE_COLUMN_1, UPDATE_COLUMN_2
 	}
 	
-	public EditTextController(EventBus eventBus, GuiTexts texts, ActionManager actionManager) {
+	public EditTextController(EventBus eventBus, ActionManager actionManager) {
 		this.eventBus = eventBus;
 		eventBus.register(this);
 		
-		editTextView = new EditTextView(texts, actionManager, this);
+		editTextView = new EditTextView(actionManager, this);
 	}
 	
 	@Subscribe

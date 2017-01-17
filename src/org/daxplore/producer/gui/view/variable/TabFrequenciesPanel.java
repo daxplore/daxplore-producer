@@ -11,7 +11,7 @@ import javax.swing.JScrollPane;
 import javax.swing.JTable;
 
 import org.daxplore.producer.daxplorelib.metadata.MetaQuestion;
-import org.daxplore.producer.gui.resources.GuiTexts;
+import org.daxplore.producer.gui.resources.UITexts;
 import org.daxplore.producer.gui.view.variable.VariableController.QuestionCommand;
 
 @SuppressWarnings("serial")
@@ -24,14 +24,14 @@ public class TabFrequenciesPanel extends JPanel {
 	private JPanel scalePanel;
 	private JButton invertButton, removeButton, downButton, upButton, addButton;
 	
-	public TabFrequenciesPanel(GuiTexts texts, ActionListener actionListener, 
+	public TabFrequenciesPanel(ActionListener actionListener, 
 			MetaQuestion metaQuestion, JTable rawTable, JTable variableTable) {
 		this.rawTable = rawTable;
 		this.variableTable = variableTable;
 		setLayout(new BorderLayout());
 		
 		JPanel topPanel = new JPanel(new BorderLayout());
-		enableCheckBox.setText(texts.get("question_edit.freq.enable"));
+		enableCheckBox.setText(UITexts.get("question_edit.freq.enable"));
 		enableCheckBox.setActionCommand(QuestionCommand.FREQ_ENABLE.name());
 		enableCheckBox.setSelected(metaQuestion.useFrequencies());
 		enableCheckBox.addActionListener(actionListener);

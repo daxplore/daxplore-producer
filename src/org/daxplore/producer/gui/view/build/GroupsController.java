@@ -36,7 +36,6 @@ import org.daxplore.producer.gui.GuiSettings;
 import org.daxplore.producer.gui.event.DaxploreFileUpdateEvent;
 import org.daxplore.producer.gui.event.DisplayLocaleSelectEvent;
 import org.daxplore.producer.gui.event.EditQuestionEvent;
-import org.daxplore.producer.gui.resources.GuiTexts;
 
 import com.google.common.eventbus.EventBus;
 import com.google.common.eventbus.Subscribe;
@@ -49,7 +48,6 @@ public class GroupsController implements ActionListener, MouseListener {
 	}
 	
 	private EventBus eventBus;
-	private GuiTexts texts;
 	
 	private DaxploreFile daxploreFile;
 	
@@ -78,13 +76,12 @@ public class GroupsController implements ActionListener, MouseListener {
 		}
 	};
 	
-	public GroupsController(EventBus eventBus, GuiTexts texts) {
+	public GroupsController(EventBus eventBus) {
 		this.eventBus = eventBus;
-		this.texts = texts;
 		
 		eventBus.register(this);
 		
-		groupsView = new GroupsView(texts, this);
+		groupsView = new GroupsView(this);
 	}
 	
 	@Subscribe
@@ -151,7 +148,7 @@ public class GroupsController implements ActionListener, MouseListener {
 		case GROUP_ADD:
 			TextReferenceManager textReferenceManager = daxploreFile.getTextReferenceManager();
 			MetaGroupManager metaGroupManager = daxploreFile.getMetaGroupManager();
-			MetaGroup mg = Dialogs.createGroupDialog(getView(), textReferenceManager, metaGroupManager, texts, daxploreFile.getAbout().getLocales());
+			MetaGroup mg = Dialogs.createGroupDialog(getView(), textReferenceManager, metaGroupManager, daxploreFile.getAbout().getLocales());
 			if(mg != null) {
 				TreePath treepath = groupTreeModel.addGroup(mg, groupTreeModel.getChildCount(groupTreeModel.getRoot()));
 				groupTree.setSelectionPath(treepath);
@@ -411,7 +408,7 @@ public class GroupsController implements ActionListener, MouseListener {
 				TextReferenceManager textReferenceManager = daxploreFile.getTextReferenceManager();
 				TreePath[] paths = groupTree.getSelectionPaths(); 
 				MetaGroup metaGroup = (MetaGroup) pathObjects[1];
-				boolean edited = Dialogs.editGroupDialog(getView(), textReferenceManager, texts, daxploreFile.getAbout().getLocales(), metaGroup);
+				boolean edited = Dialogs.editGroupDialog(getView(), textReferenceManager, daxploreFile.getAbout().getLocales(), metaGroup);
 				if(edited) {
 					groupTree.setSelectionPath(null);
 					groupTree.setSelectionPaths(paths);

@@ -33,7 +33,7 @@ import javax.swing.table.TableCellEditor;
 import javax.swing.table.TableCellRenderer;
 
 import org.daxplore.producer.gui.resources.Colors;
-import org.daxplore.producer.gui.resources.GuiTexts;
+import org.daxplore.producer.gui.resources.UITexts;
 import org.daxplore.producer.gui.widget.AbstractWidgetEditor;
 import org.daxplore.producer.gui.widget.AbstractWidgetEditor.InvalidContentException;
 import org.daxplore.producer.gui.widget.TextWidget;
@@ -54,7 +54,7 @@ public class RawVariableTable extends JXTable {
 	private JLabel cellTextLabel = new JLabel();
 	private boolean enabled = true;
 	
-	public RawVariableTable(EventBus eventBus, GuiTexts texts, RawVariableTableModel model) {
+	public RawVariableTable(EventBus eventBus, RawVariableTableModel model) {
 		super(model);
 		this.model = model;
 		
@@ -62,7 +62,7 @@ public class RawVariableTable extends JXTable {
 		setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
         mouseOverRow = -1;
         
-        cellRenderer = new RawVariableCellRenderer(texts, model.availableToNumbers);
+        cellRenderer = new RawVariableCellRenderer(model.availableToNumbers);
         setDefaultRenderer(Double.class, cellRenderer);
         setDefaultEditor(Double.class, cellRenderer);
         setDefaultRenderer(String.class, cellRenderer);
@@ -71,7 +71,7 @@ public class RawVariableTable extends JXTable {
         setDefaultEditor(Integer.class, cellRenderer);
         
         //TODO should we have to create a TextWidget here?
-        setRowHeight(new TextWidget(eventBus, texts).getPreferredSize().height);
+        setRowHeight(new TextWidget(eventBus).getPreferredSize().height);
         packAll();
         
         addMouseMotionListener(new MouseMotionAdapter() {
@@ -128,13 +128,11 @@ public class RawVariableTable extends JXTable {
 	
 	class RawVariableCellRenderer extends AbstractCellEditor implements TableCellRenderer, TableCellEditor, PopupMenuListener {
 		
-		private GuiTexts texts;
 		private AbstractWidgetEditor<?> editor;
 		
-		public RawVariableCellRenderer(GuiTexts texts, List<Integer> availableToNumbers) {
-			this.texts = texts;
-			choiceEditor = new ChoiceEditor(texts, availableToNumbers);
-			choiceRenderer = new ChoiceEditor(texts, availableToNumbers);
+		public RawVariableCellRenderer(List<Integer> availableToNumbers) {
+			choiceEditor = new ChoiceEditor(availableToNumbers);
+			choiceRenderer = new ChoiceEditor(availableToNumbers);
 			cellTextWrapper.setLayout(new BorderLayout());
 			cellTextWrapper.add(cellTextLabel, BorderLayout.CENTER);
 			choiceEditor.addPopupMenuListener(this);
@@ -153,12 +151,12 @@ public class RawVariableTable extends JXTable {
 	    		if(value!=null) {
 	    			choiceRenderer.setToolTipText(value.toString());
 	    		} else {
-	    			choiceRenderer.setToolTipText(texts.get("table.tooltip.to_nothing"));
+	    			choiceRenderer.setToolTipText(UITexts.get("table.tooltip.to_nothing"));
 	    		}
 	    		choiceRenderer.setContent((Integer)value);
 	    	} else if(value == null) {
-	    		cellTextLabel.setText(texts.get("table.text.null"));
-	    		cellTextWrapper.setToolTipText(texts.get("table.tooltip.null"));
+	    		cellTextLabel.setText(UITexts.get("table.text.null"));
+	    		cellTextWrapper.setToolTipText(UITexts.get("table.tooltip.null"));
 	    		comp = cellTextWrapper;
 	    	} else {
 	    		cellTextLabel.setText(value.toString());
@@ -188,7 +186,7 @@ public class RawVariableTable extends JXTable {
 				if(value!=null) {
 					choiceEditor.setToolTipText(value.toString());
 	    		} else {
-	    			choiceEditor.setToolTipText(texts.get("table.tooltip.to_nothing"));
+	    			choiceEditor.setToolTipText(UITexts.get("table.tooltip.to_nothing"));
 	    		}
 				
 				comp = choiceEditor;
@@ -245,12 +243,10 @@ public class RawVariableTable extends JXTable {
 	
 	class ChoiceEditor extends JComboBox<String> implements AbstractWidgetEditor<Integer>, ItemListener {
 		
-		private GuiTexts texts;
 		private List<Integer> availableNumbers;
 		private Integer content;
 		
-		public ChoiceEditor(GuiTexts texts, List<Integer> availableNumbers) {
-			this.texts = texts;
+		public ChoiceEditor(List<Integer> availableNumbers) {
 			addItemListener(this);
 			setAvailibleNumbers(availableNumbers);
 		}
@@ -258,7 +254,7 @@ public class RawVariableTable extends JXTable {
 		public void setAvailibleNumbers(List<Integer> list) {
 			availableNumbers = list;
 			removeAllItems();
-			addItem(texts.get("table.text.to_nothing"));
+			addItem(UITexts.get("table.text.to_nothing"));
 			for(Integer c: availableNumbers) {
 				addItem(c.toString());
 			}

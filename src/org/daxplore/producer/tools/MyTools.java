@@ -28,6 +28,9 @@ public class MyTools {
 	}
 
 	public static <T> String join(T[] array, String seperator) {
+		if (array.length  == 0) {
+			return "";
+		}
 		StringBuilder sb = new StringBuilder();
 		for (int i = 0; i < (array.length - 1); i++) {
 			sb.append(array[i].toString());

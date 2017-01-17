@@ -24,7 +24,7 @@ import org.daxplore.producer.gui.Dialogs;
 import org.daxplore.producer.gui.GuiSettings;
 import org.daxplore.producer.gui.event.DisplayLocaleSelectEvent;
 import org.daxplore.producer.gui.resources.Colors;
-import org.daxplore.producer.gui.resources.GuiTexts;
+import org.daxplore.producer.gui.resources.UITexts;
 
 import com.google.common.base.Strings;
 import com.google.common.eventbus.EventBus;
@@ -40,7 +40,7 @@ public class TextWidget extends JPanel implements AbstractWidgetEditor<TextRefer
 	
 	private Locale locale; 
 	
-	public TextWidget(final EventBus eventBus, final GuiTexts texts) {
+	public TextWidget(final EventBus eventBus) {
 		eventBus.register(this);
 		locale = GuiSettings.getCurrentDisplayLocale();
 		setLayout(new BorderLayout(0, 0));
@@ -49,14 +49,14 @@ public class TextWidget extends JPanel implements AbstractWidgetEditor<TextRefer
 		label.setHorizontalAlignment(SwingConstants.LEFT);
 		JPanel editPanel = new JPanel();
 		editPanel.setBackground(Colors.transparent);
-		editButton = new JButton(texts.get("general.button.edit"));
+		editButton = new JButton(UITexts.get("general.button.edit"));
 		editButton.setEnabled(false);
 		editPanel.add(editButton);
 
 		editButton.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				boolean edited = Dialogs.editTextRefDialog(editButton, texts, textRef.getActiveLocales(), textRef);
+				boolean edited = Dialogs.editTextRefDialog(editButton, textRef.getActiveLocales(), textRef);
 				if (edited) {
 					setContent(textRef);
 				}

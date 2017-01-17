@@ -22,13 +22,11 @@ import javax.swing.event.DocumentListener;
 import org.daxplore.producer.daxplorelib.About;
 import org.daxplore.producer.daxplorelib.About.TimeSeriesType;
 import org.daxplore.producer.gui.SectionHeader;
-import org.daxplore.producer.gui.resources.GuiTexts;
+import org.daxplore.producer.gui.resources.UITexts;
 import org.daxplore.producer.gui.view.time.TimeSeriesController.TimeSeriesCommand;
 
 @SuppressWarnings("serial")
 public class TimeSeriesView extends JPanel {
-
-	private GuiTexts texts;
 	
 	private JScrollPane columnValueCountPane;
 	private JScrollPane scrollPane;
@@ -41,8 +39,7 @@ public class TimeSeriesView extends JPanel {
 	/**
 	 * Create the panel.
 	 */
-	public <T extends DocumentListener & ActionListener> TimeSeriesView(About about, GuiTexts texts, T listener) {
-		this.texts = texts;
+	public <T extends DocumentListener & ActionListener> TimeSeriesView(About about, T listener) {
 		documentListener = listener;
 		actionListener = listener;
 		
@@ -51,12 +48,12 @@ public class TimeSeriesView extends JPanel {
 		JPanel headerPanel = new JPanel();
 		headerPanel.setLayout(new BorderLayout());
 		
-		enableCheckBox.setText(texts.get("timeseries.enable"));
+		enableCheckBox.setText(UITexts.get("timeseries.enable"));
 		enableCheckBox.setActionCommand(TimeSeriesCommand.TIME_ENABLE.name());
 		enableCheckBox.setSelected(about.getTimeSeriesType() == TimeSeriesType.SHORT);
 		enableCheckBox.addActionListener(actionListener);
 		
-		headerPanel.add(new SectionHeader(texts, "timeseries"), BorderLayout.NORTH);
+		headerPanel.add(new SectionHeader("timeseries"), BorderLayout.NORTH);
 		headerPanel.add(enableCheckBox, BorderLayout.WEST);
 		
 		add(headerPanel, BorderLayout.NORTH);
@@ -124,7 +121,7 @@ public class TimeSeriesView extends JPanel {
 	private JPanel buildUtilityPanel() {
 		JPanel utilityPanel = new JPanel(new BorderLayout());
 		
-		utilityPanel.add(new SectionHeader(texts, "replace_timepoints"), BorderLayout.NORTH);
+		utilityPanel.add(new SectionHeader("replace_timepoints"), BorderLayout.NORTH);
 		
 		JButton addTimepointsButton = new JButton("Replace timepoints");
 		addTimepointsButton.setBounds(27, 189, 185, 47);

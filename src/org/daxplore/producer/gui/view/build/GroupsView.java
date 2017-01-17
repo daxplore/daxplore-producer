@@ -22,7 +22,7 @@ import javax.swing.border.EmptyBorder;
 
 import org.daxplore.producer.gui.SectionHeader;
 import org.daxplore.producer.gui.resources.Colors;
-import org.daxplore.producer.gui.resources.GuiTexts;
+import org.daxplore.producer.gui.resources.UITexts;
 import org.daxplore.producer.gui.utility.VerticallyGrowingJPanel;
 import org.daxplore.producer.gui.view.build.GroupsController.GroupsCommand;
 
@@ -30,8 +30,6 @@ import com.google.common.base.Strings;
 
 @SuppressWarnings("serial")
 public class GroupsView extends JPanel {
-	
-	private GuiTexts texts;
 	private ActionListener actionListener;
 	
 	private JScrollPane questionsScrollPane = new JScrollPane();
@@ -42,8 +40,7 @@ public class GroupsView extends JPanel {
 	private JLabel infoShortText = new JLabel();
 	private JLabel infoFullText = new JLabel();
 	
-	public GroupsView(GuiTexts texts, ActionListener actionListener) {
-		this.texts = texts;
+	public GroupsView(ActionListener actionListener) {
 		this.actionListener = actionListener;
 		
 		setLayout(new BorderLayout());
@@ -67,32 +64,32 @@ public class GroupsView extends JPanel {
 	}
 	
 	void setVariableInfo(String column, String shorttext, String fulltext) {
-		infoIdText.setText(texts.format("variable_info.label.column", column));
+		infoIdText.setText(UITexts.format("variable_info.label.column", column));
 		
 		String shortDisplay = shorttext;
 		if(Strings.isNullOrEmpty(shortDisplay)) {
 			shortDisplay = "<i>missing</i>";
 		}
-		infoShortText.setText(texts.format("variable_info.label.shorttext", shortDisplay));
+		infoShortText.setText(UITexts.format("variable_info.label.shorttext", shortDisplay));
 		
 		String fullDisplay = fulltext;
 		if(Strings.isNullOrEmpty(fullDisplay)) {
 			fullDisplay = "<i>missing</i>";
 		} 
-		infoFullText.setText(texts.format("variable_info.label.fulltext", fullDisplay));
+		infoFullText.setText(UITexts.format("variable_info.label.fulltext", fullDisplay));
 	}
 	
 	private JPanel buildListSection() {
 		JPanel variableListPanel = new JPanel(new BorderLayout(0, 0));
 		questionsScrollPane.getViewport().setBackground(Colors.listBackgroundEven);
-		variableListPanel.add(new SectionHeader(texts, "variable_list"), BorderLayout.NORTH);
+		variableListPanel.add(new SectionHeader("variable_list"), BorderLayout.NORTH);
 		variableListPanel.add(questionsScrollPane, BorderLayout.CENTER);
 		return variableListPanel;
 	}
 	
 	private JPanel buildVariableInfoSection() {
 		final JPanel infoPanel = new VerticallyGrowingJPanel(new BorderLayout());
-		infoPanel.add(new SectionHeader(texts, "variable_info"), BorderLayout.NORTH);
+		infoPanel.add(new SectionHeader("variable_info"), BorderLayout.NORTH);
 		
 		JPanel textsPanel = new JPanel();
 		BoxLayout layout = new BoxLayout(textsPanel, BoxLayout.Y_AXIS);
@@ -106,7 +103,7 @@ public class GroupsView extends JPanel {
 		infoPanel.add(textsPanel, BorderLayout.CENTER);
 		
 		JPanel bottomButtonPanel = new JPanel(new BorderLayout());
-		JButton editVariableButton = new JButton(texts.get("variable_info.button.edit"));
+		JButton editVariableButton = new JButton(UITexts.get("variable_info.button.edit"));
 		editVariableButton.setActionCommand(GroupsCommand.EDIT_VARIABLE.toString());
 		editVariableButton.addActionListener(actionListener);
 		bottomButtonPanel.add(editVariableButton, BorderLayout.EAST);
@@ -120,7 +117,7 @@ public class GroupsView extends JPanel {
 		JPanel groupsPanel = new JPanel(new BorderLayout(0,0));
 		
 		JPanel listPanel = new JPanel(new BorderLayout());
-		listPanel.add(new SectionHeader(texts, "question_tree"), BorderLayout.NORTH);
+		listPanel.add(new SectionHeader("question_tree"), BorderLayout.NORTH);
 		listPanel.add(groupsScollPane, BorderLayout.CENTER);
 		groupsPanel.add(listPanel, BorderLayout.CENTER);
 		
@@ -176,7 +173,7 @@ public class GroupsView extends JPanel {
 		perspectiveScrollPane.getViewport().setBackground(Colors.listBackgroundEven);
 		
 		JPanel listPanel = new JPanel(new BorderLayout());
-		listPanel.add(new SectionHeader(texts, "perspective_list"), BorderLayout.NORTH);
+		listPanel.add(new SectionHeader("perspective_list"), BorderLayout.NORTH);
 		listPanel.add(perspectiveScrollPane, BorderLayout.CENTER);
 		perspectivePanel.add(listPanel, BorderLayout.CENTER);
 		

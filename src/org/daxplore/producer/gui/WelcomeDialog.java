@@ -28,7 +28,6 @@ import javax.swing.filechooser.FileNameExtensionFilter;
 import org.daxplore.producer.daxplorelib.DaxploreException;
 import org.daxplore.producer.daxplorelib.DaxploreFile;
 import org.daxplore.producer.gui.event.DaxploreFileUpdateEvent;
-import org.daxplore.producer.gui.resources.GuiTexts;
 import org.daxplore.producer.gui.resources.IconResources;
 import org.daxplore.producer.gui.utility.DaxploreLogger;
 import org.daxplore.producer.gui.utility.GuiTools;
@@ -91,14 +90,12 @@ public class WelcomeDialog {
 	
 	
 	EventBus eventBus;
-	GuiTexts texts;
 	DaxplorePreferences preferences;
 	
 	public WelcomeDialog() {
 		welcomeFrame = new JFrame();
 		eventBus = new EventBus();
 		eventBus.register(this);
-		texts = new GuiTexts(GuiSettings.getProgramLocale());
 		preferences = new DaxplorePreferences();
 		
 		welcomeFrame.setSize(500, 300);
@@ -112,7 +109,7 @@ public class WelcomeDialog {
 		newProjectButton.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				DaxploreWizard wizard = DaxploreWizard.createNewFileWizard(welcomeFrame, eventBus, texts, preferences);
+				DaxploreWizard wizard = DaxploreWizard.createNewFileWizard(welcomeFrame, eventBus, preferences);
 				wizard.show();
 			}
 		});
@@ -133,7 +130,7 @@ public class WelcomeDialog {
 					System.out.println("Opening: " + file.getName() + ".");
 					
 					try {
-						DaxploreFile daxploreFile = DaxploreFile.createFromExistingFile(file, texts);
+						DaxploreFile daxploreFile = DaxploreFile.createFromExistingFile(file);
 						eventBus.post(new DaxploreFileUpdateEvent(daxploreFile));
 					} catch (DaxploreException e2) {
 						// TODO Auto-generated catch block
@@ -161,7 +158,7 @@ public class WelcomeDialog {
 				public void run() {
 					try {
 						JFrame window = new JFrame();
-						MainController mainController = new MainController(window, eventBus, texts, preferences, event.getDaxploreFile());
+						MainController mainController = new MainController(window, eventBus, preferences, event.getDaxploreFile());
 						mainController.setVisible(true);
 						
 						welcomeFrame.setVisible(false);

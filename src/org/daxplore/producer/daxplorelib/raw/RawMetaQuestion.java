@@ -29,7 +29,7 @@ import org.daxplore.producer.daxplorelib.DaxploreException;
 import org.daxplore.producer.daxplorelib.DaxploreFile;
 import org.daxplore.producer.daxplorelib.DaxploreTable;
 import org.daxplore.producer.daxplorelib.SQLTools;
-import org.daxplore.producer.gui.resources.GuiTexts;
+import org.daxplore.producer.gui.resources.UITexts;
 import org.json.simple.JSONValue;
 import org.json.simple.parser.ContainerFactory;
 import org.json.simple.parser.JSONParser;
@@ -56,16 +56,14 @@ public class RawMetaQuestion {
 	public static class RawMetaManager {
 		
 		private Connection connection;
-		private static GuiTexts texts; // TODO if static, make it static globally instead
 		
 		private LinkedHashMap<String, RawMetaQuestion> columnMap = new LinkedHashMap<>();
 		private HashMap<String, Integer> columnIndexMap = new HashMap<>();
 		private List<RawMetaQuestion> toBeAdded = new ArrayList<>();
 		private Set<String> toBeRemoved = new HashSet<>();
 		
-		public RawMetaManager(Connection connection, GuiTexts texts) throws SQLException, DaxploreException {
+		public RawMetaManager(Connection connection) throws SQLException, DaxploreException {
 			this.connection = connection;
-			RawMetaManager.texts = texts;
 			boolean created = SQLTools.createIfNotExists(table, connection);
 			if (!created) {
 				loadAllToMemory();
@@ -361,6 +359,9 @@ public class RawMetaQuestion {
 		this.spsstype = spsstype;
 		this.measure = measure;
 		this.qtype = qtype;
+		if (valuelabels == null) {
+			valuelabels = new LinkedHashMap<>();
+		}
 		this.valuelabels = valuelabels;
 	}
 
@@ -443,7 +444,7 @@ public class RawMetaQuestion {
 	private String setQtype(VariableType qtype) {
 		String message = null;
 		if (this.qtype != qtype) {
-			message = RawMetaManager.texts.format("library.import.changed_variable_type", column, this.qtype, qtype);
+			message = UITexts.format("library.import.changed_variable_type", column, this.qtype, qtype);
 			this.qtype = qtype;
 			modified = true;
 		}
@@ -452,25 +453,25 @@ public class RawMetaQuestion {
 
 	private String setValuelabels(LinkedHashMap<Object, String> valuelabels) {
 		String message = null;
-		if (this.valuelabels == null && valuelabels == null) {
+		if (valuelabels == null) {
+			valuelabels = new LinkedHashMap<>();
+		}
+		if (this.valuelabels.isEmpty() && valuelabels.isEmpty()) {
 			return message;
 		}
-		if (this.valuelabels != null && valuelabels != null && this.valuelabels.isEmpty() && valuelabels.isEmpty()) {
-			return message;
-		}
-		if (valuelabels == null || !valuelabels.equals(this.valuelabels)) {
+		if (!valuelabels.equals(this.valuelabels)) {
 			StringBuilder sb = new StringBuilder();
-			sb.append(RawMetaManager.texts.format("library.import.changed_valuelables_warning", column) + "\n");
-			sb.append(RawMetaManager.texts.format("library.import.changed_valuelables_old") + "\n");
-			if (this.valuelabels == null || this.valuelabels.isEmpty()) {
+			sb.append(UITexts.format("library.import.changed_valuelabels_warning", column) + "\n");
+			sb.append(UITexts.format("library.import.changed_valuelabels_old") + "\n");
+			if (this.valuelabels.isEmpty()) {
 				sb.append("    [no mapping]\n");
 			} else {
 				for (Object key : this.valuelabels.keySet()) {
 					sb.append("    " + key + " = " + this.valuelabels.get(key) + "\n");
 				}
 			}
-			sb.append(RawMetaManager.texts.format("library.import.changed_valuelables_new") + "\n");
-			if (valuelabels == null || valuelabels.isEmpty()) {
+			sb.append(UITexts.format("library.import.changed_valuelabels_new") + "\n");
+			if (valuelabels.isEmpty()) {
 				sb.append("    [no mapping]\n");
 			} else {
 				for (Object key : valuelabels.keySet()) {

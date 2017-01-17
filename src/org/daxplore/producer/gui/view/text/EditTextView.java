@@ -32,14 +32,11 @@ import javax.swing.table.TableRowSorter;
 import org.daxplore.producer.gui.SectionHeader;
 import org.daxplore.producer.gui.menu.ActionManager;
 import org.daxplore.producer.gui.resources.Colors;
-import org.daxplore.producer.gui.resources.GuiTexts;
 import org.daxplore.producer.gui.utility.DisplayLocale;
 import org.daxplore.producer.gui.view.text.EditTextController.EditTextCommand;
 
 @SuppressWarnings("serial")
 public class EditTextView extends JPanel {
-	
-	private GuiTexts texts;
 	private ActionListener actionListener;
 	private DocumentListener documentListener;
 	private ActionManager actionManager;
@@ -55,8 +52,7 @@ public class EditTextView extends JPanel {
 	private JTable localeTable;
 	
 	public <T extends DocumentListener & ActionListener>
-	EditTextView(GuiTexts texts, ActionManager actionManager, T listener) {
-		this.texts = texts;
+	EditTextView(ActionManager actionManager, T listener) {
 		actionListener = listener;
 		documentListener = listener;
 		this.actionManager = actionManager;
@@ -80,7 +76,7 @@ public class EditTextView extends JPanel {
 	private JPanel buildEditArea() {
 		JPanel editPanel = new JPanel(new BorderLayout());
 		
-		editPanel.add(new SectionHeader(texts, "texts"), BorderLayout.NORTH);
+		editPanel.add(new SectionHeader("texts"), BorderLayout.NORTH);
 		
 		JPanel textsPanel = new JPanel(new BorderLayout());
 		JPanel searchComboPanel = new JPanel(new GridLayout(0, 3, 0, 0));
@@ -114,7 +110,7 @@ public class EditTextView extends JPanel {
 	private JPanel buildLocaleSelector() {
 		JPanel selectorPanel = new JPanel(new BorderLayout());
 		
-		selectorPanel.add(new SectionHeader(texts, "locale_picker"), BorderLayout.NORTH);
+		selectorPanel.add(new SectionHeader("locale_picker"), BorderLayout.NORTH);
 		
 		localeScrollPane = new JScrollPane();
 		localeScrollPane.getViewport().setBackground(Colors.listBackgroundEven);
@@ -126,7 +122,7 @@ public class EditTextView extends JPanel {
 	private JPanel buildImportExportPanel() {
 		JPanel sectionPanel = new JPanel(new BorderLayout());
 		
-		sectionPanel.add(new SectionHeader(texts, "import_export"), BorderLayout.NORTH);
+		sectionPanel.add(new SectionHeader("import_export"), BorderLayout.NORTH);
 		
 		JPanel flowPanel = new JPanel(new FlowLayout());
 		flowPanel.add(new JButton(actionManager.IMPORT_TEXTS));

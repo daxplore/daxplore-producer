@@ -13,20 +13,17 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 
 import org.daxplore.producer.gui.SectionHeader;
-import org.daxplore.producer.gui.resources.GuiTexts;
+import org.daxplore.producer.gui.resources.UITexts;
 
 public class SettingsView extends JPanel {
-	
-	private GuiTexts texts;
 	private ActionListener listener;
 	
-	public SettingsView(GuiTexts texts, ActionListener listener) {
-		this.texts = texts;
+	public SettingsView(ActionListener listener) {
 		this.listener = listener;
 		
 		setLayout(new BorderLayout());
 		
-		add(new SectionHeader(texts, "settings"), BorderLayout.NORTH);
+		add(new SectionHeader("settings"), BorderLayout.NORTH);
 	}
 	
 	void build(Map<String, Boolean> boolSettings, SettingsTableModel model) {
@@ -38,7 +35,7 @@ public class SettingsView extends JPanel {
 		boolPanel.setAlignmentX(0);
 		for(String key: boolSettings.keySet()) {
 			Boolean checked = boolSettings.get(key);
-			JCheckBox box = new JCheckBox(texts.get("setting." + key + ".checkbox"), checked);
+			JCheckBox box = new JCheckBox(UITexts.get("setting." + key + ".checkbox"), checked);
 			box.setActionCommand(key);
 			box.addActionListener(listener);
 			boolPanel.add(box, Component.LEFT_ALIGNMENT);
@@ -48,22 +45,22 @@ public class SettingsView extends JPanel {
 		JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
 		buttonPanel.setAlignmentX(0);
 
-		JButton checkFreq = new JButton(texts.get("setting.button.checkfreq"));
+		JButton checkFreq = new JButton(UITexts.get("setting.button.checkfreq"));
 		checkFreq.setActionCommand("checkFreq");
 		checkFreq.addActionListener(listener);
 		buttonPanel.add(checkFreq);
 		
-		JButton uncheckFreq = new JButton(texts.get("setting.button.uncheckfreq"));
+		JButton uncheckFreq = new JButton(UITexts.get("setting.button.uncheckfreq"));
 		uncheckFreq.setActionCommand("uncheckFreq");
 		uncheckFreq.addActionListener(listener);
 		buttonPanel.add(uncheckFreq);
 		
-		JButton checkMean = new JButton(texts.get("setting.button.checkmean"));
+		JButton checkMean = new JButton(UITexts.get("setting.button.checkmean"));
 		checkMean.setActionCommand("checkMean");
 		checkMean.addActionListener(listener);
 		buttonPanel.add(checkMean);
 		
-		JButton uncheckMean = new JButton(texts.get("setting.button.uncheckmean"));
+		JButton uncheckMean = new JButton(UITexts.get("setting.button.uncheckmean"));
 		uncheckMean.setActionCommand("uncheckMean");
 		uncheckMean.addActionListener(listener);
 		buttonPanel.add(uncheckMean);

@@ -12,7 +12,6 @@ import javax.swing.border.LineBorder;
 import javax.swing.border.TitledBorder;
 
 import org.daxplore.producer.daxplorelib.metadata.MetaQuestion;
-import org.daxplore.producer.gui.resources.GuiTexts;
 import org.daxplore.producer.gui.widget.TextWidget;
 
 import com.google.common.eventbus.EventBus;
@@ -26,11 +25,11 @@ public class TabInfoPanel extends JPanel{
 	private JLabel column = new JLabel();
 	private JScrollPane timePointScrollPane = new JScrollPane();
 	
-	public TabInfoPanel(EventBus eventBus, GuiTexts texts, MetaQuestion metaQuestion, JTable timePointTable) {
+	public TabInfoPanel(EventBus eventBus, MetaQuestion metaQuestion, JTable timePointTable) {
 		timePointScrollPane.setViewportView(timePointTable);
 		
-		fullText = new TextWidget(eventBus, texts);
-		shortText = new TextWidget(eventBus, texts);
+		fullText = new TextWidget(eventBus);
+		shortText = new TextWidget(eventBus);
 		
 		column.setText(metaQuestion.getColumn());
 		fullText.setContent(metaQuestion.getFullTextRef());

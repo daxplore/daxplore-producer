@@ -29,7 +29,6 @@ import org.daxplore.producer.daxplorelib.metadata.MetaScale.Option;
 import org.daxplore.producer.daxplorelib.metadata.textreference.TextReference;
 import org.daxplore.producer.daxplorelib.raw.RawMetaQuestion;
 import org.daxplore.producer.daxplorelib.raw.VariableOptionInfo;
-import org.daxplore.producer.gui.resources.GuiTexts;
 
 import com.google.common.collect.Lists;
 import com.google.common.eventbus.EventBus;
@@ -56,7 +55,7 @@ public class VariableController implements TableModelListener, ActionListener {
 	private TabMeanPanel meanPanel;
 	private TabTextPanel textPanel;
 	
-	public VariableController(EventBus eventBus, GuiTexts texts, DaxploreFile daxploreFile, MetaQuestion metaQuestion) throws DaxploreException {
+	public VariableController(EventBus eventBus, DaxploreFile daxploreFile, MetaQuestion metaQuestion) throws DaxploreException {
 		this.mq = metaQuestion;
 		this.daxploreFile = daxploreFile;
 		
@@ -66,12 +65,12 @@ public class VariableController implements TableModelListener, ActionListener {
 		rawVariableList = daxploreFile.getRawColumnInfo(rawMetaQuestion.getColumn());
 
 		variableModel = new VariableTableModel(metaQuestion.getScale(), calculateAfter());
-		variableTable = new VariableTable(eventBus, texts, variableModel);
+		variableTable = new VariableTable(eventBus, variableModel);
 		variableModel.addTableModelListener(this);
 		List<Integer> availebleToNumbers = variableModel.getAvailebleToNumbers();
 		
 		rawModel = new RawVariableTableModel(rawMetaQuestion, rawVariableList, metaQuestion.getScale(), availebleToNumbers);
-		rawTable = new RawVariableTable(eventBus, texts, rawModel);
+		rawTable = new RawVariableTable(eventBus, rawModel);
 		rawModel.addTableModelListener(this);
 		
 		TimePointTableModel timePointTableModel = new TimePointTableModel(
@@ -80,14 +79,14 @@ public class VariableController implements TableModelListener, ActionListener {
 				daxploreFile.getAbout(),
 				metaQuestion);
 		
-		TimePointTable timePointTable = new TimePointTable(eventBus, texts, timePointTableModel);
+		TimePointTable timePointTable = new TimePointTable(eventBus, timePointTableModel);
 		
-		infoPanel = new TabInfoPanel(eventBus, texts, metaQuestion, timePointTable);
-		freqPanel = new TabFrequenciesPanel(texts, this, metaQuestion, rawTable, variableTable);
-		meanPanel = new TabMeanPanel(texts, this, metaQuestion);
+		infoPanel = new TabInfoPanel(eventBus, metaQuestion, timePointTable);
+		freqPanel = new TabFrequenciesPanel(this, metaQuestion, rawTable, variableTable);
+		meanPanel = new TabMeanPanel(this, metaQuestion);
 		textPanel = new TabTextPanel();
 		
-		view = new VariableView(texts, infoPanel, freqPanel, meanPanel, textPanel);
+		view = new VariableView(infoPanel, freqPanel, meanPanel, textPanel);
 	}
 	
 	

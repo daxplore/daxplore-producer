@@ -32,7 +32,7 @@ import org.daxplore.producer.daxplorelib.metadata.textreference.TextReference;
 import org.daxplore.producer.daxplorelib.metadata.textreference.TextReferenceManager;
 import org.daxplore.producer.daxplorelib.raw.RawData.RawDataManager;
 import org.daxplore.producer.gui.event.DaxploreFileUpdateEvent;
-import org.daxplore.producer.gui.resources.GuiTexts;
+import org.daxplore.producer.gui.resources.UITexts;
 import org.daxplore.producer.gui.widget.ColumnTableModel;
 
 import com.google.common.eventbus.EventBus;
@@ -46,19 +46,17 @@ public class TimeSeriesController implements ActionListener, DocumentListener {
 	
 	private About about;
 	private EventBus eventBus;
-	private GuiTexts texts;
 	private DaxploreFile daxploreFile;
 	
 	private TimeSeriesTableModel timeSeriesTableModel;
 	private TimeSeriesTable timeSeriesTable;
 	private TimeSeriesView timeSeriesView;
 	
-	public TimeSeriesController(About about, EventBus eventBus, GuiTexts texts) {
+	public TimeSeriesController(About about, EventBus eventBus) {
 		this.about = about;
 		this.eventBus = eventBus; 
-		this.texts = texts;
 		eventBus.register(this);
-		timeSeriesView = new TimeSeriesView(about, texts, this);
+		timeSeriesView = new TimeSeriesView(about, this);
 	}
 	
 	@Subscribe
@@ -162,8 +160,8 @@ public class TimeSeriesController implements ActionListener, DocumentListener {
 			try {
 				daxploreFile.replaceAllTimepointsInQuestions();
 				JOptionPane.showMessageDialog(timeSeriesView,
-						texts.get("dialog.time_replace.text"),
-						texts.get("dialog.time_replace.title"),
+						UITexts.get("dialog.time_replace.text"),
+						UITexts.get("dialog.time_replace.title"),
 						JOptionPane.INFORMATION_MESSAGE);
 			} catch (DaxploreException|SQLException e1) {
 				// TODO Auto-generated catch block
@@ -202,7 +200,7 @@ public class TimeSeriesController implements ActionListener, DocumentListener {
 	public void loadData() {
 		if(daxploreFile != null) {
 			timeSeriesTableModel = new TimeSeriesTableModel(daxploreFile.getMetaTimepointShortManager());
-			timeSeriesTable = new TimeSeriesTable(eventBus, texts, timeSeriesTableModel);
+			timeSeriesTable = new TimeSeriesTable(eventBus, timeSeriesTableModel);
 			timeSeriesView.getTimeSeriesScrollPane().setViewportView(timeSeriesTable);
 			if(daxploreFile.getAbout().getTimeSeriesType() == TimeSeriesType.SHORT) {
 				timeSeriesView.setTimeSeriesColumn(daxploreFile.getAbout().getTimeSeriesShortColumn());

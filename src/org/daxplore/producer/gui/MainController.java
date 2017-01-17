@@ -58,7 +58,7 @@ import org.daxplore.producer.gui.event.InfoMessageEvent;
 import org.daxplore.producer.gui.menu.ActionManager;
 import org.daxplore.producer.gui.menu.MenuBarController;
 import org.daxplore.producer.gui.menu.ToolbarController;
-import org.daxplore.producer.gui.resources.GuiTexts;
+import org.daxplore.producer.gui.resources.UITexts;
 import org.daxplore.producer.gui.settings.SettingsController;
 import org.daxplore.producer.gui.utility.JLabelSelectable;
 import org.daxplore.producer.gui.view.build.GroupsController;
@@ -77,13 +77,13 @@ import com.google.common.eventbus.Subscribe;
  * Singleton.
  */
 public class MainController {
+	
 	private DaxploreFile daxploreFile = null;
 
 	private EventBus eventBus;
 	private DaxplorePreferences preferences;
 	private JFrame mainWindow;
 	private ActionManager actionManager;
-	private GuiTexts texts;
 
 	private MainView mainView;
 
@@ -114,17 +114,16 @@ public class MainController {
 		}
 	}
 	
-	public MainController(JFrame mainWindow, final EventBus eventBus, GuiTexts texts,
+	public MainController(JFrame mainWindow, final EventBus eventBus,
 			DaxplorePreferences preferences, DaxploreFile daxploreFile) {
 		this.mainWindow = mainWindow;
 		this.eventBus = eventBus;
-		this.texts = texts;
 		this.preferences = preferences;
 		this.daxploreFile = daxploreFile;
 
 		eventBus.register(this);
 		
-		actionManager = new ActionManager(eventBus, texts);
+		actionManager = new ActionManager(eventBus);
 		
 		mainWindow.setDefaultCloseOperation(WindowConstants.DO_NOTHING_ON_CLOSE);
 		mainWindow.addWindowListener(new WindowAdapter() {
@@ -137,19 +136,19 @@ public class MainController {
 		
 		menuBarController = new MenuBarController(actionManager);
 		toolbarController = new ToolbarController(eventBus, actionManager);
-		groupsController = new GroupsController(eventBus, texts);
-		editTextController = new EditTextController(eventBus, texts, actionManager);
-		timeSeriesController = new TimeSeriesController(daxploreFile.getAbout(), eventBus, texts);
-		settingsController = new SettingsController(daxploreFile.getMetaQuestionManager(), eventBus, texts);
+		groupsController = new GroupsController(eventBus);
+		editTextController = new EditTextController(eventBus, actionManager);
+		timeSeriesController = new TimeSeriesController(daxploreFile.getAbout(), eventBus);
+		settingsController = new SettingsController(daxploreFile.getMetaQuestionManager(), eventBus);
 
 		mainView = new MainView(mainWindow);
 		
 		mainView.setMenuBar(menuBarController.getView());
 		
-		mainView.addTab(texts.get("view.groups.tab"), groupsController.getView(), Views.GROUPSVIEW);
-		mainView.addTab(texts.get("view.edit_text.tab"), editTextController.getView(), Views.EDITTEXTVIEW);
-		mainView.addTab(texts.get("view.time_series.tab"), timeSeriesController.getView(), Views.TIMESERIESVIEW);
-		mainView.addTab(texts.get("view.settings.tab"), settingsController.getView(), Views.SETTINGSVIEW);
+		mainView.addTab(UITexts.get("view.groups.tab"), groupsController.getView(), Views.GROUPSVIEW);
+		mainView.addTab(UITexts.get("view.edit_text.tab"), editTextController.getView(), Views.EDITTEXTVIEW);
+		mainView.addTab(UITexts.get("view.time_series.tab"), timeSeriesController.getView(), Views.TIMESERIESVIEW);
+		mainView.addTab(UITexts.get("view.settings.tab"), settingsController.getView(), Views.SETTINGSVIEW);
 		
 		mainView.setToolbar(toolbarController.getView());
 		
@@ -223,7 +222,7 @@ public class MainController {
 	public void on(ExportTextsEvent e) {
 		try {
 			List<Locale> localeList = daxploreFile.getTextReferenceManager().getAllLocales();
-			ExportDialogResult fileLocaleUsedTriplet = Dialogs.showExportDialog(preferences, texts, mainWindow, localeList);
+			ExportDialogResult fileLocaleUsedTriplet = Dialogs.showExportDialog(preferences, mainWindow, localeList);
 			if(fileLocaleUsedTriplet == null) {
 				return;
 			}
@@ -267,7 +266,7 @@ public class MainController {
 	
 	@Subscribe
 	public void on(ImportSpssEvent e) {
-		DaxploreWizard wizard = DaxploreWizard.importSpssWizard(mainWindow, eventBus, texts, preferences, daxploreFile);
+		DaxploreWizard wizard = DaxploreWizard.importSpssWizard(mainWindow, eventBus, preferences, daxploreFile);
 		wizard.show();
 		eventBus.post(new DaxploreFileUpdateEvent(daxploreFile));
 	}
@@ -276,7 +275,7 @@ public class MainController {
 	public void on(ImportTextsEvent e) {
 		try {
 			List<Locale> localeList = GuiSettings.availableLocales();
-			ImportTextsDialogResult fileLocalePair = Dialogs.showImportTextsDialog(preferences, texts, mainWindow, localeList);
+			ImportTextsDialogResult fileLocalePair = Dialogs.showImportTextsDialog(preferences, mainWindow, localeList);
 			
 			if(fileLocalePair == null) {
 				return;
@@ -316,7 +315,7 @@ public class MainController {
 	@Subscribe
 	public void on(EditQuestionEvent e) {
 		try {
-			VariableController vc = new VariableController(eventBus, texts, daxploreFile, e.getMetaQuestion());
+			VariableController vc = new VariableController(eventBus, daxploreFile, e.getMetaQuestion());
 			JDialog dialog = vc.getDialog();
 			dialog.setSize(800, 800);
 			dialog.setLocationRelativeTo(mainWindow);
@@ -345,14 +344,14 @@ public class MainController {
 				JLabelSelectable message = new JLabelSelectable(e.getUserMessage());
 				JOptionPane.showMessageDialog(mainWindow, message);
 			} else {
-				Object[] options = {texts.get("dialog.error.continue"), texts.get("dialog.error.show_debug")};
+				Object[] options = {UITexts.get("dialog.error.continue"), UITexts.get("dialog.error.show_debug")};
 				JLabelSelectable message = new JLabelSelectable(
-						texts.format("dialog.error.message", e.getUserMessage(), e.getCause().getLocalizedMessage().replace("\n", "<br>")));
+						UITexts.format("dialog.error.message", e.getUserMessage(), e.getCause().getLocalizedMessage().replace("\n", "<br>")));
 				Logger.getGlobal().log(Level.SEVERE, e.getUserMessage());
 				e.getCause().printStackTrace();
 				int answer = JOptionPane.showOptionDialog(mainWindow,
 						message,
-						texts.get("dialog.error.title"),
+						UITexts.get("dialog.error.title"),
 				        JOptionPane.DEFAULT_OPTION,
 				        JOptionPane.ERROR_MESSAGE,
 				        null,
@@ -368,7 +367,7 @@ public class MainController {
 					debugMessage.add(stacktraceScrollPane, BorderLayout.CENTER);
 					JOptionPane.showMessageDialog(mainWindow, 
 							debugMessage, 
-							texts.get("dialog.error.debug_title"),
+							UITexts.get("dialog.error.debug_title"),
 							JOptionPane.PLAIN_MESSAGE);
 				}
 			}
@@ -394,7 +393,7 @@ public class MainController {
 				debugMessage.add(stacktraceScrollPane, BorderLayout.CENTER);
 				JOptionPane.showMessageDialog(mainWindow, 
 						debugMessage, 
-						texts.get("dialog.info.info_title"),
+						UITexts.get("dialog.info.info_title"),
 						JOptionPane.PLAIN_MESSAGE);
 			}
 		} catch (Exception ex) {
@@ -424,12 +423,12 @@ public class MainController {
 				}
 				mainWindow.dispose();
 			} else {
-				Object[] options = {texts.get("dialog.quit.save_and_quit"),
-						texts.get("dialog.quit.discard_and_quit"),
-						texts.get("dialog.quit.do_not_quit")};
+				Object[] options = {UITexts.get("dialog.quit.save_and_quit"),
+						UITexts.get("dialog.quit.discard_and_quit"),
+						UITexts.get("dialog.quit.do_not_quit")};
 				int choice = JOptionPane.showOptionDialog(mainWindow,
-						texts.get("dialog.quit.question"),
-						texts.get("dialog.quit.title"),
+						UITexts.get("dialog.quit.question"),
+						UITexts.get("dialog.quit.title"),
 						JOptionPane.YES_NO_CANCEL_OPTION,
 						JOptionPane.QUESTION_MESSAGE,
 						null,
@@ -486,7 +485,7 @@ public class MainController {
 				return;
 			}
 			if(exportTo.exists()) {
-				if(Dialogs.confirmOverwrite(mainWindow, texts, exportTo.getName())) {
+				if(Dialogs.confirmOverwrite(mainWindow, exportTo.getName())) {
 					exportTo.delete();
 				} else {
 					return;

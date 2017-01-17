@@ -44,7 +44,7 @@ import org.daxplore.producer.daxplorelib.DaxploreException;
 import org.daxplore.producer.daxplorelib.DaxploreFile;
 import org.daxplore.producer.gui.event.DaxploreFileUpdateEvent;
 import org.daxplore.producer.gui.event.InfoMessageEvent;
-import org.daxplore.producer.gui.resources.GuiTexts;
+import org.daxplore.producer.gui.resources.UITexts;
 import org.daxplore.producer.gui.utility.DisplayCharset;
 import org.daxplore.producer.gui.utility.DisplayLocale;
 import org.daxplore.producer.tools.CharsetTest;
@@ -71,12 +71,12 @@ public class DaxploreWizard extends Wizard {
 		
 		@Override
 		public String getName() {
-			return texts.get("wizard.createfile.name");
+			return UITexts.get("wizard.createfile.name");
 		}
 
 		@Override
 		public String getDescription() {
-			return texts.get("wizard.createfile.description");
+			return UITexts.get("wizard.createfile.description");
 		}
 
 		@Override
@@ -84,11 +84,11 @@ public class DaxploreWizard extends Wizard {
 			setCanFinish(false);
 			fileNameTextField = new JTextField(30);
 			fileNameTextField.setEditable(false);
-			JButton chooseButton = new JButton(texts.get("wizard.createfile.selectfile"));
+			JButton chooseButton = new JButton(UITexts.get("wizard.createfile.selectfile"));
 			chooseButton.addActionListener(this);
 			add(fileNameTextField);
 			add(chooseButton);
-			setProblem(texts.get("wizard.createfile.nofile"));
+			setProblem(UITexts.get("wizard.createfile.nofile"));
 		}
 
 		@Override
@@ -96,7 +96,7 @@ public class DaxploreWizard extends Wizard {
 			JFileChooser jfc = new JFileChooser(DaxploreWizard.preferences.getWorkingDirectory());
 			
 			FileFilter filter = new FileNameExtensionFilter(
-					texts.get("general.filetype.daxplorefile"), "daxplore");
+					UITexts.get("general.filetype.daxplorefile"), "daxplore");
 			jfc.addChoosableFileFilter(filter);
 			jfc.setFileFilter(filter);
 			
@@ -105,7 +105,7 @@ public class DaxploreWizard extends Wizard {
 			if(returnVal == JFileChooser.APPROVE_OPTION) {
 				preferences.setWorkingDirectory(jfc.getCurrentDirectory());
 				setCanFinish(false);
-				setProblem(texts.get("wizard.createfile.nofile"));
+				setProblem(UITexts.get("wizard.createfile.nofile"));
 				File fileToCreate = jfc.getSelectedFile();
 				
 				String filename = fileToCreate.toString();
@@ -115,7 +115,7 @@ public class DaxploreWizard extends Wizard {
 				}
 				
 				if(fileToCreate.exists()) {
-					if(!Dialogs.confirmOverwrite(this, texts, fileToCreate.getName())) {
+					if(!Dialogs.confirmOverwrite(this, fileToCreate.getName())) {
 						return;
 					}
 				}
@@ -127,12 +127,12 @@ public class DaxploreWizard extends Wizard {
 				}
 				
 				if(fileToCreate.isDirectory()) {
-					setProblem(texts.get("wizard.createfile.directory"));
+					setProblem(UITexts.get("wizard.createfile.directory"));
 					return;
 				}
 				
 				if(!fileToCreate.exists() && !canCreateFile(fileToCreate)) {
-					setProblem(texts.get("wizard.createfile.cantcreate "));
+					setProblem(UITexts.get("wizard.createfile.cantcreate "));
 					return;
 				}
 				
@@ -157,12 +157,12 @@ public class DaxploreWizard extends Wizard {
 		
 		@Override
 		public String getName() {
-			return texts.get("wizard.textimport.name");
+			return UITexts.get("wizard.textimport.name");
 		}
 
 		@Override
 		public String getDescription() {
-			return texts.get("wizard.textimport.description");
+			return UITexts.get("wizard.textimport.description");
 		}
 		
 		@Override
@@ -173,22 +173,22 @@ public class DaxploreWizard extends Wizard {
 			try {
 				hasTexts = SPSSTools.getNonAsciiStrings((File)data.get("spssFile"), Charsets.UTF_8).size() > 0;
 			} catch (DaxploreException e) {
-				setProblem(texts.get("wizard.textimport.badfile"));
+				setProblem(UITexts.get("wizard.textimport.badfile"));
 			}
 			
 			JPanel localePanel = new JPanel(new BorderLayout());
-			localePanel.setBorder(BorderFactory.createTitledBorder(texts.get("wizard.textimport.languageborder")));
+			localePanel.setBorder(BorderFactory.createTitledBorder(UITexts.get("wizard.textimport.languageborder")));
 			JComboBox<DisplayLocale> localeComboBox = new JComboBox<>();
 			
 			if (hasTexts) {
-				localePanel.add(new JLabel(texts.get("wizard.textimport.languageexplain")), BorderLayout.NORTH);
+				localePanel.add(new JLabel(UITexts.get("wizard.textimport.languageexplain")), BorderLayout.NORTH);
 			} else {
-				localePanel.add(new JLabel(texts.get("wizard.textimport.languageexplain.notexts")), BorderLayout.NORTH);
+				localePanel.add(new JLabel(UITexts.get("wizard.textimport.languageexplain.notexts")), BorderLayout.NORTH);
 			}
 			
 			localePanel.add(localeComboBox, BorderLayout.CENTER);
 			//TODO better locale handling
-			localeComboBox.addItem(new DisplayLocale(texts.get("wizard.textimport.selectlanguagebox")));
+			localeComboBox.addItem(new DisplayLocale(UITexts.get("wizard.textimport.selectlanguagebox")));
 			localeComboBox.addItem(new DisplayLocale(new Locale("sv")));
 			localeComboBox.addItem(new DisplayLocale(Locale.ENGLISH));
 			localeComboBox.setActionCommand(TextCommand.LOCALE.toString());
@@ -198,13 +198,13 @@ public class DaxploreWizard extends Wizard {
 			
 			JPanel encodingPanel = new JPanel(new BorderLayout());
 			JPanel encodingPickerPanel = new JPanel(new BorderLayout());
-			JLabel encodingExplain = new JLabel(texts.get("wizard.textimport.encodeexplain"));
+			JLabel encodingExplain = new JLabel(UITexts.get("wizard.textimport.encodeexplain"));
 			encodingPickerPanel.add(encodingExplain, BorderLayout.NORTH);
 			
 			if(hasTexts) {
-				encodingPanel.setBorder(BorderFactory.createTitledBorder(texts.get("wizard.textimport.encodingborder")));
+				encodingPanel.setBorder(BorderFactory.createTitledBorder(UITexts.get("wizard.textimport.encodingborder")));
 			} else {
-				encodingPanel.setBorder(BorderFactory.createTitledBorder(texts.get("wizard.textimport.encodingborder.notexts")));
+				encodingPanel.setBorder(BorderFactory.createTitledBorder(UITexts.get("wizard.textimport.encodingborder.notexts")));
 			}
 			
 			JComboBox<DisplayCharset> encodingComboBox = new JComboBox<>();
@@ -213,7 +213,7 @@ public class DaxploreWizard extends Wizard {
 			if(Charset.isSupported("windows-1252")) {
 				encodingComboBox.addItem(new DisplayCharset(Charset.forName("windows-1252")));
 			}
-			encodingComboBox.addItem(new DisplayCharset(texts.get("wizard.textimport.comboseparator")));
+			encodingComboBox.addItem(new DisplayCharset(UITexts.get("wizard.textimport.comboseparator")));
 			for(Charset charset: Charset.availableCharsets().values()) {
 				if(CharsetTest.charset8bitTest(charset) && CharsetTest.charsetSPSSTest(charset)){
 					encodingComboBox.addItem(new DisplayCharset(charset));
@@ -277,7 +277,7 @@ public class DaxploreWizard extends Wizard {
 						encodingListPanel.validate();
 						validEncoding = true;
 					} catch (DaxploreException e1) {
-						setProblem(texts.get("wizard.textimport.badencoding"));
+						setProblem(UITexts.get("wizard.textimport.badencoding"));
 					}
 				}
 				break;
@@ -290,9 +290,9 @@ public class DaxploreWizard extends Wizard {
 		
 		private void updateWizardProblem() {
 			if(!validLocale) {
-				setProblem(texts.get("wizard.textimport.selectlanguage"));
+				setProblem(UITexts.get("wizard.textimport.selectlanguage"));
 			} else if(!validEncoding) {
-				setProblem(texts.get("wizard.textimport.selectencoding"));
+				setProblem(UITexts.get("wizard.textimport.selectencoding"));
 			} else {
 				setProblem(null);
 			}
@@ -306,12 +306,12 @@ public class DaxploreWizard extends Wizard {
 		
 		@Override
 		public String getName() {
-			return texts.get("wizard.opendata.name");
+			return UITexts.get("wizard.opendata.name");
 		}
 
 		@Override
 		public String getDescription() {
-			return texts.get("wizard.opendata.description");
+			return UITexts.get("wizard.opendata.description");
 		}
 
 		@Override
@@ -320,7 +320,7 @@ public class DaxploreWizard extends Wizard {
 			JPanel fileChoosePanel = new JPanel();
 			fileNameTextField = new JTextField(30);
 			fileNameTextField.setEditable(false);
-			JButton chooseButton = new JButton(texts.get("wizard.opendata.selectfile"));
+			JButton chooseButton = new JButton(UITexts.get("wizard.opendata.selectfile"));
 			chooseButton.addActionListener(this);
 			fileChoosePanel.add(fileNameTextField);
 			fileChoosePanel.add(chooseButton);
@@ -340,7 +340,7 @@ public class DaxploreWizard extends Wizard {
 			JScrollPane scrollPane = new JScrollPane(reviewTable);
 			add(scrollPane, BorderLayout.CENTER);
 			
-			setProblem(texts.get("wizard.opendata.nofile"));
+			setProblem(UITexts.get("wizard.opendata.nofile"));
 		}
 
 		@Override
@@ -348,7 +348,7 @@ public class DaxploreWizard extends Wizard {
 			
 			JFileChooser jfc = new JFileChooser(DaxploreWizard.preferences.getWorkingDirectory());
 			
-			FileFilter filter = new FileNameExtensionFilter(texts.get("wizard.opendata.spssfilter"), "sav");
+			FileFilter filter = new FileNameExtensionFilter(UITexts.get("wizard.opendata.spssfilter"), "sav");
 			jfc.addChoosableFileFilter(filter);
 			jfc.setFileFilter(filter);
 			
@@ -364,11 +364,11 @@ public class DaxploreWizard extends Wizard {
 					fileNameTextField.setText(spssFile.getAbsolutePath());
 				}
 				if(spssFile.isDirectory()) {
-					setProblem(texts.get("wizard.opendata.directory"));
+					setProblem(UITexts.get("wizard.opendata.directory"));
 				} else if(!spssFile.exists()) {
-					setProblem(texts.get("wizard.opendata.filenotexist"));
+					setProblem(UITexts.get("wizard.opendata.filenotexist"));
 				} else if(!spssFile.canRead()) {
-					setProblem(texts.get("wizard.opendata.cantread"));
+					setProblem(UITexts.get("wizard.opendata.cantread"));
 				} else {
 					try (SPSSFile importSPSSFile = new SPSSFile(spssFile, Charsets.UTF_8)) {
 						importSPSSFile.logFlag = false;
@@ -378,7 +378,7 @@ public class DaxploreWizard extends Wizard {
 						reviewTable.setModel(model);
 						
 					} catch (IOException | SPSSFileException e1) {
-						setProblem(texts.get("wizard.opendata.notvalidspss"));
+						setProblem(UITexts.get("wizard.opendata.notvalidspss"));
 						e1.printStackTrace();
 						break;
 					}
@@ -412,9 +412,9 @@ public class DaxploreWizard extends Wizard {
 			
 			if(!problemVars.isEmpty()) {
 				if(problemVars.size() == 1) {
-					setProblem(texts.format("wizard.opendata.illegalvariable", problemVars.get(0)));
+					setProblem(UITexts.format("wizard.opendata.illegalvariable", problemVars.get(0)));
 				} else {
-					setProblem(texts.format("wizard.opendata.illegalvariables", MyTools.join(problemVars, "', '")));
+					setProblem(UITexts.format("wizard.opendata.illegalvariables", MyTools.join(problemVars, "', '")));
 				}
 			}
 			
@@ -428,27 +428,25 @@ public class DaxploreWizard extends Wizard {
 	private boolean createNewWizard;
 	
 	// static variable access for use by the screen subclasses 
-	static GuiTexts texts;
 	static DaxplorePreferences preferences;
 	
-	private DaxploreWizard(JFrame window, EventBus eventBus, GuiTexts texts, DaxplorePreferences preferences, DaxploreFile daxploreFile) {
-		super(new Wizard.Builder(texts.get("wizard.general.title"), OpenSPSSPanel.class, window));
+	private DaxploreWizard(JFrame window, EventBus eventBus, DaxplorePreferences preferences, DaxploreFile daxploreFile) {
+		super(new Wizard.Builder(UITexts.get("wizard.general.title"), OpenSPSSPanel.class, window));
 		this.eventBus = eventBus;
 		this.window = window;
 		this.daxploreFile = daxploreFile;
 		createNewWizard = (daxploreFile == null);
 		data.put("createNew", createNewWizard);
-		DaxploreWizard.texts = texts;
 		DaxploreWizard.preferences = preferences;
 		data.put("preferences", preferences);
 	}
 	
-	public static DaxploreWizard createNewFileWizard(JFrame window, EventBus eventBus, GuiTexts texts, DaxplorePreferences preferences) {
-		return new DaxploreWizard(window, eventBus, texts, preferences, null);
+	public static DaxploreWizard createNewFileWizard(JFrame window, EventBus eventBus, DaxplorePreferences preferences) {
+		return new DaxploreWizard(window, eventBus, preferences, null);
 	}
 	
-	public static DaxploreWizard importSpssWizard(JFrame window, EventBus eventBus, GuiTexts texts, DaxplorePreferences preferences, DaxploreFile daxploreFile) {
-		return new DaxploreWizard(window, eventBus, texts, preferences, daxploreFile);
+	public static DaxploreWizard importSpssWizard(JFrame window, EventBus eventBus, DaxplorePreferences preferences, DaxploreFile daxploreFile) {
+		return new DaxploreWizard(window, eventBus, preferences, daxploreFile);
 	}
 	
 	@Override
@@ -479,7 +477,7 @@ public class DaxploreWizard extends Wizard {
 	public void finish() {
 		try {
 			if (createNewWizard) {
-				DaxploreFile daxploreFile = DaxploreFile.createWithNewFile((File)data.get("daxploreFile"), texts);
+				DaxploreFile daxploreFile = DaxploreFile.createWithNewFile((File)data.get("daxploreFile"));
 				daxploreFile.importSPSS((File)data.get("spssFile"), (Charset)data.get("charset"), (Locale)data.get("locale"));
 				daxploreFile.getAbout().addLocale((Locale)data.get("locale"));
 				daxploreFile.saveAll();

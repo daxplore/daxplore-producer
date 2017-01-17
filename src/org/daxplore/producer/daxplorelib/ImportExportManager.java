@@ -64,7 +64,7 @@ import org.daxplore.producer.daxplorelib.raw.RawMetaQuestion;
 import org.daxplore.producer.daxplorelib.raw.RawMetaQuestion.RawMetaManager.RawMetaImportResult;
 import org.daxplore.producer.daxplorelib.raw.VariableType;
 import org.daxplore.producer.daxplorelib.resources.DaxploreProperties;
-import org.daxplore.producer.gui.resources.GuiTexts;
+import org.daxplore.producer.gui.resources.UITexts;
 import org.daxplore.producer.tools.MyTools;
 import org.daxplore.producer.tools.Pair;
 import org.daxplore.producer.tools.SortedProperties;
@@ -91,8 +91,8 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonPrimitive;
 
 public class ImportExportManager {
+	
 	private DaxploreFile daxploreFile;
-	private GuiTexts texts;
 	
 	private List<TextReference> emptyTextrefs = new LinkedList<>();
 	
@@ -104,9 +104,8 @@ public class ImportExportManager {
 		PROPERTIES, CSV
 	}
 	
-	ImportExportManager(DaxploreFile daxploreFile, GuiTexts texts) {
+	ImportExportManager(DaxploreFile daxploreFile) {
 		this.daxploreFile = daxploreFile;
-		this.texts = texts;
 	}
 	
 	void writeUploadFile(OutputStream output) throws TransformerFactoryConfigurationError, TransformerException, SQLException, DaxploreException, SAXException, IOException, ParserConfigurationException {
@@ -335,11 +334,11 @@ public class ImportExportManager {
 					}
 				}
 				// TODO Communicate to GUI, but not on first import
-				guiMessages.add(texts.get("library.import.removed_variable") + column);
+				guiMessages.add(UITexts.get("library.import.removed_variable") + column);
 			}
 			
 			for (String column : metaImportResult.maintainedColumns) {
-				guiMessages.add(texts.get("library.import.matched_variable") + column);
+				guiMessages.add(UITexts.get("library.import.matched_variable") + column);
 			}
 			
 			for (String column : metaImportResult.addedColumns) {
@@ -384,7 +383,7 @@ public class ImportExportManager {
 						break;
 					}
 					// TODO Communicate to GUI, but not on first import
-					guiMessages.add(texts.get("library.import.added_variable") + column);
+					guiMessages.add(UITexts.get("library.import.added_variable") + column);
 				}
 				
 				TextReference shorttext = daxploreFile.getTextReferenceManager().get(column + "_shorttext");

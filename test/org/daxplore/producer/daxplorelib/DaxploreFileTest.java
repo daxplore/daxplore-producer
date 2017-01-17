@@ -9,7 +9,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.Locale;
 
-import org.daxplore.producer.gui.resources.GuiTexts;
+import org.daxplore.producer.gui.resources.UITexts;
 import org.junit.Test;
 
 public class DaxploreFileTest {
@@ -17,8 +17,7 @@ public class DaxploreFileTest {
 	@Test
 	public void testCreateFile() throws IOException, DaxploreException {
 		File tempFile = File.createTempFile("daxplore-file", ".dax");
-		GuiTexts texts = new GuiTexts(new Locale("en"));
-		try (DaxploreFile file = DaxploreFile.createWithNewFile(tempFile, texts)) {
+		try (DaxploreFile file = DaxploreFile.createWithNewFile(tempFile)) {
 			assertEquals(tempFile, file.getFile());
 		}
 	}

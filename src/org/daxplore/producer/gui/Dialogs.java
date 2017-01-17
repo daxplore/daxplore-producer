@@ -36,16 +36,16 @@ import org.daxplore.producer.daxplorelib.metadata.MetaGroup.MetaGroupManager;
 import org.daxplore.producer.daxplorelib.metadata.MetaQuestion;
 import org.daxplore.producer.daxplorelib.metadata.textreference.TextReference;
 import org.daxplore.producer.daxplorelib.metadata.textreference.TextReferenceManager;
-import org.daxplore.producer.gui.resources.GuiTexts;
+import org.daxplore.producer.gui.resources.UITexts;
 import org.daxplore.producer.gui.utility.DisplayLocale;
 
 public class Dialogs {
 	
-	public static boolean confirmOverwrite(Component parent, GuiTexts texts, String fileName) {
-		String[] options = {texts.get("dialog.options.overwrite"), texts.get("dialog.options.cancel")};
+	public static boolean confirmOverwrite(Component parent, String fileName) {
+		String[] options = {UITexts.get("dialog.options.overwrite"), UITexts.get("dialog.options.cancel")};
 		int answer = JOptionPane.showOptionDialog(parent,
-				texts.format("dialog.overwrite.question", fileName),
-				texts.get("dialog.overwrite.title"),
+				UITexts.format("dialog.overwrite.question", fileName),
+				UITexts.get("dialog.overwrite.title"),
 				JOptionPane.YES_NO_OPTION,
 				JOptionPane.QUESTION_MESSAGE,
 				null,
@@ -55,11 +55,10 @@ public class Dialogs {
 		return answer == 0; // 0 == index of overwrite in array
 	}
 	
-	public static boolean editTextRefDialog(Component parent, GuiTexts texts,
-			List<Locale> locales, TextReference textRef) {
-		JButton[] buttons = getOkCancelOptions(texts);
+	public static boolean editTextRefDialog(Component parent, List<Locale> locales, TextReference textRef) {
+		JButton[] buttons = getOkCancelOptions();
 		
-		DialogsPanels editor = DialogsPanels.textRefEditPanel(texts, buttons[0], locales, textRef, false);
+		DialogsPanels editor = DialogsPanels.textRefEditPanel(buttons[0], locales, textRef, false);
 		int answer = JOptionPane.showOptionDialog(parent,
 				editor,
 				"Edit texts",
@@ -81,11 +80,11 @@ public class Dialogs {
 		return false;
 	}
 	
-	public static boolean editGroupDialog(Component parent, TextReferenceManager textManager, GuiTexts texts, List<Locale> locales, MetaGroup metaGroup) {
+	public static boolean editGroupDialog(Component parent, TextReferenceManager textManager, List<Locale> locales, MetaGroup metaGroup) {
 		TextReference textRef = metaGroup.getTextRef();
-		JButton[] buttons = getOkCancelOptions(texts);
+		JButton[] buttons = getOkCancelOptions();
 		
-		DialogsPanels editor = DialogsPanels.editGroupPanel(texts, buttons[0], locales, textRef);
+		DialogsPanels editor = DialogsPanels.editGroupPanel(buttons[0], locales, textRef);
 		int answer = JOptionPane.showOptionDialog(parent,
 				editor,
 				"Edit group",
@@ -121,11 +120,11 @@ public class Dialogs {
 		return false;
 	}
 	
-	public static MetaGroup createGroupDialog(Component parent, TextReferenceManager textManager, MetaGroupManager metaGroupManager, GuiTexts texts, List<Locale> locales) {
+	public static MetaGroup createGroupDialog(Component parent, TextReferenceManager textManager, MetaGroupManager metaGroupManager, List<Locale> locales) {
 		
-		JButton[] buttons = getOkCancelOptions(texts);
+		JButton[] buttons = getOkCancelOptions();
 
-		DialogsPanels editor = DialogsPanels.createGroupPanel(metaGroupManager, texts, buttons[0], locales);
+		DialogsPanels editor = DialogsPanels.createGroupPanel(metaGroupManager, buttons[0], locales);
 		
 		int answer = JOptionPane.showOptionDialog(parent,
 				editor,
@@ -163,8 +162,8 @@ public class Dialogs {
 	 * Cancel has index 1
 	 * @return a JButton[]
 	 */
-	private static JButton[] getOkCancelOptions(GuiTexts texts) {
-		final JButton okButton = new JButton(texts.get("dialog.options.ok"));
+	private static JButton[] getOkCancelOptions() {
+		final JButton okButton = new JButton(UITexts.get("dialog.options.ok"));
 		okButton.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
@@ -172,7 +171,7 @@ public class Dialogs {
                 pane.setValue(okButton);
 			}
 		});
-		final JButton cancelButton = new JButton(texts.get("dialog.options.cancel"));
+		final JButton cancelButton = new JButton(UITexts.get("dialog.options.cancel"));
 		cancelButton.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
@@ -215,9 +214,9 @@ public class Dialogs {
 		}
 	}
 	
-	public static ImportTextsDialogResult showImportTextsDialog(DaxplorePreferences preferences, GuiTexts texts, Component parent, List<Locale> localeList) {
+	public static ImportTextsDialogResult showImportTextsDialog(DaxplorePreferences preferences, Component parent, List<Locale> localeList) {
 		TextImportPanel importPanel = new TextImportPanel(localeList);
-		JButton[] buttons = getOkCancelOptions(texts);
+		JButton[] buttons = getOkCancelOptions();
 		int returnVal = JOptionPane.showOptionDialog(parent,
 				importPanel,
 				"Import texts",
@@ -244,9 +243,9 @@ public class Dialogs {
 		}
 	}
 	
-	public static ExportDialogResult showExportDialog(DaxplorePreferences preferences, GuiTexts texts, Component parent, List<Locale> localeList) {
+	public static ExportDialogResult showExportDialog(DaxplorePreferences preferences, Component parent, List<Locale> localeList) {
 		TextExportPanel exportPanel = new TextExportPanel(localeList);
-		JButton[] buttons = getOkCancelOptions(texts);
+		JButton[] buttons = getOkCancelOptions();
 		int returnVal = JOptionPane.showOptionDialog(parent,
 				exportPanel,
 				"Export texts",

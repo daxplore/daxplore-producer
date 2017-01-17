@@ -12,19 +12,19 @@ import java.awt.BorderLayout;
 import javax.swing.JPanel;
 import javax.swing.JTabbedPane;
 
-import org.daxplore.producer.gui.resources.GuiTexts;
+import org.daxplore.producer.gui.resources.UITexts;
 
 public class VariableView extends JPanel {
 	
 	JTabbedPane tabPane = new JTabbedPane();
 	
-	public VariableView(GuiTexts texts, TabInfoPanel infoPanel, TabFrequenciesPanel freqPanel, TabMeanPanel meanPanel, TabTextPanel textPanel) {
+	public VariableView(TabInfoPanel infoPanel, TabFrequenciesPanel freqPanel, TabMeanPanel meanPanel, TabTextPanel textPanel) {
 		setLayout(new BorderLayout());
 	
-		tabPane.addTab(texts.get("question_edit.tab.info"), infoPanel);
-		tabPane.addTab(texts.get("question_edit.tab.freq"), freqPanel);
-		tabPane.addTab(texts.get("question_edit.tab.mean"), meanPanel);
-		tabPane.addTab(texts.get("question_edit.tab.text"), textPanel);
+		tabPane.addTab(UITexts.get("question_edit.tab.info"), infoPanel);
+		tabPane.addTab(UITexts.get("question_edit.tab.freq"), freqPanel);
+		tabPane.addTab(UITexts.get("question_edit.tab.mean"), meanPanel);
+		tabPane.addTab(UITexts.get("question_edit.tab.text"), textPanel);
 	
 		this.add(tabPane, BorderLayout.CENTER);
 	}

@@ -14,7 +14,7 @@ import javax.swing.JPanel;
 
 import org.daxplore.producer.daxplorelib.metadata.MetaMean.Direction;
 import org.daxplore.producer.daxplorelib.metadata.MetaQuestion;
-import org.daxplore.producer.gui.resources.GuiTexts;
+import org.daxplore.producer.gui.resources.UITexts;
 import org.daxplore.producer.gui.view.variable.VariableController.QuestionCommand;
 
 public class TabMeanPanel extends JPanel {
@@ -26,18 +26,18 @@ public class TabMeanPanel extends JPanel {
 	private JLabel globalMeanText = new JLabel();
 	private JFormattedTextField globalMean = new JFormattedTextField(NumberFormat.getNumberInstance());
 	
-	public TabMeanPanel(GuiTexts texts, ActionListener actionListener, MetaQuestion metaQuestion) {
+	public TabMeanPanel(ActionListener actionListener, MetaQuestion metaQuestion) {
 		setLayout(new BorderLayout());
 		
 		JPanel topPanel = new JPanel(new GridLayout(0, 1));
 		
-		enableCheckBox.setText(texts.get("question_edit.mean.enable"));
+		enableCheckBox.setText(UITexts.get("question_edit.mean.enable"));
 		enableCheckBox.setActionCommand(QuestionCommand.MEAN_ENABLE.name());
 		enableCheckBox.addActionListener(actionListener);
 		enableCheckBox.setSelected(metaQuestion.useMean());
 		topPanel.add(enableCheckBox);
 		
-		goodDirectionText.setText(texts.get("question_edit.mean.good_direction"));
+		goodDirectionText.setText(UITexts.get("question_edit.mean.good_direction"));
 		topPanel.add(goodDirectionText);
 		
 		goodDirection.setSelectedItem(metaQuestion.getMetaMean().getGoodDirection());
@@ -45,7 +45,7 @@ public class TabMeanPanel extends JPanel {
 		goodDirection.addActionListener(actionListener);
 		topPanel.add(goodDirection);
 
-		useGlobalMean.setText(texts.get("question_edit.mean.use_global_mean"));
+		useGlobalMean.setText(UITexts.get("question_edit.mean.use_global_mean"));
 		useGlobalMean.setActionCommand(QuestionCommand.USE_GLOBAL_MEAN.name());
 		useGlobalMean.addActionListener(actionListener);
 		useGlobalMean.setSelected(metaQuestion.getMetaMean().useMeanReferenceValue());
@@ -64,7 +64,7 @@ public class TabMeanPanel extends JPanel {
 		JPanel textFieldPanel = new JPanel();
 		textFieldPanel.setLayout(new FlowLayout());
         JPanel labelPane = new JPanel(new GridLayout(0,1));
-        globalMeanText.setText(texts.get("question_edit.mean.global_mean"));
+        globalMeanText.setText(UITexts.get("question_edit.mean.global_mean"));
         labelPane.add(globalMeanText);
 
         JPanel fieldPane = new JPanel(new GridLayout(0,1));

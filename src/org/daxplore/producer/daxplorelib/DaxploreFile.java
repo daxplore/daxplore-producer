@@ -45,12 +45,12 @@ import org.daxplore.producer.daxplorelib.raw.RawMetaQuestion;
 import org.daxplore.producer.daxplorelib.raw.RawMetaQuestion.RawMetaManager;
 import org.daxplore.producer.daxplorelib.raw.VariableOptionInfo;
 import org.daxplore.producer.daxplorelib.resources.DaxploreProperties;
-import org.daxplore.producer.gui.resources.GuiTexts;
 import org.xml.sax.SAXException;
 
 import com.google.common.base.Strings;
 
 public class DaxploreFile implements Closeable {
+	
 	private Connection connection;
 	private Settings settings;
 	private About about;
@@ -66,7 +66,7 @@ public class DaxploreFile implements Closeable {
 	private MetaQuestionManager metaQuestionManager;
 	private MetaGroupManager metaGroupManager;
 	
-	public static DaxploreFile createFromExistingFile(File file, GuiTexts texts) throws DaxploreException {
+	public static DaxploreFile createFromExistingFile(File file) throws DaxploreException {
 		try {
 			Class.forName("org.sqlite.JDBC");
 		} catch (ClassNotFoundException e) {
@@ -75,13 +75,13 @@ public class DaxploreFile implements Closeable {
 		
 		try {
 			Connection connection =  DriverManager.getConnection("jdbc:sqlite:" + file.getAbsolutePath());
-			return new DaxploreFile(connection, false, file, texts);
+			return new DaxploreFile(connection, false, file);
 		} catch (SQLException e) {
 			throw new DaxploreException("Not a sqlite file?", e);
 		}
 	}
 	
-	public static DaxploreFile createWithNewFile(File file, GuiTexts texts) throws DaxploreException {
+	public static DaxploreFile createWithNewFile(File file) throws DaxploreException {
 		try {
 			Class.forName("org.sqlite.JDBC");
 		} catch (ClassNotFoundException e) {
@@ -91,19 +91,19 @@ public class DaxploreFile implements Closeable {
 		try {
 			file.delete();
 			Connection connection =  DriverManager.getConnection("jdbc:sqlite:" + file.getAbsolutePath());
-			return new DaxploreFile(connection, true, file, texts);
+			return new DaxploreFile(connection, true, file);
 		} catch (SQLException e) {
 			throw new DaxploreException("Could not create new sqlite database (No write access?)", e);
 		}
 	}
 	
-	private DaxploreFile(Connection connection, boolean createNew, File file, GuiTexts texts) throws DaxploreException {
+	private DaxploreFile(Connection connection, boolean createNew, File file) throws DaxploreException {
 		this.connection = connection;
 		this.file = file;
 		try {
 			settings = new Settings(connection);
 			about = new About(connection, settings, createNew);
-			rawMetaManager = new RawMetaManager(connection, texts);
+			rawMetaManager = new RawMetaManager(connection);
 			rawDataManager = new RawDataManager(connection, rawMetaManager);
 			
 			for(String key : DaxploreProperties.clientSettings) {
@@ -119,7 +119,7 @@ public class DaxploreFile implements Closeable {
 			metaQuestionManager = new MetaQuestionManager(connection, textReferenceManager, metaScaleManager, metaMeanManager, metaTimepointShortManager);
 			metaGroupManager = new MetaGroupManager(connection, textReferenceManager, metaQuestionManager);
 			
-			importExport = new ImportExportManager(this, texts);
+			importExport = new ImportExportManager(this);
 		} catch (SQLException e) {
 			throw new DaxploreException("Failed to construct DaxploreFile", e);
 		}

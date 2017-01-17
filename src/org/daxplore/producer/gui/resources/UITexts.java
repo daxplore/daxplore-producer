@@ -12,6 +12,7 @@ import java.util.Locale;
 import java.util.ResourceBundle;
 
 import org.daxplore.producer.daxplorelib.resources.DefaultPresenterTexts;
+import org.daxplore.producer.gui.GuiSettings;
 import org.daxplore.producer.tools.MyTools;
 
 /**
@@ -23,19 +24,31 @@ import org.daxplore.producer.tools.MyTools;
  * 
  * <p>Same as {@link DefaultPresenterTexts}.</p>
  */
-public class GuiTexts {
+public class UITexts {
+	
+	private static UITexts texts;
+	
 	private ResourceBundle textBundle;
 	
-	public GuiTexts(Locale locale) {
-		textBundle = ResourceBundle.getBundle("org.daxplore.producer.gui.resources.GuiTexts", locale, this.getClass().getClassLoader());
+	static {
+		// set default bundle
+		texts = new UITexts(GuiSettings.getProgramLocale());
+	}
+	
+	private UITexts(Locale locale) {
+		textBundle = ResourceBundle.getBundle("org.daxplore.producer.gui.resources.UITexts", locale, this.getClass().getClassLoader());
+	}
+	
+	public static void setLocale(Locale locale) {
+		texts = new UITexts(locale);
 	}
 	
 	/**
 	 * See {@link ResourceBundle#getString(String)}
 	 */
-	public String get(String key) {
-		if(textBundle.containsKey(key)) {
-			return textBundle.getString(key);
+	public static String get(String key) {
+		if(texts.textBundle.containsKey(key)) {
+			return texts.textBundle.getString(key);
 		}
 		
 		//TODO log missing property?
@@ -43,8 +56,8 @@ public class GuiTexts {
 		return "[" + key + "]";
 	}
 	
-	public boolean contains(String key) {
-		return textBundle.containsKey(key);
+	public static boolean contains(String key) {
+		return texts.textBundle.containsKey(key);
 	}
 	
 	/**
@@ -54,8 +67,8 @@ public class GuiTexts {
 	 * @param arguments the arguments to put into the string
 	 * @return the string for the given key formatted with the arguments
 	 */
-	public String format(String key, Object... arguments) {
-		if(textBundle.containsKey(key)) {
+	public static String format(String key, Object... arguments) {
+		if(texts.textBundle.containsKey(key)) {
 			return MessageFormat.format(get(key), arguments);
 		}
 		

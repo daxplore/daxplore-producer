@@ -3,7 +3,7 @@ package org.daxplore.producer.daxplorelib.resources;
 import java.util.Locale;
 import java.util.ResourceBundle;
 
-import org.daxplore.producer.gui.resources.GuiTexts;
+import org.daxplore.producer.gui.resources.UITexts;
 
 /**
  * A small one-off ResourceBundle wrapper class that reads localized
@@ -12,7 +12,7 @@ import org.daxplore.producer.gui.resources.GuiTexts;
  * <p>Hides unused methods, adds some convenience via Message format and allows for
  * a completely different implementation if we want to switch to a UTF-8 format later.</p>
  * 
- * <p>Copy of {@link GuiTexts}</p>
+ * <p>Copy of {@link UITexts}</p>
  */
 public class DefaultPresenterTexts {
 	private ResourceBundle textBundle;

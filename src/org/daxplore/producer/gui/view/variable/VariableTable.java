@@ -26,7 +26,6 @@ import javax.swing.table.TableCellRenderer;
 
 import org.daxplore.producer.daxplorelib.metadata.textreference.TextReference;
 import org.daxplore.producer.gui.resources.Colors;
-import org.daxplore.producer.gui.resources.GuiTexts;
 import org.daxplore.producer.gui.widget.AbstractWidgetEditor;
 import org.daxplore.producer.gui.widget.AbstractWidgetEditor.InvalidContentException;
 import org.daxplore.producer.gui.widget.TextWidget;
@@ -45,7 +44,7 @@ public class VariableTable extends JXTable {
 	private JLabel cellTextLabel = new JLabel();
 	private boolean enabled = true;
 	
-	public VariableTable(EventBus eventBus, GuiTexts texts, VariableTableModel model) {
+	public VariableTable(EventBus eventBus, VariableTableModel model) {
 		super(model);
 		
 		setSortable(false);
@@ -53,17 +52,17 @@ public class VariableTable extends JXTable {
 		setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
         mouseOverRow = -1;
         
-        textEditor = new TextWidget(eventBus, texts);
-		textRenderer = new TextWidget(eventBus, texts);
+        textEditor = new TextWidget(eventBus);
+		textRenderer = new TextWidget(eventBus);
         
-        cellRenderer = new VariableCellRenderer(eventBus, texts);
+        cellRenderer = new VariableCellRenderer(eventBus);
         setDefaultRenderer(TextReference.class, cellRenderer);
         setDefaultEditor(TextReference.class, cellRenderer);
         setDefaultRenderer(Integer.class, cellRenderer);
         setDefaultEditor(Integer.class, cellRenderer);
         
         //TODO should we have to create a TextWidget here?
-        setRowHeight(new TextWidget(eventBus, texts).getPreferredSize().height);
+        setRowHeight(new TextWidget(eventBus).getPreferredSize().height);
         packAll();
         
         addMouseMotionListener(new MouseMotionAdapter() {
@@ -105,7 +104,7 @@ public class VariableTable extends JXTable {
 		
 		private AbstractWidgetEditor<?> editor;
 		
-		public VariableCellRenderer(EventBus eventBus, GuiTexts texts) {
+		public VariableCellRenderer(EventBus eventBus) {
 			cellTextWrapper.setLayout(new BorderLayout());
 			cellTextWrapper.add(cellTextLabel, BorderLayout.CENTER);
 		}

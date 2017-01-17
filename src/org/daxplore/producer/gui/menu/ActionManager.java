@@ -29,22 +29,23 @@ import org.daxplore.producer.gui.event.EmptyEvents.ImportTextsEvent;
 import org.daxplore.producer.gui.event.EmptyEvents.QuitProgramEvent;
 import org.daxplore.producer.gui.event.EmptyEvents.SaveFileEvent;
 import org.daxplore.producer.gui.event.ErrorMessageEvent;
-import org.daxplore.producer.gui.resources.GuiTexts;
 import org.daxplore.producer.gui.resources.IconResources;
+import org.daxplore.producer.gui.resources.UITexts;
 
 import com.google.common.eventbus.EventBus;
 import com.google.common.eventbus.Subscribe;
 
 public class ActionManager {
+	
 	public final Action ABOUT, BACK, DISCARD_CHANGES, EXPORT_TEXTS, EXPORT_UPLOAD, HELP, IMPORT_SPSS,
 			IMPORT_TEXTS, INFO, NEW, OPEN, QUIT, SAVE, SAVE_AS, SETTINGS;
 	private DaxploreFile daxploreFile;
 	
 	/**
 	 * An {@link Action} class that automatically adds texts and icons
-	 * loaded by {@link GuiTexts} and {@link IconResources}, if available.
+	 * loaded by {@link UITexts} and {@link IconResources}, if available.
 	 * 
-	 * <p>Texts are expected to have they key <b>action.&lt;systemName&gt;.name</b> in {@link GuiTexts}.
+	 * <p>Texts are expected to have they key <b>action.&lt;systemName&gt;.name</b> in {@link UITexts}.
 	 * An action may also have the optional key <b>action.&lt;systemName&gt;.tooltip</b>.</p>
 	 * 
 	 * <p>Both icon images are optional. They are expected to be be .png files named
@@ -52,12 +53,12 @@ public class ActionManager {
 	 */
 	@SuppressWarnings("serial")
 	private abstract static class ResourcedAction extends AbstractAction {
-		public ResourcedAction(GuiTexts texts, String systemName) {
-			super(texts.get("action." + systemName + ".name"));
+		public ResourcedAction(String systemName) {
+			super(UITexts.get("action." + systemName + ".name"));
 			
 			String tooltipKey = "action." + systemName + ".tooltip";
-			if(texts.contains(tooltipKey)) {
-				String tooltip = texts.get(tooltipKey);
+			if(UITexts.contains(tooltipKey)) {
+				String tooltip = UITexts.get(tooltipKey);
 				if(!tooltip.isEmpty()) {
 					putValue(Action.SHORT_DESCRIPTION, tooltip);
 				}
@@ -69,17 +70,17 @@ public class ActionManager {
 	}
 	
 	@SuppressWarnings("serial")
-	public ActionManager(final EventBus eventBus, final GuiTexts texts) {
+	public ActionManager(final EventBus eventBus) {
 		eventBus.register(this);
 		
-		ABOUT = new ResourcedAction(texts, "about") {
+		ABOUT = new ResourcedAction("about") {
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				
 			}
 		};
 		
-		BACK = new ResourcedAction(texts, "back") {
+		BACK = new ResourcedAction("back") {
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				eventBus.post(new HistoryGoBackEvent());
@@ -87,92 +88,92 @@ public class ActionManager {
 		};
 		
 		
-		DISCARD_CHANGES = new ResourcedAction(texts, "discard_changes") {
+		DISCARD_CHANGES = new ResourcedAction("discard_changes") {
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				eventBus.post(new DiscardChangesEvent());
 			}
 		};
 		
-		EXPORT_TEXTS = new ResourcedAction(texts, "export_texts") {
+		EXPORT_TEXTS = new ResourcedAction("export_texts") {
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				eventBus.post(new ExportTextsEvent());
 			}
 		};
 		
-		EXPORT_UPLOAD = new ResourcedAction(texts, "export_upload") {
+		EXPORT_UPLOAD = new ResourcedAction("export_upload") {
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				eventBus.post(new ExportUploadEvent());
 			}
 		};
 		
-		HELP = new ResourcedAction(texts, "help") {
+		HELP = new ResourcedAction("help") {
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				String helpUrlString = texts.get("action.help.url");
+				String helpUrlString = UITexts.get("action.help.url");
 				try {
 					URL helpSite = new URL(helpUrlString);
 					Desktop.getDesktop().browse(helpSite.toURI());
 				} catch (UnsupportedOperationException | IOException | URISyntaxException e1) {
-					String errorMessage = texts.format("action.help.open_error", helpUrlString);
+					String errorMessage = UITexts.format("action.help.open_error", helpUrlString);
 					eventBus.post(new ErrorMessageEvent(errorMessage, e1));
 				}
 			}
 		};
-		HELP.putValue(Action.SHORT_DESCRIPTION, texts.format("action.help.tooltip", texts.get("action.help.url")));
+		HELP.putValue(Action.SHORT_DESCRIPTION, UITexts.format("action.help.tooltip", UITexts.get("action.help.url")));
 		
-		IMPORT_SPSS = new ResourcedAction(texts, "import_spss") {
+		IMPORT_SPSS = new ResourcedAction("import_spss") {
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				eventBus.post(new ImportSpssEvent());
 			}
 		};
 		
-		IMPORT_TEXTS = new ResourcedAction(texts, "import_texts") {
+		IMPORT_TEXTS = new ResourcedAction("import_texts") {
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				eventBus.post(new ImportTextsEvent());
 			}
 		};
 		
-		INFO = new ResourcedAction(texts, "info") {
+		INFO = new ResourcedAction("info") {
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				
 			}
 		};
 		
-		NEW = new ResourcedAction(texts, "new") {
+		NEW = new ResourcedAction("new") {
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				
 			}
 		};
 		
-		OPEN = new ResourcedAction(texts, "open") {
+		OPEN = new ResourcedAction("open") {
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				
 			}
 		};
 		
-		QUIT = new ResourcedAction(texts, "quit") {
+		QUIT = new ResourcedAction("quit") {
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				eventBus.post(new QuitProgramEvent());
 			}
 		};
 		
-		SAVE = new ResourcedAction(texts, "save") {
+		SAVE = new ResourcedAction("save") {
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				eventBus.post(new SaveFileEvent());
 			}
 		};
 		
-		SAVE_AS = new ResourcedAction(texts, "save_as") {
+		SAVE_AS = new ResourcedAction("save_as") {
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				//TODO: temporary hack
@@ -180,7 +181,7 @@ public class ActionManager {
 			}
 		};
 		
-		SETTINGS = new ResourcedAction(texts, "settings") {
+		SETTINGS = new ResourcedAction("settings") {
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				
