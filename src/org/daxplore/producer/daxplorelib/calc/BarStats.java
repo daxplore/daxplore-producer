@@ -62,20 +62,18 @@ public class BarStats {
 	private static class Means {
 		private double[] mean;
 		private Double allmean;
-		private double globalMean;
 		private int[] counts;
 		private int allcount;
 		
-		public Means(double[] mean, double allmean, double globalMean, int[] counts, int allcount) {
+		public Means(double[] mean, double allmean, int[] counts, int allcount) {
 			this.mean = mean;
 			this.allmean = allmean;
-			this.globalMean = globalMean;
 			this.counts = counts;
 			this.allcount = allcount;
 		}
 		
 		public JsonElement toJSONObject() {
-			int decimalPlaces = 2;
+			int decimalPlaces = 2; //TODO turn into producer setting, also used in MetaQuestion
 			JsonObject json = new JsonObject();
 			JsonArray array = new JsonArray();
 			for(Double d : mean) {
@@ -83,10 +81,6 @@ public class BarStats {
 			}
 			json.add("mean", array);
 			json.add("all", new JsonPrimitive((new BigDecimal(allmean)).setScale(decimalPlaces, BigDecimal.ROUND_HALF_UP)));
-			
-			if(!Double.isNaN(globalMean)) {
-				json.add("global", new JsonPrimitive((new BigDecimal(globalMean)).setScale(decimalPlaces, BigDecimal.ROUND_HALF_UP)));
-			}
 			
 			array = new JsonArray();
 			for(int d : counts) {
@@ -110,8 +104,8 @@ public class BarStats {
 		useFrequency = true;
 	}
 
-	void addMeanData(int timeindex, double[] means, double allmean, double globalMean, int[] counts, int allcount) {
-		meanData.put(timeindex, new Means(means, allmean, globalMean, counts, allcount));
+	void addMeanData(int timeindex, double[] means, double allmean, int[] counts, int allcount) {
+		meanData.put(timeindex, new Means(means, allmean, counts, allcount));
 		useMean = true;
 	}
 	
@@ -160,7 +154,6 @@ public class BarStats {
 		{
 		"mean":[1.72, 1.65, 1.56, 1.17, 5.14],
 		"all":1.96,
-		"global": 1.94,
 		"count":[1111,380,250,93,90],
 		"allcount":2331
 		}

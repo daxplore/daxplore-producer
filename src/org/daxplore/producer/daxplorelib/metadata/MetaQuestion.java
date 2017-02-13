@@ -7,6 +7,7 @@
  ******************************************************************************/
 package org.daxplore.producer.daxplorelib.metadata;
 
+import java.math.BigDecimal;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -475,6 +476,8 @@ public class MetaQuestion {
 	
 	@SuppressWarnings("rawtypes")
 	public JsonElement toJSONObject(Locale locale) {
+		int decimalPlaces = 2; //TODO turn into producer setting, also used in BarStats
+		
 		JsonObject json = new JsonObject();
 		json.addProperty("column", column);
 		json.addProperty("short", shortTextRef.getWithPlaceholder(locale));
@@ -510,7 +513,12 @@ public class MetaQuestion {
 		
 		json.add("displaytypes", displayTypesAsJSON());
 		
-		json.add("mean_reference", new JsonPrimitive(metaMean.useMeanReferenceValue()));
+		json.add("use_mean_reference", new JsonPrimitive(metaMean.useMeanReferenceValue()));
+
+		double globalMean = metaMean.useMeanReferenceValue() ? getMetaMean().getGlobalMean() : Double.NaN;
+		if(!Double.isNaN(globalMean)) {
+			json.add("mean_reference", new JsonPrimitive((new BigDecimal(globalMean)).setScale(decimalPlaces, BigDecimal.ROUND_HALF_UP)));
+		}
 		
 		Direction goodDirection = metaMean.getGoodDirection();
 		if(goodDirection != Direction.UNDEFINED) {

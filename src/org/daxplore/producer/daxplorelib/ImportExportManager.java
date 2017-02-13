@@ -188,9 +188,9 @@ public class ImportExportManager {
 					break;
 				default:
 					break;
-				
 				}
 			}
+			
 			writeZipString(zout, "settings.json", prettyGson.toJson(settings));
 			
 			for(Locale locale : daxploreFile.getAbout().getLocales()) {

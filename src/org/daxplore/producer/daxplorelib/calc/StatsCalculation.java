@@ -70,8 +70,7 @@ public class StatsCalculation {
 						for(int i=0; i<counts.length; i++){
 							intCounts[i] = (int)counts[i];
 						}
-						double globalMean = question.getMetaMean().useMeanReferenceValue() ? question.getMetaMean().getGlobalMean() : Double.NaN;
-						stats.addMeanData(0, means.get(0), means.get(1)[0], globalMean, intCounts, (int)means.get(3)[0]);
+						stats.addMeanData(0, means.get(0), means.get(1)[0], intCounts, (int)means.get(3)[0]);
 					} catch (DaxploreWarning e) {
 						warnings.add(e.getMessage());
 					}
@@ -107,8 +106,7 @@ public class StatsCalculation {
 							for(int i=0; i<counts.length; i++){
 								intCounts[i] = (int)counts[i];
 							}
-							double globalMean = question.getMetaMean().useMeanReferenceValue() ? question.getMetaMean().getGlobalMean() : Double.NaN;
-							stats.addMeanData(0, means.get(0), means.get(1)[0], globalMean, intCounts, (int)means.get(3)[0]);
+							stats.addMeanData(0, means.get(0), means.get(1)[0], intCounts, (int)means.get(3)[0]);
 						} catch (DaxploreWarning e) {
 							warnings.add(e.getMessage());
 						}
@@ -142,7 +140,7 @@ public class StatsCalculation {
 		
 		int questionColIndex = rawMetaManager.getIndexOfColumn(question.getColumn());
 		int perspectiveColIndex = rawMetaManager.getIndexOfColumn(perspective.getColumn());
-		int rawTimePointIndex = rawMetaManager.getIndexOfColumn(about.getTimeSeriesShortColumn());
+		int rawTimePointIndex = timepoint == null ? -1 : rawMetaManager.getIndexOfColumn(about.getTimeSeriesShortColumn());
 		
 		MetaScale perspectiveScale = perspective.getScale();
 		Object[][] rawdataTable = rawDataManager.getDataTable();
@@ -196,7 +194,7 @@ public class StatsCalculation {
 		
 		int questionColIndex = rawMetaManager.getIndexOfColumn(question.getColumn());
 		int perspectiveColIndex = rawMetaManager.getIndexOfColumn(perspective.getColumn());
-		int rawTimePointIndex = rawMetaManager.getIndexOfColumn(about.getTimeSeriesShortColumn());
+		int rawTimePointIndex = timepoint == null ? -1 : rawMetaManager.getIndexOfColumn(about.getTimeSeriesShortColumn());
 		
 		MetaScale questionScale = question.getScale();
 		MetaScale perspectiveScale = perspective.getScale();
@@ -238,7 +236,7 @@ public class StatsCalculation {
 		MetaScale scale = question.getScale();
 		
 		int questionColIndex = rawMetaManager.getIndexOfColumn(question.getColumn());
-		int rawTimePointIndex = rawMetaManager.getIndexOfColumn(about.getTimeSeriesShortColumn());
+		int rawTimePointIndex = timepoint == null ? -1 : rawMetaManager.getIndexOfColumn(about.getTimeSeriesShortColumn());
 		
 		Object[][] rawdataTable = rawDataManager.getDataTable();
 		
