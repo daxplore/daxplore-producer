@@ -105,7 +105,7 @@ public class Settings {
 	private Object getAndLoad(String key) {
 		if(settingsMap.containsKey(key)) {
 			return settingsMap.get(key);
-		} else {
+		} else if (!toBeRemoved.contains(key)) {
 			try (
 				PreparedStatement getStmt = connection.prepareStatement("SELECT datatype, val FROM settings WHERE key = ?")
 			){
@@ -138,8 +138,8 @@ public class Settings {
 				// couldn't find a value or valid value, treat it as if it's an empty hashmap and return null
 				return null;
 			}
-			return null;
 		}
+		return null;
 	}
 	
 	public SettingsType getType(String key) throws DaxploreException {
@@ -181,6 +181,7 @@ public class Settings {
 	}
 	
 	public void putSetting(String key, Object value) {
+		getAndLoad(key);
 		boolean isindb = (settingsMap.containsKey(key) && !toBeAdded.contains(key)) || toBeRemoved.contains(key); 
 		if(isindb) {
 			toBeUpdated.add(key);
@@ -192,6 +193,7 @@ public class Settings {
 	}
 	
 	public void removeSetting(String key) {
+		getAndLoad(key);
 		boolean isindb = (settingsMap.containsKey(key) && !toBeAdded.contains(key));
 		if(isindb) {
 			toBeRemoved.add(key);
