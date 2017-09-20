@@ -21,7 +21,7 @@ import org.daxplore.producer.gui.resources.UITexts;
 import com.google.common.eventbus.EventBus;
 import com.google.common.eventbus.Subscribe;
 
-public class SettingsController implements ActionListener{
+public class SettingsController implements ActionListener {
 
 	private MetaQuestionManager metaQuestionManager;
 	private SettingsView settingsView;
@@ -98,7 +98,7 @@ public class SettingsController implements ActionListener{
 			SettingsTableModel model = new SettingsTableModel(settings);
 			
 			Map<String, Boolean> boolSettings = new LinkedHashMap<>();
-			for(String key: DaxploreProperties.clientSettings) {
+			for(String key : DaxploreProperties.clientSettings) {
 			//	boolSettings.put(key, settings.getBool(key));
 			}
 			settingsView.build(boolSettings, model);

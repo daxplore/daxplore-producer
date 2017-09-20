@@ -222,7 +222,7 @@ public class MetaMean {
 	}
 		
 	public boolean isExcluded(Object value) {
-		if(value != null && value instanceof Double && !Double.isNaN((Double)value)) {
+		if (value instanceof Double) {
 			return excludedValues.contains(value);
 		}
 		return true;
@@ -230,6 +230,14 @@ public class MetaMean {
 	
 	public Set<Double> getExcludedValues() {
 		return ImmutableSet.copyOf(excludedValues);
+	}
+
+	public void setExcludedValue(double key, boolean checked) {
+		if (checked) {
+			modified |= excludedValues.remove(key);
+		} else {
+			modified |= excludedValues.add(key);
+		}
 	}
 	
 	public void setExcludedValues(Collection<Double> values) {
@@ -272,5 +280,4 @@ public class MetaMean {
 		this.goodDirection = goodDrection;
 		modified = true;
 	}
-	
 }

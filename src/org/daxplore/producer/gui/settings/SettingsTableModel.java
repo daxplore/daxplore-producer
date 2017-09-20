@@ -7,7 +7,7 @@ import org.daxplore.producer.daxplorelib.resources.DaxploreProperties;
 import org.daxplore.producer.gui.resources.UITexts;
 
 public class SettingsTableModel extends DefaultTableModel{
-	Settings settings;
+	private Settings settings;
 	
 	public SettingsTableModel(Settings settings) {
 		this.settings = settings;

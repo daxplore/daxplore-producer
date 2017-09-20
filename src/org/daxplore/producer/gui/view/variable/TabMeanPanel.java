@@ -11,6 +11,7 @@ import javax.swing.JComboBox;
 import javax.swing.JFormattedTextField;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
+import javax.swing.JScrollPane;
 
 import org.daxplore.producer.daxplorelib.metadata.MetaMean.Direction;
 import org.daxplore.producer.daxplorelib.metadata.MetaQuestion;
@@ -19,23 +20,33 @@ import org.daxplore.producer.gui.view.variable.VariableController.QuestionComman
 
 public class TabMeanPanel extends JPanel {
 	
-	private JCheckBox enableCheckBox = new JCheckBox();
+	private JCheckBox lineCheckBox = new JCheckBox();
+	private JCheckBox meanCheckBox = new JCheckBox();
 	private JLabel goodDirectionText = new JLabel();
 	private JComboBox<Direction> goodDirection = new JComboBox<>(Direction.values());
 	private JCheckBox useGlobalMean = new JCheckBox();
 	private JLabel globalMeanText = new JLabel();
 	private JFormattedTextField globalMean = new JFormattedTextField(NumberFormat.getNumberInstance());
+	private JLabel excludedHeader = new JLabel();
+	private MeanExcludedTable meanExcludedTable;
 	
-	public TabMeanPanel(ActionListener actionListener, MetaQuestion metaQuestion) {
-		setLayout(new BorderLayout());
+	public TabMeanPanel(ActionListener actionListener, MetaQuestion metaQuestion, MeanExcludedTable meanExcludedTable) {
+		this.meanExcludedTable = meanExcludedTable;
 		
+		setLayout(new BorderLayout());
 		JPanel topPanel = new JPanel(new GridLayout(0, 1));
 		
-		enableCheckBox.setText(UITexts.get("question_edit.mean.enable"));
-		enableCheckBox.setActionCommand(QuestionCommand.MEAN_ENABLE.name());
-		enableCheckBox.addActionListener(actionListener);
-		enableCheckBox.setSelected(metaQuestion.useMean());
-		topPanel.add(enableCheckBox);
+		lineCheckBox.setText(UITexts.get("question_edit.line.enable"));
+		lineCheckBox.setActionCommand(QuestionCommand.LINE_ENABLE.name());
+		lineCheckBox.addActionListener(actionListener);
+		lineCheckBox.setSelected(metaQuestion.useLine());
+		topPanel.add(lineCheckBox);
+
+		meanCheckBox.setText(UITexts.get("question_edit.mean.enable"));
+		meanCheckBox.setActionCommand(QuestionCommand.MEAN_ENABLE.name());
+		meanCheckBox.addActionListener(actionListener);
+		meanCheckBox.setSelected(metaQuestion.useMean());
+		topPanel.add(meanCheckBox);
 		
 		goodDirectionText.setText(UITexts.get("question_edit.mean.good_direction"));
 		topPanel.add(goodDirectionText);
@@ -75,20 +86,36 @@ public class TabMeanPanel extends JPanel {
         
         add(textFieldPanel, BorderLayout.WEST);
         
+        JScrollPane scrollPane = new JScrollPane();
+        scrollPane.setViewportView(meanExcludedTable);
+        
+        JPanel excludedSection = new JPanel(new BorderLayout());
+        excludedHeader = new JLabel(UITexts.get("question_edit.mean.excluded_header"));
+        excludedSection.add(excludedHeader, BorderLayout.WEST);
+        excludedSection.add(scrollPane, BorderLayout.SOUTH);
+        add(excludedSection, BorderLayout.SOUTH);
+
         setUseGlobalMean(isGlobalMeanUsed());
         setEnabled(isMeanActivated());
 	}
 	
+	public boolean isLineActivated() {
+		return lineCheckBox.isSelected();
+	}
+
 	public boolean isMeanActivated() {
-		return enableCheckBox.isSelected();
+		return meanCheckBox.isSelected();
 	}
 	
-	public void setEnabled(boolean enabled) {
+	public void updateEnabled() {
+		boolean enabled = isMeanActivated();
 		goodDirectionText.setEnabled(enabled);
 		goodDirection.setEnabled(enabled);
 		useGlobalMean.setEnabled(enabled);
 		globalMeanText.setEnabled(enabled && isGlobalMeanUsed());
 		globalMean.setEnabled(enabled && isGlobalMeanUsed());
+		excludedHeader.setEnabled(enabled || isLineActivated());
+		meanExcludedTable.setEnabled(enabled || isLineActivated());
 	}
 	
 	public boolean isGlobalMeanUsed() {

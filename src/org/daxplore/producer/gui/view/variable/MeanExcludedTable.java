@@ -1,4 +1,4 @@
-package org.daxplore.producer.gui.settings;
+package org.daxplore.producer.gui.view.variable;
 
 import java.awt.Color;
 import java.awt.Component;
@@ -8,45 +8,43 @@ import java.awt.event.MouseEvent;
 import java.awt.event.MouseMotionAdapter;
 
 import javax.swing.ListSelectionModel;
-import javax.swing.table.AbstractTableModel;
 import javax.swing.table.TableCellEditor;
 import javax.swing.table.TableCellRenderer;
 
 import org.daxplore.producer.gui.resources.Colors;
 import org.jdesktop.swingx.JXTable;
 
-
-public class SettingsTable extends JXTable {
+public class MeanExcludedTable extends JXTable {
 
 	protected int mouseOver;
 	@SuppressWarnings("rawtypes")
 	private Class editingClass;
 	
-	public SettingsTable(final AbstractTableModel model) {
+	public MeanExcludedTable(MeanExcludedTableModel model) {
 		super(model);
 				
+		setSortable(false);
 		setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 		mouseOver = -1;
 		
-       addMouseMotionListener(new MouseMotionAdapter() {
-            @Override
+		addMouseMotionListener(new MouseMotionAdapter() {
+			@Override
 			public void mouseMoved(MouseEvent e) {
-            	mouseOver = rowAtPoint(e.getPoint());
-                repaint();
-            }
-        });
+				mouseOver = rowAtPoint(e.getPoint());
+				repaint();
+			}
+		});
 
-        addMouseListener(new MouseAdapter() {
-        	/**
-        	 * Stop showing mouse over highlighting when mouse exits
-        	 */
-            @Override
+		addMouseListener(new MouseAdapter() {
+			/**
+			 * Stop showing mouse over highlighting when mouse exits
+			 */
+			@Override
 			public void mouseExited(MouseEvent e) {
-                mouseOver = -1;
-                repaint();
-            }
-        });
-        
+				mouseOver = -1;
+				repaint();
+			}
+		});
 	}
 	
 	@Override

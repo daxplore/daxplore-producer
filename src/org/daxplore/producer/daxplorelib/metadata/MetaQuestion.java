@@ -67,7 +67,7 @@ public class MetaQuestion {
 			"questtimerel");
 	
 	private enum DisplayTypes {
-		FREQ, MEAN
+		FREQ, LINE, MEAN
 	}
 	
 	public static class MetaQuestionManager {
@@ -114,7 +114,7 @@ public class MetaQuestion {
 			VariableType type;
 			TextReference fullTextRef, shortTextRef, descriptionTextRef;
 			MetaScale<?> scale = null;
-			boolean useFrequencies, useMean;
+			boolean useFrequencies, useLine, useMean;
 			try (PreparedStatement stmt = connection.prepareStatement("SELECT * FROM metaquestion WHERE id = ?")) {
 				stmt.setInt(1, id);
 				try(ResultSet rs = stmt.executeQuery()) {
@@ -136,6 +136,7 @@ public class MetaQuestion {
 					Gson gson = new Gson();
 					Set<String> displayTypes = Sets.newHashSet(gson.fromJson(displayTypesJson, String[].class));
 					useFrequencies = displayTypes.contains(DisplayTypes.FREQ.name());
+					useLine = displayTypes.contains(DisplayTypes.LINE.name());
 					useMean = displayTypes.contains(DisplayTypes.MEAN.name());
 					
 					scale = metascaleManager.get(id, type);
@@ -153,7 +154,8 @@ public class MetaQuestion {
 					
 				}
 			}
-			MetaQuestion mq = new MetaQuestion(id, column, type, shortTextRef, fullTextRef, descriptionTextRef, scale, useFrequencies, metaMean, useMean, timepoints);
+			MetaQuestion mq = new MetaQuestion(id, column, type, shortTextRef, fullTextRef,
+					descriptionTextRef, scale, useFrequencies, useLine, metaMean, useMean, timepoints);
 			questionMap.put(id, mq);
 			return mq;
 		}
@@ -192,7 +194,7 @@ public class MetaQuestion {
 			
 			MetaMean metaMean = metaMeanManager.create(id, meanExcludedValues, false, globalMean, Direction.UNDEFINED);
 			
-			MetaQuestion mq = new MetaQuestion(id, column, type, shortTextRef, fullTextRef, descriptionTextRef, scale, true, metaMean, useMean, timepoints);
+			MetaQuestion mq = new MetaQuestion(id, column, type, shortTextRef, fullTextRef, descriptionTextRef, scale, true, false, metaMean, useMean, timepoints);
 			toBeAdded.add(mq);
 			questionMap.put(id, mq);
 			return mq;
@@ -349,7 +351,7 @@ public class MetaQuestion {
 	private String column;
 	private VariableType type;
 	private TextReference shortTextRef, fullTextRef, descriptionTextRef;
-	private boolean useFrequencies, useMean;
+	private boolean useFrequencies, useLine, useMean;
 	private MetaScale<?> scale;
 	private MetaMean metaMean;
 	private List<MetaTimepointShort> timepoints;
@@ -358,7 +360,7 @@ public class MetaQuestion {
 	private boolean timemodified = false;
 	
 	private MetaQuestion(int id, String column, VariableType type, TextReference shortTextRef, TextReference fullTextRef,
-			TextReference descriptionTextRef,	MetaScale<?> scale, boolean useFrequencies,
+			TextReference descriptionTextRef,	MetaScale<?> scale, boolean useFrequencies, boolean useLine,
 			MetaMean metaMean, boolean useMean, List<MetaTimepointShort> timepoints) throws DaxploreException {
 		this.id = id;
 		this.column = column;
@@ -367,6 +369,7 @@ public class MetaQuestion {
 		this.fullTextRef = fullTextRef;
 		this.descriptionTextRef = descriptionTextRef;
 		this.useFrequencies = useFrequencies;
+		this.useLine = useLine;
 		this.useMean = useMean;
 		this.metaMean = metaMean;
 		this.timepoints = timepoints;
@@ -443,8 +446,21 @@ public class MetaQuestion {
 	}
 
 	public void setUseFrequencies(boolean useFrequencies) {
-		this.useFrequencies = useFrequencies;
-		modified = true;
+		if (this.useFrequencies != useFrequencies) {
+			this.useFrequencies = useFrequencies;
+			modified = true;
+		}
+	}
+	
+	public boolean useLine() {
+		return useLine;
+	}
+	
+	public void setUseLine(boolean useLine) {
+		if(this.useLine != useLine) {
+			this.useLine = useLine;
+			modified = true;
+		}
 	}
 	
 	public boolean useMean() {
@@ -532,6 +548,9 @@ public class MetaQuestion {
 		JsonArray displayTypesJson = new JsonArray();
 		if (useFrequencies) {
 			displayTypesJson.add(new JsonPrimitive(DisplayTypes.FREQ.name()));
+		}
+		if (useLine) {
+			displayTypesJson.add(new JsonPrimitive(DisplayTypes.LINE.name()));
 		}
 		if (useMean) {
 			displayTypesJson.add(new JsonPrimitive(DisplayTypes.MEAN.name()));

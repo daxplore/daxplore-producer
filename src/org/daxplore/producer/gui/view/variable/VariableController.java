@@ -15,6 +15,7 @@ import java.util.List;
 import java.util.Map.Entry;
 import java.util.TreeMap;
 
+import javax.swing.JCheckBox;
 import javax.swing.JDialog;
 import javax.swing.WindowConstants;
 import javax.swing.event.TableModelEvent;
@@ -37,13 +38,15 @@ public class VariableController implements TableModelListener, ActionListener {
 	
 	enum QuestionCommand {
 		FREQ_ENABLE, FREQ_ADD, FREQ_REMOVE, FREQ_UP, FREQ_DOWN, FREQ_INVERT,
-		MEAN_ENABLE, MEAN_DIRECTION, GLOBAL_MEAN_CHANGE, USE_GLOBAL_MEAN
+		LINE_ENABLE, MEAN_ENABLE, MEAN_DIRECTION, GLOBAL_MEAN_CHANGE, USE_GLOBAL_MEAN,
 	}
 	
 	private VariableView view;
 	private MetaQuestion mq;
 	private RawVariableTableModel rawModel;
 	private RawVariableTable rawTable;
+	private MeanExcludedTableModel meanExcludedModel;
+	private MeanExcludedTable meanExcludedTable;
 	private VariableTableModel variableModel;
 	private VariableTable variableTable;
 	private List<VariableOptionInfo> rawVariableList;
@@ -73,6 +76,10 @@ public class VariableController implements TableModelListener, ActionListener {
 		rawTable = new RawVariableTable(eventBus, rawModel);
 		rawModel.addTableModelListener(this);
 		
+		meanExcludedModel = new MeanExcludedTableModel(rawMetaQuestion, rawVariableList, metaQuestion.getMetaMean());
+		meanExcludedTable = new MeanExcludedTable(meanExcludedModel);
+		meanExcludedModel.addTableModelListener(this);
+		
 		TimePointTableModel timePointTableModel = new TimePointTableModel(
 				daxploreFile.getMetaTimepointShortManager(),
 				daxploreFile.getRawDataManager(),
@@ -83,7 +90,7 @@ public class VariableController implements TableModelListener, ActionListener {
 		
 		infoPanel = new TabInfoPanel(eventBus, metaQuestion, timePointTable);
 		freqPanel = new TabFrequenciesPanel(this, metaQuestion, rawTable, variableTable);
-		meanPanel = new TabMeanPanel(this, metaQuestion);
+		meanPanel = new TabMeanPanel(this, metaQuestion, meanExcludedTable);
 		textPanel = new TabTextPanel();
 		
 		view = new VariableView(infoPanel, freqPanel, meanPanel, textPanel);
@@ -139,137 +146,149 @@ public class VariableController implements TableModelListener, ActionListener {
 	@SuppressWarnings("unchecked")
 	@Override
 	public void actionPerformed(ActionEvent e) {
-		switch(QuestionCommand.valueOf(e.getActionCommand())) {
-		case FREQ_ENABLE:
-			mq.setUseFrequencies(freqPanel.isFreqActivated());
-			freqPanel.setEnabled(freqPanel.isFreqActivated());
-			break;
-		case FREQ_ADD:
-			int refIndex = mq.getScale().getLowestUnusedTextrefIndex();
-			try {
-				TextReference textRef = daxploreFile.getTextReferenceManager().get(mq.getColumn() + "_option_" + refIndex);
+		if (e.getActionCommand().startsWith("mean-option-")) {
+			String key = e.getActionCommand().replaceFirst("mean-option-", "");
+			JCheckBox box = (JCheckBox)e.getSource();
+			boolean checked = box.isSelected();
+			mq.getMetaMean().setExcludedValue(Double.parseDouble(key), checked);
+		} else {
+			switch(QuestionCommand.valueOf(e.getActionCommand())) {
+			case FREQ_ENABLE:
+				mq.setUseFrequencies(freqPanel.isFreqActivated());
+				freqPanel.setEnabled(freqPanel.isFreqActivated());
+				break;
+			case FREQ_ADD:
+				int refIndex = mq.getScale().getLowestUnusedTextrefIndex();
+				try {
+					TextReference textRef = daxploreFile.getTextReferenceManager().get(mq.getColumn() + "_option_" + refIndex);
+					switch (mq.getType()) {
+					case NUMERIC:
+						MetaScale<Double> msDouble = (MetaScale<Double>) mq.getScale();
+						msDouble.addOption(new Option<Double>(textRef, new HashSet<Double>(), true));
+						break;
+					case TEXT:
+						MetaScale<String> msString = (MetaScale<String>) mq.getScale();
+						msString.addOption(new Option<String>(textRef, new HashSet<String>(), true));
+						break;
+					}
+					
+					variableModel.fireTableStructureChanged();
+					variableTable.packAll();
+					rawTable.setAvailableNumbers(variableModel.getAvailebleToNumbers());
+					rawModel.remapFromMetaScale();
+					rawModel.fireTableStructureChanged();
+					rawTable.packAll();
+				} catch (DaxploreException de) {
+					// TODO Auto-generated catch block
+					de.printStackTrace();
+				}
+				break;
+			case FREQ_REMOVE:
+				int[] selectedRows = variableTable.getSelectedRows();
+				variableTable.clearSelection();
+				variableTable.removeEditor();
+	
 				switch (mq.getType()) {
 				case NUMERIC:
 					MetaScale<Double> msDouble = (MetaScale<Double>) mq.getScale();
-					msDouble.addOption(new Option<Double>(textRef, new HashSet<Double>(), true));
+					List<Option<Double>> optionsDouble = msDouble.getOptions();
+					for(int i = selectedRows.length-1; i>=0; i--) {
+						optionsDouble.remove(selectedRows[i]);
+					}
+					msDouble.setOptions(optionsDouble);
 					break;
 				case TEXT:
 					MetaScale<String> msString = (MetaScale<String>) mq.getScale();
-					msString.addOption(new Option<String>(textRef, new HashSet<String>(), true));
+					List<Option<String>> optionsString = msString.getOptions();
+					for(int i = selectedRows.length-1; i>=0; i--) {
+						optionsString.remove(selectedRows[i]);
+					}
+					msString.setOptions(optionsString);
+					break;
+				}
+				
+				rawTable.setAvailableNumbers(variableModel.getAvailebleToNumbers());
+				variableModel.fireTableRowsDeleted(selectedRows[0], selectedRows[0]);
+				variableTable.packAll();
+				rawModel.remapFromMetaScale();
+				rawModel.fireTableStructureChanged();
+				rawTable.packAll();
+				break;
+			case FREQ_UP:
+				selectedRows = variableTable.getSelectedRows();
+				if(selectedRows.length < 1 || selectedRows[0] == 0) break;
+				variableTable.clearSelection();
+				variableTable.removeEditor();
+				for(int i = 0; i < selectedRows.length; i++) {
+					variableModel.moveRow(selectedRows[i], selectedRows[i], selectedRows[i]-1);
+					variableTable.getSelectionModel().addSelectionInterval(selectedRows[i]-1, selectedRows[i]-1);
+				}
+				variableTable.packAll();
+				rawModel.remapFromMetaScale();
+				rawModel.fireTableStructureChanged();
+				rawTable.packAll();
+				break;
+			case FREQ_DOWN:
+				selectedRows = variableTable.getSelectedRows();
+				if(selectedRows.length < 1 || selectedRows[selectedRows.length-1] == variableModel.getRowCount() -1) break;
+				variableTable.clearSelection();
+				variableTable.removeEditor();
+				for(int i = selectedRows.length-1; i >= 0; i--) {
+					//perspectivesTable.changeSelection(selectedRows[i], 1, true, true);
+					variableModel.moveRow(selectedRows[i], selectedRows[i], selectedRows[i]+1);
+					variableTable.getSelectionModel().addSelectionInterval(selectedRows[i]+1, selectedRows[i]+1);
+				}
+				variableTable.packAll();
+				rawModel.remapFromMetaScale();
+				rawModel.fireTableStructureChanged();
+				rawTable.packAll();
+				break;
+			case FREQ_INVERT:
+				switch (mq.getType()) {
+				case NUMERIC:
+					MetaScale<Double> msDouble = (MetaScale<Double>) mq.getScale();
+					msDouble.setOptions(Lists.reverse(msDouble.getOptions()));
+					break;
+				case TEXT:
+					MetaScale<Double> msString = (MetaScale<Double>) mq.getScale();
+					msString.setOptions(Lists.reverse(msString.getOptions()));
 					break;
 				}
 				
 				variableModel.fireTableStructureChanged();
 				variableTable.packAll();
-				rawTable.setAvailableNumbers(variableModel.getAvailebleToNumbers());
 				rawModel.remapFromMetaScale();
 				rawModel.fireTableStructureChanged();
 				rawTable.packAll();
-			} catch (DaxploreException de) {
-				// TODO Auto-generated catch block
-				de.printStackTrace();
-			}
-			break;
-		case FREQ_REMOVE:
-			int[] selectedRows = variableTable.getSelectedRows();
-			variableTable.clearSelection();
-			variableTable.removeEditor();
-
-			switch (mq.getType()) {
-			case NUMERIC:
-				MetaScale<Double> msDouble = (MetaScale<Double>) mq.getScale();
-				List<Option<Double>> optionsDouble = msDouble.getOptions();
-				for(int i = selectedRows.length-1; i>=0; i--) {
-					optionsDouble.remove(selectedRows[i]);
+				break;
+			case LINE_ENABLE:
+				boolean useLine = meanPanel.isLineActivated();
+				mq.setUseLine(useLine);
+				meanPanel.updateEnabled();
+				break;
+			case MEAN_ENABLE:
+				boolean useMean = meanPanel.isMeanActivated();
+				mq.setUseMean(useMean);
+				meanPanel.updateEnabled();
+				break;
+			case MEAN_DIRECTION:
+				Direction direction = meanPanel.getGoodDirection();
+				mq.getMetaMean().setGoodDirection(direction);
+				break;
+			case USE_GLOBAL_MEAN:
+				boolean useGlobalMean = meanPanel.isGlobalMeanUsed();
+				mq.getMetaMean().setMeanReferenceValue(useGlobalMean);
+				meanPanel.setUseGlobalMean(useGlobalMean);
+				break;
+			case GLOBAL_MEAN_CHANGE:
+				double globalMean = meanPanel.getGlobalMean();
+				if(!Double.isNaN(globalMean)) {
+					mq.getMetaMean().setGlobalMean(globalMean);
 				}
-				msDouble.setOptions(optionsDouble);
 				break;
-			case TEXT:
-				MetaScale<String> msString = (MetaScale<String>) mq.getScale();
-				List<Option<String>> optionsString = msString.getOptions();
-				for(int i = selectedRows.length-1; i>=0; i--) {
-					optionsString.remove(selectedRows[i]);
-				}
-				msString.setOptions(optionsString);
-				break;
+			default:
+				throw new AssertionError("Undefined action command: " + e.getActionCommand());
 			}
-			
-			rawTable.setAvailableNumbers(variableModel.getAvailebleToNumbers());
-			variableModel.fireTableRowsDeleted(selectedRows[0], selectedRows[0]);
-			variableTable.packAll();
-			rawModel.remapFromMetaScale();
-			rawModel.fireTableStructureChanged();
-			rawTable.packAll();
-			break;
-		case FREQ_UP:
-			selectedRows = variableTable.getSelectedRows();
-			if(selectedRows.length < 1 || selectedRows[0] == 0) break;
-			variableTable.clearSelection();
-			variableTable.removeEditor();
-			for(int i = 0; i < selectedRows.length; i++) {
-				variableModel.moveRow(selectedRows[i], selectedRows[i], selectedRows[i]-1);
-				variableTable.getSelectionModel().addSelectionInterval(selectedRows[i]-1, selectedRows[i]-1);
-			}
-			variableTable.packAll();
-			rawModel.remapFromMetaScale();
-			rawModel.fireTableStructureChanged();
-			rawTable.packAll();
-			break;
-		case FREQ_DOWN:
-			selectedRows = variableTable.getSelectedRows();
-			if(selectedRows.length < 1 || selectedRows[selectedRows.length-1] == variableModel.getRowCount() -1) break;
-			variableTable.clearSelection();
-			variableTable.removeEditor();
-			for(int i = selectedRows.length-1; i >= 0; i--) {
-				//perspectivesTable.changeSelection(selectedRows[i], 1, true, true);
-				variableModel.moveRow(selectedRows[i], selectedRows[i], selectedRows[i]+1);
-				variableTable.getSelectionModel().addSelectionInterval(selectedRows[i]+1, selectedRows[i]+1);
-			}
-			variableTable.packAll();
-			rawModel.remapFromMetaScale();
-			rawModel.fireTableStructureChanged();
-			rawTable.packAll();
-			break;
-		case FREQ_INVERT:
-			switch (mq.getType()) {
-			case NUMERIC:
-				MetaScale<Double> msDouble = (MetaScale<Double>) mq.getScale();
-				msDouble.setOptions(Lists.reverse(msDouble.getOptions()));
-				break;
-			case TEXT:
-				MetaScale<Double> msString = (MetaScale<Double>) mq.getScale();
-				msString.setOptions(Lists.reverse(msString.getOptions()));
-				break;
-			}
-			
-			variableModel.fireTableStructureChanged();
-			variableTable.packAll();
-			rawModel.remapFromMetaScale();
-			rawModel.fireTableStructureChanged();
-			rawTable.packAll();
-			break;
-		case MEAN_ENABLE:
-			boolean useMean = meanPanel.isMeanActivated();
-			mq.setUseMean(useMean);
-			meanPanel.setEnabled(useMean);
-			break;
-		case MEAN_DIRECTION:
-			Direction direction = meanPanel.getGoodDirection();
-			mq.getMetaMean().setGoodDirection(direction);
-			break;
-		case USE_GLOBAL_MEAN:
-			boolean useGlobalMean = meanPanel.isGlobalMeanUsed();
-			mq.getMetaMean().setMeanReferenceValue(useGlobalMean);
-			meanPanel.setUseGlobalMean(useGlobalMean);
-			break;
-		case GLOBAL_MEAN_CHANGE:
-			double globalMean = meanPanel.getGlobalMean();
-			if(!Double.isNaN(globalMean)) {
-				mq.getMetaMean().setGlobalMean(globalMean);
-			}
-			break;
-		default:
-			throw new AssertionError("Undefined action command: " + e.getActionCommand());
 		}
 	}
 	
