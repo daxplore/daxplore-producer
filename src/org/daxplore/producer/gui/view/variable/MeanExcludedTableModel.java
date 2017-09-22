@@ -35,7 +35,7 @@ public class MeanExcludedTableModel extends DefaultTableModel {
 
 	@Override
 	public int getColumnCount() {
-		return 2;
+		return 4;
 	}
 
 	@Override
@@ -44,6 +44,10 @@ public class MeanExcludedTableModel extends DefaultTableModel {
 		case 0:
 			return "Value";
 		case 1:
+			return "Text";
+		case 2:
+			return "Count";
+		case 3:
 			return "Included";
 		default:
 			throw new AssertionError();
@@ -56,6 +60,10 @@ public class MeanExcludedTableModel extends DefaultTableModel {
 		case 0:
 			return rmq.getQtype().javatype();
 		case 1:
+			return String.class;
+		case 2:
+			return Integer.class;
+		case 3:
 			return Boolean.class;
 		default:
 			throw new AssertionError();
@@ -64,7 +72,7 @@ public class MeanExcludedTableModel extends DefaultTableModel {
 
 	@Override
 	public boolean isCellEditable(int rowIndex, int columnIndex) {
-		return columnIndex == 1 && (variableList.get(rowIndex).getValue() instanceof Double);
+		return columnIndex == 3 && (variableList.get(rowIndex).getValue() instanceof Double);
 	}
 	
 	@Override
@@ -82,6 +90,10 @@ public class MeanExcludedTableModel extends DefaultTableModel {
 		case 0:
 			return opt.getValue();
 		case 1:
+			return opt.getRawText();
+		case 2:
+			return opt.getCount();
+		case 3:
 			if (opt.getValue() instanceof Double) {
 				return !mm.isExcluded((Double)opt.getValue());
 			}

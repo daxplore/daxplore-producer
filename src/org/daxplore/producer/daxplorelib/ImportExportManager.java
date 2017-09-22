@@ -211,8 +211,7 @@ public class ImportExportManager {
 			    
 			    writeZipString(zout, "perspectives.json", prettyGson.toJson(perspectives.toJSONObject()));
 			    
-			    String listViewJSONString = prettyGson.toJson(
-			    		daxploreFile.getMetaGroupManager().getListViewVariablesJSON());
+			    String listViewJSONString = prettyGson.toJson(daxploreFile.getMetaGroupManager().getListViewVariablesJSON());
 			    writeZipString(zout, "listview.json", listViewJSONString);
 			}
 	
@@ -348,27 +347,38 @@ public class ImportExportManager {
 				
 				fulltext.put(rmq.getQtext(), locale);
 				List<MetaScale.Option<?>> scaleOptions = new LinkedList<MetaScale.Option<?>>();
-				Set<Double> meanExcludedValues = null;
+				Set<Double> meanExcludedValues = new HashSet<>();
+				
+				// initially set all values as excluded for mean calculation
+				for (Object value : daxploreFile.getRawDataManager().getColumnValueCount(column).keySet()) {
+					if (value instanceof Double) {
+						meanExcludedValues.add((Double)value);
+					}
+				}
+				
+				boolean meanValueIncluded = false;
 				if(rmq.getValuelabels() != null) {
 					int i = 1;
 					switch(type) {
 					case NUMERIC:
-						for(Map.Entry<Object, String> s: rmq.getValuelabels().entrySet()) {
+						for(Map.Entry<Object, String> s : rmq.getValuelabels().entrySet()) {
 							TextReference ref = daxploreFile.getTextReferenceManager().get(rmq.getColumn() + "_option_" + i);
 							ref.put(s.getValue(), locale);
 							if(s.getKey() instanceof Double) {
 								Collection<Double> vals = new LinkedList<Double>();
 								vals.add((Double)s.getKey());
 								scaleOptions.add(new MetaScale.Option<Double>(ref, vals, true));
+								
+								// if there is a mapping for a value, default to include it in mean calculation
+								meanValueIncluded |= !meanExcludedValues.remove((Double)s.getKey());
 							} else {
 								throw new DaxploreException("Trying to add a non number or string as an option");
 							}
 							i++;
 						}
-						meanExcludedValues = new HashSet<>();
 						break;
 					case TEXT:
-						for(Map.Entry<Object, String> s: rmq.getValuelabels().entrySet()) {
+						for(Map.Entry<Object, String> s : rmq.getValuelabels().entrySet()) {
 							TextReference ref = daxploreFile.getTextReferenceManager().get(rmq.getColumn() + "_option_" + i);
 							ref.put(s.getValue(), locale);
 							if(s.getKey() instanceof String) {
@@ -384,6 +394,10 @@ public class ImportExportManager {
 					}
 					// TODO Communicate to GUI, but not on first import
 					guiMessages.add(UITexts.get("library.import.added_variable") + column);
+				}
+				
+				if (!meanValueIncluded) {
+					meanExcludedValues.clear();
 				}
 				
 				TextReference shorttext = daxploreFile.getTextReferenceManager().get(column + "_shorttext");

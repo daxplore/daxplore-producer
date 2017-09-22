@@ -77,14 +77,14 @@ public class VariableController implements TableModelListener, ActionListener {
 		rawModel.addTableModelListener(this);
 		
 		meanExcludedModel = new MeanExcludedTableModel(rawMetaQuestion, rawVariableList, metaQuestion.getMetaMean());
-		meanExcludedTable = new MeanExcludedTable(meanExcludedModel);
+		meanExcludedTable = new MeanExcludedTable(eventBus, meanExcludedModel);
 		meanExcludedModel.addTableModelListener(this);
 		
 		TimePointTableModel timePointTableModel = new TimePointTableModel(
-				daxploreFile.getMetaTimepointShortManager(),
-				daxploreFile.getRawDataManager(),
-				daxploreFile.getAbout(),
-				metaQuestion);
+			daxploreFile.getMetaTimepointShortManager(),
+			daxploreFile.getRawDataManager(),
+			daxploreFile.getAbout(),
+			metaQuestion);
 		
 		TimePointTable timePointTable = new TimePointTable(eventBus, timePointTableModel);
 		

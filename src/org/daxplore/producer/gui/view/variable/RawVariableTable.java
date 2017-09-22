@@ -266,7 +266,6 @@ public class RawVariableTable extends JXTable {
 			}
 		}
 		
-		@Override
 		public Integer getContent() {
 			return content;
 		}
