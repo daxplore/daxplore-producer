@@ -62,7 +62,7 @@ public class StatsCalculation {
 						warnings.add(e.getMessage());
 					}
 				}
-				if(question.useMean() || question.useLine()) {
+				if(question.useMean()) {
 					try {
 						means = meanCalc(question, perspective, null, lowerLimit);
 						double[] counts = means.get(2);
@@ -89,7 +89,7 @@ public class StatsCalculation {
 				}
 				
 				for(MetaTimepointShort timepoint : commonTimes) {
-					if(question.useFrequencies()) {
+					if (question.useFrequencies() || question.useDichotomizedLine()) {
 						try {
 							crosstabs = freqCalc(question, perspective, timepoint, lowerLimit);
 							frequencies = frequencies(question, timepoint, lowerLimit);
@@ -98,7 +98,7 @@ public class StatsCalculation {
 							warnings.add(e.getMessage());
 						}
 					}
-					if(question.useMean() || question.useLine()) {
+					if(question.useMean()) {
 						try {
 							means = meanCalc(question, perspective, timepoint, lowerLimit);
 							double[] counts = means.get(2);
@@ -256,9 +256,6 @@ public class StatsCalculation {
 		
 		return frequencies;
 	}
-	
-	
-	
 }
 
 

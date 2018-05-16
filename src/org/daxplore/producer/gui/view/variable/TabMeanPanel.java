@@ -20,7 +20,6 @@ import org.daxplore.producer.gui.view.variable.VariableController.QuestionComman
 
 public class TabMeanPanel extends JPanel {
 	
-	private JCheckBox lineCheckBox = new JCheckBox();
 	private JCheckBox meanCheckBox = new JCheckBox();
 	private JLabel goodDirectionText = new JLabel();
 	private JComboBox<Direction> goodDirection = new JComboBox<>(Direction.values());
@@ -35,12 +34,6 @@ public class TabMeanPanel extends JPanel {
 		
 		setLayout(new BorderLayout());
 		JPanel topPanel = new JPanel(new GridLayout(0, 1));
-		
-		lineCheckBox.setText(UITexts.get("question_edit.line.enable"));
-		lineCheckBox.setActionCommand(QuestionCommand.LINE_ENABLE.name());
-		lineCheckBox.addActionListener(actionListener);
-		lineCheckBox.setSelected(metaQuestion.useLine());
-		topPanel.add(lineCheckBox);
 
 		meanCheckBox.setText(UITexts.get("question_edit.mean.enable"));
 		meanCheckBox.setActionCommand(QuestionCommand.MEAN_ENABLE.name());
@@ -97,12 +90,9 @@ public class TabMeanPanel extends JPanel {
 
         setUseGlobalMean(isGlobalMeanUsed());
         setEnabled(isMeanActivated());
+        updateEnabled();
 	}
 	
-	public boolean isLineActivated() {
-		return lineCheckBox.isSelected();
-	}
-
 	public boolean isMeanActivated() {
 		return meanCheckBox.isSelected();
 	}
@@ -114,8 +104,8 @@ public class TabMeanPanel extends JPanel {
 		useGlobalMean.setEnabled(enabled);
 		globalMeanText.setEnabled(enabled && isGlobalMeanUsed());
 		globalMean.setEnabled(enabled && isGlobalMeanUsed());
-		excludedHeader.setEnabled(enabled || isLineActivated());
-		meanExcludedTable.setEnabled(enabled || isLineActivated());
+		excludedHeader.setEnabled(enabled );
+		meanExcludedTable.setEnabled(enabled);
 	}
 	
 	public boolean isGlobalMeanUsed() {

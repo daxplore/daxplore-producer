@@ -67,7 +67,7 @@ public class MetaQuestion {
 			"questtimerel");
 	
 	private enum DisplayTypes {
-		FREQ, LINE, MEAN
+		FREQ, DICH, MEAN
 	}
 	
 	public static class MetaQuestionManager {
@@ -114,7 +114,7 @@ public class MetaQuestion {
 			VariableType type;
 			TextReference fullTextRef, shortTextRef, descriptionTextRef;
 			MetaScale<?> scale = null;
-			boolean useFrequencies, useLine, useMean;
+			boolean useFrequencies, useDich, useMean;
 			try (PreparedStatement stmt = connection.prepareStatement("SELECT * FROM metaquestion WHERE id = ?")) {
 				stmt.setInt(1, id);
 				try(ResultSet rs = stmt.executeQuery()) {
@@ -136,7 +136,7 @@ public class MetaQuestion {
 					Gson gson = new Gson();
 					Set<String> displayTypes = Sets.newHashSet(gson.fromJson(displayTypesJson, String[].class));
 					useFrequencies = displayTypes.contains(DisplayTypes.FREQ.name());
-					useLine = displayTypes.contains(DisplayTypes.LINE.name());
+					useDich = displayTypes.contains(DisplayTypes.DICH.name());
 					useMean = displayTypes.contains(DisplayTypes.MEAN.name());
 					
 					scale = metascaleManager.get(id, type);
@@ -155,7 +155,7 @@ public class MetaQuestion {
 				}
 			}
 			MetaQuestion mq = new MetaQuestion(id, column, type, shortTextRef, fullTextRef,
-					descriptionTextRef, scale, useFrequencies, useLine, metaMean, useMean, timepoints);
+					descriptionTextRef, scale, useFrequencies, useDich, metaMean, useMean, timepoints);
 			questionMap.put(id, mq);
 			return mq;
 		}
@@ -351,7 +351,7 @@ public class MetaQuestion {
 	private String column;
 	private VariableType type;
 	private TextReference shortTextRef, fullTextRef, descriptionTextRef;
-	private boolean useFrequencies, useLine, useMean;
+	private boolean useFrequencies, useDichotomizedLine, useMean;
 	private MetaScale<?> scale;
 	private MetaMean metaMean;
 	private List<MetaTimepointShort> timepoints;
@@ -360,7 +360,7 @@ public class MetaQuestion {
 	private boolean timemodified = false;
 	
 	private MetaQuestion(int id, String column, VariableType type, TextReference shortTextRef, TextReference fullTextRef,
-			TextReference descriptionTextRef,	MetaScale<?> scale, boolean useFrequencies, boolean useLine,
+			TextReference descriptionTextRef,	MetaScale<?> scale, boolean useFrequencies, boolean useDichotomizedLined,
 			MetaMean metaMean, boolean useMean, List<MetaTimepointShort> timepoints) throws DaxploreException {
 		this.id = id;
 		this.column = column;
@@ -369,9 +369,9 @@ public class MetaQuestion {
 		this.fullTextRef = fullTextRef;
 		this.descriptionTextRef = descriptionTextRef;
 		this.useFrequencies = useFrequencies;
-		this.useLine = useLine;
-		this.useMean = useMean;
+		this.useDichotomizedLine = useDichotomizedLined;
 		this.metaMean = metaMean;
+		this.useMean = useMean;
 		this.timepoints = timepoints;
 
 		if(scale.getType() == type) {
@@ -452,13 +452,13 @@ public class MetaQuestion {
 		}
 	}
 	
-	public boolean useLine() {
-		return useLine;
+	public boolean useDichotomizedLine() {
+		return useDichotomizedLine;
 	}
-	
-	public void setUseLine(boolean useLine) {
-		if(this.useLine != useLine) {
-			this.useLine = useLine;
+
+	public void setUseDichotomizedLine(boolean useDichotomizedLine) {
+		if (this.useDichotomizedLine != useDichotomizedLine) {
+			this.useDichotomizedLine = useDichotomizedLine;
 			modified = true;
 		}
 	}
@@ -528,6 +528,10 @@ public class MetaQuestion {
 		json.add("timepoints", tps);
 		
 		json.add("displaytypes", displayTypesAsJSON());
+
+		if (useDichotomizedLine) {
+			json.add("dichselected", dichotomizedSelectedAsJSON());
+		}
 		
 		json.add("use_mean_reference", new JsonPrimitive(metaMean.useMeanReferenceValue()));
 
@@ -549,12 +553,26 @@ public class MetaQuestion {
 		if (useFrequencies) {
 			displayTypesJson.add(new JsonPrimitive(DisplayTypes.FREQ.name()));
 		}
-		if (useLine) {
-			displayTypesJson.add(new JsonPrimitive(DisplayTypes.LINE.name()));
+		if (useDichotomizedLine) {
+			displayTypesJson.add(new JsonPrimitive(DisplayTypes.DICH.name()));
 		}
 		if (useMean) {
 			displayTypesJson.add(new JsonPrimitive(DisplayTypes.MEAN.name()));
 		}
+		return displayTypesJson;
+	}
+	
+	private JsonArray dichotomizedSelectedAsJSON() {
+		JsonArray displayTypesJson = new JsonArray();
+		
+		int index = 0;
+		for (Option o : scale.getOptions()) {
+			if(o.isSelectedInDichotomized()) {
+				displayTypesJson.add(new JsonPrimitive(index));
+			}
+			index++;
+		}
+		
 		return displayTypesJson;
 	}
 	

@@ -17,25 +17,36 @@ import org.daxplore.producer.gui.view.variable.VariableController.QuestionComman
 @SuppressWarnings("serial")
 public class TabFrequenciesPanel extends JPanel {
 	
+	private MetaQuestion metaQuestion;
 	private JScrollPane variableScrollPane = new JScrollPane();
 	private JScrollPane rawScrollPane = new JScrollPane();
-	private JCheckBox enableCheckBox = new JCheckBox();
+	private JCheckBox enableFreqCheckBox = new JCheckBox();
+	private JCheckBox enableDichLineCheckBox = new JCheckBox();
 	private JTable rawTable, variableTable;
 	private JPanel scalePanel;
 	private JButton invertButton, removeButton, downButton, upButton, addButton;
 	
 	public TabFrequenciesPanel(ActionListener actionListener, 
 			MetaQuestion metaQuestion, JTable rawTable, JTable variableTable) {
+		this.metaQuestion = metaQuestion;
 		this.rawTable = rawTable;
 		this.variableTable = variableTable;
+		
 		setLayout(new BorderLayout());
 		
 		JPanel topPanel = new JPanel(new BorderLayout());
-		enableCheckBox.setText(UITexts.get("question_edit.freq.enable"));
-		enableCheckBox.setActionCommand(QuestionCommand.FREQ_ENABLE.name());
-		enableCheckBox.setSelected(metaQuestion.useFrequencies());
-		enableCheckBox.addActionListener(actionListener);
-		topPanel.add(enableCheckBox);
+		enableFreqCheckBox.setText(UITexts.get("question_edit.freq.enable"));
+		enableFreqCheckBox.setActionCommand(QuestionCommand.FREQ_ENABLE.name());
+		enableFreqCheckBox.setSelected(metaQuestion.useFrequencies());
+		enableFreqCheckBox.addActionListener(actionListener);
+		topPanel.add(enableFreqCheckBox, BorderLayout.NORTH);
+		
+		enableDichLineCheckBox.setText(UITexts.get("question_edit.dichline.enable"));
+		enableDichLineCheckBox.setActionCommand(QuestionCommand.DICHLINE_ENABLE.name());
+		enableDichLineCheckBox.setSelected(metaQuestion.useDichotomizedLine());
+		enableDichLineCheckBox.addActionListener(actionListener);
+		topPanel.add(enableDichLineCheckBox, BorderLayout.SOUTH);
+		
 		add(topPanel, BorderLayout.NORTH);
 		
 		rawScrollPane.setViewportView(rawTable);
@@ -79,14 +90,20 @@ public class TabFrequenciesPanel extends JPanel {
 		invertButton.addActionListener(actionListener);
 		actionButtonPanel.add(invertButton);
 		
-		setEnabled(metaQuestion.useFrequencies());
+		updateEnabled();
 	}
 
 	public boolean isFreqActivated() {
-		return enableCheckBox.isSelected();
+		return enableFreqCheckBox.isSelected();
 	}
 	
-	public void setEnabled(boolean enabled) {
+	public boolean isDichotomizedLineActivated() {
+		return enableDichLineCheckBox.isSelected();
+	}
+	
+	public void updateEnabled() {
+		boolean enabled = metaQuestion.useFrequencies() || metaQuestion.useDichotomizedLine();
+		
 		scalePanel.setEnabled(enabled);
 		variableScrollPane.setEnabled(enabled);
 		rawScrollPane.setEnabled(enabled);
@@ -98,6 +115,4 @@ public class TabFrequenciesPanel extends JPanel {
 		upButton.setEnabled(enabled);
 		addButton.setEnabled(enabled);
 	}
-	
-	
 }

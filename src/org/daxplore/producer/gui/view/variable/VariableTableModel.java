@@ -23,8 +23,8 @@ import org.daxplore.producer.daxplorelib.metadata.textreference.TextReference;
 @SuppressWarnings("serial")
 public class VariableTableModel extends DefaultTableModel{
 
-	MetaScale ms;
-	List<Integer> values;
+	private MetaScale ms;
+	private List<Integer> values;
 	
 	public VariableTableModel(MetaScale scale, List<Integer> afterValues) {
 		this.ms = scale;
@@ -55,7 +55,7 @@ public class VariableTableModel extends DefaultTableModel{
 
 	@Override
 	public int getColumnCount() {
-		return 3;
+		return 4;
 	}
 
 	@Override
@@ -67,6 +67,8 @@ public class VariableTableModel extends DefaultTableModel{
 			return "Text";
 		case 2:
 			return "Count";
+		case 3:
+			return "Checked in dichotomized";
 		default:
 			throw new AssertionError();
 		}
@@ -81,6 +83,8 @@ public class VariableTableModel extends DefaultTableModel{
 			return TextReference.class;
 		case 2:
 			return Integer.class;
+		case 3:
+			return Boolean.class;
 		default:
 			throw new AssertionError();
 		}
@@ -88,12 +92,16 @@ public class VariableTableModel extends DefaultTableModel{
 	
 	@Override
 	public boolean isCellEditable(int rowIndex, int columnIndex) {
-		return columnIndex == 1;
+		return columnIndex == 1 || columnIndex == 3;
 	}
 	
 	@Override
-	public void setValueAt(Object aValue, int row, int column) {
-		return;
+	public void setValueAt(Object aValue, int rowIndex, int column) {
+		if (column == 3) {
+			@SuppressWarnings("rawtypes")
+			Option option = (Option)(ms.getOptions().get(rowIndex));
+			option.setSelectedInDichotomized((Boolean)aValue);
+		}
 	}
 	
 	@SuppressWarnings("unchecked")
@@ -111,6 +119,10 @@ public class VariableTableModel extends DefaultTableModel{
 			}
 		case 2:
 			return values.get(rowIndex);
+		case 3:
+			@SuppressWarnings("rawtypes")
+			Option option = (Option)(ms.getOptions().get(rowIndex));
+			return option.isSelectedInDichotomized();
 		default: 
 			throw new AssertionError();
 		}

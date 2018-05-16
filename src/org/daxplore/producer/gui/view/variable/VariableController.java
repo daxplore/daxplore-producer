@@ -37,8 +37,8 @@ import com.google.common.eventbus.EventBus;
 public class VariableController implements TableModelListener, ActionListener {
 	
 	enum QuestionCommand {
-		FREQ_ENABLE, FREQ_ADD, FREQ_REMOVE, FREQ_UP, FREQ_DOWN, FREQ_INVERT,
-		LINE_ENABLE, MEAN_ENABLE, MEAN_DIRECTION, GLOBAL_MEAN_CHANGE, USE_GLOBAL_MEAN,
+		DICHLINE_ENABLE, FREQ_ENABLE, FREQ_ADD, FREQ_REMOVE, FREQ_UP, FREQ_DOWN, FREQ_INVERT,
+		MEANLINE_ENABLE, MEAN_ENABLE, MEAN_DIRECTION, GLOBAL_MEAN_CHANGE, USE_GLOBAL_MEAN,
 	}
 	
 	private VariableView view;
@@ -155,7 +155,7 @@ public class VariableController implements TableModelListener, ActionListener {
 			switch(QuestionCommand.valueOf(e.getActionCommand())) {
 			case FREQ_ENABLE:
 				mq.setUseFrequencies(freqPanel.isFreqActivated());
-				freqPanel.setEnabled(freqPanel.isFreqActivated());
+				freqPanel.updateEnabled();
 				break;
 			case FREQ_ADD:
 				int refIndex = mq.getScale().getLowestUnusedTextrefIndex();
@@ -164,11 +164,11 @@ public class VariableController implements TableModelListener, ActionListener {
 					switch (mq.getType()) {
 					case NUMERIC:
 						MetaScale<Double> msDouble = (MetaScale<Double>) mq.getScale();
-						msDouble.addOption(new Option<Double>(textRef, new HashSet<Double>(), true));
+						msDouble.addOption(new Option<Double>(textRef, new HashSet<Double>(), false, true));
 						break;
 					case TEXT:
 						MetaScale<String> msString = (MetaScale<String>) mq.getScale();
-						msString.addOption(new Option<String>(textRef, new HashSet<String>(), true));
+						msString.addOption(new Option<String>(textRef, new HashSet<String>(), false, true));
 						break;
 					}
 					
@@ -261,10 +261,10 @@ public class VariableController implements TableModelListener, ActionListener {
 				rawModel.fireTableStructureChanged();
 				rawTable.packAll();
 				break;
-			case LINE_ENABLE:
-				boolean useLine = meanPanel.isLineActivated();
-				mq.setUseLine(useLine);
-				meanPanel.updateEnabled();
+			case DICHLINE_ENABLE:
+				boolean useDichLine = freqPanel.isDichotomizedLineActivated();
+				mq.setUseDichotomizedLine(useDichLine);
+				freqPanel.updateEnabled();
 				break;
 			case MEAN_ENABLE:
 				boolean useMean = meanPanel.isMeanActivated();

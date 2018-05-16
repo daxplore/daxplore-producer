@@ -42,6 +42,7 @@ public class MetaScale<T> {
 			+ "textref STRING NOT NULL, "
 			+ "pos INTEGER NOT NULL, "
 			+ "mappedvals TEXT NOT NULL, "
+			+ "dichselected BOOLEAN NOT NULL, "
 			+ "FOREIGN KEY(questionid) REFERENCES metaquestion(id), "
 			+ "UNIQUE(questionid, textref) ON CONFLICT REPLACE)"
 			, "metascale");
@@ -75,37 +76,37 @@ public class MetaScale<T> {
 				try(PreparedStatement stmt = connection.prepareStatement("SELECT * FROM metascale WHERE questionid = ? ORDER BY pos")) {
 					stmt.setInt(1, questionid);
 					try(ResultSet rs  = stmt.executeQuery()) {
-						
-							switch (type) {
-							case NUMERIC:
-								List<Option<Double>> optionsDouble = new LinkedList<>();
-								
-								while(rs.next()) {
-									Double[] dArray = gson.fromJson(rs.getString("mappedvals"), Double[].class);
-									optionsDouble.add(
-											new Option<Double>(
-													textsManager.get(rs.getString("textref")), 
-													Arrays.asList(dArray),
-													false));
-								}
-								MetaScale<Double> msDouble = new MetaScale<Double>(questionid, optionsDouble, false, type);
-								scaleMap.put(questionid, msDouble);
-								return msDouble;
-							case TEXT:
-								List<Option<String>> optionsString = new LinkedList<>();
-								
-								while(rs.next()) {
-									String[] sArray = gson.fromJson(rs.getString("mappedvals"), String[].class);
-									optionsString.add(
-											new Option<String>(
-													textsManager.get(rs.getString("textref")), 
-													Arrays.asList(sArray),
-													false));
-								}
-								MetaScale<String> msString = new MetaScale<String>(questionid, optionsString, false, type);
-								scaleMap.put(questionid, msString);
-								return msString;
+						switch (type) {
+						case NUMERIC:
+							List<Option<Double>> optionsDouble = new LinkedList<>();
+							while(rs.next()) {
+								Double[] dArray = gson.fromJson(rs.getString("mappedvals"), Double[].class);
+								optionsDouble.add(
+								new Option<Double>(
+									textsManager.get(rs.getString("textref")), 
+									Arrays.asList(dArray),
+									rs.getBoolean("dichselected"),
+									false));
 							}
+							MetaScale<Double> msDouble = new MetaScale<Double>(questionid, optionsDouble, false, type);
+							scaleMap.put(questionid, msDouble);
+							return msDouble;
+						case TEXT:
+							List<Option<String>> optionsString = new LinkedList<>();
+							
+							while(rs.next()) {
+								String[] sArray = gson.fromJson(rs.getString("mappedvals"), String[].class);
+								optionsString.add(
+								new Option<String>(
+									textsManager.get(rs.getString("textref")), 
+									Arrays.asList(sArray),
+									rs.getBoolean("dichselected"),
+									false));
+							}
+							MetaScale<String> msString = new MetaScale<String>(questionid, optionsString, false, type);
+							scaleMap.put(questionid, msString);
+							return msString;
+						}
 					}
 				}
 			}
@@ -135,7 +136,7 @@ public class MetaScale<T> {
 		public void saveAll() throws SQLException {
 			Gson gson = new Gson();
 			try (
-				PreparedStatement addOptionStmt = connection.prepareStatement("INSERT INTO metascale (questionid, textref, pos, mappedvals) VALUES (?, ?, ?, ?)");
+				PreparedStatement addOptionStmt = connection.prepareStatement("INSERT INTO metascale (questionid, textref, pos, mappedvals, dichselected) VALUES (?, ?, ?, ?, ?)");
 				PreparedStatement deleteOptionStmt = connection.prepareStatement("DELETE FROM metascale WHERE questionid = ?");
 				//PreparedStatement updateOptionStmt = connection.prepareStatement("UPDATE metascaleoption SET textref = ?, value = ?, transform = ? WHERE scaleid = ? AND ord = ?");
 			) {
@@ -149,6 +150,7 @@ public class MetaScale<T> {
 						addOptionStmt.setString(2, opt.textRef.getRef());
 						addOptionStmt.setInt(3, ord);
 						addOptionStmt.setString(4, gson.toJson(opt.getValues()));
+						addOptionStmt.setBoolean(5, opt.isSelectedInDichotomized());
 						addOptionStmt.addBatch();
 						ord++;
 					}
@@ -170,6 +172,7 @@ public class MetaScale<T> {
 							addOptionStmt.setString(2, opt.textRef.getRef());
 							addOptionStmt.setInt(3, ord);
 							addOptionStmt.setString(4, gson.toJson(opt.getValues()));
+							addOptionStmt.setBoolean(5,opt.isSelectedInDichotomized());
 							addOptionStmt.addBatch();
 							ord++;
 						}
@@ -215,11 +218,13 @@ public class MetaScale<T> {
 	public static class Option<T> {
 		private TextReference textRef;
 		private Set<T> values = new HashSet<T>();
+		private boolean selectedInDichotomized;
 		private boolean modified = false;
 		
-		public Option(TextReference textRef, Collection<T> values, boolean setNew) {
+		public Option(TextReference textRef, Collection<T> values, boolean selectedInDichotomized, boolean setNew) {
 			this.textRef = textRef;
 			this.values.addAll(values);
+			this.selectedInDichotomized = selectedInDichotomized;
 			this.modified = setNew;
 		}
 
@@ -256,6 +261,17 @@ public class MetaScale<T> {
 			values.clear();
 			values.addAll(values);
 			modified = true;
+		}
+		
+		public void setSelectedInDichotomized(boolean selected) {
+			if (selectedInDichotomized != selected) {
+				selectedInDichotomized = selected;
+				modified = true;
+			}
+		}
+		
+		public boolean isSelectedInDichotomized() {
+			return selectedInDichotomized;
 		}
 	}
 	

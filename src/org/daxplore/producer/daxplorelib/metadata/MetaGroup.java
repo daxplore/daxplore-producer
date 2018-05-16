@@ -337,7 +337,7 @@ public class MetaGroup implements Comparable<MetaGroup> {
 			for(MetaGroup group : getQuestionGroups()) {
 				if(group.getType() == GroupType.QUESTIONS) {
 					for(MetaQuestion question : group.getQuestions()) {
-						if((question.useMean() || question.useLine()) && question.getMetaMean().useMeanReferenceValue()) {
+						if(question.useMean() && question.getMetaMean().useMeanReferenceValue()) {
 							json.add(new JsonPrimitive(question.getColumn()));
 						}
 					}

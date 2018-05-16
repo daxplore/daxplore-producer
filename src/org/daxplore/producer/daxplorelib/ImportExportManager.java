@@ -367,7 +367,7 @@ public class ImportExportManager {
 							if(s.getKey() instanceof Double) {
 								Collection<Double> vals = new LinkedList<Double>();
 								vals.add((Double)s.getKey());
-								scaleOptions.add(new MetaScale.Option<Double>(ref, vals, true));
+								scaleOptions.add(new MetaScale.Option<Double>(ref, vals, true, true));
 								
 								// if there is a mapping for a value, default to include it in mean calculation
 								meanValueIncluded |= !meanExcludedValues.remove((Double)s.getKey());
@@ -384,7 +384,7 @@ public class ImportExportManager {
 							if(s.getKey() instanceof String) {
 								Collection<String> vals = new LinkedList<String>();
 								vals.add((String)s.getKey());
-								scaleOptions.add(new MetaScale.Option<String>(ref, vals, true));
+								scaleOptions.add(new MetaScale.Option<String>(ref, vals, true, true));
 							} else {
 								throw new DaxploreException("Trying to add a non number or string as an option");
 							}
@@ -499,7 +499,9 @@ public class ImportExportManager {
 						output.add(createOutputRow(tr, locale));
 					}
 					
-					if(question.useFrequencies() || daxploreFile.getMetaGroupManager().getPerspectiveGroup().contains(question)) {
+					if(  question.useFrequencies()
+					  || question.useDichotomizedLine()
+					  || daxploreFile.getMetaGroupManager().getPerspectiveGroup().contains(question)) {
 						for(Option option : question.getScale().getOptions()) {
 							tr = option.getTextRef();
 							if(writtenRefs.add(tr)) {
