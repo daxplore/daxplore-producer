@@ -81,6 +81,22 @@ public class SettingsController implements ActionListener {
 						}
 					}
 					break;
+				case "checkDich":
+					text = UITexts.get("setting.confirm.checkdich");
+					if(JOptionPane.showConfirmDialog(null, text, title, JOptionPane.YES_NO_OPTION) == JOptionPane.YES_OPTION) {
+						for(MetaQuestion mq : metaQuestionManager.getAll()) {
+							mq.setUseDichotomizedLine(true);
+						}
+					}
+					break;
+				case "uncheckDich":
+					text = UITexts.get("setting.confirm.uncheckdich");
+					if(JOptionPane.showConfirmDialog(null, text, title, JOptionPane.YES_NO_OPTION) == JOptionPane.YES_OPTION) {
+						for(MetaQuestion mq : metaQuestionManager.getAll()) {
+							mq.setUseDichotomizedLine(false);
+						}
+					}
+					break;
 					
 				}
 			} catch (DaxploreException de) {

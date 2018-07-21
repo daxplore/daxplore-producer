@@ -64,6 +64,16 @@ public class SettingsView extends JPanel {
 		uncheckMean.setActionCommand("uncheckMean");
 		uncheckMean.addActionListener(listener);
 		buttonPanel.add(uncheckMean);
+
+		JButton checkDich = new JButton(UITexts.get("setting.button.checkdich"));
+		checkDich.setActionCommand("checkDich");
+		checkDich.addActionListener(listener);
+		buttonPanel.add(checkDich);
+		
+		JButton uncheckDich = new JButton(UITexts.get("setting.button.uncheckdich"));
+		uncheckDich.setActionCommand("uncheckDich");
+		uncheckDich.addActionListener(listener);
+		buttonPanel.add(uncheckDich);
 		
 		contentPanel.add(buttonPanel, Component.LEFT_ALIGNMENT);
 		

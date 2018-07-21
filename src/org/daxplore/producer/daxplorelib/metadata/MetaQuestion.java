@@ -551,13 +551,13 @@ public class MetaQuestion {
 	private JsonElement displayTypesAsJSON() {
 		JsonArray displayTypesJson = new JsonArray();
 		if (useFrequencies) {
-			displayTypesJson.add(new JsonPrimitive(DisplayTypes.FREQ.name()));
+			displayTypesJson.add(new JsonPrimitive("FREQUENCY"));
 		}
 		if (useDichotomizedLine) {
-			displayTypesJson.add(new JsonPrimitive(DisplayTypes.DICH.name()));
+			displayTypesJson.add(new JsonPrimitive("DICHOTOMIZED"));
 		}
 		if (useMean) {
-			displayTypesJson.add(new JsonPrimitive(DisplayTypes.MEAN.name()));
+			displayTypesJson.add(new JsonPrimitive("MEAN"));
 		}
 		return displayTypesJson;
 	}
