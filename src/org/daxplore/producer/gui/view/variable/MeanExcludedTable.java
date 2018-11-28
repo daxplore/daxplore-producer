@@ -29,7 +29,6 @@ import javax.swing.table.TableCellRenderer;
 import org.daxplore.producer.gui.resources.Colors;
 import org.daxplore.producer.gui.resources.UITexts;
 import org.daxplore.producer.gui.widget.AbstractWidgetEditor;
-import org.daxplore.producer.gui.widget.TextWidget;
 import org.jdesktop.swingx.JXTable;
 
 import com.google.common.eventbus.EventBus;
