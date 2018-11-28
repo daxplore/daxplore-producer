@@ -22,6 +22,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedList;
@@ -126,18 +127,21 @@ public class ImportExportManager {
 		for(MetaQuestion perspective : perspectives.getQuestions()) {
 			selectedQuestions.add(perspective);
 		}
-		JsonArray dataJSON = new JsonArray();
+		
+		Map<MetaQuestion, JsonArray> questionData = new HashMap<>();
 		List<String> warnings = new LinkedList<String>();
 		for(MetaGroup group : daxploreFile.getMetaGroupManager().getQuestionGroups()) {
 			for(MetaQuestion question : group.getQuestions()) {
+				JsonArray questionJSON = new JsonArray();
 				selectedQuestions.add(question);
 				for(MetaQuestion perspective : perspectives.getQuestions()) {
 					try {
-						dataJSON.add(crosstabs.calculateData(question, perspective, 10).toJSONObject());
+						questionJSON.add(crosstabs.calculateData(question, perspective, 10).toJSONObject());
 					} catch (DaxploreWarning e) {
 						warnings.add(e.getMessage());
 					}
 				}
+				questionData.put(question, questionJSON);
 			}
 		}
 		
@@ -164,8 +168,12 @@ public class ImportExportManager {
 			Gson plainGson = new Gson();
 			Gson prettyGson = new GsonBuilder().setPrettyPrinting().create();
 			
-			// Generate a single json string and replace "}}},{" with "}}},\n{" to create rows in the file
-			writeZipString(zout, "data.json", plainGson.toJson(dataJSON).replaceAll("(}}},\\{)", "}}},\n{")); 
+			// Generate a new file for each question
+			for (MetaQuestion question : questionData.keySet()) {
+				// Generate a single json string and replace "}}},{" with "}}},\n{" to create rows in the file
+				// TODO use other identifier than column?
+				writeZipString(zout, "questions/" + question.getColumn() + ".json", plainGson.toJson(questionData.get(question)).replaceAll("(}}},\\{)", "}}},\n{")); 
+			}
 			
 			JsonObject settings = new JsonObject();
 			for(String setting : DaxploreProperties.clientSettings) {
@@ -193,6 +201,7 @@ public class ImportExportManager {
 			
 			writeZipString(zout, "settings.json", prettyGson.toJson(settings));
 			
+			// TODO either export a single locale OR update static server presenter to handle multiple locales
 			for(Locale locale : daxploreFile.getAbout().getLocales()) {
 				JsonArray questionJSON = new JsonArray();
 				for(MetaQuestion q : selectedQuestions) {
