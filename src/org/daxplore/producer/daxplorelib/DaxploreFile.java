@@ -402,6 +402,6 @@ public class DaxploreFile implements Closeable {
 	}
 
 	public static boolean isValidColumnName(String refstring) {
-		return !Strings.isNullOrEmpty(refstring) && refstring.matches("^[\\pL\\pN_\\.\\$\\#\\@]+$");
+		return !Strings.isNullOrEmpty(refstring); // TODO improve old restraints: && refstring.matches("^[\\pL\\pN_\\.\\$\\#\\@]+$");
 	}
 }
