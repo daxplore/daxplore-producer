@@ -233,6 +233,8 @@ public class RawMetaQuestion {
 			for(int i = 0; i < spssFile.getVariableCount(); i++){
 				SPSSVariable var = spssFile.getVariable(i);
 				String column = var.getName();
+				// column = column.toUpperCase(); // TODO hardcoded to force upper case
+				if (column.equalsIgnoreCase("jobb_databas2019")) { column = "jobb_databas"; }
 				if(!DaxploreFile.isValidColumnName(column)) {
 					throw new DaxploreException("Failed to load SPSS file due to an invalid variable name: '" + column + "'");
 				}

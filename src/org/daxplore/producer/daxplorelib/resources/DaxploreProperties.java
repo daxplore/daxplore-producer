@@ -50,6 +50,9 @@ public class DaxploreProperties {
 	public static final List<String> presenterUITexts =
 			ImmutableList.copyOf(Arrays.asList(
 					"allRespondents",
+					"chartTabDichotomized",
+					"chartTabFrequencies",
+					"chartTabMeans",
 					"compareWithAll",
 					"compareWithOld",
 					"compareWithOldTitleDisabled",
