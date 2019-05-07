@@ -73,6 +73,7 @@ public class DaxploreProperties {
 					"embedTransparentBackground",
 					"hideWarningButton",
 					"imageSaveButton",
+					"imageTitleProfileChart",
 					"imageWaterStamp",
 					"listReferenceValue",
 					"listReferenceBetter",
@@ -96,5 +97,14 @@ public class DaxploreProperties {
 					"showAverage",
 					"showFrequencyTitleDisabled",
 					"showFrequencyTitleEnabled",
-					"showFrequency"));
+					"showFrequency",
+					"userProfileHeaderText",
+					"userProfilePasteDataDescription",
+					"userProfilePasteDataSubmitExplanation",
+					"userPasteDataSubmitButton",
+					"userProfilePasteDataErrorLogHeader",
+					"userPasteDataErrorTextNumberBoundsErrors",
+					"userPasteDataErrorTextNoNumberErrors",
+					"userPasteDataErrorTextNoRowErrors"
+				));
 }
