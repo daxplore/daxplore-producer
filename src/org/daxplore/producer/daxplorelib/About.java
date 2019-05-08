@@ -27,8 +27,11 @@ import org.daxplore.producer.daxplorelib.metadata.textreference.TextReference;
 import org.daxplore.producer.daxplorelib.resources.DaxploreProperties;
 
 /**
- * This class mirrors the 'about' table in the project file
- * It's a one row table with information about the entire save file.
+ * General information about the entire save file.
+ * 
+ * This class contains the 'locale' table in the project file
+ * and relies on the settings table for everything else. 
+ * 
  */
 public class About {
 	private static final DaxploreTable localeTable = new DaxploreTable("CREATE TABLE locales (locale TEXT PRIMARY KEY)", "locales");
@@ -58,8 +61,6 @@ public class About {
 			}
 		});
 		if(createnew){
-			settings.putSetting("filetypeversionmajor", DaxploreProperties.filetypeversionmajor);
-			settings.putSetting("filetypeversionminor", DaxploreProperties.filetypeversionminor);
 			ZonedDateTime create = ZonedDateTime.now();
 			settings.putSetting("creation", create);
 			settings.putSetting("lastupdate", create);
@@ -97,6 +98,9 @@ public class About {
 			Logger.getGlobal().log(Level.INFO, logString);
 			
 			localesModified = false;
+		}
+		try(Statement stmt = connection.createStatement()) {
+			stmt.executeUpdate("PRAGMA user_version = " + DaxploreProperties.daxploreFileVersion + ";");
 		}
 	}
 	

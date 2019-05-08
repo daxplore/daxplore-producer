@@ -4,19 +4,12 @@
 	<xsd:element name="daxploreUploadFileManifest">
 		<xsd:complexType>
 			<xsd:sequence>
-				<xsd:element name="fileVersion" type="fileVersionType" />
+				<xsd:element name="dataVersion" type="xsd:nonNegativeInteger" />
 				<xsd:element name="supportedLocales" type="supportedLocaleType" />
 				<xsd:element name="defaultLocale" type="defaultLocaleType" />
 			</xsd:sequence>
 		</xsd:complexType>
 	</xsd:element>
-
-	<xsd:complexType name="fileVersionType">
-		<xsd:sequence>
-			<xsd:element name="major" type="xsd:nonNegativeInteger"></xsd:element>
-			<xsd:element name="minor" type="xsd:nonNegativeInteger"></xsd:element>
-		</xsd:sequence>
-	</xsd:complexType>
 
 	<xsd:simpleType name="language-BCP47-Type">
 		<xsd:restriction base="xsd:language" />

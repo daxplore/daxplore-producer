@@ -18,8 +18,11 @@ import com.google.common.collect.ImmutableMap;
 
 public class DaxploreProperties {
 
-	public static final int filetypeversionmajor = 0;
-	public static final int filetypeversionminor = 3;
+	/** File version for .daxplore save file, stored in sqlite's PRAGMA user_version **/
+	public static final int daxploreFileVersion = 4;
+	
+	/** File version for export .zip data file, stored in manifest.xml **/
+	public static final int exportFileVersion = 4;
 	
 	public static final List<Locale> predefinedLocales =
 			ImmutableList.copyOf(Arrays.asList(

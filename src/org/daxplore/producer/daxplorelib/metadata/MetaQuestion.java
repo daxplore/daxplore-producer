@@ -52,10 +52,7 @@ public class MetaQuestion {
 			+ "id INTEGER PRIMARY KEY, "
 			+ "col TEXT NOT NULL, "
 			+ "type STRING NOT NULL, "
-			+ "displaytypes STRING NOT NULL, "
-			+ "fulltextref TEXT NOT NULL, "
-			+ "shorttextref TEXT NOT NULL, "
-			+ "descriptiontextref TEXT)",
+			+ "displaytypes STRING NOT NULL)",
 			"metaquestion");
 	
 	private static final DaxploreTable timePointTable = new DaxploreTable(
@@ -69,6 +66,11 @@ public class MetaQuestion {
 	private enum DisplayTypes {
 		FREQ, DICH, MEAN
 	}
+	
+	static final String textrefSuffixFullText= "_fulltext";
+	static final String textrefSuffixShortText= "_shorttext";
+	static final String textrefSuffixDescriptionText = "_descriptiontext";
+	static final String textrefSuffixTitleMatchRegex = "_titlematchregex";
 	
 	public static class MetaQuestionManager {
 		
@@ -112,7 +114,7 @@ public class MetaQuestion {
 			
 			String column;
 			VariableType type;
-			TextReference fullTextRef, shortTextRef, descriptionTextRef;
+			TextReference fullTextRef, shortTextRef, descriptionTextRef, titleMatchRegexTextRef;
 			MetaScale<?> scale = null;
 			boolean useFrequencies, useDich, useMean;
 			try (PreparedStatement stmt = connection.prepareStatement("SELECT * FROM metaquestion WHERE id = ?")) {
@@ -123,15 +125,7 @@ public class MetaQuestion {
 					}
 					column = rs.getString("col");
 					type = VariableType.valueOf(rs.getString("type")); //TODO check exception
-					fullTextRef = textsManager.get(rs.getString("fulltextref"));
-					shortTextRef = textsManager.get(rs.getString("shorttextref"));
-					String descriptionTextRefId = rs.getString("descriptiontextref");
-					if(!rs.wasNull()) {
-						descriptionTextRef = textsManager.get(descriptionTextRefId);
-					} else {
-						descriptionTextRef = null;
-					}
-					
+										
 					String displayTypesJson = rs.getString("displaytypes");
 					Gson gson = new Gson();
 					Set<String> displayTypes = Sets.newHashSet(gson.fromJson(displayTypesJson, String[].class));
@@ -143,6 +137,11 @@ public class MetaQuestion {
 				}
 			}
 			
+			fullTextRef = textsManager.get(column + textrefSuffixFullText);
+			shortTextRef = textsManager.get(column + textrefSuffixShortText);
+			descriptionTextRef = textsManager.get(column + textrefSuffixDescriptionText);
+			titleMatchRegexTextRef = textsManager.get(column + textrefSuffixTitleMatchRegex);
+						
 			MetaMean metaMean = metaMeanManager.get(id);
 			List<MetaTimepointShort> timepoints = new LinkedList<>();
 			try(PreparedStatement stmt2 = connection.prepareStatement("SELECT timeid FROM questtimerel WHERE qid = ?")) {
@@ -154,14 +153,14 @@ public class MetaQuestion {
 					
 				}
 			}
-			MetaQuestion mq = new MetaQuestion(id, column, type, shortTextRef, fullTextRef,
-					descriptionTextRef, scale, useFrequencies, useDich, metaMean, useMean, timepoints);
+			MetaQuestion mq = new MetaQuestion(id, column, type, shortTextRef, fullTextRef, descriptionTextRef,
+					titleMatchRegexTextRef, scale, useFrequencies, useDich, metaMean, useMean, timepoints);
 			questionMap.put(id, mq);
 			return mq;
 		}
 		
 		@SuppressWarnings("unchecked")
-		public MetaQuestion create(String column, VariableType type, TextReference shortTextRef, TextReference fullTextRef, TextReference descriptionTextRef,
+		public MetaQuestion create(String column, VariableType type, TextReference shortTextRef, TextReference fullTextRef, TextReference descriptionTextRef, TextReference titleMatchRegexTextRef,
 				List<MetaScale.Option<?>> scaleOptions, Set<Double> meanExcludedValues, double globalMean, List<MetaTimepointShort> timepoints) throws DaxploreException {
 			boolean useMean = (meanExcludedValues != null);
 			
@@ -194,7 +193,7 @@ public class MetaQuestion {
 			
 			MetaMean metaMean = metaMeanManager.create(id, meanExcludedValues, false, globalMean, Direction.UNDEFINED);
 			
-			MetaQuestion mq = new MetaQuestion(id, column, type, shortTextRef, fullTextRef, descriptionTextRef, scale, true, false, metaMean, useMean, timepoints);
+			MetaQuestion mq = new MetaQuestion(id, column, type, shortTextRef, fullTextRef, descriptionTextRef, titleMatchRegexTextRef, scale, true, false, metaMean, useMean, timepoints);
 			toBeAdded.add(mq);
 			questionMap.put(id, mq);
 			return mq;
@@ -209,8 +208,8 @@ public class MetaQuestion {
 		public void saveAll() throws SQLException {
 			int nNew = 0, nModified = 0, nRemoved = 0, nTimePoint = 0;
 			try (
-			PreparedStatement updateStmt = connection.prepareStatement("UPDATE metaquestion SET col = ?, type = ?, displaytypes = ?, fulltextref = ?, shorttextref = ?, descriptiontextref = ? WHERE id = ?");
-			PreparedStatement insertStmt = connection.prepareStatement("INSERT INTO metaquestion (id, col, type, displaytypes, fulltextref, shorttextref, descriptiontextref) VALUES (?, ?, ?, ?, ?, ?, ?)");
+			PreparedStatement updateStmt = connection.prepareStatement("UPDATE metaquestion SET col = ?, type = ?, displaytypes = ? WHERE id = ?");
+			PreparedStatement insertStmt = connection.prepareStatement("INSERT INTO metaquestion (id, col, type, displaytypes) VALUES (?, ?, ?, ?)");
 			PreparedStatement deleteStmt = connection.prepareStatement("DELETE FROM metaquestion WHERE id = ?");
 			PreparedStatement deleteRelStmt = connection.prepareStatement("DELETE FROM questtimerel WHERE qid = ?");
 			PreparedStatement insertRelStmt = connection.prepareStatement("INSERT INTO questtimerel (qid, timeid) VALUES (?, ?)");
@@ -226,15 +225,7 @@ public class MetaQuestion {
 						} else {
 							updateStmt.setString(3, "");
 						}
-						
-						updateStmt.setString(4, mq.fullTextRef.getRef());
-						updateStmt.setString(5, mq.shortTextRef.getRef());
-						if(mq.descriptionTextRef != null) {
-							updateStmt.setString(6, mq.descriptionTextRef.getRef());
-						} else {
-							updateStmt.setNull(6, Types.VARCHAR);
-						}
-						updateStmt.setInt(7, mq.id);
+						updateStmt.setInt(4, mq.id);
 						updateStmt.executeUpdate();
 						mq.modified = false;
 					}
@@ -350,7 +341,7 @@ public class MetaQuestion {
 	private int id;
 	private String column;
 	private VariableType type;
-	private TextReference shortTextRef, fullTextRef, descriptionTextRef;
+	private TextReference shortTextRef, fullTextRef, descriptionTextRef, titleMatchRegexTextRef;
 	private boolean useFrequencies, useDichotomizedLine, useMean;
 	private MetaScale<?> scale;
 	private MetaMean metaMean;
@@ -360,7 +351,7 @@ public class MetaQuestion {
 	private boolean timemodified = false;
 	
 	private MetaQuestion(int id, String column, VariableType type, TextReference shortTextRef, TextReference fullTextRef,
-			TextReference descriptionTextRef,	MetaScale<?> scale, boolean useFrequencies, boolean useDichotomizedLined,
+			TextReference descriptionTextRef, TextReference titleMatchRegexTextRef, MetaScale<?> scale, boolean useFrequencies, boolean useDichotomizedLined,
 			MetaMean metaMean, boolean useMean, List<MetaTimepointShort> timepoints) throws DaxploreException {
 		this.id = id;
 		this.column = column;
@@ -368,6 +359,7 @@ public class MetaQuestion {
 		this.shortTextRef = shortTextRef;
 		this.fullTextRef = fullTextRef;
 		this.descriptionTextRef = descriptionTextRef;
+		this.titleMatchRegexTextRef = titleMatchRegexTextRef;
 		this.useFrequencies = useFrequencies;
 		this.useDichotomizedLine = useDichotomizedLined;
 		this.metaMean = metaMean;
@@ -430,11 +422,22 @@ public class MetaQuestion {
 		}
 	}
 	
+	public TextReference getTitleMatchRegexTextRef() {
+		return titleMatchRegexTextRef;
+	}
+	
+	public void setTitleMatchRegexTextRef(TextReference titleMatchRegexTextRef) {
+		if(!titleMatchRegexTextRef.equals(this.titleMatchRegexTextRef)) {
+			this.titleMatchRegexTextRef = titleMatchRegexTextRef;
+			modified = true;
+		}
+	}
+	
 	public TextReference getDescriptionTextRef() {
 		return descriptionTextRef;
 	}
 	
-	public void setExtraTextRef(TextReference descriptionTextRef) {
+	public void setDescriptionTextRef(TextReference descriptionTextRef) {
 		if(!descriptionTextRef.equals(this.descriptionTextRef)) {
 			this.descriptionTextRef = descriptionTextRef;
 			modified = true;
@@ -504,6 +507,10 @@ public class MetaQuestion {
 		}
 		
 		json.addProperty("description", descriptionTextRef.getText(locale));
+		
+		if(!Strings.isNullOrEmpty(titleMatchRegexTextRef.getText(locale))) {
+			json.addProperty("titlematchregex", titleMatchRegexTextRef.getText(locale));
+		}
 		
 		//TODO descriptiontextref
 		JsonArray options = new JsonArray();

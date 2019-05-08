@@ -261,14 +261,9 @@ public class ImportExportManager {
 		root.setAttribute("xmlns:xsi", "http://www.w3.org/2001/XMLSchema-instance");
 		root.setAttribute("xsi:noNamespaceSchemaLocation", "UploadFileManifest.xsd");
 		
-		Element version = doc.createElement("fileVersion");
+		Element version = doc.createElement("dataVersion");
 		root.appendChild(version);
-		Element major = doc.createElement("major");
-		version.appendChild(major);
-		major.appendChild(doc.createTextNode(""+DaxploreProperties.filetypeversionmajor));
-		Element minor = doc.createElement("minor");
-		version.appendChild(minor);
-		minor.appendChild(doc.createTextNode(""+DaxploreProperties.filetypeversionminor));
+		version.appendChild(doc.createTextNode(""+DaxploreProperties.exportFileVersion));
 		
 		Element supportedLocales = doc.createElement("supportedLocales");
 		root.appendChild(supportedLocales);
@@ -411,8 +406,9 @@ public class ImportExportManager {
 				
 				TextReference shorttext = daxploreFile.getTextReferenceManager().get(column + "_shorttext");
 				TextReference descriptiontext = daxploreFile.getTextReferenceManager().get(column + "_description");
+				TextReference titlematchregex = daxploreFile.getTextReferenceManager().get(column + "_titlematchregex");
 				List<MetaTimepointShort> timepoints = new LinkedList<>();
-				daxploreFile.getMetaQuestionManager().create(column, type, shorttext, fulltext, descriptiontext, scaleOptions, meanExcludedValues, Double.NaN, timepoints);
+				daxploreFile.getMetaQuestionManager().create(column, type, shorttext, fulltext, descriptiontext, titlematchregex, scaleOptions, meanExcludedValues, Double.NaN, timepoints);
 			}
 			guiMessages.add("");
 			
