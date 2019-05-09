@@ -109,16 +109,24 @@ public class DaxploreFile implements Closeable {
 		if (!createNew) {	
 			try (Statement stmt = connection.createStatement()) {
 				int systemVersion = DaxploreProperties.daxploreFileVersion;
-				ResultSet rs = stmt.executeQuery("PRAGMA user_version");
+				ResultSet rs = stmt.executeQuery("PRAGMA user_version;");
 				int filetypeVersion = rs.getInt("user_version");
 				
 				// Check if file version is newer than system version
 				if (filetypeVersion > systemVersion) {
-					throw new DaxploreException("File version type is "
-							+ filetypeVersion 
-							+ ", but system only supports up to file version: "
-							+ systemVersion
+					throw new DaxploreException("File version type is " + filetypeVersion 
+							+ ", but system only supports up to file version: " + systemVersion
 							+ ". Please upgrade your Daxplore Producer."); 
+				}
+
+				int systemApplicationID = DaxploreProperties.daxploreFileApplicationID;
+				rs = stmt.executeQuery("PRAGMA application_id;");
+				int fileApplicationID = rs.getInt("application_id");
+				// Check that the Daxplore file has the correct SQLite application ID
+				if (fileApplicationID != systemApplicationID) {
+					throw new DaxploreException("Not a Daxplore save file."
+							+ " The file is uses SQLite application ID " + fileApplicationID + "."
+							+ " Daxplore files use application ID " + systemApplicationID);
 				}
 				
 				// Check if file version is too old

@@ -17,8 +17,16 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 
 public class DaxploreProperties {
+	/**
+	 * SQLite's application ID for .daxplore save file, stored in sqlite's PRAGMA application_id.
+	 * https://sqlite.org/pragma.html#pragma_application_id
+	 **/
+	public static final int daxploreFileApplicationID = 474105420;
 
-	/** File version for .daxplore save file, stored in sqlite's PRAGMA user_version **/
+	/**
+	 * File version for .daxplore save file, stored in sqlite's PRAGMA user_version.
+	 * https://sqlite.org/pragma.html#pragma_user_version
+	 **/
 	public static final int daxploreFileVersion = 4;
 	
 	/** File version for export .zip data file, stored in manifest.xml **/

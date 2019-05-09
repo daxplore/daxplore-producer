@@ -99,8 +99,9 @@ public class About {
 			
 			localesModified = false;
 		}
-		try(Statement stmt = connection.createStatement()) {
+		try (Statement stmt = connection.createStatement()) {
 			stmt.executeUpdate("PRAGMA user_version = " + DaxploreProperties.daxploreFileVersion + ";");
+			stmt.executeUpdate("PRAGMA application_id = " + DaxploreProperties.daxploreFileApplicationID + ";");
 		}
 	}
 	
