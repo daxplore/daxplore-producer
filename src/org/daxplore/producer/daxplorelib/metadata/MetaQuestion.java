@@ -259,14 +259,7 @@ public class MetaQuestion {
 					} else {
 						insertStmt.setString(4, "");
 					}
-					
-					insertStmt.setString(5, mq.fullTextRef.getRef());
-					insertStmt.setString(6, mq.shortTextRef.getRef());
-					if(mq.descriptionTextRef != null) {
-						insertStmt.setString(7, mq.descriptionTextRef.getRef());
-					} else {
-						insertStmt.setNull(7, Types.VARCHAR);
-					}
+
 					insertStmt.addBatch();
 					
 					for(MetaTimepointShort timepoint: mq.timepoints) {

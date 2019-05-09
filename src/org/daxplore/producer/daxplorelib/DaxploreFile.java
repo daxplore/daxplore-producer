@@ -105,7 +105,8 @@ public class DaxploreFile implements Closeable {
 		this.file = file;
 		
 		// Compare file version with system version and adapt accordingly
-		try {
+		
+		if (!createNew) {	
 			try (Statement stmt = connection.createStatement()) {
 				int systemVersion = DaxploreProperties.daxploreFileVersion;
 				ResultSet rs = stmt.executeQuery("PRAGMA user_version");
@@ -133,8 +134,12 @@ public class DaxploreFile implements Closeable {
 					stmt.executeUpdate("DELETE FROM settings WHERE key='filetypeversionminor';");
 					stmt.executeUpdate("PRAGMA user_version = 4;");
 				}
+			} catch (SQLException e) {
+				throw new DaxploreException("Failed to validate or upgrade Daxplore file", e);
 			}
+		} 
 			
+		try {
 			settings = new Settings(connection);
 			about = new About(connection, settings, createNew);
 			rawMetaManager = new RawMetaManager(connection);
