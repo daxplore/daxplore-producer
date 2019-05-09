@@ -104,7 +104,7 @@ public class DaxploreFile implements Closeable {
 		this.connection = connection;
 		this.file = file;
 		
-		// Compare file version with system verison and adapt accordingly
+		// Compare file version with system version and adapt accordingly
 		try {
 			try (Statement stmt = connection.createStatement()) {
 				int systemVersion = DaxploreProperties.daxploreFileVersion;
