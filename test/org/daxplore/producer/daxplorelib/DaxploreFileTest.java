@@ -7,9 +7,7 @@ import static org.junit.Assert.assertEquals;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.Locale;
 
-import org.daxplore.producer.gui.resources.UITexts;
 import org.junit.Test;
 
 public class DaxploreFileTest {
