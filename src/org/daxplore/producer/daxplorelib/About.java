@@ -47,11 +47,7 @@ public class About {
 	
 	private Connection connection;
 	
-	public About(Connection sqliteDatabase, Settings settings) throws SQLException {
-		this(sqliteDatabase, settings, false);
-	}
-	
-	About(Connection connection, Settings settings, boolean createnew) throws SQLException { 
+	About(Connection connection, Settings settings) throws SQLException { 
 		this.connection = connection;
 		this.settings = settings;
 		locales = new TreeSet<>(new Comparator<Locale>() {
@@ -60,6 +56,8 @@ public class About {
 				return o1.getDisplayLanguage().compareTo(o2.getDisplayLanguage());
 			}
 		});
+		// Create locale table if it doesn't exist, and if needed also initialize other About-related settings
+		boolean createnew = SQLTools.createIfNotExists(localeTable, connection);
 		if(createnew){
 			ZonedDateTime create = ZonedDateTime.now();
 			settings.putSetting("creation", create);
@@ -78,7 +76,6 @@ public class About {
 			}
 		}
 		TextReference.setActiveLocales(new ArrayList<Locale>(locales));
-		SQLTools.createIfNotExists(localeTable, connection);
 	}
 	
 	void save() throws SQLException {

@@ -54,11 +54,15 @@ import com.google.common.base.Strings;
 
 public class DaxploreFile implements Closeable {
 
+	private File file = null;
+	private ImportExportManager importExport;
+	private int daxploreFileVersion;
+	private int fileApplicationID;
+	private boolean initialized = false;
+
 	private Connection connection;
 	private Settings settings;
 	private About about;
-	private File file = null;
-	private ImportExportManager importExport;
 
 	private RawMetaManager rawMetaManager;
 	private RawDataManager rawDataManager;
@@ -68,7 +72,7 @@ public class DaxploreFile implements Closeable {
 	private MetaTimepointShortManager metaTimepointShortManager;
 	private MetaQuestionManager metaQuestionManager;
 	private MetaGroupManager metaGroupManager;
-
+	
 	public static DaxploreFile createFromExistingFile(File file) throws DaxploreException {
 		try {
 			Class.forName("org.sqlite.JDBC");
@@ -94,7 +98,9 @@ public class DaxploreFile implements Closeable {
 		try {
 			file.delete();
 			Connection connection = DriverManager.getConnection("jdbc:sqlite:" + file.getAbsolutePath());
-			return new DaxploreFile(connection, true, file);
+			DaxploreFile df = new DaxploreFile(connection, true, file);
+			df.initializeInternalStructures();
+			return df;
 		} catch (SQLException e) {
 			throw new DaxploreException("Could not create new sqlite database (No write access?)", e);
 		}
@@ -103,53 +109,100 @@ public class DaxploreFile implements Closeable {
 	private DaxploreFile(Connection connection, boolean createNew, File file) throws DaxploreException {
 		this.connection = connection;
 		this.file = file;
-		
-		// Compare file version with system version and adapt accordingly
-		
-		if (!createNew) {	
+	
+		if (createNew) {
+			fileApplicationID = DaxploreProperties.daxploreFileApplicationID;
+			daxploreFileVersion = DaxploreProperties.daxploreFileVersion;
+		} else {
 			try (Statement stmt = connection.createStatement()) {
-				int systemVersion = DaxploreProperties.daxploreFileVersion;
-				ResultSet rs = stmt.executeQuery("PRAGMA user_version;");
-				int filetypeVersion = rs.getInt("user_version");
-				
-				// Check if file version is newer than system version
-				if (filetypeVersion > systemVersion) {
-					throw new DaxploreException("File version type is " + filetypeVersion 
-							+ ", but system only supports up to file version: " + systemVersion
-							+ ". Please upgrade your Daxplore Producer."); 
-				}
-
-				int systemApplicationID = DaxploreProperties.daxploreFileApplicationID;
-				rs = stmt.executeQuery("PRAGMA application_id;");
-				int fileApplicationID = rs.getInt("application_id");
-				// Check that the Daxplore file has the correct SQLite application ID
-				if (fileApplicationID != systemApplicationID) {
-					throw new DaxploreException("Not a Daxplore save file."
-							+ " The file is uses SQLite application ID " + fileApplicationID + "."
-							+ " Daxplore files use application ID " + systemApplicationID);
-				}
-				
-				// Check if file version is too old
-				// TODO prompt user: cancel opening or continue to upgrade file
-				if (filetypeVersion  < 4) {
-					stmt.executeUpdate("PRAGMA foregin_keys = off;");
-					stmt.executeUpdate("ALTER TABLE metaquestion RENAME TO metaquestion_tmp;");
-					stmt.executeUpdate("CREATE TABLE metaquestion (id INTEGER PRIMARY KEY, col TEXT NOT NULL, type STRING NOT NULL, displaytypes STRING NOT NULL);");
-					stmt.executeUpdate("INSERT INTO metaquestion (id, col, type, displaytypes) SELECT id, col, type, displaytypes FROM metaquestion_tmp;");
-					stmt.executeUpdate("DROP TABLE metaquestion_tmp;");
-					stmt.executeUpdate("PRAGMA foregin_keys = on;");
-					stmt.executeUpdate("DELETE FROM settings WHERE key='filetypeversionmajor';");
-					stmt.executeUpdate("DELETE FROM settings WHERE key='filetypeversionminor';");
-					stmt.executeUpdate("PRAGMA user_version = 4;");
-				}
+				ResultSet rs = stmt.executeQuery("PRAGMA application_id;");
+				fileApplicationID = rs.getInt("application_id");
 			} catch (SQLException e) {
-				throw new DaxploreException("Failed to validate or upgrade Daxplore file", e);
+				throw new DaxploreException("Failed to check \"PRAGMA application_id\" for opened file.", e);
 			}
-		} 
-			
+			try (Statement stmt = connection.createStatement()) {
+				ResultSet rs = stmt.executeQuery("PRAGMA user_version;");
+				daxploreFileVersion = rs.getInt("user_version");
+			} catch (SQLException e) {
+				throw new DaxploreException("Failed to check \"PRAGMA user_version\" for opened file.", e);
+			}
+		}
+	}
+	
+		
+	/**
+	 * Get the SQLite "PRAGMA application_id" from the save file.
+	 * @return the file's SQLite application_id
+	 */
+	public int getFileApplicationVersion() {
+		return fileApplicationID;
+	}
+
+	/**
+	 * Check if a loaded file uses the correct application_id for a .daxplore save file.
+	 * 
+	 * This assumes that the file is already confirmed to be a SQLite file and that a SQL connection has been made.
+	 * 
+	 * @return true if the file uses the correct SQLite application_id
+	 * @throws DaxploreException thrown in case there is an error checking application_id
+	 */
+	public boolean hasValidApplicationID() {
+		return fileApplicationID == DaxploreProperties.daxploreFileApplicationID;
+	}
+	
+	/**
+	 * Get the .daxplore save file version, as defined by SQLite "PRAGMA user_version"
+	 * 
+	 * @return the save file version 
+	 */
+	public int getFileVersion() {
+		return daxploreFileVersion;
+	}
+	
+	/**
+	 * Upgrade the file to the current .daxplore save file version.
+	 * 
+	 * Implemented as a sequence of SQL changes. This will instantly write the changes
+	 * to the .daxplore save file on disk, without further user input.
+	 *  
+	 * Compare {@link #getFileApplicationVersion()} with {@link DaxploreProperties#daxploreFileVersion}
+	 * to check if the file needs to be upgraded.
+	 *  
+	 * @throws DaxploreException thrown if upgrade failed
+	 */
+	public void upgradeFileVersion() throws DaxploreException {
+		if (daxploreFileVersion < 4) {
+			try (Statement stmt = connection.createStatement()) {
+				stmt.executeUpdate("PRAGMA foregin_keys = off;");
+				stmt.executeUpdate("ALTER TABLE metaquestion RENAME TO metaquestion_tmp;");
+				stmt.executeUpdate("CREATE TABLE metaquestion (id INTEGER PRIMARY KEY, col TEXT NOT NULL, type STRING NOT NULL, displaytypes STRING NOT NULL);");
+				stmt.executeUpdate("INSERT INTO metaquestion (id, col, type, displaytypes) SELECT id, col, type, displaytypes FROM metaquestion_tmp;");
+				stmt.executeUpdate("DROP TABLE metaquestion_tmp;");
+				stmt.executeUpdate("PRAGMA foregin_keys = on;");
+				stmt.executeUpdate("DELETE FROM settings WHERE key='filetypeversionmajor';");
+				stmt.executeUpdate("DELETE FROM settings WHERE key='filetypeversionminor';");
+				stmt.executeUpdate("PRAGMA user_version = 4;");
+				daxploreFileVersion = 4;
+			} catch (SQLException e) {
+				throw new DaxploreException("Failed to upgrade file to version 4.");
+			}
+		}
+	}
+	
+	public void initializeInternalStructures() throws DaxploreException {
+		if (!hasValidApplicationID()) {
+			throw new DaxploreException("File does not have a valid application ID. Check hasValidApplicationID before initializing the internal structures to avoid Exceptions.");
+		}
+		
+		if (daxploreFileVersion != DaxploreProperties.daxploreFileVersion) {
+			throw new DaxploreException("Daxplore file has file version " + daxploreFileVersion
+					+ ". This version of Daxplore Producer only supports .daxplore save file version " + DaxploreProperties.daxploreFileVersion
+					+ ". Run DaxploreFile's upgradeFileVersion method before initializing the internal structures.");
+		}
+		
 		try {
 			settings = new Settings(connection);
-			about = new About(connection, settings, createNew);
+			about = new About(connection, settings);
 			rawMetaManager = new RawMetaManager(connection);
 			rawDataManager = new RawDataManager(connection, rawMetaManager);
 			
@@ -167,48 +220,59 @@ public class DaxploreFile implements Closeable {
 			metaGroupManager = new MetaGroupManager(connection, textReferenceManager, metaQuestionManager);
 			
 			importExport = new ImportExportManager(this);
+			initialized = true;
 		} catch (SQLException e) {
 			throw new DaxploreException("Failed to construct DaxploreFile", e);
 		}
 	}
 
 	public About getAbout() {
+		if (!initialized) { throw new Error("Initialize DaxploreFile before using it."); }
 		return about;
 	}
 
 	public Settings getSettings() {
+		if (!initialized) { throw new Error("Initialize DaxploreFile before using it."); }
 		return settings;
 	}
 
 	public RawMetaManager getRawMetaManager() {
+		if (!initialized) { throw new Error("Initialize DaxploreFile before using it."); }
 		return rawMetaManager;
 	}
 
 	public RawDataManager getRawDataManager() {
+		if (!initialized) { throw new Error("Initialize DaxploreFile before using it."); }
 		return rawDataManager;
 	}
 
 	public MetaGroupManager getMetaGroupManager() {
+		if (!initialized) { throw new Error("Initialize DaxploreFile before using it."); }
 		return metaGroupManager;
 	}
 
 	public MetaQuestionManager getMetaQuestionManager() {
+		if (!initialized) { throw new Error("Initialize DaxploreFile before using it."); }
 		return metaQuestionManager;
 	}
 
 	public MetaScaleManager getMetaScaleManager() {
+		if (!initialized) { throw new Error("Initialize DaxploreFile before using it."); }
 		return metaScaleManager;
 	}
 
 	public MetaMeanManager getMetaMeanManager() {
+		if (!initialized) { throw new Error("Initialize DaxploreFile before using it."); }
 		return metaMeanManager;
 	}
 
 	public MetaTimepointShortManager getMetaTimepointShortManager() {
+		if (!initialized) { throw new Error("Initialize DaxploreFile before using it."); }
 		return metaTimepointShortManager;
 	}
 
 	public TextReferenceManager getTextReferenceManager() {
+		if (!initialized) { throw new Error("Initialize DaxploreFile before using it."); }
 		return textReferenceManager;
 	}
 

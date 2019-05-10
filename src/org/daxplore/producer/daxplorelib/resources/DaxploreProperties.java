@@ -21,7 +21,7 @@ public class DaxploreProperties {
 	 * SQLite's application ID for .daxplore save file, stored in sqlite's PRAGMA application_id.
 	 * https://sqlite.org/pragma.html#pragma_application_id
 	 **/
-	public static final int daxploreFileApplicationID = 474105420;
+	public static final int daxploreFileApplicationID = 474105423;
 
 	/**
 	 * File version for .daxplore save file, stored in sqlite's PRAGMA user_version.

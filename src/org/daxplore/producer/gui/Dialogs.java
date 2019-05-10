@@ -36,6 +36,7 @@ import org.daxplore.producer.daxplorelib.metadata.MetaGroup.MetaGroupManager;
 import org.daxplore.producer.daxplorelib.metadata.MetaQuestion;
 import org.daxplore.producer.daxplorelib.metadata.textreference.TextReference;
 import org.daxplore.producer.daxplorelib.metadata.textreference.TextReferenceManager;
+import org.daxplore.producer.daxplorelib.resources.DaxploreProperties;
 import org.daxplore.producer.gui.resources.UITexts;
 import org.daxplore.producer.gui.utility.DisplayLocale;
 
@@ -51,8 +52,32 @@ public class Dialogs {
 				null,
 				options,
 				options[1]);
-		
+
 		return answer == 0; // 0 == index of overwrite in array
+	}
+	
+	/**
+	 * Show an dialog to the user, asking if they want the .daxplore save file to be upgraded.
+	 * 
+	 * Used when opening a {@link DaxploreFile} with an old file version. The upgrade is instantly written to the file on disk,
+	 * so need to be properly confirmed by the user.
+	 *  
+	 * @param parent is the the GUI element to show this dialog in relation to
+	 * @param fileName is the name of the file that will upgrade
+	 * @param fileVersion is the pre-upgrade .daxplore file version
+	 * @return true if the file should be upgraded
+	 */
+	public static boolean confirmDaxploreFileUpgrade(Component parent, String fileName, int fileVersion) {
+		String[] options = {UITexts.get("dialog.options.upgrade"), UITexts.get("dialog.options.cancel")};
+		int answer = JOptionPane.showOptionDialog(parent,
+				UITexts.format("dialog.upgrade.question", fileName, fileVersion, DaxploreProperties.daxploreFileVersion),
+				UITexts.get("dialog.upgrade.title"),
+				JOptionPane.YES_NO_OPTION,
+				JOptionPane.QUESTION_MESSAGE,
+				null,
+				options,
+				options[1]);
+		return answer == 0; // 0 is the index of "upgrade" in array
 	}
 	
 	public static boolean editTextRefDialog(Component parent, List<Locale> locales, TextReference textRef) {

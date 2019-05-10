@@ -27,6 +27,7 @@ import javax.swing.filechooser.FileNameExtensionFilter;
 
 import org.daxplore.producer.daxplorelib.DaxploreException;
 import org.daxplore.producer.daxplorelib.DaxploreFile;
+import org.daxplore.producer.daxplorelib.resources.DaxploreProperties;
 import org.daxplore.producer.gui.event.DaxploreFileUpdateEvent;
 import org.daxplore.producer.gui.resources.IconResources;
 import org.daxplore.producer.gui.utility.DaxploreLogger;
@@ -130,19 +131,48 @@ public class WelcomeDialog {
 					System.out.println("Opening: " + file.getName() + ".");
 					
 					try {
+						// Open file, will throw Exception if it's not an SQLite file
 						DaxploreFile daxploreFile = DaxploreFile.createFromExistingFile(file);
+						
+						// Check that the SQLite application ID matched the one used by Daxplore Producer
+						if (!daxploreFile.hasValidApplicationID()) {
+							// TODO direct user error dialog
+							throw new DaxploreException("Not a Daxplore save file."
+								+ " This file uses SQLite application ID " + daxploreFile.getFileApplicationVersion() + "."
+								+ " Daxplore files use application ID " + DaxploreProperties.daxploreFileApplicationID);
+						}
+						
+						// Check if the file is from a newer version of Daxplore Producer
+						if (daxploreFile.getFileVersion() > DaxploreProperties.daxploreFileVersion) {
+							// TODO direct user error dialog
+							throw new DaxploreException("File version type is " + daxploreFile.getFileVersion() 
+									+ ", but this version of Daxplore Producer only supports file version "
+									+ DaxploreProperties.daxploreFileVersion
+									+ " or lower. Please upgrade your Daxplore Producer."); 
+						}
+						
+						// Check if the file is from an older version of Daxplore Producer.
+						// Offer to upgrade old files to the current file version.
+						if (daxploreFile.getFileVersion() < DaxploreProperties.daxploreFileVersion) {
+							boolean confirmUpgrade = Dialogs.confirmDaxploreFileUpgrade(welcomeFrame, file.getName(), daxploreFile.getFileVersion());
+							if (confirmUpgrade) {
+								daxploreFile.upgradeFileVersion();
+							} else {
+								// Fall back to initial new/open dialog
+								return;
+							}
+						}
+						
+						daxploreFile.initializeInternalStructures();
 						eventBus.post(new DaxploreFileUpdateEvent(daxploreFile));
 					} catch (DaxploreException e2) {
-						// TODO Auto-generated catch block
+						// TODO more complete error message, including stack trace?
 						e2.printStackTrace();
+						JOptionPane.showMessageDialog(welcomeFrame, e2.getMessage());
 					}
-					
-					
-
 				} else {
 					System.out.println("Open command cancelled by user.");
 				}
-				
 			}
 		});
 		welcomeFrame.add(existingProjectButton);
@@ -164,8 +194,9 @@ public class WelcomeDialog {
 						welcomeFrame.setVisible(false);
 						welcomeFrame.dispose();
 					} catch (Exception e1) {
-						//TODO communicate error to user
+						// TODO more complete error message, including stack trace?
 						e1.printStackTrace();
+						JOptionPane.showMessageDialog(welcomeFrame, e1.getMessage());
 					}
 				}
 			});
