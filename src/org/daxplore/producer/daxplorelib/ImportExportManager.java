@@ -248,6 +248,8 @@ public class ImportExportManager {
 		json.add("locales", locales);
 		
 		// TODO add used page types (i.e. explorer, profile, etc.) to manifest?
+		// TODO add some project identifier or name?
+		// TODO add some meta data, for example date of export?
 		
 		return json;
 	}
