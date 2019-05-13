@@ -10,7 +10,6 @@ package org.daxplore.producer.daxplorelib;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.Reader;
 import java.io.Writer;
@@ -39,19 +38,9 @@ import java.util.logging.Logger;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
-import javax.xml.XMLConstants;
-import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
-import javax.xml.transform.OutputKeys;
-import javax.xml.transform.Transformer;
 import javax.xml.transform.TransformerException;
-import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.TransformerFactoryConfigurationError;
-import javax.xml.transform.dom.DOMSource;
-import javax.xml.transform.stream.StreamResult;
-import javax.xml.transform.stream.StreamSource;
-import javax.xml.validation.Schema;
-import javax.xml.validation.SchemaFactory;
 
 import org.daxplore.producer.daxplorelib.calc.StatsCalculation;
 import org.daxplore.producer.daxplorelib.metadata.MetaGroup;
@@ -74,8 +63,6 @@ import org.opendatafoundation.data.FileFormatInfo.ASCIIFormat;
 import org.opendatafoundation.data.FileFormatInfo.Compatibility;
 import org.opendatafoundation.data.spss.SPSSFile;
 import org.opendatafoundation.data.spss.SPSSFileException;
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
 import org.xml.sax.SAXException;
 
 import com.google.common.base.Charsets;
@@ -148,25 +135,12 @@ public class ImportExportManager {
 		Logger.getGlobal().log(Level.INFO, "Generated data in " + ((System.nanoTime() -time)/Math.pow(10,9)) + "s");
 		time = System.nanoTime();
 		
-		try (ZipOutputStream zout = new ZipOutputStream(output)) {
-			//manifest
-			Document manifest = getUploadManifest();
-			Transformer transformer = TransformerFactory.newInstance().newTransformer();
-			transformer.setOutputProperty(OutputKeys.INDENT, "yes");
-			transformer.setOutputProperty("{http://xml.apache.org/xslt}indent-amount", "4");
-			DOMSource xmlSource = new DOMSource(manifest);
-			ZipEntry entry = new ZipEntry("manifest.xml");
-		    zout.putNextEntry(entry);
-			StreamResult streamResult = new StreamResult(zout);
-			transformer.transform(xmlSource, streamResult);
-			zout.flush();
-			zout.closeEntry();
-
-			StreamResult streamResultSystem = new StreamResult(System.out);
-			transformer.transform(xmlSource, streamResultSystem);
-			
+		try (ZipOutputStream zout = new ZipOutputStream(output)) {	
 			Gson plainGson = new Gson();
 			Gson prettyGson = new GsonBuilder().setPrettyPrinting().create();
+			
+			// Add data package manifest
+			writeZipString(zout, "manifest.json", prettyGson.toJson(getExportDataPackageManifest()));
 			
 			// Generate a new file for each question
 			for (MetaQuestion question : questionData.keySet()) {
@@ -250,44 +224,32 @@ public class ImportExportManager {
 	    zout.closeEntry();
 	}
 	
-	private Document getUploadManifest() throws SAXException, IOException, ParserConfigurationException {
-		DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
-		dbf.setSchema(getUploadFileManifestSchema());
-		Document doc = dbf.newDocumentBuilder().newDocument();
-		doc.setXmlStandalone(true);
+	/**
+	 * Get a JSON representation of the export data package manifest content.
+	 * 
+	 * The manifest contains:
+	 * - The data package version, which should be synced with the Daxplore Presenter data version
+	 * - A list of locales supported in the exported data
+	 * 
+	 * @return a JSON element containing the upload manifests
+	 */
+	private JsonElement getExportDataPackageManifest() {
+		JsonObject json = new JsonObject();
 		
-		Element root = doc.createElement("daxploreUploadFileManifest");
-		doc.appendChild(root);
-		root.setAttribute("xmlns:xsi", "http://www.w3.org/2001/XMLSchema-instance");
-		root.setAttribute("xsi:noNamespaceSchemaLocation", "UploadFileManifest.xsd");
+		// Add the export version
+		json.addProperty("dataPackageVersion", DaxploreProperties.exportDataPackageVersion);
+		JsonArray locales = new JsonArray();
 		
-		Element version = doc.createElement("dataVersion");
-		root.appendChild(version);
-		version.appendChild(doc.createTextNode(""+DaxploreProperties.exportFileVersion));
-		
-		Element supportedLocales = doc.createElement("supportedLocales");
-		root.appendChild(supportedLocales);
+		// Add supported locales
 		for(Locale locale : daxploreFile.getAbout().getLocales()) {
-			Element localeElement = doc.createElement("language-BCP47");
-			supportedLocales.appendChild(localeElement);
-			localeElement.appendChild(doc.createTextNode(locale.toLanguageTag()));
+			// Use toLanguageTag to get the IETF BCP 47 language tag representation
+			locales.add(new JsonPrimitive(locale.toLanguageTag()));
 		}
+		json.add("locales", locales);
 		
-		Element defaultLocale = doc.createElement("defaultLocale");
-		root.appendChild(defaultLocale);
-		Element localeElement = doc.createElement("language-BCP47");
-		defaultLocale.appendChild(localeElement);
-		localeElement.appendChild(doc.createTextNode(daxploreFile.getAbout().getLocales().get(0).toLanguageTag())); // TODO pick default locale properly
+		// TODO add used page types (i.e. explorer, profile, etc.) to manifest?
 		
-		return doc;
-	}
-	
-	private static Schema getUploadFileManifestSchema() throws SAXException, IOException {
-		try (InputStream stream = DaxploreFile.class.getResourceAsStream("UploadFileManifest.xsd")) {
-			SchemaFactory sf = SchemaFactory.newInstance(XMLConstants.W3C_XML_SCHEMA_NS_URI);
-			Schema schema = sf.newSchema(new StreamSource(stream));
-			return schema;
-		}
+		return json;
 	}
 	
 	private JsonElement getUITextsJson(Locale locale) throws DaxploreException {

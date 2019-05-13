@@ -30,7 +30,7 @@ public class DaxploreProperties {
 	public static final int daxploreFileVersion = 4;
 	
 	/** File version for export .zip data file, stored in manifest.xml **/
-	public static final int exportFileVersion = 4;
+	public static final int exportDataPackageVersion = 4;
 	
 	public static final List<Locale> predefinedLocales =
 			ImmutableList.copyOf(Arrays.asList(
