@@ -93,12 +93,13 @@ public class DaxploreWizard extends Wizard {
 
 		@Override
 		public void actionPerformed(ActionEvent e) {
-			JFileChooser jfc = new JFileChooser(DaxploreWizard.preferences.getWorkingDirectory());
-			
-			FileFilter filter = new FileNameExtensionFilter(
-					UITexts.get("general.filetype.daxplorefile"), "daxplore");
+			FileFilter filter = new FileNameExtensionFilter(UITexts.get("general.filetype.daxplorefile"), "daxplore");
+			File directory = DaxploreWizard.preferences.getWorkingDirectory();
+			JFileChooser jfc = new JFileChooser(directory);
 			jfc.addChoosableFileFilter(filter);
 			jfc.setFileFilter(filter);
+			jfc.setDialogTitle(UITexts.get("wizard.create.dialogtitle"));
+			jfc.setSelectedFile(new File(directory, UITexts.get("wizard.create.untitledproject")));
 			
 			int returnVal = jfc.showSaveDialog(this);
 			
