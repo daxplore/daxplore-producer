@@ -30,6 +30,7 @@ import org.daxplore.producer.daxplorelib.DaxploreFile;
 import org.daxplore.producer.daxplorelib.DaxploreTable;
 import org.daxplore.producer.daxplorelib.SQLTools;
 import org.daxplore.producer.gui.resources.UITexts;
+import org.daxplore.producer.tools.MyTools;
 import org.json.simple.JSONValue;
 import org.json.simple.parser.ContainerFactory;
 import org.json.simple.parser.JSONParser;
@@ -129,7 +130,11 @@ public class RawMetaQuestion {
 				}
 				
 				if (Sets.symmetricDifference(rawDataColumns, rawMetaColumns).size() > 0) {
-					throw new DaxploreException("Corrupt data file: rawdata columns doesn't match rawmeta columns");
+					Object[] onlyInData = Sets.difference(rawDataColumns, rawMetaColumns).toArray();
+					Object[] onlyInMeta = Sets.difference(rawMetaColumns, rawDataColumns).toArray();
+					throw new DaxploreException("Corrupt data file: rawdata columns doesn't match rawmeta columns."
+							+ "\nOnly in data: '" + MyTools.join(onlyInData, "', '") + "'"
+							+ "\nOnly in meta: '" + MyTools.join(onlyInMeta, "', '") + "'");
 				}
 			}
 		}
@@ -203,13 +208,15 @@ public class RawMetaQuestion {
 		public class RawMetaImportResult {
 			public Set<String> addedColumns;
 			public Set<String> maintainedColumns;
+			public Set<String> updatedTypeColumns;
 			public Set<String> removedColumns;
 			public List<String> warnings;
 			public RawMetaImportResult(Set<String> addedColumns, Set<String> maintainedColumns,
-					Set<String> removedColumns, List<String> warnings) {
+					Set<String> updatedTypeColumns, Set<String> removedColumns, List<String> warnings) {
 				this.addedColumns = addedColumns;
 				this.maintainedColumns = maintainedColumns;
 				this.removedColumns = removedColumns;
+				this.updatedTypeColumns = updatedTypeColumns;
 				this.warnings = warnings;
 			}
 		}
@@ -223,6 +230,7 @@ public class RawMetaQuestion {
 			Set<String> oldQuestions = new TreeSet<>(columnMap.keySet());
 			Set<String> addedQuestions = new TreeSet<>();
 			Set<String> maintainedQuestions = new TreeSet<>();
+			Set<String> updatedTypeQuestions = new TreeSet<>();
 			List<String> warnings = new ArrayList<>();
 			
 			LinkedHashMap<String, RawMetaQuestion> newColumnMap = new LinkedHashMap<>();
@@ -272,16 +280,18 @@ public class RawMetaQuestion {
 					String qTypeMessage = rmq.setQtype(qtype);
 					if (qTypeMessage != null) {
 						warnings.add(qTypeMessage);
+						// If the question mapping has changed, re-add the question to reset question types.
+						// This will implicitly result in the question being first removed (it's an old question but not
+						// a maintained question) and then added fresh. Track updatedType to prevent incorrect logging.
+//						addedQuestions.add(column);
+						updatedTypeQuestions.add(column);
 					}
-					
 					rmq.setSpsstype(spsstype);
 					String valueLabelMessage = rmq.setValuelabels(valuelabels);
 					if (valueLabelMessage != null) {
 						warnings.add(valueLabelMessage);
 					}
-					
 					rmq.setMeasure(var.getMeasureLabel());
-					
 					maintainedQuestions.add(column);
 				} else {
 					rmq = new RawMetaQuestion(
@@ -305,7 +315,7 @@ public class RawMetaQuestion {
 			toBeRemoved.addAll(removedQuestions);
 			columnMap = newColumnMap;
 			
-			return new RawMetaImportResult(addedQuestions, maintainedQuestions, removedQuestions, warnings);
+			return new RawMetaImportResult(addedQuestions, maintainedQuestions, updatedTypeQuestions, removedQuestions, warnings);
 		}
 
 		public boolean hasColumn(String column) {

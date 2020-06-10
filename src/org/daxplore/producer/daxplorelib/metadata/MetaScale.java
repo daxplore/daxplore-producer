@@ -362,4 +362,17 @@ public class MetaScale<T> {
 			}
 		}
 	}
+	
+	/* 
+	 * Change Scale to a new type.
+	 * 
+	 * Overrides generics safety at runtime and throws away all previous options.
+	 */
+	public void setScaleVariableType(VariableType type) {
+		if (this.type != type) {
+			this.type = type;
+			options = new LinkedList();	
+			modified = true;
+		}
+	}
 }

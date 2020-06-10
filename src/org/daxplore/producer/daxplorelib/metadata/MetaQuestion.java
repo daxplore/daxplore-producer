@@ -66,10 +66,10 @@ public class MetaQuestion {
 		FREQ, DICH, MEAN
 	}
 	
-	static final String textrefSuffixFullText= "_fulltext";
-	static final String textrefSuffixShortText= "_shorttext";
-	static final String textrefSuffixDescriptionText = "_descriptiontext";
-	static final String textrefSuffixTitleMatchRegex = "_titlematchregex";
+	public static final String textrefSuffixFullText= "_fulltext";
+	public static final String textrefSuffixShortText= "_shorttext";
+	public static final String textrefSuffixDescriptionText = "_description";
+	public static final String textrefSuffixTitleMatchRegex = "_titlematchregex";
 	
 	public static class MetaQuestionManager {
 		
@@ -80,7 +80,7 @@ public class MetaQuestion {
 		private MetaTimepointShortManager timePointManager;
 		
 		private Map<Integer, MetaQuestion> questionMap = new HashMap<>();
-		private LinkedList<MetaQuestion> toBeAdded= new LinkedList<>();
+		private LinkedList<MetaQuestion> toBeAdded = new LinkedList<>();
 		private Map<Integer, MetaQuestion> toBeRemoved = new HashMap<>();
 		private int addDelta = 0;
 		
@@ -377,11 +377,18 @@ public class MetaQuestion {
 		return type;
 	}
 	
+	public void setType(VariableType type) {
+		if(!type.equals(this.type)) {
+			this.type = type;
+			modified = true;
+		}
+	}
+	
 	public MetaScale<?> getScale() {
 		return scale;
 	}
 	
-	public void setScale(MetaScale<?> scale) throws DaxploreException {
+	private void setScale(MetaScale<?> scale) throws DaxploreException {
 		if(!scale.equals(this.scale)) {
 			if(scale.getType() == type) {
 				this.scale = scale;

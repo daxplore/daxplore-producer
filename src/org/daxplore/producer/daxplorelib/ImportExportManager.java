@@ -192,7 +192,7 @@ public class ImportExportManager {
 			    emptyTextrefs.addAll(daxploreFile.getMetaGroupManager().getEmptyTextRefs(locale));
 			    writeZipString(zout, "groups_"+locale.toLanguageTag()+".json", groupJSONString);
 			    
-			    writeZipString(zout, "perspectives.json", prettyGson.toJson(perspectives.toJSONObject()));
+			    writeZipString(zout, "perspectives.json", prettyGson.toJson(daxploreFile.getMetaGroupManager().getPerspectiveGroupJsonObject()));
 			    
 			    String listViewJSONString = prettyGson.toJson(daxploreFile.getMetaGroupManager().getListViewVariablesJSON());
 			    writeZipString(zout, "listview.json", listViewJSONString);
@@ -308,10 +308,20 @@ public class ImportExportManager {
 				guiMessages.add(UITexts.get("library.import.matched_variable") + column);
 			}
 			
+			for (String column : metaImportResult.updatedTypeColumns) {
+				for (MetaQuestion mq : daxploreFile.getMetaQuestionManager().getAll()) {
+					if (mq.getColumn().equals(column)) {
+						VariableType vt = daxploreFile.getRawMetaManager().getQuestion(column).getQtype();
+						mq.setType(vt);
+						mq.getScale().setScaleVariableType(vt);
+					}
+				}
+			}
+			
 			for (String column : metaImportResult.addedColumns) {
 				RawMetaQuestion rmq = daxploreFile.getRawMetaManager().getQuestion(column);
 				VariableType type = rmq.getQtype();
-				TextReference fulltext = daxploreFile.getTextReferenceManager().get(column + "_fulltext");
+				TextReference fulltext = daxploreFile.getTextReferenceManager().get(column + MetaQuestion.textrefSuffixFullText);
 				
 				fulltext.put(rmq.getQtext(), locale);
 				List<MetaScale.Option<?>> scaleOptions = new LinkedList<MetaScale.Option<?>>();
@@ -368,9 +378,9 @@ public class ImportExportManager {
 					meanExcludedValues.clear();
 				}
 				
-				TextReference shorttext = daxploreFile.getTextReferenceManager().get(column + "_shorttext");
-				TextReference descriptiontext = daxploreFile.getTextReferenceManager().get(column + "_description");
-				TextReference titlematchregex = daxploreFile.getTextReferenceManager().get(column + "_titlematchregex");
+				TextReference shorttext = daxploreFile.getTextReferenceManager().get(column + MetaQuestion.textrefSuffixShortText);
+				TextReference descriptiontext = daxploreFile.getTextReferenceManager().get(column + MetaQuestion.textrefSuffixDescriptionText);
+				TextReference titlematchregex = daxploreFile.getTextReferenceManager().get(column + MetaQuestion.textrefSuffixTitleMatchRegex);
 				List<MetaTimepointShort> timepoints = new LinkedList<>();
 				daxploreFile.getMetaQuestionManager().create(column, type, shorttext, fulltext, descriptiontext, titlematchregex, scaleOptions, meanExcludedValues, Double.NaN, timepoints);
 			}

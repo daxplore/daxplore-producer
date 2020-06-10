@@ -295,6 +295,18 @@ public class MetaGroup implements Comparable<MetaGroup> {
 			}
 		}
 		
+		public JsonElement getPerspectiveGroupJsonObject() throws DaxploreException {
+			MetaGroup perspectiveGroup = getPerspectiveGroup();
+			JsonArray perspectives = new JsonArray();
+			for(MetaQuestion q : perspectiveGroup.getQuestions()) {
+				JsonObject perspective = new JsonObject();
+				perspective.add("q", new JsonPrimitive(q.getColumn()));
+				perspective.add("explorerPerspective", new JsonPrimitive(true));
+				perspectives.add(perspective);
+			}
+			return perspectives;
+		}
+		
 		public boolean inPerspectives(MetaQuestion metaQuestion) throws DaxploreException {
 			return getPerspectiveGroup().contains(metaQuestion);
 		}
@@ -567,19 +579,6 @@ public class MetaGroup implements Comparable<MetaGroup> {
 			return json;
 		default:
 			throw new AssertionError("Non-existant group type");	
-		}
-	}
-	
-	/**
-	 * Get as json for group types that don't depend on locale (i.e. {@link GroupType#PERSPECTIVE})
-	 * @throws DaxploreException 
-	 */
-	public JsonElement toJSONObject() throws DaxploreException {
-		switch(type) {
-		case PERSPECTIVE:
-			return toJSONObject(null);
-		default:
-			throw new DaxploreException("Can't generate json for type '" + type.toString() + "' without a specified locale");
 		}
 	}
 }

@@ -30,7 +30,7 @@ public class DaxploreProperties {
 	public static final int daxploreFileVersion = 4;
 	
 	/** File version for export .zip data file, stored in manifest.xml **/
-	public static final int exportDataPackageVersion = 4;
+	public static final int exportDataPackageVersion = 5;
 	
 	public static final List<Locale> predefinedLocales =
 			ImmutableList.copyOf(Arrays.asList(
@@ -54,6 +54,7 @@ public class DaxploreProperties {
 		settingsMap.put("perspectiveCheckboxesPerColumn", new Integer(8));
 		settingsMap.put("questionDescriptionPosition", new String("BOTTOM")); //TODO enums
 		settingsMap.put("perspectiveDescriptionPosition", new String("BOTTOM"));
+		settingsMap.put("structure.perspectivePosition", new String("BOTTOM"));
 		clientSettingsDefaults = ImmutableMap.copyOf(settingsMap);
 		clientSettings = ImmutableList.copyOf(clientSettingsDefaults.keySet());
 	}
@@ -82,6 +83,11 @@ public class DaxploreProperties {
 					"embedSettingsHeader",
 					"embedShowLegend",
 					"embedTransparentBackground",
+					"explorer.freq.legend.missing_data",
+					"explorer.freq.tooltip.single",
+					"explorer.freq.tooltip.single_missing_data",
+					"explorer.freq.tooltip.timepoints", 
+					"explorer.freq.tooltip.timepoints_missing_data",
 					"hideWarningButton",
 					"imageSaveButton",
 					"imageTitleProfileChart",
@@ -91,6 +97,13 @@ public class DaxploreProperties {
 					"listReferenceWorse",
 					"listReferenceComparable",
 					"listXAxisDescription",
+					"meanbars_legend_missingData",
+					"meanbars_legend_referenceValue",
+					"meanbars_tooltip_fewRespondents",
+					"meanbars_tooltip_mean",
+					"meanbars_tooltip_missingData",
+					"meanbars_tooltip_referenceValue",
+					"meanbars_tooltip_respondents",
 					"onlyShowNewTitleDisabled",
 					"onlyShowNewTitleEnabled",
 					"onlyShowNew",
