@@ -42,19 +42,19 @@ public class DaxploreProperties {
 	static {
 		Map<String, Object> settingsMap = new LinkedHashMap<String, Object>(); 
 		//TODO: rename things to more descriptive names
-		settingsMap.put("csv", new Boolean(false));
-		settingsMap.put("img", new Boolean(false));
-		settingsMap.put("embed", new Boolean(true));
-		settingsMap.put("timebuttons", new Boolean(false));
-		settingsMap.put("typebuttons", new Boolean(false));
-		settingsMap.put("respondents", new Boolean(true));
-		settingsMap.put("defaultSelectedPerspectiveOptions", new Integer(4));
-		settingsMap.put("showSelectTotal", new Boolean(true));
-		settingsMap.put("defaultSelectTotal", new Boolean(true));
-		settingsMap.put("perspectiveCheckboxesPerColumn", new Integer(8));
-		settingsMap.put("questionDescriptionPosition", new String("BOTTOM")); //TODO enums
-		settingsMap.put("perspectiveDescriptionPosition", new String("BOTTOM"));
-		settingsMap.put("structure.perspectivePosition", new String("BOTTOM"));
+		settingsMap.put("csv", false);
+		settingsMap.put("img", false);
+		settingsMap.put("embed", true);
+		settingsMap.put("timebuttons", false);
+		settingsMap.put("typebuttons", false);
+		settingsMap.put("respondents", true);
+		settingsMap.put("defaultSelectedPerspectiveOptions", 4);
+		settingsMap.put("showSelectTotal", true);
+		settingsMap.put("defaultSelectTotal", true);
+		settingsMap.put("perspectiveCheckboxesPerColumn", 8);
+		settingsMap.put("questionDescriptionPosition", "BOTTOM"); //TODO enums
+		settingsMap.put("perspectiveDescriptionPosition", "BOTTOM");
+		settingsMap.put("structure.perspectivePosition", "BOTTOM");
 		clientSettingsDefaults = ImmutableMap.copyOf(settingsMap);
 		clientSettings = ImmutableList.copyOf(clientSettingsDefaults.keySet());
 	}
