@@ -55,6 +55,7 @@ public class DaxploreProperties {
 		settingsMap.put("questionDescriptionPosition", "BOTTOM"); //TODO enums
 		settingsMap.put("perspectiveDescriptionPosition", "BOTTOM");
 		settingsMap.put("structure.perspectivePosition", "BOTTOM");
+		settingsMap.put("chart.mean.orientation", "HORIZONTAL");
 		clientSettingsDefaults = ImmutableMap.copyOf(settingsMap);
 		clientSettings = ImmutableList.copyOf(clientSettingsDefaults.keySet());
 	}
@@ -90,8 +91,6 @@ public class DaxploreProperties {
 					"explorer.freq.tooltip.timepoints_missing_data",
 					"hideWarningButton",
 					"imageSaveButton",
-					"imageTitleProfileChart",
-					"imageWaterStamp",
 					"listReferenceValue",
 					"listReferenceBetter",
 					"listReferenceWorse",
@@ -114,6 +113,10 @@ public class DaxploreProperties {
 					"perspectivesMoreButton",
 					"perspectivesNoneButton",
 					"printButtonTitle",
+					"profile.image.filename",
+					"profile.image.watermark",
+					"profile_user.image.filename",
+					"profile_user.image.watermark",
 					"questionsHeader",
 					"secondaryFlag",
 					"showAverageTitleDisabled",
