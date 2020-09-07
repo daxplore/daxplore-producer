@@ -125,6 +125,7 @@ public class MainController {
 		
 		actionManager = new ActionManager(eventBus);
 		
+		mainWindow.setTitle(UITexts.format("window.main.title", daxploreFile.getFile().getName()));
 		mainWindow.setDefaultCloseOperation(WindowConstants.DO_NOTHING_ON_CLOSE);
 		mainWindow.addWindowListener(new WindowAdapter() {
 			@Override

@@ -33,7 +33,6 @@ public class MainView {
 	MainView(JFrame mainWindow) {
 		this.mainWindow = mainWindow;
 		mainWindow.setIconImage(IconResources.getImage("window-icon.png"));
-		mainWindow.setTitle("Daxplore Producer Developer Version");
 		mainWindow.setSize(1020, 900); //TODO: save size in preferences
 		mainWindow.setLocationRelativeTo(null);
 		mainWindow.getContentPane().setLayout(new BorderLayout(0, 0));
