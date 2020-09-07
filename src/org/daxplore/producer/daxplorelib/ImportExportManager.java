@@ -478,6 +478,11 @@ public class ImportExportManager {
 						output.add(createOutputRow(tr, locale));
 					}
 					
+					tr = question.getTitleMatchRegexTextRef();
+					if(tr.hasText(locale) && tr.getText(locale).length() > 0 && writtenRefs.add(tr)) {
+						output.add(createOutputRow(tr, locale));
+					}
+					
 					if(  question.useFrequencies()
 					  || question.useDichotomizedLine()
 					  || daxploreFile.getMetaGroupManager().getPerspectiveGroup().contains(question)) {
