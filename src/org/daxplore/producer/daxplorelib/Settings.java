@@ -182,7 +182,11 @@ public class Settings {
 	
 	public void putSetting(String key, Object value) {
 		getAndLoad(key);
-		boolean isindb = (settingsMap.containsKey(key) && !toBeAdded.contains(key)) || toBeRemoved.contains(key); 
+		boolean isindb = (settingsMap.containsKey(key) && !toBeAdded.contains(key)) || toBeRemoved.contains(key);
+		// remove any whitespace at the end and beginning of string settings
+		if (value instanceof String) {
+			value = ((String) value).trim();
+		}
 		if(isindb) {
 			toBeUpdated.add(key);
 		} else {
