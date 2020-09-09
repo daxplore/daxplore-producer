@@ -21,6 +21,7 @@ import javax.swing.ListSelectionModel;
 import javax.swing.table.TableCellEditor;
 import javax.swing.table.TableCellRenderer;
 
+import org.daxplore.producer.daxplorelib.metadata.MetaGroup.MetaGroupManager;
 import org.daxplore.producer.daxplorelib.metadata.textreference.TextReference;
 import org.daxplore.producer.gui.widget.AbstractWidget;
 import org.daxplore.producer.gui.widget.AbstractWidgetEditor;
@@ -42,7 +43,7 @@ public class TimePointTable extends JTable {
 	private int mouseOverRow;
 	private int mouseOverColumn;
 
-	public TimePointTable(EventBus eventBus, TimePointTableModel model) {
+	public TimePointTable(EventBus eventBus, MetaGroupManager metaGroupManager, TimePointTableModel model) {
 		super(model);
 		setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
         mouseOverRow = -1;
@@ -52,7 +53,7 @@ public class TimePointTable extends JTable {
         setDefaultRenderer(TextReference.class, cellRenderer);
         setDefaultEditor(TextReference.class, cellRenderer);
         //TODO should we have to create a QuestionWidget here?
-        setRowHeight(new QuestionWidget(eventBus).getPreferredSize().height);
+        setRowHeight(new QuestionWidget(eventBus, metaGroupManager).getPreferredSize().height);
         
         addMouseMotionListener(new MouseMotionAdapter() {
             @Override

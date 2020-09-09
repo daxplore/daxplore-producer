@@ -26,6 +26,7 @@ import javax.swing.table.AbstractTableModel;
 import javax.swing.table.TableCellEditor;
 import javax.swing.table.TableCellRenderer;
 
+import org.daxplore.producer.daxplorelib.metadata.MetaGroup.MetaGroupManager;
 import org.daxplore.producer.daxplorelib.metadata.MetaQuestion;
 import org.daxplore.producer.gui.event.EditQuestionEvent;
 import org.daxplore.producer.gui.event.EmptyEvents.ReloadTextsEvent;
@@ -39,10 +40,12 @@ import com.google.common.eventbus.Subscribe;
 public class QuestionTable extends JTable {
 	
 	protected int mouseOver;
+	private MetaGroupManager metaGroupManager;
 	private AbstractTableModel model;
 	
-	public QuestionTable(final EventBus eventBus, final AbstractTableModel model) {
+	public QuestionTable(final EventBus eventBus, final MetaGroupManager metaGroupManager, final AbstractTableModel model) {
 		super(model);
+		this.metaGroupManager = metaGroupManager;
 		this.model = model;
 		
 		eventBus.register(this);
@@ -53,7 +56,7 @@ public class QuestionTable extends JTable {
         
         setDefaultRenderer(MetaQuestion.class, new QuestionCellRenderer(eventBus));
         //TODO should we have to create a QuestionWidget here?
-        setRowHeight(new QuestionWidget(eventBus).getPreferredSize().height);
+        setRowHeight(new QuestionWidget(eventBus, metaGroupManager).getPreferredSize().height);
         
         addMouseMotionListener(new MouseMotionAdapter() {
             @Override
@@ -110,8 +113,8 @@ public class QuestionTable extends JTable {
 		private Border nonFocusBorder = new EmptyBorder(1, 1, 1, 1);
 		
 		public QuestionCellRenderer(EventBus eventBus) {
-			qwRenderer = new QuestionWidget(eventBus);
-			qwEditor = new QuestionWidget(eventBus);
+			qwRenderer = new QuestionWidget(eventBus, metaGroupManager);
+			qwEditor = new QuestionWidget(eventBus, metaGroupManager);
 		}
 		
 	    @Override

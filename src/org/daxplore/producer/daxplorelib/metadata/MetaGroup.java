@@ -23,6 +23,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.stream.Collectors;
 
 import org.daxplore.producer.daxplorelib.DaxploreException;
 import org.daxplore.producer.daxplorelib.DaxploreTable;
@@ -54,67 +55,79 @@ public class MetaGroup implements Comparable<MetaGroup> {
 			+ "FOREIGN KEY(questionid) REFERENCES metaquestion(id), "
 			+ "FOREIGN KEY(groupid) REFERENCES metagroup(id))",
 			"metagrouprel");
-
+	
 	public static class MetaGroupManager {
-
-		private Map<Integer, MetaGroup> groupMap = new HashMap<>();
-		private List<MetaGroup> toBeAddedGroup = new LinkedList<>();
-		private int addDelta = 0;
-		private List<MetaGroupRel> toBeAddedGroupRel = new LinkedList<>();
-		private Map<Integer, MetaGroup> toBeRemoved = new HashMap<>();
 		private Connection connection;
 		private TextReferenceManager textsManager;
 		private MetaQuestionManager questionManager;
+		
+		private Map<Integer, MetaGroup> groupMap = new HashMap<>();
+		private MetaGroup perspectiveGroup, perspectiveSecondaryGroup;
+		
+		private List<MetaGroup> toBeAddedGroup = new LinkedList<>();
+		private int addDelta = 0;
+		private List<MetaGroupRel> toBeAddedGroupRel = new LinkedList<>();
+		
+		private Map<Integer, MetaGroup> toBeRemoved = new HashMap<>();
 
 		public MetaGroupManager(Connection connection, TextReferenceManager textsManager,
-				MetaQuestionManager questionManager) throws SQLException {
+				MetaQuestionManager questionManager) throws SQLException, DaxploreException {
 			this.connection = connection;
 			this.textsManager = textsManager;
 			this.questionManager = questionManager;
 
 			SQLTools.createIfNotExists(groupTable, connection);
 			SQLTools.createIfNotExists(groupRelTable, connection);
+	
+			try (PreparedStatement stmt = connection.prepareStatement("SELECT * FROM metagroup")) {
+				try (ResultSet rs = stmt.executeQuery()) {
+					while (rs.next()) {
+						int id = rs.getInt("id");
+						TextReference tr = textsManager.get(rs.getString("textref"));
+						int index = rs.getInt("ord");
+						GroupType type = GroupType.fromInt(rs.getInt("type"));
+						
+						List<MetaQuestion> qList = new LinkedList<>();
+						try (PreparedStatement qstmt = connection
+								.prepareStatement("SELECT questionid FROM metagrouprel WHERE groupid = ? ORDER BY ord ASC")) {
+							qstmt.setInt(1, id);
+							try (ResultSet questionsResult = qstmt.executeQuery()) {
+								while (questionsResult.next()) {
+									qList.add(questionManager.get(questionsResult.getInt("questionid")));
+								}
+							}
+						}
+						
+						MetaGroup metaGroup = new MetaGroup(id, tr, index, type, qList);
+						groupMap.put(id, metaGroup);
+						switch (type) {
+						case PERSPECTIVE:
+							perspectiveGroup = metaGroup;
+							break;
+						case PERSPECTIVE_SECONDARY:
+							perspectiveSecondaryGroup = metaGroup;
+							break;
+						default:
+							break;
+						}
+					}
+				}
+			}
+			
+			if (perspectiveGroup == null) {
+				perspectiveGroup = create(textsManager.get("PERSPECTIVE"), 999, GroupType.PERSPECTIVE, new LinkedList<MetaQuestion>());
+			}
+			
+			if (perspectiveSecondaryGroup == null) {
+				perspectiveSecondaryGroup = create(textsManager.get("PERSPECTIVE_SECONDARY"), 999, GroupType.PERSPECTIVE_SECONDARY, new LinkedList<MetaQuestion>());
+			}
 		}
 
 		public MetaGroup get(int id) throws SQLException, DaxploreException {
 			if (groupMap.containsKey(id)) {
 				return groupMap.get(id);
-			} else if (toBeRemoved.containsKey(id)) {
-				throw new DaxploreException("No group with id '" + id + "'");
 			}
-
-			TextReference tr;
-			int index;
-			GroupType type;
-			try (PreparedStatement stmt = connection
-					.prepareStatement("SELECT * FROM metagroup WHERE id = ?")) {
-				stmt.setInt(1, id);
-				try (ResultSet rs = stmt.executeQuery()) {
-					if (rs.next()) {
-						tr = textsManager.get(rs.getString("textref"));
-						index = rs.getInt("ord");
-						type = GroupType.fromInt(rs.getInt("type"));
-					} else {
-						throw new DaxploreException("No group with id '" + id + "'");
-					}
-		
-				}
-			}
-
-			List<MetaQuestion> qList = new LinkedList<>();
-			try (PreparedStatement qstmt = connection
-					.prepareStatement("SELECT questionid FROM metagrouprel WHERE groupid = ? ORDER BY ord ASC")) {
-				qstmt.setInt(1, id);
-				try (ResultSet rs = qstmt.executeQuery()) {
-					while (rs.next()) {
-						qList.add(questionManager.get(rs.getInt("questionid")));
-					}
-				}
-			}
-			
-			MetaGroup mg = new MetaGroup(id, tr, index, type, qList);
-			groupMap.put(id, mg);
-			return mg;
+			throw new DaxploreException("No group with id '" + id + "'");
 		}
 
 		public MetaGroup create(TextReference textref, int index,
@@ -237,62 +250,30 @@ public class MetaGroup implements Comparable<MetaGroup> {
 					nModified++;
 				}
 			}
-			try {
-				perchanged = getPerspectiveGroup().modified? 1: 0;
-			} catch (DaxploreException e) {
-				//TODO: autogenerated catch clause
-				e.printStackTrace();
-			}
+			perchanged = getPerspectiveGroup().modified? 1: 0;
 			return nModified + toBeAddedGroup.size() + toBeAddedGroupRel.size() + toBeRemoved.size() + perchanged;
 		}
 
 		public List<MetaGroup> getAll() throws DaxploreException {
-			// make sure all groups are cached before returning the content of
-			// the map
-			try (Statement stmt = connection.createStatement();
-					ResultSet rs = stmt.executeQuery("SELECT id FROM metagroup")) {
-				while (rs.next()) {
-					int id = rs.getInt("id");
-					if (!groupMap.containsKey(id) && !toBeRemoved.containsKey(id)) {
-						get(id);
-					}
-				}
-			} catch (SQLException e) {
-				throw new DaxploreException("Failed to load the groups", e);
-			}
 			List<MetaGroup> groupList = new LinkedList<>(groupMap.values());
 			Collections.sort(groupList);
 			return groupList;
 		}
 		
 		public List<MetaGroup> getQuestionGroups() throws DaxploreException {
-			// make sure all groups are cached before returning the content of the map
-			List<MetaGroup> groupList = new LinkedList<>(toBeAddedGroup);
-			try (Statement stmt = connection.createStatement();
-			ResultSet rs = stmt.executeQuery("SELECT id FROM metagroup WHERE type IN (" + GroupType.QUESTIONS.type + ", " + GroupType.HEADER.type + ")")) {
-				while (rs.next()) {
-					int id = rs.getInt("id");
-					if (!toBeRemoved.containsKey(id)) {
-						groupList.add(get(id));
-					}
-				}
-			} catch (SQLException e) {
-				throw new DaxploreException("Exception while loading questions", e);
-			}
+			List<MetaGroup> groupList = groupMap.values().stream()
+					.filter(gm -> gm.getType() == GroupType.QUESTIONS)
+					.collect(Collectors.toList());
 			Collections.sort(groupList);
 			return groupList;
 		}
 		
-		public MetaGroup getPerspectiveGroup() throws DaxploreException {
-			try (Statement stmt =connection.createStatement();
-					ResultSet rs = stmt.executeQuery("SELECT id FROM metagroup WHERE type = " + GroupType.PERSPECTIVE.type)) {
-				if(rs.next()) {
-					return get(rs.getInt("id"));
-				}
-				return create(textsManager.get("PERSPECTIVE"), 999, GroupType.PERSPECTIVE, new LinkedList<MetaQuestion>()); //TODO 999
-			} catch (SQLException e) {
-				throw new DaxploreException("Failed to load perspectives", e);
-			}
+		public MetaGroup getPerspectiveGroup() {
+			return perspectiveGroup;
+		}
+		
+		public MetaGroup getPerspectiveSecondaryGroup() {
+			return perspectiveSecondaryGroup;
 		}
 		
 		public JsonElement getPerspectiveGroupJsonObject() throws DaxploreException {
@@ -378,7 +359,7 @@ public class MetaGroup implements Comparable<MetaGroup> {
 	}
 
 	public enum GroupType {
-		QUESTIONS(0), PERSPECTIVE(1), HEADER(2);
+		QUESTIONS(0), PERSPECTIVE(1), HEADER(2), PERSPECTIVE_SECONDARY(3);
 
 		protected final int type;
 
@@ -398,6 +379,8 @@ public class MetaGroup implements Comparable<MetaGroup> {
 				return PERSPECTIVE;
 			case 2:
 				return HEADER;
+			case 3:
+				return PERSPECTIVE_SECONDARY;
 			default:
 				throw new IllegalArgumentException("No group type with that type id: '" + i + "'");
 			}

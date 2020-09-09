@@ -24,7 +24,7 @@ public class VariableView extends JPanel {
 		tabPane.addTab(UITexts.get("question_edit.tab.info"), infoPanel);
 		tabPane.addTab(UITexts.get("question_edit.tab.freq"), freqPanel);
 		tabPane.addTab(UITexts.get("question_edit.tab.mean"), meanPanel);
-		tabPane.addTab(UITexts.get("question_edit.tab.text"), textPanel);
+//		tabPane.addTab(UITexts.get("question_edit.tab.text"), textPanel);
 	
 		this.add(tabPane, BorderLayout.CENTER);
 	}

@@ -66,6 +66,10 @@ public class PerspectivesTableModel extends DefaultTableModel {
 		return mg.getQuestion(rowIndex);
 	}
 	
+	public MetaQuestion getQuestionAt(int rowIndex) {
+		return mg.getQuestion(rowIndex);
+	}
+	
 	@Override
 	public void removeRow(int row) {
 		List<MetaQuestion> mqlist = mg.getQuestions();

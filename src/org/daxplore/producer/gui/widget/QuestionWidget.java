@@ -19,6 +19,9 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.border.EmptyBorder;
 
+import org.daxplore.producer.daxplorelib.DaxploreException;
+import org.daxplore.producer.daxplorelib.metadata.MetaGroup;
+import org.daxplore.producer.daxplorelib.metadata.MetaGroup.MetaGroupManager;
 import org.daxplore.producer.daxplorelib.metadata.MetaQuestion;
 import org.daxplore.producer.gui.GuiSettings;
 import org.daxplore.producer.gui.event.DisplayLocaleSelectEvent;
@@ -32,6 +35,7 @@ import com.google.common.eventbus.Subscribe;
 public class QuestionWidget extends JPanel implements AbstractWidgetEditor<MetaQuestion> {
 	
 	private MetaQuestion metaQuestion;
+	private MetaGroupManager metaGroupManager;
 
 	private String idFormat = "<html><b>{0}</b></html>";
 	private JLabel idLabel = new JLabel(MessageFormat.format(idFormat, "placeholder"));
@@ -42,14 +46,18 @@ public class QuestionWidget extends JPanel implements AbstractWidgetEditor<MetaQ
 	private final String longTextFormat = "{0}";
 	private JLabel longTextLabel = new JLabel(MessageFormat.format(longTextFormat, "placeholder"));
 	
+	private final String usageTextFormat = "<html>{0} / {1} / {2}</html>";
+	private JLabel usageTextLabel = new JLabel(MessageFormat.format(usageTextFormat, "-", "-", "-"));
+	
 	private Locale locale;
 	boolean compact = false;
 	
-	public QuestionWidget(EventBus eventBus) {
-		this(eventBus, false);
+	public QuestionWidget(EventBus eventBus, MetaGroupManager metaGroupManager) {
+		this(eventBus, metaGroupManager, false);
 	}
  	
-	public QuestionWidget(final EventBus eventBus, boolean compact) {
+	public QuestionWidget(final EventBus eventBus, MetaGroupManager metaGroupManager, boolean compact) {
+		this.metaGroupManager = metaGroupManager;
 		this.compact = compact;
 		eventBus.register(this);
 		locale = GuiSettings.getCurrentDisplayLocale();
@@ -73,6 +81,8 @@ public class QuestionWidget extends JPanel implements AbstractWidgetEditor<MetaQ
 			containerPanel.add(topRowPanel, BorderLayout.NORTH);
 			longTextLabel.setForeground(Color.GRAY);
 			containerPanel.add(longTextLabel, BorderLayout.SOUTH);
+			usageTextLabel.setForeground(Color.GRAY);
+			containerPanel.add(usageTextLabel, BorderLayout.EAST);
 			add(containerPanel, 0);
 		}
 	}
@@ -96,7 +106,22 @@ public class QuestionWidget extends JPanel implements AbstractWidgetEditor<MetaQ
 			setToolTipText(longText);
 		}
 		
-		longTextLabel.setText(MessageFormat.format(longTextFormat, longText));
+		try {
+			String isQuestion = "&nbsp;&nbsp;";
+			longTextLabel.setText(MessageFormat.format(longTextFormat, longText));
+			for (MetaGroup group : metaGroupManager.getQuestionGroups()) {
+				if(group.contains(metaQuestion)) {
+					isQuestion = "<b>Q</b>";
+					break;
+				}
+			}
+			String isPerspective = metaGroupManager.getPerspectiveGroup().contains(metaQuestion) ? "<b>P</b>" : "&nbsp;&nbsp;";
+			String isPerspectiveSecondary = metaGroupManager.getPerspectiveSecondaryGroup().contains(metaQuestion) ? "<b>P2</b>" : "&nbsp;&nbsp;";
+			usageTextLabel.setText(MessageFormat.format(usageTextFormat, isQuestion, isPerspective, isPerspectiveSecondary));
+		} catch (DaxploreException e) {
+			e.printStackTrace();
+			usageTextLabel.setText(MessageFormat.format(usageTextFormat, "ERROR", "ERROR", "ERROR"));
+		}
 	}
 
 	@Override

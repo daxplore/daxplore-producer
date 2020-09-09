@@ -25,6 +25,7 @@ import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 import javax.swing.tree.TreePath;
 
+import org.daxplore.producer.daxplorelib.DaxploreException;
 import org.daxplore.producer.daxplorelib.DaxploreFile;
 import org.daxplore.producer.daxplorelib.metadata.MetaGroup;
 import org.daxplore.producer.daxplorelib.metadata.MetaGroup.GroupType;
@@ -44,7 +45,8 @@ public class GroupsController implements ActionListener, MouseListener {
 
 	enum GroupsCommand {
 		EDIT_VARIABLE, GROUP_ADD, GROUP_UP, GROUP_DOWN, GROUP_REMOVE, GROUP_ADD_ITEM,
-		PERSPECTIVE_UP, PERSPECTIVE_DOWN, PERSPECTIVE_REMOVE, PERSPECTIVE_ADD_ITEM, EDIT_TREE
+		PERSPECTIVE_UP, PERSPECTIVE_DOWN, PERSPECTIVE_REMOVE, PERSPECTIVE_ADD_ITEM,
+		PERSPECTIVE_SECONDARY_TOGGLE, EDIT_TREE
 	}
 	
 	private EventBus eventBus;
@@ -89,7 +91,7 @@ public class GroupsController implements ActionListener, MouseListener {
 		this.daxploreFile = e.getDaxploreFile();
 		try {
 			questionTableModel = new QuestionTableModel(daxploreFile.getMetaQuestionManager());
-			questionJTable = new QuestionTable(eventBus, questionTableModel);
+			questionJTable = new QuestionTable(eventBus, daxploreFile.getMetaGroupManager(), questionTableModel);
 			
 			questionJTable.getSelectionModel().addListSelectionListener(new ListSelectionListener(){
 		        @Override
@@ -104,14 +106,14 @@ public class GroupsController implements ActionListener, MouseListener {
 			
 			//get groups and perspectives
 			groupTreeModel = new GroupTreeModel(daxploreFile.getMetaGroupManager());
-			groupTree = new GroupTree(eventBus, groupTreeModel);
+			groupTree = new GroupTree(eventBus, daxploreFile.getMetaGroupManager(), groupTreeModel);
 			groupTree.addMouseListener(this);
 			groupsView.setQuestionTree(groupTree);
 			
 			MetaGroup perspectives = daxploreFile.getMetaGroupManager().getPerspectiveGroup();
 			
 			perspectivesTableModel = new PerspectivesTableModel(perspectives);
-			perspectivesTable = new QuestionTable(eventBus, perspectivesTableModel);
+			perspectivesTable = new QuestionTable(eventBus, daxploreFile.getMetaGroupManager(), perspectivesTableModel);
 			groupsView.setPerspectiveList(perspectivesTable);
 			
 			questionJTable.getSelectionModel().setSelectionInterval(0, 0);
@@ -367,6 +369,19 @@ public class GroupsController implements ActionListener, MouseListener {
 				delta++;
 			}
 			break;
+		case PERSPECTIVE_SECONDARY_TOGGLE:
+			selectedRows = perspectivesTable.getSelectedRows();
+			metaGroupManager = daxploreFile.getMetaGroupManager();
+			for(int row : selectedRows) {
+				MetaQuestion metaQuestion = perspectivesTableModel.getQuestionAt(row);
+				MetaGroup perspectiveSecondaryGroup = metaGroupManager.getPerspectiveSecondaryGroup();
+				if (perspectiveSecondaryGroup.contains(metaQuestion)) {
+					perspectiveSecondaryGroup.removeQuestion(metaQuestion);
+				} else {
+					perspectiveSecondaryGroup.addQuestion(metaQuestion);
+				}
+			}
+			break;
 		case PERSPECTIVE_ADD_ITEM:
 			int index = perspectivesTable.getSelectedRow() != -1 ? perspectivesTable.getSelectedRow() : perspectivesTable.getRowCount();
 			for(int i : questionJTable.getSelectedRows()) {
@@ -377,8 +392,6 @@ public class GroupsController implements ActionListener, MouseListener {
 				}
 			}
 			break;
-		default:
-			throw new AssertionError("Action command not implemented: '" + e.getActionCommand() + "'");
 		}
 		
 	}

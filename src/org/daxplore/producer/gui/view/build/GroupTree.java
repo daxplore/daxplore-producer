@@ -31,6 +31,7 @@ import javax.swing.tree.TreePath;
 
 import org.daxplore.producer.daxplorelib.metadata.MetaGroup;
 import org.daxplore.producer.daxplorelib.metadata.MetaGroup.GroupType;
+import org.daxplore.producer.daxplorelib.metadata.MetaGroup.MetaGroupManager;
 import org.daxplore.producer.daxplorelib.metadata.MetaQuestion;
 import org.daxplore.producer.gui.GuiSettings;
 import org.daxplore.producer.gui.MainController.Views;
@@ -51,10 +52,12 @@ import com.google.common.eventbus.Subscribe;
 public class GroupTree extends JTree {
 	
 	private final EventBus eventBus;
+	private final MetaGroupManager metaGroupManager;
 	
-    public GroupTree(final EventBus eventBus, GroupTreeModel groupTreeModel) {
+    public GroupTree(final EventBus eventBus, MetaGroupManager metaGroupManager, GroupTreeModel groupTreeModel) {
     	super(groupTreeModel);
     	this.eventBus = eventBus;
+    	this.metaGroupManager = metaGroupManager;
     	setRootVisible(false);
     	setUI(new GroupTreeUI());
     	setEditable(false);
@@ -133,7 +136,7 @@ public class GroupTree extends JTree {
 			groupWidget = new GroupWidget(eventBus);
 			groupEditor = new GroupWidget(eventBus);
 			headerWidget = new HeaderWidget(eventBus);
-			questionWidget = new QuestionWidget(eventBus, true);
+			questionWidget = new QuestionWidget(eventBus, metaGroupManager, true);
 		}
 		
 		@Override
@@ -249,8 +252,6 @@ public class GroupTree extends JTree {
 			gg.setColor(bgColor);
 			gg.fillRect(0, bounds.y, tree.getWidth(), bounds.height);
 			gg.dispose();
-			
-			//System.out.println("rectangle: " + bounds.x + " " + bounds.width);
 
 			if(path.getLastPathComponent() instanceof MetaGroup) {
 				MetaGroup mg = (MetaGroup)path.getLastPathComponent();

@@ -195,6 +195,11 @@ public class GroupsView extends JPanel {
 		perspectivesRemoveButton.addActionListener(actionListener);
 		perspectivesButtonPanel.add(perspectivesRemoveButton);
 		
+		JButton perspectivesSecondaryToggle = new JButton("Toggle secondary perspective");
+		perspectivesSecondaryToggle.setActionCommand(GroupsCommand.PERSPECTIVE_SECONDARY_TOGGLE.toString());
+		perspectivesSecondaryToggle.addActionListener(actionListener);
+		perspectivesButtonPanel.add(perspectivesSecondaryToggle);
+		
 		JPanel addToPerspectivesPanel = new JPanel();
 		perspectivePanel.add(addToPerspectivesPanel, BorderLayout.WEST);
 		

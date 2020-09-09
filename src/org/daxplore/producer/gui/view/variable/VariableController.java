@@ -86,7 +86,7 @@ public class VariableController implements TableModelListener, ActionListener {
 			daxploreFile.getAbout(),
 			metaQuestion);
 		
-		TimePointTable timePointTable = new TimePointTable(eventBus, timePointTableModel);
+		TimePointTable timePointTable = new TimePointTable(eventBus, daxploreFile.getMetaGroupManager(), timePointTableModel);
 		
 		infoPanel = new TabInfoPanel(eventBus, metaQuestion, timePointTable);
 		freqPanel = new TabFrequenciesPanel(this, metaQuestion, rawTable, variableTable);
