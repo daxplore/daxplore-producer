@@ -4,6 +4,7 @@ import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dimension;
 
+import javax.swing.BoxLayout;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
@@ -28,6 +29,7 @@ public class TabInfoPanel extends JPanel{
 	public TabInfoPanel(EventBus eventBus, MetaQuestion metaQuestion, JTable timePointTable) {
 		timePointScrollPane.setViewportView(timePointTable);
 		
+		// Assorted texts (NORTH)
 		fullText = new TextWidget(eventBus);
 		shortText = new TextWidget(eventBus);
 		
@@ -37,7 +39,8 @@ public class TabInfoPanel extends JPanel{
 		
 		setLayout(new BorderLayout(0, 0));
 		
-		JPanel topPanel = new JPanel(new BorderLayout());
+		JPanel topPanel = new JPanel();
+		topPanel.setLayout(new BoxLayout(topPanel, BoxLayout.Y_AXIS));
 		
 		shortTextRefHolder = new JPanel();
 		shortTextRefHolder.setBorder(new TitledBorder(new LineBorder(new Color(0,0,75)), "Short text"));
@@ -52,10 +55,9 @@ public class TabInfoPanel extends JPanel{
 		
 		add(topPanel, BorderLayout.NORTH);
 		
-
-		
+		// Timepoints (SOUTH)
 		JPanel timepointPanel = new JPanel(new BorderLayout());
-		timePointScrollPane.setPreferredSize(new Dimension(100, 150)); //TODO: fix size issues, to big if left to it's own devices
+		timePointScrollPane.setPreferredSize(new Dimension(100, 150)); //TODO: fix size issues, too big if left to it's own devices
 		timepointPanel.add(timePointScrollPane, BorderLayout.CENTER);
 		add(timepointPanel, BorderLayout.SOUTH);
 	}
