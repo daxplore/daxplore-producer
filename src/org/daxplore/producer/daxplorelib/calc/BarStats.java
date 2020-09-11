@@ -24,14 +24,17 @@ public class BarStats {
 	
 	private LinkedHashMap<Integer, Frequencies> frequencyData = new LinkedHashMap<>();
 	private LinkedHashMap<Integer, Means> meanData = new LinkedHashMap<>();
-	private MetaQuestion question, perspective;
+	private MetaQuestion question;
+	private List<MetaQuestion> perspectives;
 	private boolean useFrequency = false, useMean = false;
 	
 	private static class Frequencies {
+		List<MetaQuestion> perspectives;
 		private List<int[]> frequencies;
 		private int[] all;
 		
-		private Frequencies(int[][] barsData, int[] all) {
+		private Frequencies(List<MetaQuestion> perspectives, int[][] barsData, int[] all) {
+			this.perspectives = perspectives;
 			frequencies = new LinkedList<>();
 			for(int i = 0; i < barsData.length; i++) {
 				frequencies.add(barsData[i]);
@@ -41,12 +44,27 @@ public class BarStats {
 		
 		public JsonElement toJSONObject() {
 			JsonObject json = new JsonObject();
-			for(int i = 0; i < frequencies.size(); i++) {
-				JsonArray barsJSON = new JsonArray();
-				for(int v : frequencies.get(i)) {
-					barsJSON.add(new JsonPrimitive(v));
+			if (perspectives.size() == 1) {
+				for(int i = 0; i < frequencies.size(); i++) {
+					JsonArray barsJSON = new JsonArray();
+					for(int v : frequencies.get(i)) {
+						barsJSON.add(new JsonPrimitive(v));
+					}
+					json.add(Integer.toString(i), barsJSON);
 				}
-				json.add(Integer.toString(i), barsJSON);
+			} else {
+				int p1OptionCount = perspectives.get(0).getScale().getOptionCount();
+				int p2OptionCount = perspectives.get(1).getScale().getOptionCount();
+				for (int p1 = 0; p1 < p1OptionCount; p1++) {
+					for (int p2 = 0; p2 < p2OptionCount; p2++) {
+						int combinedPerspective = p1 * p2OptionCount + p2;
+						JsonArray barsJSON = new JsonArray();
+						for(int v : frequencies.get(combinedPerspective)) {
+							barsJSON.add(new JsonPrimitive(v));
+						}
+						json.add(p1 + "," + p2, barsJSON);
+					}
+				}
 			}
 			
 			JsonArray allJSON = new JsonArray();
@@ -94,13 +112,13 @@ public class BarStats {
 		
 	}
 	
-	BarStats(MetaQuestion question, MetaQuestion perspective) {
+	BarStats(MetaQuestion question, List<MetaQuestion> perspectives) {
 		this.question = question;
-		this.perspective = perspective;
+		this.perspectives = perspectives;
 	}
 	
 	void addFrequencyData(int timeindex, int[][] crosstabs, int[] frequencies) {
-		frequencyData.put(timeindex, new Frequencies(crosstabs, frequencies));
+		frequencyData.put(timeindex, new Frequencies(perspectives, crosstabs, frequencies));
 		useFrequency = true;
 	}
 
@@ -112,7 +130,11 @@ public class BarStats {
 	public JsonElement toJSONObject() {
 		JsonObject json = new JsonObject();
 		json.add("q", new JsonPrimitive(question.getColumn()));
-		json.add("p", new JsonPrimitive(perspective.getColumn()));
+		JsonArray perspectiveJson = new JsonArray();
+		for (MetaQuestion p : perspectives) {
+			perspectiveJson.add(new JsonPrimitive(p.getColumn()));
+		}
+		json.add("p", perspectiveJson);
 		
 		if(useFrequency) {
 			JsonObject frequnecyValues = new JsonObject();

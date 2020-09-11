@@ -6,6 +6,7 @@ package org.daxplore.producer.daxplorelib.calc;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.daxplore.producer.daxplorelib.About;
 import org.daxplore.producer.daxplorelib.DaxploreException;
@@ -39,9 +40,9 @@ public class StatsCalculation {
 	 * @throws DaxploreException
 	 * @throws DaxploreWarning 
 	 */
-	public BarStats calculateData(MetaQuestion question, MetaQuestion perspective, int lowerLimit) throws DaxploreWarning, DaxploreException {
+	public BarStats calculateData(MetaQuestion question, List<MetaQuestion> perspectives, int lowerLimit) throws DaxploreWarning, DaxploreException {
 		try {
-			BarStats stats = new BarStats(question, perspective);
+			BarStats stats = new BarStats(question, perspectives);
 			int[][] crosstabs;
 			int[] frequencies;
 			List<double[]> means; // <mean, allmean, count>
@@ -52,7 +53,7 @@ public class StatsCalculation {
 			case NONE:
 				if(question.useFrequencies()) {
 					try {
-						crosstabs = freqCalc(question, perspective, null, lowerLimit);
+						crosstabs = freqCalc(question, perspectives, null, lowerLimit);
 						//TODO add option to choose how to calculate the "all" group
 						// A) As frequencies, as it currently is
 						// B) As a sum of the crosstab data
@@ -64,7 +65,7 @@ public class StatsCalculation {
 				}
 				if(question.useMean()) {
 					try {
-						means = meanCalc(question, perspective, null, lowerLimit);
+						means = meanCalc(question, perspectives.get(0), null, lowerLimit); //TODO !!!
 						double[] counts = means.get(2);
 						int[] intCounts = new int[counts.length];
 						for(int i=0; i<counts.length; i++){
@@ -78,7 +79,7 @@ public class StatsCalculation {
 				break;
 			case SHORT:
 				List<MetaTimepointShort> questionTimes = question.getTimepoints();
-				List<MetaTimepointShort> perspectiveTimes = perspective.getTimepoints();
+				List<MetaTimepointShort> perspectiveTimes = perspectives.get(0).getTimepoints(); // TODO !!!
 				
 				LinkedList<MetaTimepointShort> commonTimes = new LinkedList<>();
 				
@@ -91,7 +92,7 @@ public class StatsCalculation {
 				for(MetaTimepointShort timepoint : commonTimes) {
 					if (question.useFrequencies() || question.useDichotomizedLine()) {
 						try {
-							crosstabs = freqCalc(question, perspective, timepoint, lowerLimit);
+							crosstabs = freqCalc(question, perspectives, timepoint, lowerLimit);
 							frequencies = frequencies(question, timepoint, lowerLimit);
 							stats.addFrequencyData(timepoint.getTimeindex(), crosstabs, frequencies);
 						} catch (DaxploreWarning e) {
@@ -100,7 +101,7 @@ public class StatsCalculation {
 					}
 					if(question.useMean()) {
 						try {
-							means = meanCalc(question, perspective, timepoint, lowerLimit);
+							means = meanCalc(question, perspectives.get(0), timepoint, lowerLimit); // TODO !!!
 							double[] counts = means.get(2);
 							int[] intCounts = new int[counts.length];
 							for(int i=0; i<counts.length; i++){
@@ -122,7 +123,11 @@ public class StatsCalculation {
 			
 			return stats;
 		} catch (NullPointerException | ArrayIndexOutOfBoundsException | DaxploreException e) {
-			throw new DaxploreException("Failed to generate data for question: " + question.getColumn() + ", perspective: " + perspective.getColumn(), e);
+			if (perspectives.size() == 1) {
+				throw new DaxploreException("Failed to generate data for question: " + question.getColumn() + ", perspective: " + perspectives.get(0).getColumn(), e);
+			} else {
+				throw new DaxploreException("Failed to generate data for question: " + question.getColumn() + ", perspectives: " + perspectives.get(0).getColumn() + ", " + perspectives.get(1).getColumn(), e);
+			}
 		}
 	}
 	
@@ -182,33 +187,80 @@ public class StatsCalculation {
 		return list;
 	}
 	
+	/**
+	 * 
+	 * @param question
+	 * @param perspectives should have 1 or 2 perspectives
+	 * @param timepoint
+	 * @param lowerlimit
+	 * @return
+	 * @throws DaxploreWarning
+	 * @throws DaxploreException
+	 */
 	@SuppressWarnings({ "unchecked", "rawtypes" })
-	private int[][] freqCalc(MetaQuestion question, MetaQuestion perspective, MetaTimepointShort timepoint, int lowerlimit) throws DaxploreWarning, DaxploreException {
-		if(question.getScale() == null && perspective.getScale() == null) { 
+	private int[][] freqCalc(MetaQuestion question, List<MetaQuestion> perspectives, MetaTimepointShort timepoint, int lowerlimit) throws DaxploreWarning, DaxploreException {
+		if(question.getScale() == null) { 
 			return null;
 		}
+		for (MetaQuestion p : perspectives) {
+			 if(p.getScale() == null) {
+				 return null;
+			 }
+		}
 		
-		int[][] crosstabsdata = new int[perspective.getScale().getOptionCount()][question.getScale().getOptionCount()];
+		if (perspectives.size() == 0 || perspectives.size() > 2) {
+			throw new DaxploreException("Invalid number of perspectives: " + perspectives.size());
+		}
 		
-		int[] totals = new int[perspective.getScale().getOptionCount()];	
+		boolean hasSecondaryPerspective = perspectives.size() == 2;
+		
+		int perspectiveOptionCount = perspectives
+			.stream()
+			.mapToInt(mq -> mq.getScale().getOptionCount())
+			.reduce(1, (q1, q2) -> q1*q2);
+		
+		int[][] crosstabsdata = new int[perspectiveOptionCount][question.getScale().getOptionCount()];
+		
+		int[] totals = new int[perspectiveOptionCount];	
 		
 		int questionColIndex = rawMetaManager.getIndexOfColumn(question.getColumn());
-		int perspectiveColIndex = rawMetaManager.getIndexOfColumn(perspective.getColumn());
+	
+		int[] perspectiveColIndices = new int[perspectives.size()];
+		perspectiveColIndices[0] = rawMetaManager.getIndexOfColumn(perspectives.get(0).getColumn());
+		if (hasSecondaryPerspective) {
+			perspectiveColIndices[1] = rawMetaManager.getIndexOfColumn(perspectives.get(1).getColumn());
+		}
+
 		int rawTimePointIndex = timepoint == null ? -1 : rawMetaManager.getIndexOfColumn(about.getTimeSeriesShortColumn());
 		
 		MetaScale questionScale = question.getScale();
-		MetaScale perspectiveScale = perspective.getScale();
+		List<MetaScale> perspectiveScales = perspectives
+				.stream()
+				.map(MetaQuestion::getScale)
+				.collect(Collectors.toList());
 		Object[][] rawdataTable = rawDataManager.getDataTable();
 		
 		for(int row = 0; row < rawdataTable[0].length; row++) {
 			if(timepoint == null || ((Double)rawdataTable[rawTimePointIndex][row]) == timepoint.getValue()) { //TODO timepoint: support TEXT/REAL for value
 				int qindex = questionScale.getOptionIndex(rawdataTable[questionColIndex][row]);
-				int pindex = perspectiveScale.getOptionIndex(rawdataTable[perspectiveColIndex][row]);
-				if(qindex == -1 || pindex == -1) {
+				Object p1Option = rawdataTable[perspectiveColIndices[0]][row];
+				int pindex1 = perspectiveScales.get(0).getOptionIndex(p1Option);
+				
+				if(qindex == -1 || pindex1 == -1) {
 					continue;
 				}
-				totals[pindex]++;
-				crosstabsdata[pindex][qindex]++;
+				
+				int combinedPerspectiveIndex = pindex1;
+				if (hasSecondaryPerspective) {
+					Object p2Option = rawdataTable[perspectiveColIndices[1]][row];
+					int pindex2 = perspectiveScales.get(1).getOptionIndex(p2Option);
+					if (pindex2 == -1) {
+						continue;
+					}
+					combinedPerspectiveIndex = pindex1 * perspectiveScales.get(1).getOptionCount() + pindex2;
+				}
+				totals[combinedPerspectiveIndex]++;
+				crosstabsdata[combinedPerspectiveIndex][qindex]++;
 			}
 		}
 
@@ -221,7 +273,11 @@ public class StatsCalculation {
 		}
 		
 		if(emptyCount == totals.length) {
-			throw new DaxploreWarning("Could not generate frequency data for question: " + question.getColumn() + " and perspective: " + perspective.getColumn());
+			if (perspectives.size() == 1) {
+				throw new DaxploreWarning("Could not generate frequency data for question: " + question.getColumn() + " and perspective: " + perspectives.get(0).getColumn());
+			} else {
+				throw new DaxploreWarning("Could not generate frequency data for question: " + question.getColumn() + " and perspectives: " + perspectives.get(0).getColumn() + ", " + perspectives.get(1).getColumn());
+			}
 		}
 		
 		return crosstabsdata;

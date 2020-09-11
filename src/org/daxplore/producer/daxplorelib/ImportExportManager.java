@@ -105,6 +105,7 @@ public class ImportExportManager {
 		StatsCalculation crosstabs = new StatsCalculation(daxploreFile.getAbout(), daxploreFile.getRawMetaManager(), daxploreFile.getRawDataManager());
 
 		MetaGroup perspectives = daxploreFile.getMetaGroupManager().getPerspectiveGroup();
+		MetaGroup perspectivesSecondary = daxploreFile.getMetaGroupManager().getPerspectiveSecondaryGroup();
 		SortedSet<MetaQuestion> selectedQuestions = new TreeSet<>(new Comparator<MetaQuestion>() {
 			@Override
 			public int compare(MetaQuestion o1, MetaQuestion o2) {
@@ -121,11 +122,30 @@ public class ImportExportManager {
 			for(MetaQuestion question : group.getQuestions()) {
 				JsonArray questionJSON = new JsonArray();
 				selectedQuestions.add(question);
+				Set<String> usedPerspectiveCombos = new HashSet<>();
 				for(MetaQuestion perspective : perspectives.getQuestions()) {
+					List<MetaQuestion> selectedPerspectives = new ArrayList<>();
+					selectedPerspectives.add(perspective);
 					try {
-						questionJSON.add(crosstabs.calculateData(question, perspective, 10).toJSONObject());
+						questionJSON.add(crosstabs.calculateData(question, selectedPerspectives, 10).toJSONObject());						
 					} catch (DaxploreWarning e) {
 						warnings.add(e.getMessage());
+					}
+					for (MetaQuestion secondaryPerspective : perspectivesSecondary.getQuestions()) {
+						if (usedPerspectiveCombos.contains(secondaryPerspective.getId() + "/" + perspective.getId())
+								|| perspective.getId() == secondaryPerspective.getId()) {
+							continue;
+						}
+						if (selectedPerspectives.size() == 2) {
+							selectedPerspectives.remove(1);
+						}
+						selectedPerspectives.add(secondaryPerspective);
+						try {
+							questionJSON.add(crosstabs.calculateData(question, selectedPerspectives, 10).toJSONObject());						
+						} catch (DaxploreWarning e) {
+							warnings.add(e.getMessage());
+						}
+						usedPerspectiveCombos.add(perspective.getId() + "/" + secondaryPerspective.getId());
 					}
 				}
 				questionData.put(question, questionJSON);

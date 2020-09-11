@@ -25,7 +25,6 @@ import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 import javax.swing.tree.TreePath;
 
-import org.daxplore.producer.daxplorelib.DaxploreException;
 import org.daxplore.producer.daxplorelib.DaxploreFile;
 import org.daxplore.producer.daxplorelib.metadata.MetaGroup;
 import org.daxplore.producer.daxplorelib.metadata.MetaGroup.GroupType;
@@ -363,8 +362,14 @@ public class GroupsController implements ActionListener, MouseListener {
 			break;
 		case PERSPECTIVE_REMOVE:
 			selectedRows = perspectivesTable.getSelectedRows();
+			metaGroupManager = daxploreFile.getMetaGroupManager();
 			int delta = 0;
-			for(int row: selectedRows) {
+			for(int row : selectedRows) {
+				MetaQuestion metaQuestion = perspectivesTableModel.getQuestionAt(row - delta);
+				MetaGroup perspectiveSecondaryGroup = metaGroupManager.getPerspectiveSecondaryGroup();
+				if (perspectiveSecondaryGroup.contains(metaQuestion)) {
+					perspectiveSecondaryGroup.removeQuestion(metaQuestion);
+				}
 				perspectivesTableModel.removeRow(row - delta);
 				delta++;
 			}
