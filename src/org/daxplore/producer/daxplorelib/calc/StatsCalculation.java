@@ -65,7 +65,7 @@ public class StatsCalculation {
 				}
 				if(question.useMean()) {
 					try {
-						means = meanCalc(question, perspectives.get(0), null, lowerLimit); //TODO !!!
+						means = meanCalc(question, perspectives, null, lowerLimit); //TODO !!!
 						double[] counts = means.get(2);
 						int[] intCounts = new int[counts.length];
 						for(int i=0; i<counts.length; i++){
@@ -101,7 +101,7 @@ public class StatsCalculation {
 					}
 					if(question.useMean()) {
 						try {
-							means = meanCalc(question, perspectives.get(0), timepoint, lowerLimit); // TODO !!!
+							means = meanCalc(question, perspectives, timepoint, lowerLimit); // TODO !!!
 							double[] counts = means.get(2);
 							int[] intCounts = new int[counts.length];
 							for(int i=0; i<counts.length; i++){
@@ -132,32 +132,59 @@ public class StatsCalculation {
 	}
 	
 	@SuppressWarnings({ "unchecked", "rawtypes" })
-	private List<double[]> meanCalc(MetaQuestion question, MetaQuestion perspective, MetaTimepointShort timepoint, int lowerlimit) throws DaxploreException, DaxploreWarning {
-		if(perspective.getScale() == null) { 
-			throw new DaxploreException("meanCalc: perspective is missing scale");
+	private List<double[]> meanCalc(MetaQuestion question, List<MetaQuestion> perspectives, MetaTimepointShort timepoint, int lowerlimit) throws DaxploreException, DaxploreWarning {
+		for (MetaQuestion p : perspectives) {
+			 if(p.getScale() == null) {
+				 throw new DaxploreException("Perspective is missing scale: " + p.getColumn());
+			 }
 		}
 		
+		boolean hasSecondaryPerspective = perspectives.size() == 2;
+		
+		int perspectiveOptionCount = perspectives.get(0).getScale().getOptionCount();
+		perspectiveOptionCount *= hasSecondaryPerspective ? perspectives.get(1).getScale().getOptionCount() : 1;
+		
 		// return values in order
-		double[] meandata = new double[perspective.getScale().getOptionCount()];
+		double[] meandata = new double[perspectiveOptionCount];
 		double[] meanall = new double[1];
-		double[] count = new double[perspective.getScale().getOptionCount()];
+		double[] count = new double[perspectiveOptionCount];
 		double[] countall = new double[1];
 		
 		int questionColIndex = rawMetaManager.getIndexOfColumn(question.getColumn());
-		int perspectiveColIndex = rawMetaManager.getIndexOfColumn(perspective.getColumn());
+		int[] perspectiveColIndices = new int[perspectives.size()];
+		perspectiveColIndices[0] = rawMetaManager.getIndexOfColumn(perspectives.get(0).getColumn());
+		if (hasSecondaryPerspective) {
+			perspectiveColIndices[1] = rawMetaManager.getIndexOfColumn(perspectives.get(1).getColumn());
+		}
 		int rawTimePointIndex = timepoint == null ? -1 : rawMetaManager.getIndexOfColumn(about.getTimeSeriesShortColumn());
 		
-		MetaScale perspectiveScale = perspective.getScale();
+		List<MetaScale> perspectiveScales = perspectives
+				.stream()
+				.map(MetaQuestion::getScale)
+				.collect(Collectors.toList());
 		Object[][] rawdataTable = rawDataManager.getDataTable();
 		
 		for(int row = 0; row < rawdataTable[0].length; row++) {
 			if(timepoint == null || ((Double)rawdataTable[rawTimePointIndex][row]) == timepoint.getValue()) {
-				int pindex = perspectiveScale.getOptionIndex(rawdataTable[perspectiveColIndex][row]);
-				if(pindex == -1 || question.getMetaMean().isExcluded(rawdataTable[questionColIndex][row])) {
+				Object p1Option = rawdataTable[perspectiveColIndices[0]][row];
+				int p1index = perspectiveScales.get(0).getOptionIndex(p1Option);
+
+				if(p1index == -1 || question.getMetaMean().isExcluded(rawdataTable[questionColIndex][row])) {
 					continue;
 				}
-				meandata[pindex] += (Double)rawdataTable[questionColIndex][row];
-				count[pindex]++;
+				
+				int combinedPerspectiveIndex = p1index;
+				if (hasSecondaryPerspective) {
+					Object p2Option = rawdataTable[perspectiveColIndices[1]][row];
+					int pindex2 = perspectiveScales.get(1).getOptionIndex(p2Option);
+					if (pindex2 == -1) {
+						continue;
+					}
+					combinedPerspectiveIndex = p1index * perspectiveScales.get(1).getOptionCount() + pindex2;
+				}
+				
+				meandata[combinedPerspectiveIndex] += (Double)rawdataTable[questionColIndex][row];
+				count[combinedPerspectiveIndex]++;
 			}
 		}
 		
@@ -175,7 +202,14 @@ public class StatsCalculation {
 		if(countall[0] >= lowerlimit) {
 			meanall[0] = meanall[0]/countall[0];
 		} else {
-			throw new DaxploreWarning("Could not generate mean data for question: " + question.getColumn() + " and perspective: " + perspective.getColumn());
+			if (hasSecondaryPerspective) {
+				throw new DaxploreWarning(
+						"Could not generate mean data for question: " + question.getColumn() + " and perspectives: "
+								+ perspectives.get(0).getColumn() + ", " + perspectives.get(1).getColumn());
+			} else {
+				throw new DaxploreWarning("Could not generate mean data for question: " + question.getColumn()
+						+ " and perspective: " + perspectives.get(0).getColumn());
+			}
 		}
 		
 		ArrayList<double[]> list = new ArrayList<double[]>(4);
@@ -200,11 +234,12 @@ public class StatsCalculation {
 	@SuppressWarnings({ "unchecked", "rawtypes" })
 	private int[][] freqCalc(MetaQuestion question, List<MetaQuestion> perspectives, MetaTimepointShort timepoint, int lowerlimit) throws DaxploreWarning, DaxploreException {
 		if(question.getScale() == null) { 
-			return null;
+			throw new DaxploreException("Question is missing scale: " + question.getColumn());
 		}
+		
 		for (MetaQuestion p : perspectives) {
 			 if(p.getScale() == null) {
-				 return null;
+				 throw new DaxploreException("Perspective is missing scale: " + p.getColumn());
 			 }
 		}
 		
@@ -214,10 +249,8 @@ public class StatsCalculation {
 		
 		boolean hasSecondaryPerspective = perspectives.size() == 2;
 		
-		int perspectiveOptionCount = perspectives
-			.stream()
-			.mapToInt(mq -> mq.getScale().getOptionCount())
-			.reduce(1, (q1, q2) -> q1*q2);
+		int perspectiveOptionCount = perspectives.get(0).getScale().getOptionCount();
+		perspectiveOptionCount *= hasSecondaryPerspective ? perspectives.get(1).getScale().getOptionCount() : 1;
 		
 		int[][] crosstabsdata = new int[perspectiveOptionCount][question.getScale().getOptionCount()];
 		
@@ -242,25 +275,25 @@ public class StatsCalculation {
 		
 		for(int row = 0; row < rawdataTable[0].length; row++) {
 			if(timepoint == null || ((Double)rawdataTable[rawTimePointIndex][row]) == timepoint.getValue()) { //TODO timepoint: support TEXT/REAL for value
-				int qindex = questionScale.getOptionIndex(rawdataTable[questionColIndex][row]);
+				int qIndex = questionScale.getOptionIndex(rawdataTable[questionColIndex][row]);
 				Object p1Option = rawdataTable[perspectiveColIndices[0]][row];
-				int pindex1 = perspectiveScales.get(0).getOptionIndex(p1Option);
+				int p1Index = perspectiveScales.get(0).getOptionIndex(p1Option);
 				
-				if(qindex == -1 || pindex1 == -1) {
+				if(qIndex == -1 || p1Index == -1) {
 					continue;
 				}
 				
-				int combinedPerspectiveIndex = pindex1;
+				int combinedPerspectiveIndex = p1Index;
 				if (hasSecondaryPerspective) {
 					Object p2Option = rawdataTable[perspectiveColIndices[1]][row];
-					int pindex2 = perspectiveScales.get(1).getOptionIndex(p2Option);
-					if (pindex2 == -1) {
+					int p2Index = perspectiveScales.get(1).getOptionIndex(p2Option);
+					if (p2Index == -1) {
 						continue;
 					}
-					combinedPerspectiveIndex = pindex1 * perspectiveScales.get(1).getOptionCount() + pindex2;
+					combinedPerspectiveIndex = p1Index * perspectiveScales.get(1).getOptionCount() + p2Index;
 				}
 				totals[combinedPerspectiveIndex]++;
-				crosstabsdata[combinedPerspectiveIndex][qindex]++;
+				crosstabsdata[combinedPerspectiveIndex][qIndex]++;
 			}
 		}
 
