@@ -91,7 +91,7 @@ public class DaxploreProperties {
 					"explorer.freq.tooltip.timepoints_missing_data",
 					"explorer.perspective.header",
 					"explorer.perspective.header_secondary",
-					"explorer.perspective.none_button",
+					"explorer.perspective.secondary_none_button",
 					"hideWarningButton",
 					"imageSaveButton",
 					"listReferenceValue",
