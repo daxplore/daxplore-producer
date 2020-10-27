@@ -7,6 +7,9 @@
  ******************************************************************************/
 package org.daxplore.producer.daxplorelib;
 
+import java.nio.charset.StandardCharsets;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -25,6 +28,7 @@ import java.util.logging.Logger;
 
 import org.daxplore.producer.daxplorelib.metadata.textreference.TextReference;
 import org.daxplore.producer.daxplorelib.resources.DaxploreProperties;
+import org.daxplore.producer.tools.MyTools;
 
 /**
  * General information about the entire save file.
@@ -137,6 +141,27 @@ public class About {
 	
 	public String getImportFilename() {
 		return settings.getString("filename");
+	}
+	
+	/**
+	 * Get a hash based ID based on the import filename
+	 * 
+	 * Only intended for internal use, to keep track of exported files without uploading actual filenames.
+	 * Not intended to be robust on the level of a UUID.
+	 * 
+	 * @return A short ID
+	 * @throws DaxploreException 
+	 */
+	public String getImportFileNameID () throws DaxploreException {
+		try {
+			// Add short, randomized IDs based on the used daxplore filename and spss filename
+			// Only a few characters are needed, as this is only used for internal reference to keep track of exported versions.
+			MessageDigest md = MessageDigest.getInstance("SHA-256");
+			md.update((byte) 131);
+			return MyTools.bytesToHex(md.digest(getImportFilename().getBytes(StandardCharsets.UTF_8))).substring(0, 8);
+		} catch (NoSuchAlgorithmException e) {
+			throw new DaxploreException("Failed to create hash", e);
+		}
 	}
 	
 	public void setTimeSeriesType(TimeSeriesType timeSeriesType) {

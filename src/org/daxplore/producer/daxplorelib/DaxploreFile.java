@@ -16,6 +16,9 @@ import java.io.OutputStream;
 import java.io.Reader;
 import java.io.Writer;
 import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.ResultSet;
@@ -48,9 +51,11 @@ import org.daxplore.producer.daxplorelib.raw.RawMetaQuestion;
 import org.daxplore.producer.daxplorelib.raw.RawMetaQuestion.RawMetaManager;
 import org.daxplore.producer.daxplorelib.raw.VariableOptionInfo;
 import org.daxplore.producer.daxplorelib.resources.DaxploreProperties;
+import org.daxplore.producer.tools.MyTools;
 import org.xml.sax.SAXException;
 
 import com.google.common.base.Strings;
+import com.google.gson.JsonPrimitive;
 
 public class DaxploreFile implements Closeable {
 
@@ -157,6 +162,27 @@ public class DaxploreFile implements Closeable {
 	 */
 	public int getFileVersion() {
 		return daxploreFileVersion;
+	}
+	
+	/**
+	 * Get a hash based ID based on the filename
+	 * 
+	 * Only intended for internal use, to keep track of exported files without uploading actual filenames.
+	 * Not intended to be robust on the level of a UUID.
+	 * 
+	 * @return A short ID
+	 * @throws DaxploreException 
+	 */
+	public String getFileNameID () throws DaxploreException {
+		try {
+			// Add short, randomized IDs based on the used daxplore filename and spss filename
+			// Only a few characters are needed, as this is only used for internal reference to keep track of exported versions.
+			MessageDigest md = MessageDigest.getInstance("SHA-256");
+			md.update((byte) 131);
+			return MyTools.bytesToHex(md.digest(getFile().getName().getBytes(StandardCharsets.UTF_8))).substring(0, 8);
+		} catch (NoSuchAlgorithmException e) {
+			throw new DaxploreException("Failed to create hash", e);
+		}
 	}
 	
 	/**

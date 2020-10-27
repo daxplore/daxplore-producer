@@ -54,6 +54,7 @@ public class DaxploreProperties {
 		settingsMap.put("perspectiveCheckboxesPerColumn", 8);
 		settingsMap.put("questionDescriptionPosition", "BOTTOM"); //TODO enums
 		settingsMap.put("perspectiveDescriptionPosition", "BOTTOM");
+		settingsMap.put("export.manifest.project_name", "New Daxplore Project");
 		settingsMap.put("structure.perspectivePosition", "BOTTOM");
 		settingsMap.put("chart.mean.orientation", "HORIZONTAL");
 		clientSettingsDefaults = ImmutableMap.copyOf(settingsMap);
