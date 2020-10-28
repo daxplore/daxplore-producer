@@ -213,6 +213,16 @@ public class ImportExportManager {
 					emptyTextrefs.addAll(q.getEmptyTextRefs(locale));
 				}
 
+				String projectFilename = "daxplore-"
+						+ daxploreFile.getSettings().getString("export.manifest.project_name");
+				projectFilename = projectFilename
+						.trim()
+						.replaceAll(" ", "_")
+						.replaceAll("[^a-zA-Z0-9_-]", "")
+						.substring(0, 30);
+				String projectMessage = "This is a Daxplore Presenter data package.\nSee https://daxplore.org for more information.";
+				writeZipString(zout, projectFilename, projectMessage);
+
 				String propertiesJSONString = prettyGson.toJson(getUITextsJson(locale));
 				writeZipString(zout, "usertexts_" + locale.toLanguageTag() + ".json", propertiesJSONString);
 
@@ -261,9 +271,9 @@ public class ImportExportManager {
 	/**
 	 * Get a JSON representation of the export data package manifest content.
 	 * 
-	 * The manifest contains:
-	 * - The data package version, which should be synced with the Daxplore Presenter data version
-	 * - A list of locales supported in the exported data
+	 * The manifest contains: - The data package version, which should be synced
+	 * with the Daxplore Presenter data version - A list of locales supported in the
+	 * exported data
 	 * 
 	 * @return a JSON element containing the upload manifests
 	 * @throws DaxploreException
@@ -272,13 +282,14 @@ public class ImportExportManager {
 		JsonObject json = new JsonObject();
 
 		// Add data that allows later identification of the source of the export
-		json.add("projectName", new JsonPrimitive(daxploreFile.getSettings().getString("export.manifest.project_name")));
+		json.add("projectName",
+				new JsonPrimitive(daxploreFile.getSettings().getString("export.manifest.project_name")));
 		json.add("daxploreFileID", new JsonPrimitive(daxploreFile.getFileNameID()));
 		json.add("dataFileID", new JsonPrimitive(daxploreFile.getAbout().getImportFileNameID()));
-		
+
 		// Add timestamp for export
 		json.addProperty("exportDate", ZonedDateTime.now().format(DateTimeFormatter.ISO_LOCAL_DATE_TIME));
-		
+
 		// Add the export version
 		json.addProperty("dataPackageVersion", DaxploreProperties.exportDataPackageVersion);
 		JsonArray locales = new JsonArray();
@@ -330,7 +341,7 @@ public class ImportExportManager {
 			daxploreFile.getAbout().setImport(importSPSSFile.file.getName());
 
 			// Order important, meta before data
-			RawMetaImportResult metaImportResult = daxploreFile.getRawMetaManager().loadFromSPSS(importSPSSFile); 
+			RawMetaImportResult metaImportResult = daxploreFile.getRawMetaManager().loadFromSPSS(importSPSSFile);
 			daxploreFile.getRawDataManager().loadFromSPSS(importSPSSFile);
 
 			List<String> guiMessages = new ArrayList<>();
