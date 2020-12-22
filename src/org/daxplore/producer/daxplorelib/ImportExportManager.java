@@ -218,8 +218,8 @@ public class ImportExportManager {
 				projectFilename = projectFilename
 						.trim()
 						.replaceAll(" ", "_")
-						.replaceAll("[^a-zA-Z0-9_-]", "")
-						.substring(0, 30);
+						.replaceAll("[^a-zA-Z0-9_-]", "");
+				projectFilename = projectFilename.substring(0, Math.min(30, projectFilename.length()));
 				String projectMessage = "This is a Daxplore Presenter data package.\nSee https://daxplore.org for more information.";
 				writeZipString(zout, projectFilename, projectMessage);
 
