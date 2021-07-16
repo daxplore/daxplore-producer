@@ -55,7 +55,6 @@ import org.daxplore.producer.tools.MyTools;
 import org.xml.sax.SAXException;
 
 import com.google.common.base.Strings;
-import com.google.gson.JsonPrimitive;
 
 public class DaxploreFile implements Closeable {
 
@@ -197,21 +196,101 @@ public class DaxploreFile implements Closeable {
 	 * @throws DaxploreException thrown if upgrade failed
 	 */
 	public void upgradeFileVersion() throws DaxploreException {
+		try {
+		boolean autocommit = connection.getAutoCommit();
+		connection.setAutoCommit(false);
+		connection.setTransactionIsolation(Connection.TRANSACTION_READ_UNCOMMITTED);
+		Statement stmt = connection.createStatement();
 		if (daxploreFileVersion < 4) {
-			try (Statement stmt = connection.createStatement()) {
-				stmt.executeUpdate("PRAGMA foregin_keys = off;");
-				stmt.executeUpdate("ALTER TABLE metaquestion RENAME TO metaquestion_tmp;");
-				stmt.executeUpdate("CREATE TABLE metaquestion (id INTEGER PRIMARY KEY, col TEXT NOT NULL, type STRING NOT NULL, displaytypes STRING NOT NULL);");
-				stmt.executeUpdate("INSERT INTO metaquestion (id, col, type, displaytypes) SELECT id, col, type, displaytypes FROM metaquestion_tmp;");
-				stmt.executeUpdate("DROP TABLE metaquestion_tmp;");
-				stmt.executeUpdate("PRAGMA foregin_keys = on;");
-				stmt.executeUpdate("DELETE FROM settings WHERE key='filetypeversionmajor';");
-				stmt.executeUpdate("DELETE FROM settings WHERE key='filetypeversionminor';");
-				stmt.executeUpdate("PRAGMA user_version = 4;");
-				daxploreFileVersion = 4;
-			} catch (SQLException e) {
-				throw new DaxploreException("Failed to upgrade file to version 4.");
-			}
+			stmt.executeUpdate("PRAGMA foregin_keys = off;");
+			stmt.executeUpdate("ALTER TABLE metaquestion RENAME TO metaquestion_tmp;");
+			stmt.executeUpdate("CREATE TABLE metaquestion (id INTEGER PRIMARY KEY, col TEXT NOT NULL, type STRING NOT NULL, displaytypes STRING NOT NULL);");
+			stmt.executeUpdate("INSERT INTO metaquestion (id, col, type, displaytypes) SELECT id, col, type, displaytypes FROM metaquestion_tmp;");
+			stmt.executeUpdate("DROP TABLE metaquestion_tmp;");
+			stmt.executeUpdate("PRAGMA foregin_keys = on;");
+			stmt.executeUpdate("DELETE FROM settings WHERE key='filetypeversionmajor';");
+			stmt.executeUpdate("DELETE FROM settings WHERE key='filetypeversionminor';");
+			stmt.executeUpdate("PRAGMA user_version = 4;");
+			daxploreFileVersion = 4;
+		}
+		if (daxploreFileVersion < 5) {
+			stmt.executeUpdate("UPDATE texts SET ref='explorer.perspective_picker.all_respondents' WHERE ref='allRespondents';");
+			
+			stmt.executeUpdate("UPDATE texts SET ref='explorer.chart_tab.dichotomized_line' WHERE ref='chartTabDichotomized';");
+			stmt.executeUpdate("UPDATE texts SET ref='explorer.chart_tab.frequency_bar' WHERE ref='chartTabFrequencies';");
+			stmt.executeUpdate("UPDATE texts SET ref='explorer.chart_tab.mean_bar' WHERE ref='chartTabMeans';");
+
+			stmt.executeUpdate("UPDATE texts SET ref='explorer.chart.dichotomized_line.subtitle_start' WHERE ref='dichotomizedSubtitleStart';");
+			stmt.executeUpdate("UPDATE texts SET ref='explorer.chart.dichotomized_line.subtitle_separator' WHERE ref='dichotomizedSubtitleSeparator';");
+			stmt.executeUpdate("UPDATE texts SET ref='explorer.chart.dichotomized_line.subtitle_or' WHERE ref='dichotomizedSubtitleOr';");
+			stmt.executeUpdate("UPDATE texts SET ref='explorer.chart.dichotomized_line.subtitle_end' WHERE ref='dichotomizedSubtitleEnd';");
+			
+			stmt.executeUpdate("UPDATE texts SET ref='explorer.chart.frequency_bar.legend.missing_data' WHERE ref='explorer.freq.legend.missing_data';");
+			stmt.executeUpdate("UPDATE texts SET ref='explorer.chart.frequency_bar.tooltip.single_timepoint' WHERE ref='explorer.freq.tooltip.single';");
+			stmt.executeUpdate("UPDATE texts SET ref='explorer.chart.frequency_bar.tooltip.single_timepoint_missing' WHERE ref='explorer.freq.tooltip.single_missing_data';");
+			stmt.executeUpdate("UPDATE texts SET ref='explorer.chart.frequency_bar.tooltip.multiple_timepoints' WHERE ref='explorer.freq.tooltip.timepoints';");
+			stmt.executeUpdate("UPDATE texts SET ref='explorer.chart.frequency_bar.tooltip.multiple_timepoints_missing' WHERE ref='explorer.freq.tooltip.timepoints_missing_data';");
+			
+			stmt.executeUpdate("UPDATE texts SET ref='explorer.chart.mean_bar_vertical.image.filename' WHERE ref='explorer.meanprofile.image.filename';");
+			
+			stmt.executeUpdate("UPDATE texts SET ref='explorer.perspective_picker.header' WHERE ref='perspectivesHeader' OR 'explorer.perspective.header';");
+			stmt.executeUpdate("UPDATE texts SET ref='explorer.perspective_picker.secondary_perspective.header' WHERE ref='explorer.perspective.header_secondary';");
+			stmt.executeUpdate("UPDATE texts SET ref='explorer.perspective_picker.secondary_perspective.button.none' WHERE ref='explorer.perspective.secondary_none_button';");
+			
+			stmt.executeUpdate("UPDATE texts SET ref='common.button.save_chart_as_image' WHERE ref='imageSaveButton';");
+			
+			stmt.executeUpdate("INSERT INTO texts(ref, locale, text) SELECT 'explorer.chart.mean_bar_vertical.reference.value', locale, text FROM texts WHERE ref='listReferenceValue';");
+			stmt.executeUpdate("INSERT INTO texts(ref, locale, text) SELECT 'explorer.chart.mean_bar_vertical.reference.better', locale, text FROM texts WHERE ref='listReferenceBetter';");
+			stmt.executeUpdate("INSERT INTO texts(ref, locale, text) SELECT 'explorer.chart.mean_bar_vertical.reference.worse', locale, text FROM texts WHERE ref='listReferenceWorse';");
+			stmt.executeUpdate("INSERT INTO texts(ref, locale, text) SELECT 'explorer.chart.mean_bar_vertical.reference.comparable', locale, text FROM texts WHERE ref='listReferenceComparable';");
+			stmt.executeUpdate("INSERT INTO texts(ref, locale, text) SELECT 'explorer.chart.mean_bar_vertical.x_axis_description', locale, text FROM texts WHERE ref='listXAxisDescription';");
+
+			stmt.executeUpdate("UPDATE texts SET ref='profile.chart.mean_bar_vertical.reference.better' WHERE ref='listReferenceBetter';");
+			stmt.executeUpdate("UPDATE texts SET ref='profile.chart.mean_bar_vertical.reference.comparable' WHERE ref='listReferenceComparable';");
+			stmt.executeUpdate("UPDATE texts SET ref='profile.chart.mean_bar_vertical.reference.value' WHERE ref='listReferenceValue';");
+			stmt.executeUpdate("UPDATE texts SET ref='profile.chart.mean_bar_vertical.reference.worse' WHERE ref='listReferenceWorse';");
+			stmt.executeUpdate("UPDATE texts SET ref='profile.chart.mean_bar_vertical.x_axis_description' WHERE ref='listXAxisDescription';");
+			
+			stmt.executeUpdate("UPDATE texts SET ref='explorer.chart.mean_bar_horizontal.legend.missing_data' WHERE ref='meanbars_legend_missingData';");
+			stmt.executeUpdate("UPDATE texts SET ref='explorer.chart.mean_bar_horizontal.legend.reference_value' WHERE ref='meanbars_legend_referenceValue';");
+			stmt.executeUpdate("UPDATE texts SET ref='explorer.chart.mean_bar_horizontal.tooltip.few_respondents' WHERE ref='meanbars_tooltip_fewRespondents';");
+			stmt.executeUpdate("UPDATE texts SET ref='explorer.chart.mean_bar_horizontal.tooltip.mean' WHERE ref='meanbars_tooltip_mean';");
+			stmt.executeUpdate("UPDATE texts SET ref='explorer.chart.mean_bar_horizontal.tooltip.missing_data' WHERE ref='meanbars_tooltip_missingData';");
+			stmt.executeUpdate("UPDATE texts SET ref='explorer.chart.mean_bar_horizontal.tooltip.reference_value' WHERE ref='meanbars_tooltip_referenceValue';");
+			stmt.executeUpdate("UPDATE texts SET ref='explorer.chart.mean_bar_horizontal.tooltip.respondents' WHERE ref='meanbars_tooltip_respondents';");
+			
+			stmt.executeUpdate("UPDATE texts SET ref='explorer.perspective_picker.button.select_all' WHERE ref='perspectivesAllButton';");
+			stmt.executeUpdate("UPDATE texts SET ref='explorer.perspective_picker.button.show_less' WHERE ref='perspectivesLessButton';");
+			stmt.executeUpdate("UPDATE texts SET ref='explorer.perspective_picker.button.show_more' WHERE ref='perspectivesMoreButton';");
+			stmt.executeUpdate("UPDATE texts SET ref='explorer.perspective_picker.button.select_none' WHERE ref='perspectivesNoneButton';");
+			
+			stmt.executeUpdate("UPDATE texts SET ref='profile.chart.mean_bar_vertical.image.watermark' WHERE ref='profile.image.water_stamp' OR ref='profile.image.watermark';");
+			
+			stmt.executeUpdate("UPDATE texts SET ref='user_profile.grid.image.filename' WHERE ref='profile_user.grid_image.filename';");
+			stmt.executeUpdate("UPDATE texts SET ref='user_profile.mean_bar_vertical.image.filename' WHERE ref='profile_user.image.filename';");
+			stmt.executeUpdate("UPDATE texts SET ref='user_profile.grid.image.watermark' WHERE ref='profile_user.image.water_stamp';");
+			stmt.executeUpdate("UPDATE texts SET ref='user_profile.chart.mean_bar_vertical.image.filename' WHERE ref='profile_user.chart_image.filename';");
+			stmt.executeUpdate("UPDATE texts SET ref='user_profile.image.watermark' WHERE ref='profile_user.image.watermark';");
+			
+			stmt.executeUpdate("UPDATE texts SET ref='explorer.question_picker.section_header' WHERE ref='questionsHeader';");
+			
+			stmt.executeUpdate("UPDATE texts SET ref='user_profile.paste_data.header' WHERE ref='userProfileHeaderText';");
+			stmt.executeUpdate("UPDATE texts SET ref='user_profile.paste_data.instruction' WHERE ref='userProfilePasteDataDescription';");
+			stmt.executeUpdate("UPDATE texts SET ref='user_profile.paste_data.submit.button' WHERE ref='userPasteDataSubmitButton' OR 'user-paste-data-submit-button';");
+			stmt.executeUpdate("UPDATE texts SET ref='user_profile.paste_data.submit.explanation' WHERE ref='userProfilePasteDataSubmitExplanation';");
+			stmt.executeUpdate("UPDATE texts SET ref='user_profile.paste_data.error_log.header' WHERE ref='userProfilePasteDataErrorLogHeader';");
+			stmt.executeUpdate("UPDATE texts SET ref='user_profile.paste_data.error_log.header.number_bounds' WHERE ref='userPasteDataErrorTextNumberBoundsErrors';");
+			stmt.executeUpdate("UPDATE texts SET ref='user_profile.paste_data.error_log.header.no_number' WHERE ref='userPasteDataErrorTextNoNumberErrors';");
+			stmt.executeUpdate("UPDATE texts SET ref='user_profile.paste_data.error_log.header.no_row' WHERE ref='userPasteDataErrorTextNoRowErrors ';");
+			
+			stmt.executeUpdate("PRAGMA user_version = 5;");
+			daxploreFileVersion = 5;
+		}
+		
+		connection.commit();
+		connection.setAutoCommit(autocommit);
+		} catch (SQLException e) {
+			throw new DaxploreException("Failed to upgrade file.", e);
 		}
 	}
 	
