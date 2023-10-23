@@ -322,20 +322,30 @@ public class MetaGroup implements Comparable<MetaGroup> {
 			}
 			return json;
 		}
-
+		
 		// TODO use a specific list for this independent of group tree and whether
 		// it uses mean and has a reference mean value?
-		public JsonElement getListViewVariablesJSON() throws DaxploreException {
-			JsonArray json = new JsonArray();
+		public List<MetaQuestion> getListViewVariables() throws DaxploreException {
+			List<MetaQuestion> questions = new ArrayList<>();
 			for(MetaGroup group : getQuestionGroups()) {
 				if(group.getType() == GroupType.QUESTIONS) {
 					for(MetaQuestion question : group.getQuestions()) {
 						if(question.useMean() && question.getMetaMean().useMeanReferenceValue()) {
-							json.add(new JsonPrimitive(question.getColumn()));
+							questions.add(question);
 						}
 					}
 				}
 			}
+			return questions;
+		}
+
+		public JsonElement getListViewVariablesJSON() throws DaxploreException {
+			List<MetaQuestion> questions = getListViewVariables();
+			JsonArray json = new JsonArray();
+			for (MetaQuestion q : questions) {
+				json.add(new JsonPrimitive(q.getColumn()));
+				
+			}						
 			return json;
 		}
 		

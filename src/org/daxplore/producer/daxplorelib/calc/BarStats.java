@@ -127,6 +127,42 @@ public class BarStats {
 		useMean = true;
 	}
 	
+	public boolean useMean() {
+		return useMean;
+	}
+	
+	/**
+	 * Helper function used to calculate global mean interval
+	 * 
+	 * @return The highest mean value found in these bar stats
+	 */
+	public double getMeanMaxValue() {
+		double max = Double.MIN_VALUE;
+		for (Means means : meanData.values()) {
+			for (double val : means.mean) {
+				if (val == -1) { continue; }
+				max = Math.max(max, val);
+			}
+		}
+		return max;
+	}
+	
+	/**
+	 * Helper function used to calculate global mean interval
+	 * 
+	 * @return The lowest mean value found in these bar stats
+	 */
+	public double getMeanMinValue() {
+		double min = Double.MAX_VALUE;
+		for (Means means : meanData.values()) {
+			for (double val : means.mean) {
+				if (val == -1) { continue; }
+				min = Math.min(min, val);
+			}
+		}
+		return min;
+	}
+	
 	public JsonElement toJSONObject() {
 		JsonObject json = new JsonObject();
 		json.add("q", new JsonPrimitive(question.getColumn()));

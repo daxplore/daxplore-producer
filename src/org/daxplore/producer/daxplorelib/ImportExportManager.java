@@ -43,6 +43,7 @@ import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.transform.TransformerException;
 import javax.xml.transform.TransformerFactoryConfigurationError;
 
+import org.daxplore.producer.daxplorelib.calc.BarStats;
 import org.daxplore.producer.daxplorelib.calc.StatsCalculation;
 import org.daxplore.producer.daxplorelib.metadata.MetaGroup;
 import org.daxplore.producer.daxplorelib.metadata.MetaQuestion;
@@ -121,6 +122,8 @@ public class ImportExportManager {
 
 		Map<MetaQuestion, JsonArray> questionData = new HashMap<>();
 		List<String> warnings = new LinkedList<String>();
+		List<MetaQuestion> listViewQuestions = daxploreFile.getMetaGroupManager().getListViewVariables();
+		double maxListViewReferenceDiff = 0;
 		for (MetaGroup group : daxploreFile.getMetaGroupManager().getQuestionGroups()) {
 			for (MetaQuestion question : group.getQuestions()) {
 				JsonArray questionJSON = new JsonArray();
@@ -130,7 +133,17 @@ public class ImportExportManager {
 					List<MetaQuestion> selectedPerspectives = new ArrayList<>();
 					selectedPerspectives.add(perspective);
 					try {
-						questionJSON.add(crosstabs.calculateData(question, selectedPerspectives, 10).toJSONObject());
+						// Add question data
+						BarStats barStats = crosstabs.calculateData(question, selectedPerspectives, 10);
+						questionJSON.add(barStats.toJSONObject());
+						// Calculate list view interval
+						if (listViewQuestions.contains(question) && question.useMean()
+								&& question.getMetaMean().useMeanReferenceValue()) {
+							double meanReference = question.getMetaMean().getGlobalMean();
+							double meanMaxDiff = Math.max(Math.abs(barStats.getMeanMaxValue() - meanReference),
+									Math.abs(barStats.getMeanMinValue() - meanReference));
+							maxListViewReferenceDiff = Math.max(meanMaxDiff, maxListViewReferenceDiff);
+						}
 					} catch (DaxploreWarning e) {
 						warnings.add(e.getMessage());
 					}
@@ -199,6 +212,13 @@ public class ImportExportManager {
 				}
 			}
 
+//			List<MetaQuestion> questions = daxploreFile.getMetaGroupManager().getListViewVariables();
+//			int maxReferenceDiff = -1;
+//			for (MetaQuestion question : questions) {
+//				JsonArray ja = questionData.get(question);
+//			}
+			settings.add("listview.max_reference_diff", new JsonPrimitive((int) Math.ceil(maxListViewReferenceDiff)));
+
 			writeZipString(zout, "settings.json", prettyGson.toJson(settings));
 
 			// TODO either export a single locale OR update static server presenter to
@@ -212,10 +232,7 @@ public class ImportExportManager {
 
 				String projectFilename = "daxplore-"
 						+ daxploreFile.getSettings().getString("export.manifest.project_name");
-				projectFilename = projectFilename
-						.trim()
-						.replaceAll(" ", "_")
-						.replaceAll("[^a-zA-Z0-9_-]", "");
+				projectFilename = projectFilename.trim().replaceAll(" ", "_").replaceAll("[^a-zA-Z0-9_-]", "");
 				projectFilename = projectFilename.substring(0, Math.min(30, projectFilename.length()));
 				String projectMessage = "This is a Daxplore Presenter data package.\nSee https://daxplore.org for more information.";
 				writeZipString(zout, projectFilename, projectMessage);
