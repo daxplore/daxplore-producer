@@ -303,6 +303,7 @@ public class DaxploreFile implements Closeable {
 			stmt.executeUpdate("UPDATE texts SET ref='profile.reference.value' WHERE ref='profile.chart.mean_bar_vertical.reference.value';");
 			stmt.executeUpdate("UPDATE texts SET ref='profile.reference.worse' WHERE ref='profile.chart.mean_bar_vertical.reference.worse';");
 			
+			stmt.executeUpdate("UPDATE texts SET ref='user_profile.profile.image.watermark' WHERE ref='user_profile.chart.mean_bar_vertical.image.filename';");
 			stmt.executeUpdate("UPDATE texts SET ref='user_profile.grid.image.watermark' WHERE ref='user_profile.image.watermark';");
 			
 			stmt.executeUpdate("PRAGMA user_version = 6;");
