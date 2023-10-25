@@ -286,6 +286,28 @@ public class DaxploreFile implements Closeable {
 			stmt.executeUpdate("PRAGMA user_version = 5;");
 			daxploreFileVersion = 5;
 		}
+		if (daxploreFileVersion < 6) {
+			stmt.executeUpdate("UPDATE settings SET key='chart.show_respondent_count' WHERE key='respondents';");
+			stmt.executeUpdate("UPDATE settings SET key='explorer.chart.mean.orientation' WHERE key='chart.mean.orientation';");
+			stmt.executeUpdate("UPDATE settings SET key='explorer.description.position' WHERE key='questionDescriptionPosition';");
+			stmt.executeUpdate("UPDATE settings SET key='explorer.perspective.checkboxes_per_column' WHERE key='perspectiveCheckboxesPerColumn';");
+			stmt.executeUpdate("UPDATE settings SET key='explorer.perspective.default_selected_option_count' WHERE key='defaultSelectedPerspectiveOptions';");
+			stmt.executeUpdate("UPDATE settings SET key='explorer.perspective.compare_to_all.default_select' WHERE key='defaultSelectTotal';");
+			stmt.executeUpdate("UPDATE settings SET key='explorer.perspective.compare_to_all.show' WHERE key='showSelectTotal';");
+			
+			
+			stmt.executeUpdate("UPDATE texts SET ref='profile.x_axis_description'  WHERE ref='profile.chart.mean_bar_vertical.x_axis_description';");
+			stmt.executeUpdate("UPDATE texts SET ref='profile.image.watermark' WHERE ref='profile.chart.mean_bar_vertical.image.watermark';");
+			stmt.executeUpdate("UPDATE texts SET ref='profile.reference.better' WHERE ref='profile.chart.mean_bar_vertical.reference.better';");
+			stmt.executeUpdate("UPDATE texts SET ref='profile.reference.comparable' WHERE ref='profile.chart.mean_bar_vertical.reference.comparable';");
+			stmt.executeUpdate("UPDATE texts SET ref='profile.reference.value' WHERE ref='profile.chart.mean_bar_vertical.reference.value';");
+			stmt.executeUpdate("UPDATE texts SET ref='profile.reference.worse' WHERE ref='profile.chart.mean_bar_vertical.reference.worse';");
+			
+			stmt.executeUpdate("UPDATE texts SET ref='user_profile.grid.image.watermark' WHERE ref='user_profile.image.watermark';");
+			
+			stmt.executeUpdate("PRAGMA user_version = 6;");
+			daxploreFileVersion = 6;
+		}
 		
 		connection.commit();
 		connection.setAutoCommit(autocommit);
