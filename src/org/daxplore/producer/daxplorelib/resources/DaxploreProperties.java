@@ -43,6 +43,7 @@ public class DaxploreProperties {
 		Map<String, Object> settingsMap = new LinkedHashMap<String, Object>(); 
 		settingsMap.put("chart.show_respondent_count", true);
 		settingsMap.put("explorer.chart.mean.orientation", "HORIZONTAL"); // TODO enum {HORIZONTAL, VERTICAL}
+		settingsMap.put("explorer.chart.frequency.orientation", "HORIZONTAL"); // TODO enum {HORIZONTAL, VERTICAL}
 		settingsMap.put("explorer.description.position", "BOTTOM"); // TODO enum {BOTTOM, LEFT, HEADER}
 		settingsMap.put("explorer.header.position", "INNER"); // TODO enum {OUTER, INNER}
  		settingsMap.put("explorer.perspective.checkboxes_per_column", 8);
