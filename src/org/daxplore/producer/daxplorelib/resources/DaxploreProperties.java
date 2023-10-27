@@ -44,7 +44,8 @@ public class DaxploreProperties {
 		settingsMap.put("chart.show_respondent_count", true);
 		settingsMap.put("explorer.chart.mean.orientation", "HORIZONTAL"); // TODO enum {HORIZONTAL, VERTICAL}
 		settingsMap.put("explorer.description.position", "BOTTOM"); // TODO enum {BOTTOM, LEFT, HEADER}
-		settingsMap.put("explorer.perspective.checkboxes_per_column", 8);
+		settingsMap.put("explorer.header.position", "INNER"); // TODO enum {OUTER, INNER}
+ 		settingsMap.put("explorer.perspective.checkboxes_per_column", 8);
 		settingsMap.put("explorer.perspective.default_selected_option_count", 10);
 		settingsMap.put("explorer.perspective.compare_to_all.default_select", false);
 		settingsMap.put("explorer.perspective.compare_to_all.show", true);
