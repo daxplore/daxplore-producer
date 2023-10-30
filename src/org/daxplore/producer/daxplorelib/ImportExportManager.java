@@ -226,7 +226,7 @@ public class ImportExportManager {
 			for (Locale locale : daxploreFile.getAbout().getLocales()) {
 				JsonArray questionJSON = new JsonArray();
 				for (MetaQuestion q : selectedQuestions) {
-					questionJSON.add(q.toJSONObject(locale));
+					questionJSON.add(q.toJSONObject(locale, daxploreFile.getAbout().getTimeSeriesType()));
 					emptyTextrefs.addAll(q.getEmptyTextRefs(locale));
 				}
 

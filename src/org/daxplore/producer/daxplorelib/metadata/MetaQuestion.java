@@ -26,6 +26,7 @@ import java.util.logging.Logger;
 import org.daxplore.producer.daxplorelib.DaxploreException;
 import org.daxplore.producer.daxplorelib.DaxploreTable;
 import org.daxplore.producer.daxplorelib.SQLTools;
+import org.daxplore.producer.daxplorelib.About.TimeSeriesType;
 import org.daxplore.producer.daxplorelib.metadata.MetaMean.Direction;
 import org.daxplore.producer.daxplorelib.metadata.MetaMean.MetaMeanManager;
 import org.daxplore.producer.daxplorelib.metadata.MetaScale.MetaScaleManager;
@@ -493,7 +494,7 @@ public class MetaQuestion {
 	}
 	
 	@SuppressWarnings("rawtypes")
-	public JsonElement toJSONObject(Locale locale) {
+	public JsonElement toJSONObject(Locale locale, TimeSeriesType timeSeriesType) {
 		int decimalPlaces = 2; //TODO turn into producer setting, also used in BarStats
 		
 		JsonObject json = new JsonObject();
@@ -524,7 +525,7 @@ public class MetaQuestion {
 		json.add("options", options);
 		
 		JsonArray tps = new JsonArray();
-		if(!getTimepoints().isEmpty()) {
+		if(timeSeriesType.equals(TimeSeriesType.SHORT) && !getTimepoints().isEmpty()) {
 			for(MetaTimepointShort tp : getTimepoints()) {
 				tps.add(new JsonPrimitive(tp.getTimeindex()));
 			}
