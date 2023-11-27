@@ -43,6 +43,7 @@ import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.transform.TransformerException;
 import javax.xml.transform.TransformerFactoryConfigurationError;
 
+import org.daxplore.producer.daxplorelib.About.TimeSeriesType;
 import org.daxplore.producer.daxplorelib.calc.BarStats;
 import org.daxplore.producer.daxplorelib.calc.StatsCalculation;
 import org.daxplore.producer.daxplorelib.metadata.MetaGroup;
@@ -219,6 +220,19 @@ public class ImportExportManager {
 //			}
 			settings.add("listview.max_reference_diff", new JsonPrimitive((int) Math.ceil(maxListViewReferenceDiff)));
 
+			// Add used timepoints
+			TimeSeriesType timeSeriesType = daxploreFile.getAbout().getTimeSeriesType();
+			List<MetaTimepointShort> timepoints = daxploreFile.getMetaTimepointShortManager().getAll();
+			JsonArray timepointArray = new JsonArray();
+			if (timeSeriesType.equals(TimeSeriesType.SHORT) && !timepoints.isEmpty()) {
+				for (MetaTimepointShort tp : timepoints) {
+					timepointArray.add(new JsonPrimitive(tp.getTimeindex()));
+				}
+			} else {
+				timepointArray.add(new JsonPrimitive(0));
+			}
+			settings.add("all_timepoints", timepointArray);
+			
 			writeZipString(zout, "settings.json", prettyGson.toJson(settings));
 
 			// TODO either export a single locale OR update static server presenter to
