@@ -135,7 +135,8 @@ public class ImportExportManager {
 					selectedPerspectives.add(perspective);
 					try {
 						// Add question data
-						BarStats barStats = crosstabs.calculateData(question, selectedPerspectives, 10);
+						BarStats barStats = crosstabs.calculateData(question, selectedPerspectives,
+								daxploreFile.getSettings().getInteger("export.statistics.group_cutoff"));
 						questionJSON.add(barStats.toJSONObject());
 						// Calculate list view interval
 						if (listViewQuestions.contains(question) && question.useMean()
@@ -159,7 +160,11 @@ public class ImportExportManager {
 						selectedPerspectives.add(secondaryPerspective);
 						try {
 							questionJSON
-									.add(crosstabs.calculateData(question, selectedPerspectives, 10).toJSONObject());
+									.add(crosstabs.calculateData(
+											question,
+											selectedPerspectives,
+											daxploreFile.getSettings().getInteger("export.statistics.group_cutoff"))
+									.toJSONObject());
 						} catch (DaxploreWarning e) {
 							warnings.add(e.getMessage());
 						}
@@ -220,7 +225,7 @@ public class ImportExportManager {
 //			}
 			settings.add("listview.max_reference_diff", new JsonPrimitive((int) Math.ceil(maxListViewReferenceDiff)));
 
-			// Add used timepoints
+			// Add used timepoints to settings
 			TimeSeriesType timeSeriesType = daxploreFile.getAbout().getTimeSeriesType();
 			List<MetaTimepointShort> timepoints = daxploreFile.getMetaTimepointShortManager().getAll();
 			JsonArray timepointArray = new JsonArray();
@@ -231,7 +236,7 @@ public class ImportExportManager {
 			} else {
 				timepointArray.add(new JsonPrimitive(0));
 			}
-			settings.add("all_timepoints", timepointArray);
+			settings.add("all_timepoints", timepointArray);	
 			
 			writeZipString(zout, "settings.json", prettyGson.toJson(settings));
 

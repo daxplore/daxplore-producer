@@ -51,6 +51,7 @@ public class DaxploreProperties {
 		settingsMap.put("explorer.perspective.default_selected_option_count", 10);
 		settingsMap.put("explorer.perspective.compare_to_all.default_select", false);
 		settingsMap.put("explorer.perspective.compare_to_all.show", true);
+		settingsMap.put("export.statistics.group_cutoff", 10);
 		settingsMap.put("export.manifest.project_name", "New Daxplore Project");
 		clientSettingsDefaults = ImmutableMap.copyOf(settingsMap);
 		clientSettings = ImmutableList.copyOf(clientSettingsDefaults.keySet());
